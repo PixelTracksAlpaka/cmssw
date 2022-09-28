@@ -11,15 +11,14 @@
 #include "DataFormats/Math/interface/approx_atan2.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cuda_assert.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforGPU.h"
-#include "CUDADataFormats/SiPixelDigi/interface/SiPixelDigisCUDASOAView.h"
 
 namespace gpuPixelRecHits {
 
   __global__ void getHits(pixelCPEforGPU::ParamsOnGPU const* __restrict__ cpeParams,
                           BeamSpotPOD const* __restrict__ bs,
-                          SiPixelDigisCUDASOAView const digis,
+                          SiPixelDigisCUDAConstView const digis,
                           int numElements,
-                          SiPixelClustersCUDA::SiPixelClustersCUDASOAView const* __restrict__ pclusters,
+                          SiPixelClustersCUDA::RestrictConstView const clusters,
                           TrackingRecHit2DSOAView* phits) {
     // FIXME
     // the compiler seems NOT to optimize loads from views (even in a simple test case)
@@ -29,7 +28,6 @@ namespace gpuPixelRecHits {
     assert(cpeParams);
     auto& hits = *phits;
 
-    auto const& clusters = *pclusters;
     auto isPhase2 = cpeParams->commonParams().isPhase2;
     // copy average geometry corrected by beamspot . FIXME (move it somewhere else???)
     if (0 == blockIdx.x) {
@@ -108,7 +106,7 @@ namespace gpuPixelRecHits {
       // one thread per "digi"
       auto first = clusters.moduleStart(1 + blockIdx.x) + threadIdx.x;
       for (int i = first; i < numElements; i += blockDim.x) {
-        auto id = digis.moduleInd(i);
+        auto id = digis.moduleId(i);
         if (id == invalidModuleId)
           continue;  // not valid
         if (id != me)
@@ -131,7 +129,7 @@ namespace gpuPixelRecHits {
 
       auto pixmx = cpeParams->detParams(me).pixmx;
       for (int i = first; i < numElements; i += blockDim.x) {
-        auto id = digis.moduleInd(i);
+        auto id = digis.moduleId(i);
         if (id == invalidModuleId)
           continue;  // not valid
         if (id != me)

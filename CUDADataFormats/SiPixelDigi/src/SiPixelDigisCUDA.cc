@@ -5,25 +5,23 @@
 #include "HeterogeneousCore/CUDAUtilities/interface/device_unique_ptr.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/host_unique_ptr.h"
 
-SiPixelDigisCUDA::SiPixelDigisCUDA(size_t maxFedWords, cudaStream_t stream)
-    : m_store(cms::cuda::make_device_unique<SiPixelDigisCUDA::StoreType[]>(
-          SiPixelDigisCUDASOAView::roundFor128ByteAlignment(maxFedWords) *
-              static_cast<int>(SiPixelDigisCUDASOAView::StorageLocation::kMAX),
-          stream)),
-      m_view(m_store, maxFedWords, SiPixelDigisCUDASOAView::StorageLocation::kMAX) {
-  assert(maxFedWords != 0);
-}
+// SiPixelDigisCUDA::SiPixelDigisCUDA(size_t maxFedWords, cudaStream_t stream)
+//     : m_buffer(cms::cuda::make_device_unique<std::byte[]>(
+//           SiPixelDigisCUDASOA_H_D::computeDataSize(maxFedWords) ,
+//           stream)),
+//       m_layout(m_buffer.get(), maxFedWords),
+//       m_view(m_hostDeviceLayout){
+//   assert(maxFedWords != 0);
+// }
 
-cms::cuda::host::unique_ptr<SiPixelDigisCUDA::StoreType[]> SiPixelDigisCUDA::copyAllToHostAsync(
-    cudaStream_t stream) const {
-  auto ret = cms::cuda::make_host_unique<StoreType[]>(
-      m_view.roundFor128ByteAlignment(nDigis()) * static_cast<int>(SiPixelDigisCUDASOAView::StorageLocationHost::kMAX),
-      stream);
-  cudaCheck(cudaMemcpyAsync(ret.get(),
-                            m_view.clus(),
-                            m_view.roundFor128ByteAlignment(nDigis()) * sizeof(SiPixelDigisCUDA::StoreType) *
-                                static_cast<int>(SiPixelDigisCUDASOAView::StorageLocationHost::kMAX),
-                            cudaMemcpyDeviceToHost,
-                            stream));
-  return ret;
-}
+// cms::cuda::host::unique_ptr<std::byte[]> SiPixelDigisCUDA::copyAllToHostAsync(
+//     cudaStream_t stream) const {
+//   // Copy to a host buffer the host-device shared part (m_hostDeviceLayout).
+//   auto ret = cms::cuda::make_host_unique<std::byte[]>(m_hostDeviceLayout.metadata().byteSize(), stream);
+//   cudaCheck(cudaMemcpyAsync(ret.get(),
+//                             m_hostDeviceLayout.metadata().data(),
+//                             m_hostDeviceLayout.metadata().byteSize(),
+//                             cudaMemcpyDeviceToHost,
+//                             stream));
+//   return ret;
+// }

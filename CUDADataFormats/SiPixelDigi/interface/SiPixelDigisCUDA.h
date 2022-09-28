@@ -6,17 +6,41 @@
 #include "HeterogeneousCore/CUDAUtilities/interface/device_unique_ptr.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/host_unique_ptr.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCompat.h"
-#include "CUDADataFormats/SiPixelDigi/interface/SiPixelDigisCUDASOAView.h"
 
-class SiPixelDigisCUDA {
+#include "DataFormats/SoATemplate/interface/SoALayout.h"
+
+#include "DataFormats/Portable/interface/PortableCUDADeviceCollection.h"
+
+// Host and device layout: data used on both sides and transferred from device to host.
+GENERATE_SOA_LAYOUT(SiPixelDigisCUDATemplate,
+                    SOA_COLUMN(int32_t, clus),
+                    SOA_COLUMN(uint32_t, pdigi),
+                    SOA_COLUMN(uint32_t, rawIdArr),
+                    SOA_COLUMN(uint16_t, adc),
+                    SOA_COLUMN(uint16_t, xx),
+                    SOA_COLUMN(uint16_t, yy),
+                    SOA_COLUMN(uint16_t, moduleId))
+
+
+  using SiPixelDigisCUDALayout = SiPixelDigisCUDATemplate<>;
+  using SiPixelDigisCUDAView = SiPixelDigisCUDALayout::View;
+  using SiPixelDigisCUDAConstView = SiPixelDigisCUDALayout::ConstView;
+
+// While porting from previous code, we decorate the base PortableCollection. XXX/TODO: improve if possible...
+class SiPixelDigisCUDA : public PortableCUDADeviceCollection<SiPixelDigisCUDALayout> {
 public:
-  using StoreType = uint16_t;
-  SiPixelDigisCUDA() = default;
-  explicit SiPixelDigisCUDA(size_t maxFedWords, cudaStream_t stream);
-  ~SiPixelDigisCUDA() = default;
 
-  SiPixelDigisCUDA(const SiPixelDigisCUDA &) = delete;
-  SiPixelDigisCUDA &operator=(const SiPixelDigisCUDA &) = delete;
+  SiPixelDigisCUDA() = default;
+  explicit SiPixelDigisCUDA(size_t maxFedWords, cudaStream_t stream) :
+      PortableCUDADeviceCollection<SiPixelDigisCUDALayout> (maxFedWords + 1, stream)
+      {
+        assert(maxFedWords != 0);
+
+      }
+
+
+
+  // movable
   SiPixelDigisCUDA(SiPixelDigisCUDA &&) = default;
   SiPixelDigisCUDA &operator=(SiPixelDigisCUDA &&) = default;
 
@@ -25,20 +49,20 @@ public:
     nDigis_h = nDigis;
   }
 
+  ~SiPixelDigisCUDA() = default;
+
   uint32_t nModules() const { return nModules_h; }
   uint32_t nDigis() const { return nDigis_h; }
 
-  cms::cuda::host::unique_ptr<StoreType[]> copyAllToHostAsync(cudaStream_t stream) const;
-
-  SiPixelDigisCUDASOAView view() { return m_view; }
-  SiPixelDigisCUDASOAView const view() const { return m_view; }
+  cms::cuda::host::unique_ptr<std::byte[]> copyAllToHostAsync(cudaStream_t stream) const {
+    // Copy to a host buffer the host-device shared part (m_hostDeviceLayout).
+    auto ret = cms::cuda::make_host_unique<std::byte[]>(layout().metadata().byteSize(), stream);
+    cudaCheck(cudaMemcpyAsync(
+        ret.get(), layout().metadata().data(), layout().metadata().byteSize(), cudaMemcpyDeviceToHost, stream));
+    return ret;
+  }
 
 private:
-  // These are consumed by downstream device code
-  cms::cuda::device::unique_ptr<StoreType[]> m_store;
-
-  SiPixelDigisCUDASOAView m_view;
-
   uint32_t nModules_h = 0;
   uint32_t nDigis_h = 0;
 };
