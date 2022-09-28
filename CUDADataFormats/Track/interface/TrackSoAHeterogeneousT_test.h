@@ -37,6 +37,9 @@ class TrackSoAHeterogeneousT  : public cms::cuda::PortableDeviceCollection<Track
 
 public:
 
+  // using cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::PortableDeviceCollection;
+  TrackSoAHeterogeneousT() = default;
+
   static constexpr int32_t stride() { return S; }
 
   using Quality = pixelTrack::Quality;
@@ -53,6 +56,15 @@ public:
   // TODO: static did not work; using reinterpret_cast
   constexpr Quality const *qualityData() const { return reinterpret_cast <Quality const *>(view().quality()); }
   constexpr Quality *qualityData() { return reinterpret_cast< Quality *>(view().quality()); }
+
+  constexpr float pt(int32_t i) const { return view()[i].pt(); }
+  constexpr float &pt(int32_t i) { return view()[i].pt(); }
+
+  constexpr float eta(int32_t i) const { return view()[i].eta(); }
+  constexpr float &eta(int32_t i) { return view()[i].eta(); }
+
+  constexpr float chi2(int32_t i) const { return view()[i].chi2(); }
+  constexpr float &chi2(int32_t i) { return view()[i].chi2(); }
 
   constexpr int nTracks() const { return nTracks_; }
   constexpr void setNTracks(int n) { nTracks_ = n; }
