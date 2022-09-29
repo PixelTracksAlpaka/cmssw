@@ -233,7 +233,8 @@ void CAHitNtupletGeneratorKernelsGPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
 
   // classify tracks based on kinematics
   auto numberOfBlocks = nQuadrupletBlocks(blockSize);
-  kernel_classifyTracks<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tuples_d, tracks_d, params_.cuts_, quality_d);
+  kernel_classifyTracks<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
+      tuples_d, tracks_d, tracks_d->stateAtBS.view(), params_.cuts_, quality_d);
   cudaCheck(cudaGetLastError());
 
   if (params_.lateFishbone_) {
@@ -247,7 +248,7 @@ void CAHitNtupletGeneratorKernelsGPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
   // mark duplicates (tracks that share a doublet)
   numberOfBlocks = nDoubletBlocks(blockSize);
   kernel_fastDuplicateRemover<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
-      device_theCells_.get(), device_nCells_, tracks_d, params_.dupPassThrough_);
+      device_theCells_.get(), device_nCells_, tracks_d, tracks_d->stateAtBS.view(), params_.dupPassThrough_);
   cudaCheck(cudaGetLastError());
 #ifdef GPU_DEBUG
   cudaCheck(cudaDeviceSynchronize());
@@ -275,8 +276,12 @@ void CAHitNtupletGeneratorKernelsGPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
     // mark duplicates (tracks that share at least one hit)
     numberOfBlocks = (hitToTupleView_.offSize + blockSize - 1) / blockSize;
 
-    kernel_rejectDuplicate<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
-        tracks_d, quality_d, params_.minHitsForSharingCut_, params_.dupPassThrough_, device_hitToTuple_.get());
+    kernel_rejectDuplicate<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tracks_d,
+                                                                         tracks_d->stateAtBS.view(),
+                                                                         quality_d,
+                                                                         params_.minHitsForSharingCut_,
+                                                                         params_.dupPassThrough_,
+                                                                         device_hitToTuple_.get());
 
     kernel_sharedHitCleaner<<<numberOfBlocks, blockSize, 0, cudaStream>>>(hh.view(),
                                                                           tracks_d,

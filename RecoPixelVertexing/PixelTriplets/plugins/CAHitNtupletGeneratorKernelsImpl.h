@@ -14,6 +14,7 @@
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cuda_assert.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforGPU.h"
+#include "CUDADataFormats/Track/interface/TrajectoryStateSoAT.h"
 
 #include "CAConstants.h"
 #include "CAHitNtupletGeneratorKernels.h"
@@ -175,10 +176,12 @@ __global__ void kernel_earlyDuplicateRemover(GPUCACell const *cells,
 }
 
 // assume the above (so, short tracks already removed)
-__global__ void kernel_fastDuplicateRemover(GPUCACell const *__restrict__ cells,
-                                            uint32_t const *__restrict__ nCells,
-                                            TkSoA *__restrict__ tracks,
-                                            bool dupPassThrough) {
+__global__ void kernel_fastDuplicateRemover(
+    GPUCACell const *__restrict__ cells,
+    uint32_t const *__restrict__ nCells,
+    TkSoA *__restrict__ tracks,
+    cms::cuda::PortableDeviceCollection<TrajectoryStateSoAT_test<>>::ConstView stateAtBS_view,
+    bool dupPassThrough) {
   // quality to mark rejected
   auto const reject = dupPassThrough ? pixelTrack::Quality::loose : pixelTrack::Quality::dup;
   constexpr auto loose = pixelTrack::Quality::loose;
@@ -211,21 +214,21 @@ __global__ void kernel_fastDuplicateRemover(GPUCACell const *__restrict__ cells,
       auto qi = tracks->quality(it);
       if (qi <= reject)
         continue;
-      auto opi = tracks->stateAtBS.state(it)(2);
-      auto e2opi = tracks->stateAtBS.covariance(it)(9);
-      auto cti = tracks->stateAtBS.state(it)(3);
-      auto e2cti = tracks->stateAtBS.covariance(it)(12);
+      auto opi = stateAtBS_view[it].state()(2);
+      auto e2opi = stateAtBS_view[it].covariance()(9);
+      auto cti = stateAtBS_view[it].state()(3);
+      auto e2cti = stateAtBS_view[it].covariance()(12);
       for (auto j = i + 1; j < ntr; ++j) {
         auto jt = thisCell.tracks()[j];
         auto qj = tracks->quality(jt);
         if (qj <= reject)
           continue;
-        auto opj = tracks->stateAtBS.state(jt)(2);
-        auto ctj = tracks->stateAtBS.state(jt)(3);
-        auto dct = nSigma2 * (tracks->stateAtBS.covariance(jt)(12) + e2cti);
+        auto opj = stateAtBS_view[jt].state()(2);
+        auto ctj = stateAtBS_view[jt].state()(3);
+        auto dct = nSigma2 * (stateAtBS_view[jt].covariance()(12) + e2cti);
         if ((cti - ctj) * (cti - ctj) > dct)
           continue;
-        auto dop = nSigma2 * (tracks->stateAtBS.covariance(jt)(9) + e2opi);
+        auto dop = nSigma2 * (stateAtBS_view[jt].covariance()(9) + e2opi);
         if ((opi - opj) * (opi - opj) > dop)
           continue;
         if ((qj < qi) || (qj == qi && score(it) < score(jt)))
@@ -410,10 +413,12 @@ __global__ void kernel_fillMultiplicity(HitContainer const *__restrict__ foundNt
   }
 }
 
-__global__ void kernel_classifyTracks(HitContainer const *__restrict__ tuples,
-                                      TkSoA const *__restrict__ tracks,
-                                      CAHitNtupletGeneratorKernelsGPU::QualityCuts cuts,
-                                      Quality *__restrict__ quality) {
+__global__ void kernel_classifyTracks(
+    HitContainer const *__restrict__ tuples,
+    TkSoA const *__restrict__ tracks,
+    cms::cuda::PortableDeviceCollection<TrajectoryStateSoAT_test<>>::ConstView stateAtBS_view,
+    CAHitNtupletGeneratorKernelsGPU::QualityCuts cuts,
+    Quality *__restrict__ quality) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
   for (int it = first, nt = tuples->nOnes(); it < nt; it += gridDim.x * blockDim.x) {
     auto nhits = tuples->size(it);
@@ -433,7 +438,7 @@ __global__ void kernel_classifyTracks(HitContainer const *__restrict__ tuples,
     // if the fit has any invalid parameters, mark it as bad
     bool isNaN = false;
     for (int i = 0; i < 5; ++i) {
-      isNaN |= std::isnan(tracks->stateAtBS.state(it)(i));
+      isNaN |= std::isnan(stateAtBS_view[it].state()(i));
     }
     if (isNaN) {
 #ifdef NTUPLE_DEBUG
@@ -642,11 +647,13 @@ __global__ void kernel_markSharedHit(int const *__restrict__ nshared,
 }
 
 // mostly for very forward triplets.....
-__global__ void kernel_rejectDuplicate(TkSoA const *__restrict__ ptracks,
-                                       Quality *__restrict__ quality,
-                                       uint16_t nmin,
-                                       bool dupPassThrough,
-                                       CAHitNtupletGeneratorKernelsGPU::HitToTuple const *__restrict__ phitToTuple) {
+__global__ void kernel_rejectDuplicate(
+    TkSoA const *__restrict__ ptracks,  // TODO: Change to Constview
+    cms::cuda::PortableDeviceCollection<TrajectoryStateSoAT_test<>>::ConstView stateAtBS_view,
+    Quality *__restrict__ quality,
+    uint16_t nmin,
+    bool dupPassThrough,
+    CAHitNtupletGeneratorKernelsGPU::HitToTuple const *__restrict__ phitToTuple) {
   // quality to mark rejected
   auto const reject = dupPassThrough ? pixelTrack::Quality::loose : pixelTrack::Quality::dup;
 
@@ -672,22 +679,22 @@ __global__ void kernel_rejectDuplicate(TkSoA const *__restrict__ ptracks,
       auto qi = quality[it];
       if (qi <= reject)
         continue;
-      auto opi = tracks.stateAtBS.state(it)(2);
-      auto e2opi = tracks.stateAtBS.covariance(it)(9);
-      auto cti = tracks.stateAtBS.state(it)(3);
-      auto e2cti = tracks.stateAtBS.covariance(it)(12);
+      auto opi = stateAtBS_view[it].state()(2);
+      auto e2opi = stateAtBS_view[it].covariance()(9);
+      auto cti = stateAtBS_view[it].state()(3);
+      auto e2cti = stateAtBS_view[it].covariance()(12);
       auto nli = tracks.nLayers(it);
       for (auto jp = ip + 1; jp < hitToTuple.end(idx); ++jp) {
         auto const jt = *jp;
         auto qj = quality[jt];
         if (qj <= reject)
           continue;
-        auto opj = tracks.stateAtBS.state(jt)(2);
-        auto ctj = tracks.stateAtBS.state(jt)(3);
-        auto dct = nSigma2 * (tracks.stateAtBS.covariance(jt)(12) + e2cti);
+        auto opj = stateAtBS_view[jt].state()(2);
+        auto ctj = stateAtBS_view[jt].state()(3);
+        auto dct = nSigma2 * (stateAtBS_view[jt].covariance()(12) + e2cti);
         if ((cti - ctj) * (cti - ctj) > dct)
           continue;
-        auto dop = nSigma2 * (tracks.stateAtBS.covariance(jt)(9) + e2opi);
+        auto dop = nSigma2 * (stateAtBS_view[jt].covariance()(9) + e2opi);
         if ((opi - opj) * (opi - opj) > dop)
           continue;
         auto nlj = tracks.nLayers(jt);
