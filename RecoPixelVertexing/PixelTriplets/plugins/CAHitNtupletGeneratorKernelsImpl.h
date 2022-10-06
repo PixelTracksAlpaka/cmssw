@@ -14,7 +14,8 @@
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cuda_assert.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforGPU.h"
-
+#include "CUDADataFormats/Common/interface/PortableDeviceCollection.h"
+#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
 #include "CAConstants.h"
 #include "CAHitNtupletGeneratorKernels.h"
 #include "GPUCACell.h"
@@ -28,7 +29,8 @@ using HitToTuple = caConstants::HitToTuple;
 using TupleMultiplicity = caConstants::TupleMultiplicity;
 
 using Quality = pixelTrack::Quality;
-using TkSoA = pixelTrack::TrackSoA;
+// using TkSoA = pixelTrack::TrackSoA;
+using TkSoA = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::ConstView;
 using HitContainer = pixelTrack::HitContainer;
 
 namespace {
@@ -137,11 +139,8 @@ __global__ void kernel_fishboneCleaner(GPUCACell const *cells, uint32_t const *_
 
 // remove shorter tracks if sharing a cell
 // It does not seem to affect efficiency in any way!
-__global__ void kernel_earlyDuplicateRemover(GPUCACell const *cells,
-                                             uint32_t const *__restrict__ nCells,
-                                             TkSoA const *__restrict__ ptracks,
-                                             Quality *quality,
-                                             bool dupPassThrough) {
+__global__ void kernel_earlyDuplicateRemover(
+    GPUCACell const *cells, uint32_t const *__restrict__ nCells, TkSoA ptracks, Quality *quality, bool dupPassThrough) {
   // quality to mark rejected
   constexpr auto reject = pixelTrack::Quality::edup;  /// cannot be loose
 
@@ -177,7 +176,7 @@ __global__ void kernel_earlyDuplicateRemover(GPUCACell const *cells,
 // assume the above (so, short tracks already removed)
 __global__ void kernel_fastDuplicateRemover(GPUCACell const *__restrict__ cells,
                                             uint32_t const *__restrict__ nCells,
-                                            TkSoA *__restrict__ tracks,
+                                            TkSoA tracks,
                                             bool dupPassThrough) {
   // quality to mark rejected
   auto const reject = dupPassThrough ? pixelTrack::Quality::loose : pixelTrack::Quality::dup;
@@ -202,7 +201,7 @@ __global__ void kernel_fastDuplicateRemover(GPUCACell const *__restrict__ cells,
     };
     */
 
-    auto score = [&](auto it) { return std::abs(tracks->tip(it)); };
+    auto score = [&](auto it) { return std::abs(trackSoAHeterogeneousUtilities::tip(tracks, it)); };
 
     // full crazy combinatorics
     int ntr = thisCell.tracks().size();
@@ -211,21 +210,21 @@ __global__ void kernel_fastDuplicateRemover(GPUCACell const *__restrict__ cells,
       auto qi = tracks->quality(it);
       if (qi <= reject)
         continue;
-      auto opi = tracks->stateAtBS.state(it)(2);
-      auto e2opi = tracks->stateAtBS.covariance(it)(9);
-      auto cti = tracks->stateAtBS.state(it)(3);
-      auto e2cti = tracks->stateAtBS.covariance(it)(12);
+      auto opi = tracks[it].state()(2);
+      auto e2opi = tracks[it].covariance()(9);
+      auto cti = tracks[it].state(it)(3);
+      auto e2cti = tracks[it].covariance()(12);
       for (auto j = i + 1; j < ntr; ++j) {
         auto jt = thisCell.tracks()[j];
         auto qj = tracks->quality(jt);
         if (qj <= reject)
           continue;
-        auto opj = tracks->stateAtBS.state(jt)(2);
-        auto ctj = tracks->stateAtBS.state(jt)(3);
-        auto dct = nSigma2 * (tracks->stateAtBS.covariance(jt)(12) + e2cti);
+        auto opj = tracks[jt].state()(2);
+        auto ctj = tracks[jt].state()(3);
+        auto dct = nSigma2 * (tracks[jt].covariance()(12) + e2cti);
         if ((cti - ctj) * (cti - ctj) > dct)
           continue;
-        auto dop = nSigma2 * (tracks->stateAtBS.covariance(jt)(9) + e2opi);
+        auto dop = nSigma2 * (tracks[jt].covariance()(9) + e2opi);
         if ((opi - opj) * (opi - opj) > dop)
           continue;
         if ((qj < qi) || (qj == qi && score(it) < score(jt)))
@@ -411,7 +410,7 @@ __global__ void kernel_fillMultiplicity(HitContainer const *__restrict__ foundNt
 }
 
 __global__ void kernel_classifyTracks(HitContainer const *__restrict__ tuples,
-                                      TkSoA const *__restrict__ tracks,
+                                      TkSoA tracks,
                                       CAHitNtupletGeneratorKernelsGPU::QualityCuts cuts,
                                       Quality *__restrict__ quality) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
@@ -555,7 +554,7 @@ __global__ void kernel_fillHitDetIndices(HitContainer const *__restrict__ tuples
   }
 }
 
-__global__ void kernel_fillNLayers(TkSoA *__restrict__ ptracks, cms::cuda::AtomicPairCounter *apc) {
+__global__ void kernel_fillNLayers(TkSoA ptracks, cms::cuda::AtomicPairCounter *apc) {
   auto &tracks = *ptracks;
   auto first = blockIdx.x * blockDim.x + threadIdx.x;
   // clamp the number of tracks to the capacity of the SoA
@@ -642,7 +641,7 @@ __global__ void kernel_markSharedHit(int const *__restrict__ nshared,
 }
 
 // mostly for very forward triplets.....
-__global__ void kernel_rejectDuplicate(TkSoA const *__restrict__ ptracks,
+__global__ void kernel_rejectDuplicate(TkSoA ptracks,
                                        Quality *__restrict__ quality,
                                        uint16_t nmin,
                                        bool dupPassThrough,
@@ -703,7 +702,7 @@ __global__ void kernel_rejectDuplicate(TkSoA const *__restrict__ ptracks,
 }
 
 __global__ void kernel_sharedHitCleaner(TrackingRecHit2DSOAView const *__restrict__ hhp,
-                                        TkSoA const *__restrict__ ptracks,
+                                        TkSoA ptracks,
                                         Quality *__restrict__ quality,
                                         int nmin,
                                         bool dupPassThrough,
@@ -755,7 +754,7 @@ __global__ void kernel_sharedHitCleaner(TrackingRecHit2DSOAView const *__restric
   }
 }
 
-__global__ void kernel_tripletCleaner(TkSoA const *__restrict__ ptracks,
+__global__ void kernel_tripletCleaner(TkSoA ptracks,
                                       Quality *__restrict__ quality,
                                       uint16_t nmin,
                                       bool dupPassThrough,
@@ -813,7 +812,7 @@ __global__ void kernel_tripletCleaner(TkSoA const *__restrict__ ptracks,
 }
 
 __global__ void kernel_simpleTripletCleaner(
-    TkSoA const *__restrict__ ptracks,
+    TkSoA ptracks,
     Quality *__restrict__ quality,
     uint16_t nmin,
     bool dupPassThrough,
@@ -858,7 +857,7 @@ __global__ void kernel_simpleTripletCleaner(
 
 __global__ void kernel_print_found_ntuplets(TrackingRecHit2DSOAView const *__restrict__ hhp,
                                             HitContainer const *__restrict__ ptuples,
-                                            TkSoA const *__restrict__ ptracks,
+                                            TkSoA ptracks,
                                             Quality const *__restrict__ quality,
                                             CAHitNtupletGeneratorKernelsGPU::HitToTuple const *__restrict__ phitToTuple,
                                             int32_t firstPrint,

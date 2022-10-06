@@ -6,11 +6,13 @@
 
 #include "CUDADataFormats/Vertex/interface/ZVertexHeterogeneous.h"
 #include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
+#include "CUDADataFormats/Common/interface/PortableDeviceCollection.h"
 
 namespace gpuVertexFinder {
 
   using ZVertices = ZVertexSoA;
-  using TkSoA = pixelTrack::TrackSoA;
+  // using TkSoA = pixelTrack::TrackSoA;
+  using TkSoA = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::ConstView;
 
   // workspace used in the vertex reco algos
   struct WorkSpace {
@@ -42,7 +44,8 @@ namespace gpuVertexFinder {
   public:
     using ZVertices = ZVertexSoA;
     using WorkSpace = gpuVertexFinder::WorkSpace;
-    using TkSoA = pixelTrack::TrackSoA;
+    // using TkSoA = pixelTrack::TrackSoA;
+    using TkSoA = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::ConstView;
 
     Producer(bool oneKernel,
              bool useDensity,
@@ -64,8 +67,8 @@ namespace gpuVertexFinder {
 
     ~Producer() = default;
 
-    ZVertexHeterogeneous makeAsync(cudaStream_t stream, TkSoA const* tksoa, float ptMin, float ptMax) const;
-    ZVertexHeterogeneous make(TkSoA const* tksoa, float ptMin, float ptMax) const;
+    ZVertexHeterogeneous makeAsync(cudaStream_t stream, TkSoA tksoa, float ptMin, float ptMax) const;
+    ZVertexHeterogeneous make(TkSoA tksoa, float ptMin, float ptMax) const;
 
   private:
     const bool oneKernel_;
