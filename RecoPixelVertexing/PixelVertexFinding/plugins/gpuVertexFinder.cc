@@ -18,7 +18,7 @@ namespace gpuVertexFinder {
   // split vertices with a chi2/NDoF greater than this
   constexpr float maxChi2ForSplit = 9.f;
 
-  __global__ void loadTracks(TkSoA const* ptracks, ZVertexSoA* soa, WorkSpace* pws, float ptMin, float ptMax) {
+  __global__ void loadTracks(TkSoA ptracks, ZVertexSoA* soa, WorkSpace* pws, float ptMin, float ptMax) {
     assert(ptracks);
     assert(soa);
     auto const& tracks = *ptracks;
