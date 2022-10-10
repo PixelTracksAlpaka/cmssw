@@ -39,7 +39,7 @@ GENERATE_SOA_LAYOUT(TrackSoAHeterogeneousT_test,
 // Previous TrajectoryStateSoAT class methods
 namespace pixelTrack {
   namespace utilities {
-    using TrackSoAView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::ConstView;
+    using TrackSoAView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::View;
     // State at the Beam spot
     // phi,tip,1/pt,cotan(theta),zip
     float charge(TrackSoAView tracks, int32_t i) { return std::copysign(1.f, tracks[i].state()(2)); }
