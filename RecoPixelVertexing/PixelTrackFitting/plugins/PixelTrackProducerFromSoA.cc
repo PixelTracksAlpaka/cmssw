@@ -155,7 +155,7 @@ void PixelTrackProducerFromSoA::produce(edm::StreamID streamID,
   const auto &tsoa = *iEvent.get(tokenTrack_);
 
   auto const *quality = tsoa.qualityData();
-  auto const &fit = tsoa.stateAtBS;
+  // auto const &fit = tsoa.stateAtBS;
   auto const &hitIndices = tsoa.hitIndices;
   auto nTracks = tsoa.nTracks();
 
@@ -190,11 +190,11 @@ void PixelTrackProducerFromSoA::produce(edm::StreamID streamID,
     // mind: this values are respect the beamspot!
 
     float chi2 = tsoa.chi2(it);
-    float phi = tsoa.phi(it);
+    float phi = pixelTrack::utilities::phi(tsoa.view(), it);
 
     riemannFit::Vector5d ipar, opar;
     riemannFit::Matrix5d icov, ocov;
-    fit.copyToDense(ipar, icov, it);
+    pixelTrack::utilities::copyToDense(tsoa.view(), ipar, icov, it);
     riemannFit::transformToPerigeePlane(ipar, icov, opar, ocov);
 
     LocalTrajectoryParameters lpar(opar(0), opar(1), opar(2), opar(3), opar(4), 1.);

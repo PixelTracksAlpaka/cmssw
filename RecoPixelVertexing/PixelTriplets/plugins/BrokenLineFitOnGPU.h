@@ -204,7 +204,7 @@ __global__ void kernel_BLFit(caConstants::TupleMultiplicity const *__restrict__ 
     brokenline::circleFit(hits, hits_ge, fast_fit, bField, data, circle);
 
     pixelTrack::utilities::copyFromCircle(
-        results, circle.par, circle.cov, line.par, line.cov, 1.f / float(bField), tkid);
+        results->view(), circle.par, circle.cov, line.par, line.cov, 1.f / float(bField), tkid);
     results->pt(tkid) = float(bField) / float(std::abs(circle.par(2)));
     results->eta(tkid) = asinhf(line.par(0));
     results->chi2(tkid) = (circle.chi2 + line.chi2) / (2 * N - 5);
