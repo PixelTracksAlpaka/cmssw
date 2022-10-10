@@ -49,6 +49,45 @@ namespace pixelTrack {
     float phi(TrackSoAView tracks, int32_t i) { return tracks[i].state()(0); }
     float tip(TrackSoAView tracks, int32_t i) { return tracks[i].state()(1); }
     float zip(TrackSoAView tracks, int32_t i) { return tracks[i].state()(4); }
+
+    template <typename V3, typename M3, typename V2, typename M2>
+    __host__ __device__ inline void copyFromCircle(
+        TrackSoAView tracks, V3 const &cp, M3 const &ccov, V2 const &lp, M2 const &lcov, float b, int32_t i) {
+      tracks[i].state() << cp.template cast<float>(), lp.template cast<float>();
+
+      tracks[i].state()(2) = tracks[i].state()(2) * b;
+      auto cov = tracks[i].covariance();
+      cov(0) = ccov(0, 0);
+      cov(1) = ccov(0, 1);
+      cov(2) = b * float(ccov(0, 2));
+      cov(4) = cov(3) = 0;
+      cov(5) = ccov(1, 1);
+      cov(6) = b * float(ccov(1, 2));
+      cov(8) = cov(7) = 0;
+      cov(9) = b * b * float(ccov(2, 2));
+      cov(11) = cov(10) = 0;
+      cov(12) = lcov(0, 0);
+      cov(13) = lcov(0, 1);
+      cov(14) = lcov(1, 1);
+    }
+
+    template <typename V5, typename M5>
+    __host__ __device__ inline void copyFromDense(TrackSoAView tracks, V5 const &v, M5 const &cov, int32_t i) {
+      tracks[i].state() = v.template cast<float>();
+      for (int j = 0, ind = 0; j < 5; ++j)
+        for (auto k = j; k < 5; ++k)
+          tracks[i].covariance()(ind++) = cov(j, k);
+    }
+
+    template <typename V5, typename M5>
+    __host__ __device__ inline void copyToDense(TrackSoAView tracks, V5 &v, M5 &cov, int32_t i) {
+      v = tracks[i].state().template cast<typename V5::Scalar>();
+      for (int j = 0, ind = 0; j < 5; ++j) {
+        cov(j, j) = tracks[i].covariance()(ind++);
+        for (auto k = j + 1; k < 5; ++k)
+          cov(k, j) = cov(j, k) = tracks[i].covariance()(ind++);
+      }
+    }
   }  // namespace utilities
 }  // namespace pixelTrack
 
@@ -57,6 +96,9 @@ class TrackSoAHeterogeneousT : public cms::cuda::PortableDeviceCollection<TrackS
 public:
   // using cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::PortableDeviceCollection;
   TrackSoAHeterogeneousT() = default;
+
+  explicit TrackSoAHeterogeneousT(size_t maxModules, cudaStream_t stream)
+      : PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>(maxModules, stream) {}
 
   static constexpr int32_t stride() { return S; }
 
