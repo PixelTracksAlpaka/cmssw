@@ -1,7 +1,6 @@
 #ifndef CUDADataFormats_Track_TrajectoryStateSOAT_H
 #define CUDADataFormats_Track_TrajectoryStateSOAT_H
 
-#include <Eigen/Dense>
 #include "HeterogeneousCore/CUDAUtilities/interface/eigenSoA.h"
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 #include "CUDADataFormats/Common/interface/PortableDeviceCollection.h"

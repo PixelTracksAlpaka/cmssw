@@ -4,7 +4,7 @@
 #include <string>
 #include <algorithm>
 
-#include "CUDADataFormats/Track/interface/TrajectoryStateSoAT.h"
+#include <Eigen/Dense>
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/HistoContainer.h"
 
@@ -24,19 +24,37 @@ namespace pixelTrack {
   }
 }  // namespace pixelTrack
 
+using Vector5f = Eigen::Matrix<float, 5, 1>;
+using Vector15f = Eigen::Matrix<float, 15, 1>;
+
+using Vector5d = Eigen::Matrix<double, 5, 1>;
+using Matrix5d = Eigen::Matrix<double, 5, 5>;
+
 GENERATE_SOA_LAYOUT(TrackSoAHeterogeneousT_test,
                     SOA_COLUMN(uint8_t, quality),
-                    SOA_COLUMN(float, chi2), // this is chi2/ndof as not necessarely all hits are used in the fit
+                    SOA_COLUMN(float, chi2),  // this is chi2/ndof as not necessarely all hits are used in the fit
                     SOA_COLUMN(int8_t, nLayers),
                     SOA_COLUMN(float, eta),
-                    SOA_COLUMN(float, pt))
-                    // TODO: maybe add stateAtBS
+                    SOA_COLUMN(float, pt),
+                    SOA_EIGEN_COLUMN(Vector5f, state),
+                    SOA_EIGEN_COLUMN(Vector15f, covariance))
+
+// Previous TrajectoryStateSoAT class methods
+namespace pixelTrack {
+  namespace utilities {
+    using TrackSoAView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::ConstView;
+    // State at the Beam spot
+    // phi,tip,1/pt,cotan(theta),zip
+    float charge(TrackSoAView tracks, int32_t i) { return std::copysign(1.f, tracks[i].state()(2)); }
+    float phi(TrackSoAView tracks, int32_t i) { return tracks[i].state()(0); }
+    float tip(TrackSoAView tracks, int32_t i) { return tracks[i].state()(1); }
+    float zip(TrackSoAView tracks, int32_t i) { return tracks[i].state()(4); }
+  }  // namespace utilities
+}  // namespace pixelTrack
 
 template <int32_t S>
-class TrackSoAHeterogeneousT  : public cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>> {
-
+class TrackSoAHeterogeneousT : public cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>> {
 public:
-
   // using cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::PortableDeviceCollection;
   TrackSoAHeterogeneousT() = default;
 
@@ -49,13 +67,12 @@ public:
   // Always check quality is at least loose!
   // CUDA does not support enums  in __lgc ...
 private:
-
 public:
   constexpr Quality quality(int32_t i) const { return static_cast<Quality>(view()[i].quality()); }
   constexpr Quality &quality(int32_t i) { return static_cast<Quality &>(view()[i].quality()); }
   // TODO: static did not work; using reinterpret_cast
-  constexpr Quality const *qualityData() const { return reinterpret_cast <Quality const *>(view().quality()); }
-  constexpr Quality *qualityData() { return reinterpret_cast< Quality *>(view().quality()); }
+  constexpr Quality const *qualityData() const { return reinterpret_cast<Quality const *>(view().quality()); }
+  constexpr Quality *qualityData() { return reinterpret_cast<Quality *>(view().quality()); }
 
   constexpr float pt(int32_t i) const { return view()[i].pt(); }
   constexpr float &pt(int32_t i) { return view()[i].pt(); }
@@ -87,19 +104,6 @@ public:
     return nl;
   }
 
-  // State at the Beam spot
-  // phi,tip,1/pt,cotan(theta),zip
-  TrajectoryStateSoAT<S> stateAtBS;
-  constexpr float charge(int32_t i) const { return std::copysign(1.f, stateAtBS.state(i)(2)); }
-  constexpr float phi(int32_t i) const { return stateAtBS.state(i)(0); }
-  constexpr float tip(int32_t i) const { return stateAtBS.state(i)(1); }
-  constexpr float zip(int32_t i) const { return stateAtBS.state(i)(4); }
-
-  // state at the detector of the outermost hit
-  // representation to be decided...
-  // not yet filled on GPU
-  // TrajectoryStateSoA<S> stateAtOuterDet;
-
   HitContainer hitIndices;
   HitContainer detIndices;
 
@@ -118,7 +122,7 @@ namespace pixelTrack {
 #endif
 
   using TrackSoA = TrackSoAHeterogeneousT<maxNumber()>;
-  using TrajectoryState = TrajectoryStateSoAT<maxNumber()>;
+
   using HitContainer = TrackSoA::HitContainer;
 
 }  // namespace pixelTrack
