@@ -7,11 +7,8 @@
 #include <Eigen/Dense>
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/HistoContainer.h"
-
-#include "CUDADataFormats/Common/interface/HeterogeneousSoA.h"
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
-
-//#include "DataFormats/Portable/interface/PortableCUDADeviceCollection.h"
+#include "CUDADataFormats/Common/interface/HeterogeneousSoA.h"
 #include "CUDADataFormats/Common/interface/PortableDeviceCollection.h"
 
 namespace pixelTrack {
