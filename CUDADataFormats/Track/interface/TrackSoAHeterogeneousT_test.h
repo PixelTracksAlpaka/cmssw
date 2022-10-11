@@ -34,7 +34,8 @@ GENERATE_SOA_LAYOUT(TrackSoAHeterogeneousT_test,
                     SOA_COLUMN(float, eta),
                     SOA_COLUMN(float, pt),
                     SOA_EIGEN_COLUMN(Vector5f, state),
-                    SOA_EIGEN_COLUMN(Vector15f, covariance))
+                    SOA_EIGEN_COLUMN(Vector15f, covariance),
+                    SOA_SCALAR(int, nTracks))
 
 // Previous TrajectoryStateSoAT class methods
 namespace pixelTrack {
