@@ -666,8 +666,8 @@ __global__ void kernel_rejectDuplicate(TkSoAView tracks_view,
 
     /* chi2 is bad for large pt
     auto score = [&](auto it, auto nl) {
-      return nl < 4 ? std::abs(tracks.tip(it)) :  // tip for triplets
-                 tracks.chi2(it);                 //chi2
+      return nl < 4 ? std::abs(pixelTrack::utilities::tip(tracks_view, it)) :  // tip for triplets
+                 pixelTrack::utilities::chi2(tracks_view, it);                 //chi2
     };
     */
     auto score = [&](auto it, auto nl) { return std::abs(pixelTrack::utilities::tip(tracks_view, it)); };
@@ -682,7 +682,7 @@ __global__ void kernel_rejectDuplicate(TkSoAView tracks_view,
       auto e2opi = tracks_view[it].covariance()(9);
       auto cti = tracks_view[it].state()(3);
       auto e2cti = tracks_view[it].covariance()(12);
-      auto nli = tracks[it].nLayers();
+      auto nli = tracks_view[it].nLayers();
       for (auto jp = ip + 1; jp < hitToTuple.end(idx); ++jp) {
         auto const jt = *jp;
         auto qj = tracks_view[jt].quality();
@@ -734,7 +734,7 @@ __global__ void kernel_sharedHitCleaner(TrackingRecHit2DSOAView const *__restric
     for (auto it = hitToTuple.begin(idx); it != hitToTuple.end(idx); ++it) {
       if (tracks_view[*it].quality() < longTqual)
         continue;
-      // if (tracks.nHits(*it)==3) continue;
+      // if (tracks_view[*it].nHits()==3) continue;
       auto nl = tracks_view[*it].nLayers();
       maxNl = std::max(nl, maxNl);
     }
@@ -781,7 +781,7 @@ __global__ void kernel_tripletCleaner(TkSoAView tracks_view,
 
     // check if only triplets
     for (auto it = hitToTuple.begin(idx); it != hitToTuple.end(idx); ++it) {
-      if (track_view[*it].quality() <= good)
+      if (tracks_view[*it].quality() <= good)
         continue;
       onlyTriplets &= pixelTrack::utilities::isTriplet(tracks_view, *it);
       if (!onlyTriplets)
@@ -858,8 +858,7 @@ __global__ void kernel_simpleTripletCleaner(
 
 __global__ void kernel_print_found_ntuplets(TrackingRecHit2DSOAView const *__restrict__ hhp,
                                             HitContainer const *__restrict__ ptuples,
-                                            TkSoA const *__restrict__ ptracks,
-                                            Quality const *__restrict__ quality,
+                                            TkSoAConstView tracks_view,
                                             CAHitNtupletGeneratorKernelsGPU::HitToTuple const *__restrict__ phitToTuple,
                                             int32_t firstPrint,
                                             int32_t lastPrint,
@@ -867,27 +866,27 @@ __global__ void kernel_print_found_ntuplets(TrackingRecHit2DSOAView const *__res
   constexpr auto loose = pixelTrack::Quality::loose;
   auto const &hh = *hhp;
   auto const &foundNtuplets = *ptuples;
-  auto const &tracks = *ptracks;
+
   int first = firstPrint + blockDim.x * blockIdx.x + threadIdx.x;
   for (int i = first, np = std::min(lastPrint, foundNtuplets.nOnes()); i < np; i += blockDim.x * gridDim.x) {
     auto nh = foundNtuplets.size(i);
     if (nh < 3)
       continue;
-    if (quality[i] < loose)
+    if (tracks_view[i].quality() < loose)
       continue;
     printf("TK: %d %d %d %d %f %f %f %f %f %f %f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n",
            10000 * iev + i,
-           int(quality[i]),
+           int(tracks_view[i].quality()),
            nh,
-           tracks[i].nLayers(),
-           pixelTrack::utilities::charge(tracks, i),
-           tracks[i].pt(),
-           tracks[i].eta(),
-           pixelTrack::utilities::phi(tracks, i),
-           pixelTrack::utilities::tip(tracks, i),
-           pixelTrack::utilities::zip(tracks, i),
+           tracks_view[i].nLayers(),
+           pixelTrack::utilities::charge(tracks_view, i),
+           tracks_view[i].pt(),
+           tracks_view[i].eta(),
+           pixelTrack::utilities::phi(tracks_view, i),
+           pixelTrack::utilities::tip(tracks_view, i),
+           pixelTrack::utilities::zip(tracks_view, i),
            //           asinhf(fit_results[i].par(3)),
-           tracks[i].chi2(),
+           tracks_view[i].chi2(),
            hh.zGlobal(*foundNtuplets.begin(i)),
            hh.zGlobal(*(foundNtuplets.begin(i) + 1)),
            hh.zGlobal(*(foundNtuplets.begin(i) + 2)),

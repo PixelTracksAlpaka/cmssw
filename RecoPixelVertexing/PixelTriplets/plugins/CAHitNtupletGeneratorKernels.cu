@@ -234,12 +234,13 @@ void CAHitNtupletGeneratorKernelsGPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
   // classify tracks based on kinematics
   auto numberOfBlocks = nQuadrupletBlocks(blockSize);
   kernel_classifyTracks<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
-      tuples_d, tracks_d, tracks_d->stateAtBS.view(), params_.cuts_, quality_d);
+      tuples_d, tracks_d->view(), params_.cuts_, quality_d);
   cudaCheck(cudaGetLastError());
 
   if (params_.lateFishbone_) {
-    // apply fishbone cleaning to good tracks
-    numberOfBlocks = nDoubletBlocks(blockSize);
+    x
+        // apply fishbone cleaning to good tracks
+        numberOfBlocks = nDoubletBlocks(blockSize);
     kernel_fishboneCleaner<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
         device_theCells_.get(), device_nCells_, quality_d);
     cudaCheck(cudaGetLastError());
@@ -248,7 +249,7 @@ void CAHitNtupletGeneratorKernelsGPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
   // mark duplicates (tracks that share a doublet)
   numberOfBlocks = nDoubletBlocks(blockSize);
   kernel_fastDuplicateRemover<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
-      device_theCells_.get(), device_nCells_, tracks_d, tracks_d->stateAtBS.view(), params_.dupPassThrough_);
+      device_theCells_.get(), device_nCells_, tracks_d->view(), params_.dupPassThrough_);
   cudaCheck(cudaGetLastError());
 #ifdef GPU_DEBUG
   cudaCheck(cudaDeviceSynchronize());
@@ -276,26 +277,18 @@ void CAHitNtupletGeneratorKernelsGPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
     // mark duplicates (tracks that share at least one hit)
     numberOfBlocks = (hitToTupleView_.offSize + blockSize - 1) / blockSize;
 
-    kernel_rejectDuplicate<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tracks_d,
-                                                                         tracks_d->stateAtBS.view(),
-                                                                         quality_d,
-                                                                         params_.minHitsForSharingCut_,
-                                                                         params_.dupPassThrough_,
-                                                                         device_hitToTuple_.get());
+    kernel_rejectDuplicate<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
+        tracks_d->view(), params_.minHitsForSharingCut_, params_.dupPassThrough_, device_hitToTuple_.get());
 
-    kernel_sharedHitCleaner<<<numberOfBlocks, blockSize, 0, cudaStream>>>(hh.view(),
-                                                                          tracks_d,
-                                                                          quality_d,
-                                                                          params_.minHitsForSharingCut_,
-                                                                          params_.dupPassThrough_,
-                                                                          device_hitToTuple_.get());
+    kernel_sharedHitCleaner<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
+        hh.view(), tracks_d->view(), params_.minHitsForSharingCut_, params_.dupPassThrough_, device_hitToTuple_.get());
 
     if (params_.useSimpleTripletCleaner_) {
       kernel_simpleTripletCleaner<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
-          tracks_d, quality_d, params_.minHitsForSharingCut_, params_.dupPassThrough_, device_hitToTuple_.get());
+          tracks_d->view(), params_.minHitsForSharingCut_, params_.dupPassThrough_, device_hitToTuple_.get());
     } else {
       kernel_tripletCleaner<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
-          tracks_d, quality_d, params_.minHitsForSharingCut_, params_.dupPassThrough_, device_hitToTuple_.get());
+          tracks_d->view(), params_.minHitsForSharingCut_, params_.dupPassThrough_, device_hitToTuple_.get());
     }
     cudaCheck(cudaGetLastError());
 #ifdef GPU_DEBUG
@@ -342,11 +335,11 @@ void CAHitNtupletGeneratorKernelsGPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
     ++iev;
     for (int k = 0; k < 20000; k += 500) {
       kernel_print_found_ntuplets<<<1, 32, 0, cudaStream>>>(
-          hh.view(), tuples_d, tracks_d, quality_d, device_hitToTuple_.get(), k, k + 500, iev);
+          hh.view(), tuples_d, tracks_d->view(), device_hitToTuple_.get(), k, k + 500, iev);
       cudaDeviceSynchronize();
     }
     kernel_print_found_ntuplets<<<1, 32, 0, cudaStream>>>(
-        hh.view(), tuples_d, tracks_d, quality_d, device_hitToTuple_.get(), 20000, 1000000, iev);
+        hh.view(), tuples_d, tracks_d->view(), device_hitToTuple_.get(), 20000, 1000000, iev);
     cudaDeviceSynchronize();
     // cudaStreamSynchronize(cudaStream);
   }
