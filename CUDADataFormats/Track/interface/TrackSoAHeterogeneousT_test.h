@@ -116,8 +116,6 @@ public:
   // CUDA does not support enums  in __lgc ...
 private:
 public:
-  constexpr Quality quality(int32_t i) const { return static_cast<Quality>(view()[i].quality()); }
-  constexpr Quality &quality(int32_t i) { return static_cast<Quality &>(view()[i].quality()); }
   // TODO: static did not work; using reinterpret_cast
   constexpr Quality const *qualityData() const { return reinterpret_cast<Quality const *>(view().quality()); }
   constexpr Quality *qualityData() { return reinterpret_cast<Quality *>(view().quality()); }
