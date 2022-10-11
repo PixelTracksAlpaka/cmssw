@@ -149,7 +149,7 @@ void CAHitNtupletGeneratorKernelsCPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
   auto const *tuples_d = &tracks_d->hitIndices;
 
   // classify tracks based on kinematics
-  kernel_classifyTracks(tuples_d, tracks_d, tracks_d->view(), params_.cuts_);
+  kernel_classifyTracks(tuples_d, tracks_d->view(), params_.cuts_);
 
   if (params_.lateFishbone_) {
     // apply fishbone cleaning to good tracks

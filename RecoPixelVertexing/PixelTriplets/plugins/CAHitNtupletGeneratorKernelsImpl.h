@@ -415,7 +415,6 @@ __global__ void kernel_fillMultiplicity(HitContainer const *__restrict__ foundNt
 the SoA Data
  */
 __global__ void kernel_classifyTracks(HitContainer const *__restrict__ tuples,
-                                      TkSoA const *__restrict__ tracks,
                                       TkSoAView tracks_view,
                                       CAHitNtupletGeneratorKernelsGPU::QualityCuts cuts) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
@@ -447,7 +446,7 @@ __global__ void kernel_classifyTracks(HitContainer const *__restrict__ tuples,
       continue;
     }
 
-    tracks[it].quality() = pixelTrack::Quality::strict;
+    tracks_view[it].quality() = pixelTrack::Quality::strict;
 
     // compute a pT-dependent chi2 cut
 
@@ -487,7 +486,7 @@ __global__ void kernel_classifyTracks(HitContainer const *__restrict__ tuples,
       continue;
     }
 
-    tracks[it].quality() = pixelTrack::Quality::tight;
+    tracks_view[it].quality() = pixelTrack::Quality::tight;
 
     // impose "region cuts" based on the fit results (phi, Tip, pt, cotan(theta)), Zip)
     // default cuts:
@@ -500,7 +499,7 @@ __global__ void kernel_classifyTracks(HitContainer const *__restrict__ tuples,
                 (std::abs(pixelTrack::utilities::zip(tracks_view, it)) < region.maxZip);
 
     if (isOk) {
-      tracks[it].quality() = pixelTrack::Quality::highPurity;
+      tracks_view[it].quality() = pixelTrack::Quality::highPurity;
     }
   }
 }
