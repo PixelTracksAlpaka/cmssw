@@ -178,12 +178,10 @@ __global__ void kernel_earlyDuplicateRemover(GPUCACell const *cells,
 }
 
 // assume the above (so, short tracks already removed)
-__global__ void kernel_fastDuplicateRemover(
-    GPUCACell const *__restrict__ cells,
-    uint32_t const *__restrict__ nCells,
-    TkSoA *__restrict__ tracks,
-    cms::cuda::PortableDeviceCollection<TrajectoryStateSoAT_test<>>::ConstView stateAtBS_view,
-    bool dupPassThrough) {
+__global__ void kernel_fastDuplicateRemover(GPUCACell const *__restrict__ cells,
+                                            uint32_t const *__restrict__ nCells,
+                                            TkSoAView tracks_view,
+                                            bool dupPassThrough) {
   // quality to mark rejected
   auto const reject = dupPassThrough ? pixelTrack::Quality::loose : pixelTrack::Quality::dup;
   constexpr auto loose = pixelTrack::Quality::loose;
@@ -201,42 +199,42 @@ __global__ void kernel_fastDuplicateRemover(
 
     /* chi2 penalize higher-pt tracks  (try rescale it?)
     auto score = [&](auto it) {
-      return tracks[it].nLayers() < 4 ? 
-              std::abs(pixelTrack::utilities::tip(tracks,it)) :  // tip for triplets
-              tracks[it].chi2(it);            //chi2 for quads
+      return tracks_view[it].nLayers() < 4 ? 
+              std::abs(pixelTrack::utilities::tip(tracks_view, it)) :  // tip for triplets
+              tracks_view[it].chi2(it);            //chi2 for quads
     };
     */
 
-    auto score = [&](auto it) { return std::abs(pixelTrack::utilities::tip(tracks, it)); };
+    auto score = [&](auto it) { return std::abs(pixelTrack::utilities::tip(tracks_view, it)); };
 
     // full crazy combinatorics
     int ntr = thisCell.tracks().size();
     for (int i = 0; i < ntr - 1; ++i) {
       auto it = thisCell.tracks()[i];
-      auto qi = tracks->quality(it);
+      auto qi = tracks_view[it].quality();
       if (qi <= reject)
         continue;
-      auto opi = stateAtBS_view[it].state()(2);
-      auto e2opi = stateAtBS_view[it].covariance()(9);
-      auto cti = stateAtBS_view[it].state()(3);
-      auto e2cti = stateAtBS_view[it].covariance()(12);
+      auto opi = tracks_view[it].state()(2);
+      auto e2opi = tracks_view[it].covariance()(9);
+      auto cti = tracks_view[it].state()(3);
+      auto e2cti = tracks_view[it].covariance()(12);
       for (auto j = i + 1; j < ntr; ++j) {
         auto jt = thisCell.tracks()[j];
-        auto qj = tracks->quality(jt);
+        auto qj = tracks_view[jt].quality();
         if (qj <= reject)
           continue;
-        auto opj = stateAtBS_view[jt].state()(2);
-        auto ctj = stateAtBS_view[jt].state()(3);
-        auto dct = nSigma2 * (stateAtBS_view[jt].covariance()(12) + e2cti);
+        auto opj = tracks_view[jt].state()(2);
+        auto ctj = tracks_view[jt].state()(3);
+        auto dct = nSigma2 * (tracks_view[jt].covariance()(12) + e2cti);
         if ((cti - ctj) * (cti - ctj) > dct)
           continue;
-        auto dop = nSigma2 * (stateAtBS_view[jt].covariance()(9) + e2opi);
+        auto dop = nSigma2 * (tracks_view[jt].covariance()(9) + e2opi);
         if ((opi - opj) * (opi - opj) > dop)
           continue;
         if ((qj < qi) || (qj == qi && score(it) < score(jt)))
-          tracks->quality(jt) = reject;
+          tracks_view[jt].quality() = reject;
         else {
-          tracks->quality(it) = reject;
+          tracks_view[it].quality() = reject;
           break;
         }
       }
@@ -245,8 +243,8 @@ __global__ void kernel_fastDuplicateRemover(
     // find maxQual
     auto maxQual = reject;  // no duplicate!
     for (auto it : thisCell.tracks()) {
-      if (tracks->quality(it) > maxQual)
-        maxQual = tracks->quality(it);
+      if (tracks_view[it].quality() > maxQual)
+        maxQual = tracks_view[it].quality();
     }
 
     if (maxQual <= loose)
@@ -254,7 +252,7 @@ __global__ void kernel_fastDuplicateRemover(
 
     // find min score
     for (auto it : thisCell.tracks()) {
-      if (tracks->quality(it) == maxQual && score(it) < mc) {
+      if (tracks_view[it].quality() == maxQual && score(it) < mc) {
         mc = score(it);
         im = it;
       }
@@ -265,8 +263,8 @@ __global__ void kernel_fastDuplicateRemover(
 
     // mark all other duplicates  (not yet, keep it loose)
     for (auto it : thisCell.tracks()) {
-      if (tracks->quality(it) > loose && it != im)
-        tracks->quality(it) = loose;  //no race:  simple assignment of the same constant
+      if (tracks_view[it].quality() > loose && it != im)
+        tracks_view[it].quality() = loose;  //no race:  simple assignment of the same constant
     }
   }
 }
@@ -654,18 +652,14 @@ __global__ void kernel_markSharedHit(int const *__restrict__ nshared,
 }
 
 // mostly for very forward triplets.....
-__global__ void kernel_rejectDuplicate(
-    TkSoA const *__restrict__ ptracks,  // TODO: Change to Constview
-    cms::cuda::PortableDeviceCollection<TrajectoryStateSoAT_test<>>::ConstView stateAtBS_view,
-    Quality *__restrict__ quality,
-    uint16_t nmin,
-    bool dupPassThrough,
-    CAHitNtupletGeneratorKernelsGPU::HitToTuple const *__restrict__ phitToTuple) {
+__global__ void kernel_rejectDuplicate(TkSoAView tracks_view,
+                                       uint16_t nmin,
+                                       bool dupPassThrough,
+                                       CAHitNtupletGeneratorKernelsGPU::HitToTuple const *__restrict__ phitToTuple) {
   // quality to mark rejected
   auto const reject = dupPassThrough ? pixelTrack::Quality::loose : pixelTrack::Quality::dup;
 
   auto &hitToTuple = *phitToTuple;
-  auto const &tracks = *ptracks;
 
   int first = blockDim.x * blockIdx.x + threadIdx.x;
   for (int idx = first, ntot = hitToTuple.nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
@@ -678,37 +672,37 @@ __global__ void kernel_rejectDuplicate(
                  tracks.chi2(it);                 //chi2
     };
     */
-    auto score = [&](auto it, auto nl) { return std::abs(tracks.tip(it)); };
+    auto score = [&](auto it, auto nl) { return std::abs(pixelTrack::utilities::tip(tracks_view, it)); };
 
     // full combinatorics
     for (auto ip = hitToTuple.begin(idx); ip < hitToTuple.end(idx) - 1; ++ip) {
       auto const it = *ip;
-      auto qi = quality[it];
+      auto qi = tracks_view[it].quality();
       if (qi <= reject)
         continue;
-      auto opi = stateAtBS_view[it].state()(2);
-      auto e2opi = stateAtBS_view[it].covariance()(9);
-      auto cti = stateAtBS_view[it].state()(3);
-      auto e2cti = stateAtBS_view[it].covariance()(12);
+      auto opi = tracks_view[it].state()(2);
+      auto e2opi = tracks_view[it].covariance()(9);
+      auto cti = tracks_view[it].state()(3);
+      auto e2cti = tracks_view[it].covariance()(12);
       auto nli = tracks[it].nLayers();
       for (auto jp = ip + 1; jp < hitToTuple.end(idx); ++jp) {
         auto const jt = *jp;
-        auto qj = quality[jt];
+        auto qj = tracks_view[jt].quality();
         if (qj <= reject)
           continue;
-        auto opj = stateAtBS_view[jt].state()(2);
-        auto ctj = stateAtBS_view[jt].state()(3);
-        auto dct = nSigma2 * (stateAtBS_view[jt].covariance()(12) + e2cti);
+        auto opj = tracks_view[jt].state()(2);
+        auto ctj = tracks_view[jt].state()(3);
+        auto dct = nSigma2 * (tracks_view[jt].covariance()(12) + e2cti);
         if ((cti - ctj) * (cti - ctj) > dct)
           continue;
-        auto dop = nSigma2 * (stateAtBS_view[jt].covariance()(9) + e2opi);
+        auto dop = nSigma2 * (tracks_view[jt].covariance()(9) + e2opi);
         if ((opi - opj) * (opi - opj) > dop)
           continue;
-        auto nlj = tracks[jt].nLayers();
+        auto nlj = tracks_view[jt].nLayers();
         if (nlj < nli || (nlj == nli && (qj < qi || (qj == qi && score(it, nli) < score(jt, nlj)))))
-          quality[jt] = reject;
+          tracks_view[jt].quality() = reject;
         else {
-          quality[it] = reject;
+          tracks_view[it].quality() = reject;
           break;
         }
       }

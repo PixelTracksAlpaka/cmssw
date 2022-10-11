@@ -158,8 +158,7 @@ void CAHitNtupletGeneratorKernelsCPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
   }
 
   // remove duplicates (tracks that share a doublet)
-  kernel_fastDuplicateRemover(
-      device_theCells_.get(), device_nCells_, tracks_d, tracks_d->view(), params_.dupPassThrough_);
+  kernel_fastDuplicateRemover(device_theCells_.get(), device_nCells_, tracks_d->view(), params_.dupPassThrough_);
 
   // fill hit->track "map"
   if (params_.doSharedHitCut_ || params_.doStats_) {
@@ -170,12 +169,8 @@ void CAHitNtupletGeneratorKernelsCPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
 
   // remove duplicates (tracks that share at least one hit)
   if (params_.doSharedHitCut_) {
-    kernel_rejectDuplicate(tracks_d,
-                           tracks_d->view(),  // stateAtBS SoA view
-                           quality_d,
-                           params_.minHitsForSharingCut_,
-                           params_.dupPassThrough_,
-                           device_hitToTuple_.get());
+    kernel_rejectDuplicate(
+        tracks_d->view(), params_.minHitsForSharingCut_, params_.dupPassThrough_, device_hitToTuple_.get());
 
     kernel_sharedHitCleaner(hh.view(),
                             tracks_d,
