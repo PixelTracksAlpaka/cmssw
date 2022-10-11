@@ -761,8 +761,7 @@ __global__ void kernel_sharedHitCleaner(TrackingRecHit2DSOAView const *__restric
   }
 }
 
-__global__ void kernel_tripletCleaner(TkSoA const *__restrict__ ptracks,
-                                      Quality *__restrict__ quality,
+__global__ void kernel_tripletCleaner(TkSoAView tracks_view,
                                       uint16_t nmin,
                                       bool dupPassThrough,
                                       CAHitNtupletGeneratorKernelsGPU::HitToTuple const *__restrict__ phitToTuple) {
@@ -772,7 +771,6 @@ __global__ void kernel_tripletCleaner(TkSoA const *__restrict__ ptracks,
   auto const good = pixelTrack::Quality::strict;
 
   auto &hitToTuple = *phitToTuple;
-  auto const &tracks = *ptracks;
 
   int first = blockDim.x * blockIdx.x + threadIdx.x;
   for (int idx = first, ntot = hitToTuple.nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
@@ -785,9 +783,9 @@ __global__ void kernel_tripletCleaner(TkSoA const *__restrict__ ptracks,
 
     // check if only triplets
     for (auto it = hitToTuple.begin(idx); it != hitToTuple.end(idx); ++it) {
-      if (quality[*it] <= good)
+      if (track_view[*it].quality() <= good)
         continue;
-      onlyTriplets &= tracks.isTriplet(*it);
+      onlyTriplets &= pixelTrack::utilities::isTriplet(tracks_view, *it);
       if (!onlyTriplets)
         break;
     }
@@ -799,8 +797,8 @@ __global__ void kernel_tripletCleaner(TkSoA const *__restrict__ ptracks,
     // for triplets choose best tip!  (should we first find best quality???)
     for (auto ip = hitToTuple.begin(idx); ip != hitToTuple.end(idx); ++ip) {
       auto const it = *ip;
-      if (quality[it] >= good && std::abs(tracks.tip(it)) < mc) {
-        mc = std::abs(tracks.tip(it));
+      if (tracks_view[it].quality() >= good && std::abs(pixelTrack::utilities::tip(tracks_view, it)) < mc) {
+        mc = std::abs(pixelTrack::utilities::tip(tracks_view, it));
         im = it;
       }
     }
@@ -811,8 +809,8 @@ __global__ void kernel_tripletCleaner(TkSoA const *__restrict__ ptracks,
     // mark worse ambiguities
     for (auto ip = hitToTuple.begin(idx); ip != hitToTuple.end(idx); ++ip) {
       auto const it = *ip;
-      if (quality[it] > reject && it != im)
-        quality[it] = reject;  //no race:  simple assignment of the same constant
+      if (tracks_view[it].quality() > reject && it != im)
+        tracks_view[it].quality() = reject;  //no race:  simple assignment of the same constant
     }
 
   }  // loop over hits

@@ -183,7 +183,7 @@ void CAHitNtupletGeneratorKernelsCPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
           tracks_d, quality_d, params_.minHitsForSharingCut_, params_.dupPassThrough_, device_hitToTuple_.get());
     } else {
       kernel_tripletCleaner(
-          tracks_d, quality_d, params_.minHitsForSharingCut_, params_.dupPassThrough_, device_hitToTuple_.get());
+          tracks_d->view(), params_.minHitsForSharingCut_, params_.dupPassThrough_, device_hitToTuple_.get());
     }
   }
 
@@ -216,7 +216,7 @@ void CAHitNtupletGeneratorKernelsCPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
   {
     std::lock_guard<std::mutex> guard(lock);
     ++iev;
-    kernel_print_found_ntuplets(hh.view(), tuples_d, tracks_d, quality_d, device_hitToTuple_.get(), 0, 1000000, iev);
+    kernel_print_found_ntuplets(hh.view(), tuples_d, tracks_d->view(), device_hitToTuple_.get(), 0, 1000000, iev);
   }
 #endif
 }
