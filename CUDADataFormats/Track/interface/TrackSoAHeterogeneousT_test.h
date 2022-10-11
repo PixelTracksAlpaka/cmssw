@@ -51,16 +51,16 @@ namespace pixelTrack {
 
     float zip(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(4); }
 
-    float pt(TrackSoAConstView tracks, int32_t i) { return tracks[i].pt(); }
-    float &pt(TrackSoAConstView tracks, int32_t i) { return tracks[i].pt(); }
+    // float pt(TrackSoAConstView tracks, int32_t i) { return tracks[i].pt(); }
+    // // float &pt(TrackSoAConstView tracks, int32_t i) { return tracks[i].pt(); }
 
-    float eta(TrackSoAConstView tracks, int32_t i) { return tracks[i].eta(); }
-    float &eta(TrackSoAConstView tracks, int32_t i) { return tracks[i].eta(); }
+    // float eta(TrackSoAConstView tracks, int32_t i) { return tracks[i].eta(); }
+    // // float &eta(TrackSoAConstView tracks, int32_t i) { return tracks[i].eta(); }
 
-    float chi2(TrackSoAConstView tracks, int32_t i) { return tracks[i].chi2(); }
-    float &chi2(TrackSoAConstView tracks, int32_t i) { return tracks[i].chi2(); }
+    // float chi2(TrackSoAConstView tracks, int32_t i) { return tracks[i].chi2(); }
+    // float &chi2(TrackSoAConstView tracks, int32_t i) { return tracks[i].chi2(); }
 
-    bool isTriplet(TrackSoAConstView tracks, int i) { return view[i].nLayers() == 3; }
+    bool isTriplet(TrackSoAConstView tracks, int i) { return tracks[i].nLayers() == 3; }
 
     template <typename V3, typename M3, typename V2, typename M2>
     __host__ __device__ inline void copyFromCircle(
