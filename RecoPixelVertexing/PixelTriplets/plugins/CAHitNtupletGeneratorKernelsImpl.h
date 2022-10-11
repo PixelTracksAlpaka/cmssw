@@ -142,13 +142,11 @@ __global__ void kernel_fishboneCleaner(GPUCACell const *cells, uint32_t const *_
 // It does not seem to affect efficiency in any way!
 __global__ void kernel_earlyDuplicateRemover(GPUCACell const *cells,
                                              uint32_t const *__restrict__ nCells,
-                                             TkSoA const *__restrict__ ptracks,
+                                             TkSoAConstView tracks_view,
                                              Quality *quality,
                                              bool dupPassThrough) {
   // quality to mark rejected
   constexpr auto reject = pixelTrack::Quality::edup;  /// cannot be loose
-
-  auto const &tracks = *ptracks;
 
   assert(nCells);
   auto first = threadIdx.x + blockIdx.x * blockDim.x;
@@ -162,7 +160,7 @@ __global__ void kernel_earlyDuplicateRemover(GPUCACell const *cells,
 
     // find maxNl
     for (auto it : thisCell.tracks()) {
-      auto nl = tracks[it].nLayers();
+      auto nl = tracks_view[it].nLayers();
       maxNl = std::max(nl, maxNl);
     }
 
@@ -171,7 +169,7 @@ __global__ void kernel_earlyDuplicateRemover(GPUCACell const *cells,
     //  maxNl = std::min(4, maxNl);
 
     for (auto it : thisCell.tracks()) {
-      if (tracks[it].nLayers() < maxNl)
+      if (tracks_view[it].nLayers() < maxNl)
         quality[it] = reject;  //no race:  simple assignment of the same constant
     }
   }
