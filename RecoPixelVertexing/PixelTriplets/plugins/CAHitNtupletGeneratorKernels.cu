@@ -91,13 +91,13 @@ void CAHitNtupletGeneratorKernelsGPU::launchKernels(HitsOnCPU const &hh, TkSoA *
 
   kernel_fillHitDetIndices<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tuples_d, hh.view(), detId_d);
   cudaCheck(cudaGetLastError());
-  kernel_fillNLayers<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tracks_d, device_hitTuple_apc_);
+  kernel_fillNLayers<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tracks_d, tracks_d->view(), device_hitTuple_apc_);
   cudaCheck(cudaGetLastError());
 
   // remove duplicates (tracks that share a doublet)
   numberOfBlocks = nDoubletBlocks(blockSize);
   kernel_earlyDuplicateRemover<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
-      device_theCells_.get(), device_nCells_, tracks_d, quality_d, params_.dupPassThrough_);
+      device_theCells_.get(), device_nCells_, tracks_d->view(), params_.dupPassThrough_);
   cudaCheck(cudaGetLastError());
 
   blockSize = 128;
@@ -234,13 +234,13 @@ void CAHitNtupletGeneratorKernelsGPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
   // classify tracks based on kinematics
   auto numberOfBlocks = nQuadrupletBlocks(blockSize);
   kernel_classifyTracks<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
-      tuples_d, tracks_d->view(), params_.cuts_, quality_d);
+      tuples_d, tracks_d->view(), quality_d, params_.cuts_);
+
   cudaCheck(cudaGetLastError());
 
   if (params_.lateFishbone_) {
-    x
-        // apply fishbone cleaning to good tracks
-        numberOfBlocks = nDoubletBlocks(blockSize);
+    // apply fishbone cleaning to good tracks
+    numberOfBlocks = nDoubletBlocks(blockSize);
     kernel_fishboneCleaner<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
         device_theCells_.get(), device_nCells_, quality_d);
     cudaCheck(cudaGetLastError());

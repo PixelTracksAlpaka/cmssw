@@ -83,7 +83,7 @@ void CAHitNtupletGeneratorKernelsCPU::launchKernels(HitsOnCPU const &hh, TkSoA *
   auto *detId_d = &tracks_d->detIndices;
   auto *quality_d = tracks_d->qualityData();
 
-  assert(tuples_d && quality_d);
+  // assert(tuples_d && quality_d); // TODO Find equivalent for View
 
   // zero tuples
   cms::cuda::launchZero(tuples_d, cudaStream);
@@ -135,7 +135,7 @@ void CAHitNtupletGeneratorKernelsCPU::launchKernels(HitsOnCPU const &hh, TkSoA *
   kernel_earlyDuplicateRemover(device_theCells_.get(), device_nCells_, tracks_d->view(), params_.dupPassThrough_);
   kernel_countMultiplicity(tuples_d, tracks_d->view(), device_tupleMultiplicity_.get());
   cms::cuda::launchFinalize(device_tupleMultiplicity_.get(), cudaStream);
-  kernel_fillMultiplicity(tuples_d, quality_d, device_tupleMultiplicity_.get());
+  kernel_fillMultiplicity(tuples_d, tracks_d->view(), device_tupleMultiplicity_.get());
 
   if (nhits > 1 && params_.lateFishbone_) {
     gpuPixelDoublets::fishbone(hh.view(), device_theCells_.get(), device_nCells_, isOuterHitOfCell_, nhits, true);
@@ -147,9 +147,9 @@ void CAHitNtupletGeneratorKernelsCPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
   int32_t nhits = hh.nHits();
 
   auto const *tuples_d = &tracks_d->hitIndices;
-
+  auto *quality_d = tracks_d->qualityData();
   // classify tracks based on kinematics
-  kernel_classifyTracks(tuples_d, tracks_d->view(), params_.cuts_);
+  kernel_classifyTracks(tuples_d, tracks_d->view(), quality_d, params_.cuts_);
 
   if (params_.lateFishbone_) {
     // apply fishbone cleaning to good tracks
@@ -161,9 +161,9 @@ void CAHitNtupletGeneratorKernelsCPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
 
   // fill hit->track "map"
   if (params_.doSharedHitCut_ || params_.doStats_) {
-    kernel_countHitInTracks(tuples_d, quality_d, device_hitToTuple_.get());
+    kernel_countHitInTracks(tuples_d, device_hitToTuple_.get());
     cms::cuda::launchFinalize(hitToTupleView_, cudaStream);
-    kernel_fillHitInTracks(tuples_d, quality_d, device_hitToTuple_.get());
+    kernel_fillHitInTracks(tuples_d, device_hitToTuple_.get());
   }
 
   // remove duplicates (tracks that share at least one hit)
