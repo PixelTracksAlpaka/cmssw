@@ -19,7 +19,6 @@
 
 using HitsOnGPU = TrackingRecHit2DSOAView;
 using Tuples = pixelTrack::HitContainer;
-using OutputSoA = pixelTrack::TrackSoA;
 using OutputSoAView = pixelTrack::TrackSoAView;
 using tindex_type = caConstants::tindex_type;
 constexpr auto invalidTkId = std::numeric_limits<tindex_type>::max();
@@ -176,7 +175,7 @@ __global__ void kernel_BLFit(caConstants::TupleMultiplicity const *__restrict__ 
                              double *__restrict__ phits,
                              float *__restrict__ phits_ge,
                              double *__restrict__ pfast_fit) {
-  // assert(results_view); // Need to be replaced with something that works
+  // assert(results_view); // TODO Find equivalent assertion for View
   assert(pfast_fit);
 
   // same as above...
