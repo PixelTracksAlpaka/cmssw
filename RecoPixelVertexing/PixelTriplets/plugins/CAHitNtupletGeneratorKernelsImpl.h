@@ -817,8 +817,7 @@ __global__ void kernel_tripletCleaner(TkSoAView tracks_view,
 }
 
 __global__ void kernel_simpleTripletCleaner(
-    TkSoA const *__restrict__ ptracks,
-    Quality *__restrict__ quality,
+    TkSoAView tracks_view,
     uint16_t nmin,
     bool dupPassThrough,
     CAHitNtupletGeneratorKernelsGPU::HitToTuple const *__restrict__ phitToTuple) {
@@ -828,7 +827,6 @@ __global__ void kernel_simpleTripletCleaner(
   auto const good = pixelTrack::Quality::loose;
 
   auto &hitToTuple = *phitToTuple;
-  auto const &tracks = *ptracks;
 
   int first = blockDim.x * blockIdx.x + threadIdx.x;
   for (int idx = first, ntot = hitToTuple.nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
@@ -841,8 +839,8 @@ __global__ void kernel_simpleTripletCleaner(
     // choose best tip!  (should we first find best quality???)
     for (auto ip = hitToTuple.begin(idx); ip != hitToTuple.end(idx); ++ip) {
       auto const it = *ip;
-      if (quality[it] >= good && std::abs(tracks.tip(it)) < mc) {
-        mc = std::abs(tracks.tip(it));
+      if (tracks_view[it].quality() >= good && std::abs(pixelTrack::utilities::tip(tracks_view, it)) < mc) {
+        mc = std::abs(pixelTrack::utilities::tip(tracks_view, it));
         im = it;
       }
     }
@@ -853,8 +851,8 @@ __global__ void kernel_simpleTripletCleaner(
     // mark worse ambiguities
     for (auto ip = hitToTuple.begin(idx); ip != hitToTuple.end(idx); ++ip) {
       auto const it = *ip;
-      if (quality[it] > reject && tracks.isTriplet(it) && it != im)
-        quality[it] = reject;  //no race:  simple assignment of the same constant
+      if (tracks_view[it].quality() > reject && pixelTracks::utilities::isTriplet(tracks_view, it) && it != im)
+        tracks_view[it].quality() = reject;  //no race:  simple assignment of the same constant
     }
 
   }  // loop over hits
