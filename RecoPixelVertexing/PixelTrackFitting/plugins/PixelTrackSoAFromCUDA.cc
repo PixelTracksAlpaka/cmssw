@@ -63,7 +63,7 @@ void PixelTrackSoAFromCUDA::produce(edm::Event& iEvent, edm::EventSetup const& i
   // check that the fixed-size SoA does not overflow
   auto const& tsoa = *soa_;
   auto maxTracks = tsoa.stride();
-  auto nTracks = tsoa.nTracks();
+  auto nTracks = tsoa.view().nTracks();
   assert(nTracks < maxTracks);
   if (nTracks == maxTracks - 1) {
     edm::LogWarning("PixelTracks") << "Unsorted reconstructed pixel tracks truncated to " << maxTracks - 1

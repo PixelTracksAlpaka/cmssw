@@ -44,24 +44,17 @@ namespace pixelTrack {
     using TrackSoAConstView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::ConstView;
     // State at the Beam spot
     // phi,tip,1/pt,cotan(theta),zip
-    float charge(TrackSoAConstView tracks, int32_t i) { return std::copysign(1.f, tracks[i].state()(2)); }
+    __host__ __device__ float charge(TrackSoAConstView tracks, int32_t i) {
+      return std::copysign(1.f, tracks[i].state()(2));
+    }
 
-    float phi(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(0); }
+    __host__ __device__ float phi(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(0); }
 
-    float tip(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(1); }
+    __host__ __device__ float tip(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(1); }
 
-    float zip(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(4); }
+    __host__ __device__ float zip(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(4); }
 
-    // float pt(TrackSoAConstView tracks, int32_t i) { return tracks[i].pt(); }
-    // // float &pt(TrackSoAConstView tracks, int32_t i) { return tracks[i].pt(); }
-
-    // float eta(TrackSoAConstView tracks, int32_t i) { return tracks[i].eta(); }
-    // // float &eta(TrackSoAConstView tracks, int32_t i) { return tracks[i].eta(); }
-
-    // float chi2(TrackSoAConstView tracks, int32_t i) { return tracks[i].chi2(); }
-    // float &chi2(TrackSoAConstView tracks, int32_t i) { return tracks[i].chi2(); }
-
-    bool isTriplet(TrackSoAConstView tracks, int i) { return tracks[i].nLayers() == 3; }
+    __host__ __device__ bool isTriplet(TrackSoAConstView tracks, int i) { return tracks[i].nLayers() == 3; }
 
     template <typename V3, typename M3, typename V2, typename M2>
     __host__ __device__ inline void copyFromCircle(
@@ -93,7 +86,7 @@ namespace pixelTrack {
     }
 
     template <typename V5, typename M5>
-    __host__ __device__ inline void copyToDense(TrackSoAView tracks, V5 &v, M5 &cov, int32_t i) {
+    __host__ __device__ inline void copyToDense(TrackSoAConstView tracks, V5 &v, M5 &cov, int32_t i) {
       v = tracks[i].state().template cast<typename V5::Scalar>();
       for (int j = 0, ind = 0; j < 5; ++j) {
         cov(j, j) = tracks[i].covariance()(ind++);
@@ -129,9 +122,6 @@ public:
   constexpr Quality const *qualityData() const { return reinterpret_cast<Quality const *>(view().quality()); }
   constexpr Quality *qualityData() { return reinterpret_cast<Quality *>(view().quality()); }
 
-  constexpr int nTracks() const { return nTracks_; }
-  constexpr void setNTracks(int n) { nTracks_ = n; }
-
   constexpr int nHits(int i) const { return detIndices.size(i); }
 
   constexpr int computeNumberOfLayers(int32_t i) const {
@@ -150,9 +140,6 @@ public:
 
   HitContainer hitIndices;
   HitContainer detIndices;
-
-private:
-  int nTracks_;
 };
 
 namespace pixelTrack {

@@ -16,7 +16,7 @@
 
 using HitsOnGPU = TrackingRecHit2DSOAView;
 using Tuples = pixelTrack::HitContainer;
-using OutputSoA = pixelTrack::TrackSoA;
+using OutputSoAView = pixelTrack::TrackSoAView;
 
 template <int N>
 __global__ void kernel_FastFit(Tuples const *__restrict__ foundNtuplets,
@@ -149,7 +149,7 @@ __global__ void kernel_LineFit(caConstants::TupleMultiplicity const *__restrict_
       break;
 
     // get it for the ntuple container (one to one to helix)
-    auto tkid = *(tupleMultiplicity->begin(nHits) + tuple_idx);
+    int32_t tkid = *(tupleMultiplicity->begin(nHits) + tuple_idx);
 
     riemannFit::Map3xNd<N> hits(phits + local_idx);
     riemannFit::Map4d fast_fit(pfast_fit_input + local_idx);

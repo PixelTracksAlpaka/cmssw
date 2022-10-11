@@ -103,10 +103,10 @@ void CAHitNtupletGeneratorKernelsGPU::launchKernels(HitsOnCPU const &hh, TkSoA *
   blockSize = 128;
   numberOfBlocks = (3 * caConstants::maxTuples / 4 + blockSize - 1) / blockSize;
   kernel_countMultiplicity<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
-      tuples_d, quality_d, device_tupleMultiplicity_.get());
+      tuples_d, tracks_d->view(), device_tupleMultiplicity_.get());
   cms::cuda::launchFinalize(device_tupleMultiplicity_.get(), cudaStream);
   kernel_fillMultiplicity<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
-      tuples_d, quality_d, device_tupleMultiplicity_.get());
+      tuples_d, tracks_d->view(), device_tupleMultiplicity_.get());
   cudaCheck(cudaGetLastError());
 
   // do not run the fishbone if there are hits only in BPIX1
@@ -259,14 +259,13 @@ void CAHitNtupletGeneratorKernelsGPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
     // fill hit->track "map"
     assert(hitToTupleView_.offSize > nhits);
     numberOfBlocks = nQuadrupletBlocks(blockSize);
-    kernel_countHitInTracks<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
-        tuples_d, quality_d, device_hitToTuple_.get());
+    kernel_countHitInTracks<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tuples_d, device_hitToTuple_.get());
     cudaCheck(cudaGetLastError());
     assert((hitToTupleView_.assoc == device_hitToTuple_.get()) &&
            (hitToTupleView_.offStorage == device_hitToTupleStorage_.get()) && (hitToTupleView_.offSize > 0));
     cms::cuda::launchFinalize(hitToTupleView_, cudaStream);
     cudaCheck(cudaGetLastError());
-    kernel_fillHitInTracks<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tuples_d, quality_d, device_hitToTuple_.get());
+    kernel_fillHitInTracks<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tuples_d, device_hitToTuple_.get());
     cudaCheck(cudaGetLastError());
 #ifdef GPU_DEBUG
     cudaCheck(cudaDeviceSynchronize());
