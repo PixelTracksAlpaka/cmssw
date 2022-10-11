@@ -40,12 +40,27 @@ GENERATE_SOA_LAYOUT(TrackSoAHeterogeneousT_test,
 namespace pixelTrack {
   namespace utilities {
     using TrackSoAView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::View;
+    using TrackSoAConstView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::ConstView;
     // State at the Beam spot
     // phi,tip,1/pt,cotan(theta),zip
-    float charge(TrackSoAView tracks, int32_t i) { return std::copysign(1.f, tracks[i].state()(2)); }
-    float phi(TrackSoAView tracks, int32_t i) { return tracks[i].state()(0); }
-    float tip(TrackSoAView tracks, int32_t i) { return tracks[i].state()(1); }
-    float zip(TrackSoAView tracks, int32_t i) { return tracks[i].state()(4); }
+    float charge(TrackSoAConstView tracks, int32_t i) { return std::copysign(1.f, tracks[i].state()(2)); }
+
+    float phi(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(0); }
+
+    float tip(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(1); }
+
+    float zip(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(4); }
+
+    float pt(TrackSoAConstView tracks, int32_t i) { return tracks[i].pt(); }
+    float &pt(TrackSoAConstView tracks, int32_t i) { return tracks[i].pt(); }
+
+    float eta(TrackSoAConstView tracks, int32_t i) { return tracks[i].eta(); }
+    float &eta(TrackSoAConstView tracks, int32_t i) { return tracks[i].eta(); }
+
+    float chi2(TrackSoAConstView tracks, int32_t i) { return tracks[i].chi2(); }
+    float &chi2(TrackSoAConstView tracks, int32_t i) { return tracks[i].chi2(); }
+
+    bool isTriplet(TrackSoAConstView tracks, int i) { return view[i].nLayers() == 3; }
 
     template <typename V3, typename M3, typename V2, typename M2>
     __host__ __device__ inline void copyFromCircle(
@@ -113,21 +128,10 @@ public:
   constexpr Quality const *qualityData() const { return reinterpret_cast<Quality const *>(view().quality()); }
   constexpr Quality *qualityData() { return reinterpret_cast<Quality *>(view().quality()); }
 
-  constexpr float pt(int32_t i) const { return view()[i].pt(); }
-  constexpr float &pt(int32_t i) { return view()[i].pt(); }
-
-  constexpr float eta(int32_t i) const { return view()[i].eta(); }
-  constexpr float &eta(int32_t i) { return view()[i].eta(); }
-
-  constexpr float chi2(int32_t i) const { return view()[i].chi2(); }
-  constexpr float &chi2(int32_t i) { return view()[i].chi2(); }
-
   constexpr int nTracks() const { return nTracks_; }
   constexpr void setNTracks(int n) { nTracks_ = n; }
 
   constexpr int nHits(int i) const { return detIndices.size(i); }
-
-  constexpr bool isTriplet(int i) const { return view()[i].nLayers() == 3; }
 
   constexpr int computeNumberOfLayers(int32_t i) const {
     // layers are in order and we assume tracks are either forward or backward
@@ -161,6 +165,8 @@ namespace pixelTrack {
 #endif
 
   using TrackSoA = TrackSoAHeterogeneousT<maxNumber()>;
+  using TrackSoAView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::View;
+  using TrackSoAConstView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::ConstView;
 
   using HitContainer = TrackSoA::HitContainer;
 

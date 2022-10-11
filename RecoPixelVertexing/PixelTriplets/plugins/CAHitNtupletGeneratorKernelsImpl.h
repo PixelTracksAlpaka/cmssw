@@ -30,6 +30,8 @@ using TupleMultiplicity = caConstants::TupleMultiplicity;
 
 using Quality = pixelTrack::Quality;
 using TkSoA = pixelTrack::TrackSoA;
+using TkSoAView = pixelTrack::TrackSoAView;
+using TkSoAConstView = pixelTrack::TrackSoAConstView;
 using HitContainer = pixelTrack::HitContainer;
 
 namespace {
@@ -413,23 +415,26 @@ __global__ void kernel_fillMultiplicity(HitContainer const *__restrict__ foundNt
   }
 }
 
-__global__ void kernel_classifyTracks(
-    HitContainer const *__restrict__ tuples,
-    TkSoA const *__restrict__ tracks,
-    cms::cuda::PortableDeviceCollection<TrajectoryStateSoAT_test<>>::ConstView stateAtBS_view,
-    CAHitNtupletGeneratorKernelsGPU::QualityCuts cuts,
-    Quality *__restrict__ quality) {
+/*
+  Supply both the original TkSoA and the TkSoAView which contains
+the SoA Data
+ */
+__global__ void kernel_classifyTracks(HitContainer const *__restrict__ tuples,
+                                      TkSoA const *__restrict__ tracks,
+                                      TkSoAView tracks_view,
+                                      CAHitNtupletGeneratorKernelsGPU::QualityCuts cuts) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
+
   for (int it = first, nt = tuples->nOnes(); it < nt; it += gridDim.x * blockDim.x) {
     auto nhits = tuples->size(it);
     if (nhits == 0)
       break;  // guard
 
     // if duplicate: not even fit
-    if (quality[it] == pixelTrack::Quality::edup)
+    if (tracks_view[it].quality() == pixelTrack::Quality::edup)
       continue;
 
-    assert(quality[it] == pixelTrack::Quality::bad);
+    assert(tracks_view[it].quality() == pixelTrack::Quality::bad);
 
     // mark doublets as bad
     if (nhits < 3)
@@ -438,16 +443,16 @@ __global__ void kernel_classifyTracks(
     // if the fit has any invalid parameters, mark it as bad
     bool isNaN = false;
     for (int i = 0; i < 5; ++i) {
-      isNaN |= std::isnan(stateAtBS_view[it].state()(i));
+      isNaN |= std::isnan(tracks_view[it].state()(i));
     }
     if (isNaN) {
 #ifdef NTUPLE_DEBUG
-      printf("NaN in fit %d size %d chi2 %f\n", it, tuples->size(it), tracks->chi2(it));
+      printf("NaN in fit %d size %d chi2 %f\n", it, tuples->size(it), pixelTrack::utilities::chi2(tracks_view, it));
 #endif
       continue;
     }
 
-    quality[it] = pixelTrack::Quality::strict;
+    tracks[it].quality() = pixelTrack::Quality::strict;
 
     // compute a pT-dependent chi2 cut
 
@@ -473,21 +478,21 @@ __global__ void kernel_classifyTracks(
     };
 
     // (see CAHitNtupletGeneratorGPU.cc)
-    float pt = std::min<float>(tracks->pt(it), cuts.chi2MaxPt);
+    float pt = std::min<float>(pixelTrack::utilities::pt(tracks_view, it), cuts.chi2MaxPt);
     float chi2Cut = cuts.chi2Scale * (cuts.chi2Coeff[0] + roughLog(pt) * cuts.chi2Coeff[1]);
-    if (tracks->chi2(it) >= chi2Cut) {
+    if (pixelTrack::utilities::chi2(tracks_view, it) >= chi2Cut) {
 #ifdef NTUPLE_FIT_DEBUG
       printf("Bad chi2 %d size %d pt %f eta %f chi2 %f\n",
              it,
              tuples->size(it),
-             tracks->pt(it),
-             tracks->eta(it),
-             tracks->chi2(it));
+             pixelTrack::utilities::pt(tracks_view, it),
+             pixelTrack::utilities::eta(tracks_view, it),
+             pixelTrack::utilities::chi2(tracks_view, it));
 #endif
       continue;
     }
 
-    quality[it] = pixelTrack::Quality::tight;
+    tracks[it].quality() = pixelTrack::Quality::tight;
 
     // impose "region cuts" based on the fit results (phi, Tip, pt, cotan(theta)), Zip)
     // default cuts:
@@ -495,11 +500,13 @@ __global__ void kernel_classifyTracks(
     //   - for quadruplets: |Tip| < 0.5 cm, pT > 0.3 GeV, |Zip| < 12.0 cm
     // (see CAHitNtupletGeneratorGPU.cc)
     auto const &region = (nhits > 3) ? cuts.quadruplet : cuts.triplet;
-    bool isOk = (std::abs(tracks->tip(it)) < region.maxTip) and (tracks->pt(it) > region.minPt) and
-                (std::abs(tracks->zip(it)) < region.maxZip);
+    bool isOk = (std::abs(pixelTrack::utilities::tip(tracks_view, it)) < region.maxTip) and
+                (pixelTrack::utilities::pt(tracks_view, it) > region.minPt) and
+                (std::abs(pixelTrack::utilities::zip(tracks_view, it)) < region.maxZip);
 
-    if (isOk)
-      quality[it] = pixelTrack::Quality::highPurity;
+    if (isOk) {
+      tracks[it].quality() = pixelTrack::Quality::highPurity;
+    }
   }
 }
 
