@@ -162,7 +162,7 @@ __global__ void kernel_earlyDuplicateRemover(GPUCACell const *cells,
 
     // find maxNl
     for (auto it : thisCell.tracks()) {
-      auto nl = tracks.nLayers(it);
+      auto nl = tracks[it].nLayers();
       maxNl = std::max(nl, maxNl);
     }
 
@@ -171,7 +171,7 @@ __global__ void kernel_earlyDuplicateRemover(GPUCACell const *cells,
     //  maxNl = std::min(4, maxNl);
 
     for (auto it : thisCell.tracks()) {
-      if (tracks.nLayers(it) < maxNl)
+      if (tracks[it].nLayers() < maxNl)
         quality[it] = reject;  //no race:  simple assignment of the same constant
     }
   }
@@ -201,13 +201,13 @@ __global__ void kernel_fastDuplicateRemover(
 
     /* chi2 penalize higher-pt tracks  (try rescale it?)
     auto score = [&](auto it) {
-      return tracks->nLayers(it) < 4 ? 
-              std::abs(tracks->tip(it)) :  // tip for triplets
-              tracks->chi2(it);            //chi2 for quads
+      return tracks[it].nLayers() < 4 ? 
+              std::abs(pixelTrack::utilities::tip(tracks,it)) :  // tip for triplets
+              tracks[it].chi2(it);            //chi2 for quads
     };
     */
 
-    auto score = [&](auto it) { return std::abs(tracks->tip(it)); };
+    auto score = [&](auto it) { return std::abs(pixelTrack::utilities::tip(tracks, it)); };
 
     // full crazy combinatorics
     int ntr = thisCell.tracks().size();
@@ -577,7 +577,7 @@ __global__ void kernel_fillNLayers(TkSoA *__restrict__ ptracks, cms::cuda::Atomi
   for (int idx = first, nt = ntracks; idx < nt; idx += gridDim.x * blockDim.x) {
     auto nHits = tracks.nHits(idx);
     assert(nHits >= 3);
-    tracks.nLayers(idx) = tracks.computeNumberOfLayers(idx);
+    tracks[idx].nLayers() = tracks.computeNumberOfLayers(idx);
   }
 }
 
@@ -690,7 +690,7 @@ __global__ void kernel_rejectDuplicate(
       auto e2opi = stateAtBS_view[it].covariance()(9);
       auto cti = stateAtBS_view[it].state()(3);
       auto e2cti = stateAtBS_view[it].covariance()(12);
-      auto nli = tracks.nLayers(it);
+      auto nli = tracks[it].nLayers();
       for (auto jp = ip + 1; jp < hitToTuple.end(idx); ++jp) {
         auto const jt = *jp;
         auto qj = quality[jt];
@@ -704,7 +704,7 @@ __global__ void kernel_rejectDuplicate(
         auto dop = nSigma2 * (stateAtBS_view[jt].covariance()(9) + e2opi);
         if ((opi - opj) * (opi - opj) > dop)
           continue;
-        auto nlj = tracks.nLayers(jt);
+        auto nlj = tracks[jt].nLayers();
         if (nlj < nli || (nlj == nli && (qj < qi || (qj == qi && score(it, nli) < score(jt, nlj)))))
           quality[jt] = reject;
         else {
@@ -745,7 +745,7 @@ __global__ void kernel_sharedHitCleaner(TrackingRecHit2DSOAView const *__restric
       if (quality[*it] < longTqual)
         continue;
       // if (tracks.nHits(*it)==3) continue;
-      auto nl = tracks.nLayers(*it);
+      auto nl = tracks[*it].nLayers();
       maxNl = std::max(nl, maxNl);
     }
 
@@ -757,7 +757,7 @@ __global__ void kernel_sharedHitCleaner(TrackingRecHit2DSOAView const *__restric
 
     // kill all tracks shorter than maxHl (only triplets???
     for (auto it = hitToTuple.begin(idx); it != hitToTuple.end(idx); ++it) {
-      auto nl = tracks.nLayers(*it);
+      auto nl = tracks[*it].nLayers();
 
       //checking if shared hit is on bpix1 and if the tuple is short enough
       if (idx < l1end and nl > nmin)
@@ -893,15 +893,15 @@ __global__ void kernel_print_found_ntuplets(TrackingRecHit2DSOAView const *__res
            10000 * iev + i,
            int(quality[i]),
            nh,
-           tracks.nLayers(i),
-           tracks.charge(i),
-           tracks.pt(i),
-           tracks.eta(i),
-           tracks.phi(i),
-           tracks.tip(i),
-           tracks.zip(i),
+           tracks[i].nLayers(),
+           pixelTrack::utilities::charge(tracks, i),
+           tracks[i].pt(),
+           tracks[i].eta(),
+           pixelTrack::utilities::phi(tracks, i),
+           pixelTrack::utilities::tip(tracks, i),
+           pixelTrack::utilities::zip(tracks, i),
            //           asinhf(fit_results[i].par(3)),
-           tracks.chi2(i),
+           tracks[i].chi2(),
            hh.zGlobal(*foundNtuplets.begin(i)),
            hh.zGlobal(*(foundNtuplets.begin(i) + 1)),
            hh.zGlobal(*(foundNtuplets.begin(i) + 2)),
