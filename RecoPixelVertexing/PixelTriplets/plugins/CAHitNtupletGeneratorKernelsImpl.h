@@ -711,8 +711,7 @@ __global__ void kernel_rejectDuplicate(TkSoAView tracks_view,
 }
 
 __global__ void kernel_sharedHitCleaner(TrackingRecHit2DSOAView const *__restrict__ hhp,
-                                        TkSoA const *__restrict__ ptracks,
-                                        Quality *__restrict__ quality,
+                                        TkSoAView tracks_view,
                                         int nmin,
                                         bool dupPassThrough,
                                         CAHitNtupletGeneratorKernelsGPU::HitToTuple const *__restrict__ phitToTuple) {
@@ -722,7 +721,6 @@ __global__ void kernel_sharedHitCleaner(TrackingRecHit2DSOAView const *__restric
   auto const longTqual = pixelTrack::Quality::highPurity;
 
   auto &hitToTuple = *phitToTuple;
-  auto const &tracks = *ptracks;
 
   auto const &hh = *hhp;
   int l1end = hh.hitsLayerStart()[1];
@@ -736,10 +734,10 @@ __global__ void kernel_sharedHitCleaner(TrackingRecHit2DSOAView const *__restric
 
     // find maxNl
     for (auto it = hitToTuple.begin(idx); it != hitToTuple.end(idx); ++it) {
-      if (quality[*it] < longTqual)
+      if (tracks_view[*it].quality() < longTqual)
         continue;
       // if (tracks.nHits(*it)==3) continue;
-      auto nl = tracks[*it].nLayers();
+      auto nl = tracks_view[*it].nLayers();
       maxNl = std::max(nl, maxNl);
     }
 
@@ -751,14 +749,14 @@ __global__ void kernel_sharedHitCleaner(TrackingRecHit2DSOAView const *__restric
 
     // kill all tracks shorter than maxHl (only triplets???
     for (auto it = hitToTuple.begin(idx); it != hitToTuple.end(idx); ++it) {
-      auto nl = tracks[*it].nLayers();
+      auto nl = tracks_view[*it].nLayers();
 
       //checking if shared hit is on bpix1 and if the tuple is short enough
       if (idx < l1end and nl > nmin)
         continue;
 
-      if (nl < maxNl && quality[*it] > reject)
-        quality[*it] = reject;
+      if (nl < maxNl && tracks_view[*it].quality() > reject)
+        tracks_view[*it].quality() = reject;
     }
   }
 }
