@@ -375,16 +375,16 @@ __global__ void kernel_mark_used(GPUCACell *__restrict__ cells, uint32_t const *
 }
 
 __global__ void kernel_countMultiplicity(HitContainer const *__restrict__ foundNtuplets,
-                                         Quality const *__restrict__ quality,
+                                         TkSoAConstView tracks_view,
                                          caConstants::TupleMultiplicity *tupleMultiplicity) {
   auto first = blockIdx.x * blockDim.x + threadIdx.x;
   for (int it = first, nt = foundNtuplets->nOnes(); it < nt; it += gridDim.x * blockDim.x) {
     auto nhits = foundNtuplets->size(it);
     if (nhits < 3)
       continue;
-    if (quality[it] == pixelTrack::Quality::edup)
+    if (tracks_view[it].quality() == pixelTrack::Quality::edup)
       continue;
-    assert(quality[it] == pixelTrack::Quality::bad);
+    assert(tracks_view[it].quality() == pixelTrack::Quality::bad);
     if (nhits > 7)  // current limit
       printf("wrong mult %d %d\n", it, nhits);
     assert(nhits <= caConstants::maxHitsOnTrack);
@@ -393,16 +393,16 @@ __global__ void kernel_countMultiplicity(HitContainer const *__restrict__ foundN
 }
 
 __global__ void kernel_fillMultiplicity(HitContainer const *__restrict__ foundNtuplets,
-                                        Quality const *__restrict__ quality,
+                                        TkSoAConstView tracks_view,
                                         caConstants::TupleMultiplicity *tupleMultiplicity) {
   auto first = blockIdx.x * blockDim.x + threadIdx.x;
   for (int it = first, nt = foundNtuplets->nOnes(); it < nt; it += gridDim.x * blockDim.x) {
     auto nhits = foundNtuplets->size(it);
     if (nhits < 3)
       continue;
-    if (quality[it] == pixelTrack::Quality::edup)
+    if (tracks_view[it].quality() == pixelTrack::Quality::edup)
       continue;
-    assert(quality[it] == pixelTrack::Quality::bad);
+    assert(tracks_view[it].quality() == pixelTrack::Quality::bad);
     if (nhits > 7)
       printf("wrong mult %d %d\n", it, nhits);
     assert(nhits <= caConstants::maxHitsOnTrack);

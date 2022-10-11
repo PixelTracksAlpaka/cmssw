@@ -133,7 +133,7 @@ void CAHitNtupletGeneratorKernelsCPU::launchKernels(HitsOnCPU const &hh, TkSoA *
 
   // remove duplicates (tracks that share a doublet)
   kernel_earlyDuplicateRemover(device_theCells_.get(), device_nCells_, tracks_d->view(), params_.dupPassThrough_);
-  kernel_countMultiplicity(tuples_d, quality_d, device_tupleMultiplicity_.get());
+  kernel_countMultiplicity(tuples_d, tracks_d->view(), device_tupleMultiplicity_.get());
   cms::cuda::launchFinalize(device_tupleMultiplicity_.get(), cudaStream);
   kernel_fillMultiplicity(tuples_d, quality_d, device_tupleMultiplicity_.get());
 
