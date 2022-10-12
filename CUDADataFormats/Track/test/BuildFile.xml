@@ -1,5 +1,6 @@
 <use name="HeterogeneousCore/CUDAUtilities"/>
-
+<bin file="trivially_constructible.cpp">
+</bin>
 <bin file="TrackSoAHeterogeneous_t.cpp">
   <use name="eigen"/>
   <flags CXXFLAGS="-g -DGPU_DEBUG"/>
