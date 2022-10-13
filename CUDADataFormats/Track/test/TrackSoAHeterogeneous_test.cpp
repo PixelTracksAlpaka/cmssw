@@ -17,7 +17,8 @@ int main() {
   const auto soaSize = 256;
   // inner scope to deallocate memory before destroying the stream
   {
-    pixelTrack::TrackSoA tracks;
+    // pixelTrack::TrackSoA tracks;
+    TrackSoAHeterogeneousT<soaSize> tracks(stream);
     testTrackSoAHeterogeneousT::runKernels(tracks.view(), soaSize);
   }
   cudaCheck(cudaStreamDestroy(stream));

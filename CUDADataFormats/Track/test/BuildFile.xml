@@ -21,5 +21,6 @@
 <use name="CUDADataFormats/Track"/>
 <flags CUDA_FLAGS="-g -DGPU_DEBUG"/>
 <iftool name="cuda-gcc-support">
-<bin file="TrackSoAHeterogeneous_test.cpp TrackSoAHeterogeneous_test.cu" name="TrackSoAHeterogeneous_test"/>
+  <bin file="TrackSoAHeterogeneous_test.cpp TrackSoAHeterogeneous_test.cu" name="TrackSoAHeterogeneous_test">
+  </bin>
 </iftool>
