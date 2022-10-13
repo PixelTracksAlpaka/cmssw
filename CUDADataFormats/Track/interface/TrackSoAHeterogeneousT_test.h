@@ -26,17 +26,15 @@ namespace pixelTrack {
 
 GENERATE_SOA_LAYOUT(TrackSoAHeterogeneousT_test,
                     SOA_COLUMN(uint8_t, quality),
-                    SOA_COLUMN(float, chi2), // this is chi2/ndof as not necessarely all hits are used in the fit
+                    SOA_COLUMN(float, chi2),  // this is chi2/ndof as not necessarely all hits are used in the fit
                     SOA_COLUMN(int8_t, nLayers),
                     SOA_COLUMN(float, eta),
                     SOA_COLUMN(float, pt))
-	            // TODO: maybe add stateAtBS
+// TODO: maybe add stateAtBS
 
 template <int32_t S>
-class TrackSoAHeterogeneousT  : public cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>> {
-
+class TrackSoAHeterogeneousT : public cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>> {
 public:
-
   // using cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::PortableDeviceCollection;
   TrackSoAHeterogeneousT() = default;
 
@@ -52,19 +50,19 @@ private:
 
 public:
   constexpr Quality quality(int32_t i) const { return static_cast<Quality>(view()[i].quality()); }
-  constexpr Quality &quality(int32_t i) { return static_cast<Quality &>(view()[i].quality()); }
+  // constexpr Quality &quality(int32_t i) { return static_cast<Quality &>(view()[i].quality()); }
   // TODO: static did not work; using reinterpret_cast
   constexpr Quality const *qualityData() const { return reinterpret_cast <Quality const *>(view().quality()); }
   constexpr Quality *qualityData() { return reinterpret_cast< Quality *>(view().quality()); }
 
   constexpr float pt(int32_t i) const { return view()[i].pt(); }
-  constexpr float &pt(int32_t i) { return view()[i].pt(); }
+  // constexpr float &pt(int32_t i) { return view()[i].pt(); }
 
   constexpr float eta(int32_t i) const { return view()[i].eta(); }
-  constexpr float &eta(int32_t i) { return view()[i].eta(); }
+  // constexpr float &eta(int32_t i) { return view()[i].eta(); }
 
   constexpr float chi2(int32_t i) const { return view()[i].chi2(); }
-  constexpr float &chi2(int32_t i) { return view()[i].chi2(); }
+  // constexpr float &chi2(int32_t i) { return view()[i].chi2(); }
 
   constexpr int nTracks() const { return nTracks_; }
   constexpr void setNTracks(int n) { nTracks_ = n; }
