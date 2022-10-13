@@ -30,7 +30,7 @@ GENERATE_SOA_LAYOUT(TrackSoAHeterogeneousT_test,
                     SOA_COLUMN(int8_t, nLayers),
                     SOA_COLUMN(float, eta),
                     SOA_COLUMN(float, pt))
-                    // TODO: maybe add stateAtBS
+	            // TODO: maybe add stateAtBS
 
 template <int32_t S>
 class TrackSoAHeterogeneousT  : public cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>> {
@@ -118,6 +118,9 @@ namespace pixelTrack {
 #endif
 
   using TrackSoA = TrackSoAHeterogeneousT<maxNumber()>;
+  using TrackSoAView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::View;
+  using TrackSoAConstView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::ConstView;
+
   using TrajectoryState = TrajectoryStateSoAT<maxNumber()>;
   using HitContainer = TrackSoA::HitContainer;
 
