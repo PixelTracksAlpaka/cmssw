@@ -44,17 +44,23 @@ namespace pixelTrack {
     using TrackSoAConstView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::ConstView;
     // State at the Beam spot
     // phi,tip,1/pt,cotan(theta),zip
-    __host__ __device__ float charge(TrackSoAConstView tracks, int32_t i) {
-      return std::copysign(1.f, tracks[i].state()(2));
-    }
+    // __host__ __device__ float charge(TrackSoAConstView tracks, int32_t i) {
+    //   return std::copysign(1.f, tracks[i].state()(2));
+    // }
 
-    __host__ __device__ float phi(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(0); }
+    // __host__ __device__ float phi(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(0); }
 
-    __host__ __device__ float tip(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(1); }
+    // __host__ __device__ float tip(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(1); }
 
-    __host__ __device__ float zip(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(4); }
+    // __host__ __device__ float zip(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(4); }
 
-    __host__ __device__ bool isTriplet(TrackSoAConstView tracks, int i) { return tracks[i].nLayers() == 3; }
+    // __host__ __device__ bool isTriplet(TrackSoAConstView tracks, int i) { return tracks[i].nLayers() == 3; }
+
+#define phi(tracks, i) (tracks[i].state()(0))
+#define tip(tracks, i) (tracks[i].state()(1))
+#define charge(tracks, i) (tracks[i].state()(2))
+#define zip(tracks, i) (tracks[i].state()(4))
+#define isTriplet(tracks, i) (tracks[i].nLayers() == 3)
 
     template <typename V3, typename M3, typename V2, typename M2>
     __host__ __device__ inline void copyFromCircle(
@@ -103,8 +109,8 @@ public:
   // using cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::PortableDeviceCollection;
   TrackSoAHeterogeneousT() = default;
 
-  explicit TrackSoAHeterogeneousT(size_t maxModules, cudaStream_t stream)
-      : PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>(maxModules, stream) {}
+  explicit TrackSoAHeterogeneousT(cudaStream_t stream)
+      : PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>(S, stream) {}
 
   static constexpr int32_t stride() { return S; }
 

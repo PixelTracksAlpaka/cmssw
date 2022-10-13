@@ -1,10 +1,14 @@
 <use name="HeterogeneousCore/CUDAUtilities"/>
-<bin file="trivially_constructible_manual_soa.cpp">
-</bin>
-<bin file="trivially_constructible_eric_soa.cpp">
-</bin>
 <bin file="TrackSoAHeterogeneous_t.cpp">
   <use name="eigen"/>
   <flags CXXFLAGS="-g -DGPU_DEBUG"/>
 </bin>
 
+<use name="CUDADataFormats/Track"/>
+
+<iftool name="cuda-gcc-support">
+  <bin file="TrackSoAHeterogeneous_test.cpp TrackSoAHeterogeneous_test.cu" name="TrackSoAHeterogeneous_test">
+	<flags CUDA_FLAGS="-g -DGPU_DEBUG"/>
+	<flags CXXFLAGS="-g -DGPU_DEBUG"/>	
+  </bin>
+</iftool>
