@@ -28,7 +28,7 @@ public:
   using hindex_type = TrackingRecHit2DSOAView::hindex_type;
 
   using Quality = pixelTrack::Quality;
-  using OutputSoA = pixelTrack::TrackSoA;
+  using OutputSoAView = pixelTrack::TrackSoAView;
   using HitContainer = pixelTrack::HitContainer;
   using Tuple = HitContainer;
 

@@ -155,9 +155,9 @@ void PixelTrackProducerFromSoA::produce(edm::StreamID streamID,
   const auto &tsoa = *iEvent.get(tokenTrack_);
 
   auto const *quality = tsoa.qualityData();
-  auto const &fit = tsoa.stateAtBS;
+  // auto const &fit = tsoa.stateAtBS;
   auto const &hitIndices = tsoa.hitIndices;
-  auto nTracks = tsoa.nTracks();
+  auto nTracks = tsoa.view().nTracks();
 
   tracks.reserve(nTracks);
 
@@ -166,8 +166,9 @@ void PixelTrackProducerFromSoA::produce(edm::StreamID streamID,
   //sort index by pt
   std::vector<int32_t> sortIdxs(nTracks);
   std::iota(sortIdxs.begin(), sortIdxs.end(), 0);
-  std::sort(
-      sortIdxs.begin(), sortIdxs.end(), [&](int32_t const i1, int32_t const i2) { return tsoa.pt(i1) > tsoa.pt(i2); });
+  std::sort(sortIdxs.begin(), sortIdxs.end(), [&](int32_t const i1, int32_t const i2) {
+    return tsoa.view()[i1].pt() > tsoa.view()[i2].pt();
+  });
 
   //store the index of the SoA: indToEdm[index_SoAtrack] -> index_edmTrack (if it exists)
   indToEdm.resize(sortIdxs.size(), -1);
@@ -189,12 +190,12 @@ void PixelTrackProducerFromSoA::produce(edm::StreamID streamID,
 
     // mind: this values are respect the beamspot!
 
-    float chi2 = tsoa.chi2(it);
-    float phi = tsoa.phi(it);
+    float chi2 = tsoa.view()[it].chi2();
+    float phi = pixelTrack::utilities::phi(tsoa.view(), it);
 
     riemannFit::Vector5d ipar, opar;
     riemannFit::Matrix5d icov, ocov;
-    fit.copyToDense(ipar, icov, it);
+    pixelTrack::utilities::copyToDense<riemannFit::Vector5d, riemannFit::Matrix5d>(tsoa.view(), ipar, icov, it);
     riemannFit::transformToPerigeePlane(ipar, icov, opar, ocov);
 
     LocalTrajectoryParameters lpar(opar(0), opar(1), opar(2), opar(3), opar(4), 1.);

@@ -8,6 +8,7 @@
 
 #include <cuda_runtime.h>
 
+#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
 #include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHit2DHeterogeneous.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cuda_assert.h"
@@ -18,7 +19,7 @@
 
 using HitsOnGPU = TrackingRecHit2DSOAView;
 using Tuples = pixelTrack::HitContainer;
-using OutputSoA = pixelTrack::TrackSoA;
+using OutputSoAView = pixelTrack::TrackSoAView;
 using tindex_type = caConstants::tindex_type;
 constexpr auto invalidTkId = std::numeric_limits<tindex_type>::max();
 
@@ -169,12 +170,12 @@ __global__ void kernel_BLFastFit(Tuples const *__restrict__ foundNtuplets,
 template <int N>
 __global__ void kernel_BLFit(caConstants::TupleMultiplicity const *__restrict__ tupleMultiplicity,
                              double bField,
-                             OutputSoA *results,
+                             OutputSoAView results_view,
                              tindex_type const *__restrict__ ptkids,
                              double *__restrict__ phits,
                              float *__restrict__ phits_ge,
                              double *__restrict__ pfast_fit) {
-  assert(results);
+  // assert(results_view); // TODO Find equivalent assertion for View
   assert(pfast_fit);
 
   // same as above...
@@ -203,10 +204,11 @@ __global__ void kernel_BLFit(caConstants::TupleMultiplicity const *__restrict__ 
     brokenline::lineFit(hits_ge, fast_fit, bField, data, line);
     brokenline::circleFit(hits, hits_ge, fast_fit, bField, data, circle);
 
-    results->stateAtBS.copyFromCircle(circle.par, circle.cov, line.par, line.cov, 1.f / float(bField), tkid);
-    results->pt(tkid) = float(bField) / float(std::abs(circle.par(2)));
-    results->eta(tkid) = asinhf(line.par(0));
-    results->chi2(tkid) = (circle.chi2 + line.chi2) / (2 * N - 5);
+    pixelTrack::utilities::copyFromCircle(
+        results_view, circle.par, circle.cov, line.par, line.cov, 1.f / float(bField), tkid);
+    results_view[tkid].pt() = float(bField) / float(std::abs(circle.par(2)));
+    results_view[tkid].eta() = asinhf(line.par(0));
+    results_view[tkid].chi2() = (circle.chi2 + line.chi2) / (2 * N - 5);
 
 #ifdef BROKENLINE_DEBUG
     if (!(circle.chi2 >= 0) || !(line.chi2 >= 0))

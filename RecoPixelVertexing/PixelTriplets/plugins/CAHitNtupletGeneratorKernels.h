@@ -35,6 +35,8 @@ namespace cAHitNtupletGenerator {
 
   using Quality = pixelTrack::Quality;
   using TkSoA = pixelTrack::TrackSoA;
+  using TkSoAView = pixelTrack::TrackSoAView;
+  using TkSoAConstView = pixelTrack::TrackSoAConstView;
   using HitContainer = pixelTrack::HitContainer;
 
   struct QualityCuts {
@@ -174,6 +176,8 @@ public:
 
   using Quality = pixelTrack::Quality;
   using TkSoA = pixelTrack::TrackSoA;
+  using TkSoAView = pixelTrack::TrackSoAView;
+  using TkSoAConstView = pixelTrack::TrackSoAConstView;
   using HitContainer = pixelTrack::HitContainer;
 
   CAHitNtupletGeneratorKernels(Params const& params)
