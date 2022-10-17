@@ -4,14 +4,11 @@
 #include <string>
 #include <algorithm>
 
-#include "CUDADataFormats/Track/interface/TrajectoryStateSoAT.h"
+#include <Eigen/Dense>
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/HistoContainer.h"
-
-#include "CUDADataFormats/Common/interface/HeterogeneousSoA.h"
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
-
-//#include "DataFormats/Portable/interface/PortableCUDADeviceCollection.h"
+#include "CUDADataFormats/Common/interface/HeterogeneousSoA.h"
 #include "CUDADataFormats/Common/interface/PortableDeviceCollection.h"
 
 namespace pixelTrack {
@@ -24,19 +21,88 @@ namespace pixelTrack {
   }
 }  // namespace pixelTrack
 
+using Vector5f = Eigen::Matrix<float, 5, 1>;
+using Vector15f = Eigen::Matrix<float, 15, 1>;
+
+using Vector5d = Eigen::Matrix<double, 5, 1>;
+using Matrix5d = Eigen::Matrix<double, 5, 5>;
+
 GENERATE_SOA_LAYOUT(TrackSoAHeterogeneousT_test,
                     SOA_COLUMN(uint8_t, quality),
                     SOA_COLUMN(float, chi2),  // this is chi2/ndof as not necessarely all hits are used in the fit
                     SOA_COLUMN(int8_t, nLayers),
                     SOA_COLUMN(float, eta),
-                    SOA_COLUMN(float, pt))
-// TODO: maybe add stateAtBS
+                    SOA_COLUMN(float, pt),
+                    SOA_EIGEN_COLUMN(Vector5f, state),
+                    SOA_EIGEN_COLUMN(Vector15f, covariance),
+                    SOA_SCALAR(int, nTracks))
+
+// Previous TrajectoryStateSoAT class methods
+namespace pixelTrack {
+  namespace utilities {
+    using TrackSoAView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::View;
+    using TrackSoAConstView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::ConstView;
+    // State at the Beam spot
+    // phi,tip,1/pt,cotan(theta),zip
+    __host__ __device__ inline float charge(TrackSoAConstView tracks, int32_t i) {
+      return std::copysign(1.f, tracks[i].state()(2));
+    }
+
+    __host__ __device__ inline float phi(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(0); }
+
+    __host__ __device__ inline float tip(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(1); }
+
+    __host__ __device__ inline float zip(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(4); }
+
+    __host__ __device__ inline bool isTriplet(TrackSoAConstView tracks, int i) { return tracks[i].nLayers() == 3; }
+
+    template <typename V3, typename M3, typename V2, typename M2>
+    __device__ inline void copyFromCircle(
+        TrackSoAView tracks, V3 const &cp, M3 const &ccov, V2 const &lp, M2 const &lcov, float b, int32_t i) {
+      tracks[i].state() << cp.template cast<float>(), lp.template cast<float>();
+
+      tracks[i].state()(2) = tracks[i].state()(2) * b;
+      auto cov = tracks[i].covariance();
+      cov(0) = ccov(0, 0);
+      cov(1) = ccov(0, 1);
+      cov(2) = b * float(ccov(0, 2));
+      cov(4) = cov(3) = 0;
+      cov(5) = ccov(1, 1);
+      cov(6) = b * float(ccov(1, 2));
+      cov(8) = cov(7) = 0;
+      cov(9) = b * b * float(ccov(2, 2));
+      cov(11) = cov(10) = 0;
+      cov(12) = lcov(0, 0);
+      cov(13) = lcov(0, 1);
+      cov(14) = lcov(1, 1);
+    }
+
+    template <typename V5, typename M5>
+    __device__ inline void copyFromDense(TrackSoAView tracks, V5 const &v, M5 const &cov, int32_t i) {
+      tracks[i].state() = v.template cast<float>();
+      for (int j = 0, ind = 0; j < 5; ++j)
+        for (auto k = j; k < 5; ++k)
+          tracks[i].covariance()(ind++) = cov(j, k);
+    }
+
+    template <typename V5, typename M5>
+    __device__ inline void copyToDense(TrackSoAConstView tracks, V5 &v, M5 &cov, int32_t i) {
+      v = tracks[i].state().template cast<typename V5::Scalar>();
+      for (int j = 0, ind = 0; j < 5; ++j) {
+        cov(j, j) = tracks[i].covariance()(ind++);
+        for (auto k = j + 1; k < 5; ++k)
+          cov(k, j) = cov(j, k) = tracks[i].covariance()(ind++);
+      }
+    }
+  }  // namespace utilities
+}  // namespace pixelTrack
 
 template <int32_t S>
 class TrackSoAHeterogeneousT : public cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>> {
 public:
   // using cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::PortableDeviceCollection;
   TrackSoAHeterogeneousT() = default;
+
   explicit TrackSoAHeterogeneousT(cudaStream_t stream)
       : PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>(S, stream) {}
 
@@ -49,29 +115,12 @@ public:
   // Always check quality is at least loose!
   // CUDA does not support enums  in __lgc ...
 private:
-
 public:
-  constexpr Quality quality(int32_t i) const { return static_cast<Quality>(view()[i].quality()); }
-  // constexpr Quality &quality(int32_t i) { return static_cast<Quality &>(view()[i].quality()); }
   // TODO: static did not work; using reinterpret_cast
-  constexpr Quality const *qualityData() const { return reinterpret_cast <Quality const *>(view().quality()); }
-  constexpr Quality *qualityData() { return reinterpret_cast< Quality *>(view().quality()); }
-
-  constexpr float pt(int32_t i) const { return view()[i].pt(); }
-  // constexpr float &pt(int32_t i) { return view()[i].pt(); }
-
-  constexpr float eta(int32_t i) const { return view()[i].eta(); }
-  // constexpr float &eta(int32_t i) { return view()[i].eta(); }
-
-  constexpr float chi2(int32_t i) const { return view()[i].chi2(); }
-  // constexpr float &chi2(int32_t i) { return view()[i].chi2(); }
-
-  constexpr int nTracks() const { return nTracks_; }
-  constexpr void setNTracks(int n) { nTracks_ = n; }
+  constexpr Quality const *qualityData() const { return reinterpret_cast<Quality const *>(view().quality()); }
+  constexpr Quality *qualityData() { return reinterpret_cast<Quality *>(view().quality()); }
 
   constexpr int nHits(int i) const { return detIndices.size(i); }
-
-  constexpr bool isTriplet(int i) const { return view()[i].nLayers() == 3; }
 
   constexpr int computeNumberOfLayers(int32_t i) const {
     // layers are in order and we assume tracks are either forward or backward
@@ -87,24 +136,8 @@ public:
     return nl;
   }
 
-  // State at the Beam spot
-  // phi,tip,1/pt,cotan(theta),zip
-  TrajectoryStateSoAT<S> stateAtBS;
-  constexpr float charge(int32_t i) const { return std::copysign(1.f, stateAtBS.state(i)(2)); }
-  constexpr float phi(int32_t i) const { return stateAtBS.state(i)(0); }
-  constexpr float tip(int32_t i) const { return stateAtBS.state(i)(1); }
-  constexpr float zip(int32_t i) const { return stateAtBS.state(i)(4); }
-
-  // state at the detector of the outermost hit
-  // representation to be decided...
-  // not yet filled on GPU
-  // TrajectoryStateSoA<S> stateAtOuterDet;
-
   HitContainer hitIndices;
   HitContainer detIndices;
-
-private:
-  int nTracks_;
 };
 
 namespace pixelTrack {
@@ -121,7 +154,6 @@ namespace pixelTrack {
   using TrackSoAView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::View;
   using TrackSoAConstView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::ConstView;
 
-  using TrajectoryState = TrajectoryStateSoAT<maxNumber()>;
   using HitContainer = TrackSoA::HitContainer;
 
 }  // namespace pixelTrack
