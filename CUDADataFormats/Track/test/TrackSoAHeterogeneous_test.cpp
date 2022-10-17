@@ -1,4 +1,4 @@
-#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test2.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/copyAsync.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/requireDevices.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"

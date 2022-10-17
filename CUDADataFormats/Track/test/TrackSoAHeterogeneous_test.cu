@@ -1,4 +1,4 @@
-#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test2.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
 
 namespace testTrackSoAHeterogeneousT {
 
