@@ -105,9 +105,6 @@ public:
   explicit TrackSoAHeterogeneousT(cudaStream_t stream)
       : PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>(S, stream) {}
 
-  explicit TrackSoAHeterogeneousT(cudaStream_t stream)
-      : PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>(S, stream) {}
-
   static constexpr int32_t stride() { return S; }
 
   using Quality = pixelTrack::Quality;
