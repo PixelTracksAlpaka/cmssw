@@ -57,7 +57,7 @@ namespace pixelTrack {
     __host__ __device__ inline bool isTriplet(TrackSoAConstView tracks, int i) { return tracks[i].nLayers() == 3; }
 
     template <typename V3, typename M3, typename V2, typename M2>
-    __device__ inline void copyFromCircle(
+    __host__ __device__ inline void copyFromCircle(
         TrackSoAView tracks, V3 const &cp, M3 const &ccov, V2 const &lp, M2 const &lcov, float b, int32_t i) {
       tracks[i].state() << cp.template cast<float>(), lp.template cast<float>();
 
@@ -78,7 +78,7 @@ namespace pixelTrack {
     }
 
     template <typename V5, typename M5>
-    __device__ inline void copyFromDense(TrackSoAView tracks, V5 const &v, M5 const &cov, int32_t i) {
+    __host__ __device__ inline void copyFromDense(TrackSoAView tracks, V5 const &v, M5 const &cov, int32_t i) {
       tracks[i].state() = v.template cast<float>();
       for (int j = 0, ind = 0; j < 5; ++j)
         for (auto k = j; k < 5; ++k)
@@ -86,7 +86,7 @@ namespace pixelTrack {
     }
 
     template <typename V5, typename M5>
-    __device__ inline void copyToDense(TrackSoAConstView tracks, V5 &v, M5 &cov, int32_t i) {
+    __host__ __device__ inline void copyToDense(TrackSoAConstView tracks, V5 &v, M5 &cov, int32_t i) {
       v = tracks[i].state().template cast<typename V5::Scalar>();
       for (int j = 0, ind = 0; j < 5; ++j) {
         cov(j, j) = tracks[i].covariance()(ind++);

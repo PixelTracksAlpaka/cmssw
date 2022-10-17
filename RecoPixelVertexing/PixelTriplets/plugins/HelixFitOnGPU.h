@@ -36,7 +36,7 @@ public:
   using HitsView = TrackingRecHit2DSOAView;
 
   using Tuples = pixelTrack::HitContainer;
-  using OutputSoA = pixelTrack::TrackSoA;
+  using OutputSoAView = pixelTrack::TrackSoAView;
 
   using TupleMultiplicity = caConstants::TupleMultiplicity;
 
@@ -50,7 +50,7 @@ public:
   void launchRiemannKernelsOnCPU(HitsView const *hv, uint32_t nhits, uint32_t maxNumberOfTuples);
   void launchBrokenLineKernelsOnCPU(HitsView const *hv, uint32_t nhits, uint32_t maxNumberOfTuples);
 
-  void allocateOnGPU(Tuples const *tuples, TupleMultiplicity const *tupleMultiplicity, OutputSoA *outputSoA);
+  void allocateOnGPU(Tuples const *tuples, TupleMultiplicity const *tupleMultiplicity, OutputSoAView outputSoA);
   void deallocateOnGPU();
 
 private:
@@ -59,7 +59,7 @@ private:
   // fowarded
   Tuples const *tuples_ = nullptr;
   TupleMultiplicity const *tupleMultiplicity_ = nullptr;
-  OutputSoA *outputSoa_;
+  OutputSoAView outputSoa_;
   float bField_;
 
   const bool fitNas4_;

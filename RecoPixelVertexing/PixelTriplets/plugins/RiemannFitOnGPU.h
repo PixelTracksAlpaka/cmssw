@@ -16,7 +16,7 @@
 
 using HitsOnGPU = TrackingRecHit2DSOAView;
 using Tuples = pixelTrack::HitContainer;
-using OutputSoA = pixelTrack::TrackSoA;
+using OutputSoAView = pixelTrack::TrackSoAView;
 
 template <int N>
 __global__ void kernel_FastFit(Tuples const *__restrict__ foundNtuplets,
@@ -128,13 +128,13 @@ template <int N>
 __global__ void kernel_LineFit(caConstants::TupleMultiplicity const *__restrict__ tupleMultiplicity,
                                uint32_t nHits,
                                double bField,
-                               OutputSoA *results,
+                               OutputSoAView results_view,
                                double *__restrict__ phits,
                                float *__restrict__ phits_ge,
                                double *__restrict__ pfast_fit_input,
                                riemannFit::CircleFit *__restrict__ circle_fit,
                                uint32_t offset) {
-  assert(results);
+  // assert(results); // TODO find equivalent for View
   assert(circle_fit);
   assert(N <= nHits);
 
@@ -149,7 +149,7 @@ __global__ void kernel_LineFit(caConstants::TupleMultiplicity const *__restrict_
       break;
 
     // get it for the ntuple container (one to one to helix)
-    auto tkid = *(tupleMultiplicity->begin(nHits) + tuple_idx);
+    int32_t tkid = *(tupleMultiplicity->begin(nHits) + tuple_idx);
 
     riemannFit::Map3xNd<N> hits(phits + local_idx);
     riemannFit::Map4d fast_fit(pfast_fit_input + local_idx);
@@ -159,11 +159,16 @@ __global__ void kernel_LineFit(caConstants::TupleMultiplicity const *__restrict_
 
     riemannFit::fromCircleToPerigee(circle_fit[local_idx]);
 
-    results->stateAtBS.copyFromCircle(
-        circle_fit[local_idx].par, circle_fit[local_idx].cov, line_fit.par, line_fit.cov, 1.f / float(bField), tkid);
-    results->pt(tkid) = bField / std::abs(circle_fit[local_idx].par(2));
-    results->eta(tkid) = asinhf(line_fit.par(0));
-    results->chi2(tkid) = (circle_fit[local_idx].chi2 + line_fit.chi2) / (2 * N - 5);
+    pixelTrack::utilities::copyFromCircle(results_view,
+                                          circle_fit[local_idx].par,
+                                          circle_fit[local_idx].cov,
+                                          line_fit.par,
+                                          line_fit.cov,
+                                          1.f / float(bField),
+                                          tkid);
+    results_view[tkid].pt() = bField / std::abs(circle_fit[local_idx].par(2));
+    results_view[tkid].eta() = asinhf(line_fit.par(0));
+    results_view[tkid].chi2() = (circle_fit[local_idx].chi2 + line_fit.chi2) / (2 * N - 5);
 
 #ifdef RIEMANN_DEBUG
     printf("kernelLineFit size %d for %d hits circle.par(0,1,2): %d %f,%f,%f\n",

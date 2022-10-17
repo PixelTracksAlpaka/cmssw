@@ -12,7 +12,7 @@ namespace testTrackSoAHeterogeneousT {
     tracks[i].eta() = (float)i;
     tracks[i].chi2() = (float)i;
     tracks[i].quality() = (uint8_t)i;
-    tracks[i].nLayers() = i%128;
+    tracks[i].nLayers() = i % 128;
   }
 
   __global__ void verify(pixelTrack::TrackSoAConstView tracks, uint32_t soaSize) {
@@ -25,7 +25,7 @@ namespace testTrackSoAHeterogeneousT {
     assert(abs(tracks[i].eta() - (float)i) < .0001);
     assert(abs(tracks[i].chi2() - (float)i) < .0001);
     assert(tracks[i].quality() == i);
-    assert(tracks[i].nLayers() == i%128);
+    assert(tracks[i].nLayers() == i % 128);
   }
 
   void runKernels(pixelTrack::TrackSoAView tracks, uint32_t soaSize) {
