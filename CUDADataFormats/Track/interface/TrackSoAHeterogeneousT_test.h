@@ -102,6 +102,8 @@ class TrackSoAHeterogeneousT : public cms::cuda::PortableDeviceCollection<TrackS
 public:
   // using cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::PortableDeviceCollection;
   TrackSoAHeterogeneousT() = default;
+  explicit TrackSoAHeterogeneousT(cudaStream_t stream)
+      : PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>(S, stream) {}
 
   explicit TrackSoAHeterogeneousT(cudaStream_t stream)
       : PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>(S, stream) {}

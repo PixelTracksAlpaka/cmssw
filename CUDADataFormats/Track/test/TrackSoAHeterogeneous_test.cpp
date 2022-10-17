@@ -7,7 +7,6 @@
 namespace testTrackSoAHeterogeneousT {
 
   void runKernels(pixelTrack::TrackSoAView tracks, uint32_t soaSize);
-
 }
 
 int main() {
