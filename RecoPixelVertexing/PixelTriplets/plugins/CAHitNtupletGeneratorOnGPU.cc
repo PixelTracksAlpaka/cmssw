@@ -20,6 +20,8 @@
 #include "HeterogeneousCore/CUDAServices/interface/CUDAService.h"
 #include "TrackingTools/DetLayers/interface/BarrelDetLayer.h"
 
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
+
 #include "CAHitNtupletGeneratorOnGPU.h"
 
 namespace {
@@ -184,13 +186,15 @@ void CAHitNtupletGeneratorOnGPU::endJob() {
   }
 }
 
-PixelTrackHeterogeneous CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DGPU const& hits_d,
+/*PixelTrackHeterogeneous CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DGPU const& hits_d,
                                                                     float bfield,
                                                                     cudaStream_t stream) const {
-  PixelTrackHeterogeneous tracks(cms::cuda::make_device_unique<pixelTrack::TrackSoA>(stream));
-
-  auto* soa = tracks.get();
-  assert(soa);
+  PixelTrackHeterogeneous tracks(cms::cuda::make_device_unique<pixelTrack::TrackSoA>(stream));*/
+  pixelTrack::TrackSoA CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DGPU const& hits_d,
+                                                                      float bfield,
+                                                                      cudaStream_t stream) const {
+  pixelTrack::TrackSoA tracks(stream);
+  auto* soa = &tracks;
 
   CAHitNtupletGeneratorKernelsGPU kernels(m_params);
   kernels.setCounters(m_counters);
@@ -217,11 +221,12 @@ PixelTrackHeterogeneous CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecH
   return tracks;
 }
 
-PixelTrackHeterogeneous CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2DCPU const& hits_d, float bfield) const {
-  PixelTrackHeterogeneous tracks(std::make_unique<pixelTrack::TrackSoA>());
+pixelTrack::TrackSoA CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2DCPU const& hits_d, float bfield) const {
+  //PixelTrackHeterogeneous tracks(std::make_unique<pixelTrack::TrackSoA>());
+  pixelTrack::TrackSoA tracks;
 
-  auto* soa = tracks.get();
-  assert(soa);
+  auto* soa = &tracks;
+  //assert(soa);
 
   CAHitNtupletGeneratorKernelsCPU kernels(m_params);
   kernels.setCounters(m_counters);
