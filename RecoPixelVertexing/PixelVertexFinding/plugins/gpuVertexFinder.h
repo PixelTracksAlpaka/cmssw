@@ -5,7 +5,8 @@
 #include <cstdint>
 
 #include "CUDADataFormats/Vertex/interface/ZVertexHeterogeneous.h"
-#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
+//#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
 
 namespace gpuVertexFinder {
 
@@ -43,6 +44,7 @@ namespace gpuVertexFinder {
     using ZVertices = ZVertexSoA;
     using WorkSpace = gpuVertexFinder::WorkSpace;
     using TkSoA = pixelTrack::TrackSoA;
+    using TkSoAConstView = pixelTrack::TrackSoAConstView;
 
     Producer(bool oneKernel,
              bool useDensity,

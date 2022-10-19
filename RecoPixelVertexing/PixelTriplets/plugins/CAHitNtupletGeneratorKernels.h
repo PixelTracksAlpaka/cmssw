@@ -3,7 +3,8 @@
 
 // #define GPU_DEBUG
 
-#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
+//#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
 #include "GPUCACell.h"
 
 // #define DUMP_GPU_TK_TUPLES

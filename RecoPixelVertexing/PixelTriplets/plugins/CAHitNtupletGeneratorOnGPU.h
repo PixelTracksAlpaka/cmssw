@@ -3,7 +3,8 @@
 
 #include <cuda_runtime.h>
 #include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHit2DHeterogeneous.h"
-#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
+//#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
 
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"

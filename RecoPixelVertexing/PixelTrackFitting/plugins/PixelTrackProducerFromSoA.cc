@@ -27,7 +27,8 @@
 #include "RecoPixelVertexing/PixelTrackFitting/interface/FitUtils.h"
 
 #include "CUDADataFormats/Common/interface/HostProduct.h"
-#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
+//#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
 #include "CUDADataFormats/SiPixelCluster/interface/gpuClusteringConstants.h"
 
 #include "storeTracks.h"
@@ -35,7 +36,7 @@
 
 /**
  * This class creates "leagcy"  reco::Track
- * objects from the output of SoA CA. 
+ * objects from the output of SoA CA.
  */
 class PixelTrackProducerFromSoA : public edm::global::EDProducer<> {
 public:
@@ -54,7 +55,8 @@ private:
 
   // Event Data tokens
   const edm::EDGetTokenT<reco::BeamSpot> tBeamSpot_;
-  const edm::EDGetTokenT<PixelTrackHeterogeneous> tokenTrack_;
+  //const edm::EDGetTokenT<PixelTrackHeterogeneous> tokenTrack_;
+  const edm::EDGetTokenT<pixelTrack::TrackSoA> tokenTrack_;
   const edm::EDGetTokenT<SiPixelRecHitCollectionNew> cpuHits_;
   const edm::EDGetTokenT<HMSstorage> hmsToken_;
   // Event Setup tokens
@@ -67,7 +69,8 @@ private:
 
 PixelTrackProducerFromSoA::PixelTrackProducerFromSoA(const edm::ParameterSet &iConfig)
     : tBeamSpot_(consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamSpot"))),
-      tokenTrack_(consumes<PixelTrackHeterogeneous>(iConfig.getParameter<edm::InputTag>("trackSrc"))),
+      //tokenTrack_(consumes<PixelTrackHeterogeneous>(iConfig.getParameter<edm::InputTag>("trackSrc"))),
+      tokenTrack_(consumes<pixelTrack::TrackSoA>(iConfig.getParameter<edm::InputTag>("trackSrc"))),
       cpuHits_(consumes<SiPixelRecHitCollectionNew>(iConfig.getParameter<edm::InputTag>("pixelRecHitLegacySrc"))),
       hmsToken_(consumes<HMSstorage>(iConfig.getParameter<edm::InputTag>("pixelRecHitLegacySrc"))),
       idealMagneticFieldToken_(esConsumes()),
@@ -152,7 +155,7 @@ void PixelTrackProducerFromSoA::produce(edm::StreamID streamID,
   std::vector<const TrackingRecHit *> hits;
   hits.reserve(5);
 
-  const auto &tsoa = *iEvent.get(tokenTrack_);
+  const auto &tsoa = iEvent.get(tokenTrack_);
 
   auto const *quality = tsoa.qualityData();
   // auto const &fit = tsoa.stateAtBS;

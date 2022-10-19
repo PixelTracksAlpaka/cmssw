@@ -7,6 +7,8 @@
 #include "gpuSortByPt2.h"
 #include "gpuSplitVertices.h"
 
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
+
 #undef PIXVERTEX_DEBUG_PRODUCE
 
 namespace gpuVertexFinder {
@@ -17,28 +19,29 @@ namespace gpuVertexFinder {
 
   // split vertices with a chi2/NDoF greater than this
   constexpr float maxChi2ForSplit = 9.f;
+  using TkSoAConstView = pixelTrack::TrackSoAConstView;
 
-  __global__ void loadTracks(TkSoA const* ptracks, ZVertexSoA* soa, WorkSpace* pws, float ptMin, float ptMax) {
+  __global__ void loadTracks(TkSoA const* ptracks, TkSoAConstView ptracksView, ZVertexSoA* soa, WorkSpace* pws, float ptMin, float ptMax) {
     assert(ptracks);
     assert(soa);
     auto const& tracks = *ptracks;
-    auto const& fit = tracks.stateAtBS;
+    //auto const& fit = tracks.stateAtBS;
     auto const* quality = tracks.qualityData();
 
     auto first = blockIdx.x * blockDim.x + threadIdx.x;
-    for (int idx = first, nt = tracks.nTracks(); idx < nt; idx += gridDim.x * blockDim.x) {
+    for (int idx = first, nt = ptracksView.nTracks(); idx < nt; idx += gridDim.x * blockDim.x) {
       auto nHits = tracks.nHits(idx);
       assert(nHits >= 3);
 
       // initialize soa...
       soa->idv[idx] = -1;
 
-      if (tracks.isTriplet(idx))
+      if (pixelTrack::utilities::isTriplet(ptracksView,idx))
         continue;  // no triplets
       if (quality[idx] < pixelTrack::Quality::highPurity)
         continue;
 
-      auto pt = tracks.pt(idx);
+      auto pt = ptracksView[idx].pt();
 
       if (pt < ptMin)
         continue;
@@ -49,8 +52,8 @@ namespace gpuVertexFinder {
       auto& data = *pws;
       auto it = atomicAdd(&data.ntrks, 1);
       data.itrk[it] = idx;
-      data.zt[it] = tracks.zip(idx);
-      data.ezt2[it] = fit.covariance(idx)(14);
+      data.zt[it] = pixelTrack::utilities::zip(ptracksView,idx);
+      data.ezt2[it] = ptracksView[idx].covariance()(14);
       data.ptt2[it] = pt * pt;
     }
   }
@@ -121,11 +124,11 @@ namespace gpuVertexFinder {
     init<<<1, 1, 0, stream>>>(soa, ws_d.get());
     auto blockSize = 128;
     auto numberOfBlocks = (TkSoA::stride() + blockSize - 1) / blockSize;
-    loadTracks<<<numberOfBlocks, blockSize, 0, stream>>>(tksoa, soa, ws_d.get(), ptMin, ptMax);
+    loadTracks<<<numberOfBlocks, blockSize, 0, stream>>>(tksoa, tksoa->view(), soa, ws_d.get(), ptMin, ptMax);
     cudaCheck(cudaGetLastError());
 #else
     init(soa, ws_d.get());
-    loadTracks(tksoa, soa, ws_d.get(), ptMin, ptMax);
+    loadTracks(tksoa, tksoa->view(), soa, ws_d.get(), ptMin, ptMax);
 #endif
 
 #ifdef __CUDACC__
