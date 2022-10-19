@@ -107,13 +107,27 @@ namespace pixelTrack {
           cov(k, j) = cov(j, k) = tracks[i].covariance()(ind++);
       }
     }
+
+    __host__ __device__ inline int computeNumberOfLayers(TrackSoAConstView tracks, int32_t i) {
+      auto pdet = tracks.detIndices().begin(i);
+      int nl = 1;
+      auto ol = phase1PixelTopology::getLayer(*pdet);
+      for (; pdet < tracks.detIndices().end(i); ++pdet) {
+        auto il = phase1PixelTopology::getLayer(*pdet);
+        if (il != ol)
+          ++nl;
+        ol = il;
+      }
+      return nl;
+    }
+
+    __host__ __device__ inline int nHits(TrackSoAConstView tracks, int i) { return tracks.detIndices().size(i); }
   }  // namespace utilities
 }  // namespace pixelTrack
 
 template <int32_t S>
 class TrackSoAHeterogeneousT : public cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>> {
 public:
-  // using cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::PortableDeviceCollection;
   TrackSoAHeterogeneousT() = default;
 
   explicit TrackSoAHeterogeneousT(cudaStream_t stream)
@@ -123,34 +137,13 @@ public:
 
   using Quality = pixelTrack::Quality;
   using hindex_type = uint32_t;
-  // using HitContainer = cms::cuda::OneToManyAssoc<hindex_type, S + 1, 5 * S>;
 
   // Always check quality is at least loose!
   // CUDA does not support enums  in __lgc ...
 private:
 public:
-  // TODO: static did not work; using reinterpret_cast
   constexpr Quality const *qualityData() const { return reinterpret_cast<Quality const *>(view().quality()); }
   constexpr Quality *qualityData() { return reinterpret_cast<Quality *>(view().quality()); }
-
-  constexpr int nHits(int i) const { return detIndices.size(i); }
-
-  constexpr int computeNumberOfLayers(int32_t i) const {
-    // layers are in order and we assume tracks are either forward or backward
-    auto pdet = detIndices.begin(i);
-    int nl = 1;
-    auto ol = phase1PixelTopology::getLayer(*pdet);
-    for (; pdet < detIndices.end(i); ++pdet) {
-      auto il = phase1PixelTopology::getLayer(*pdet);
-      if (il != ol)
-        ++nl;
-      ol = il;
-    }
-    return nl;
-  }
-
-  HitContainer hitIndices;
-  HitContainer detIndices;
 };
 
 namespace pixelTrack {
@@ -158,8 +151,6 @@ namespace pixelTrack {
   using TrackSoA = TrackSoAHeterogeneousT<maxNumber()>;
   using TrackSoAView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::View;
   using TrackSoAConstView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::ConstView;
-
-  // using HitContainer = TrackSoA::HitContainer;
 
 }  // namespace pixelTrack
 

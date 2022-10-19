@@ -1,3 +1,4 @@
+#include <bits/stdint-uintn.h>
 #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/requireDevices.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
@@ -6,7 +7,7 @@
 
 namespace testTrackSoAHeterogeneousT {
 
-  void runKernels(pixelTrack::TrackSoA *tracks, pixelTrack::TrackSoAView tracks_view);
+  void runKernels(pixelTrack::TrackSoAView tracks_view, uint32_t soaSize);
 }
 
 int main() {
@@ -28,8 +29,7 @@ int main() {
     cudaCheck(cudaMemcpy(mem, &tracks_h, sizeof(pixelTrack::TrackSoA), cudaMemcpyHostToDevice));
 
     // Run the tests
-    pixelTrack::TrackSoA *tracks_d = reinterpret_cast<pixelTrack::TrackSoA *>(mem);
-    testTrackSoAHeterogeneousT::runKernels(tracks_d, tracks_h.view());
+    testTrackSoAHeterogeneousT::runKernels(tracks_h.view(), tracks_h->metadata().size());
 
     // Copy SoA data back to host
     auto ret = cms::cuda::make_host_unique<std::byte[]>(tracks_h.bufferSize(), stream);
@@ -38,7 +38,6 @@ int main() {
                          TrackSoAHeterogeneousT_test<>::computeDataSize(tracks_h.stride()),
                          cudaMemcpyDeviceToHost));
 
-    // Copy tracks_d back to tracks_h
     cudaCheck(cudaMemcpy(&tracks_h, mem, sizeof(pixelTrack::TrackSoA), cudaMemcpyDeviceToHost));
 
     // Create a view to access the copied data
@@ -55,7 +54,8 @@ int main() {
               << "nLayers"
               << "\t"
               << "hitIndices off" << std::endl;
-    for (int i = 0; i < tracks_h.stride(); ++i) {
+    // for (int i = 0; i < tracks_h.stride(); ++i) {
+    for (int i = 0; i < 10; ++i) {
       std::cout << tmp_view[i].pt() << "\t" << tmp_view[i].eta() << "\t" << tmp_view[i].chi2() << "\t"
                 << (int)tmp_view[i].quality() << "\t" << (int)tmp_view[i].nLayers() << "\t"
                 << tmp_view.hitIndices().off[i] << std::endl;
