@@ -58,8 +58,9 @@ int main() {
     for (int i = 0; i < tracks_h.stride(); ++i) {
       std::cout << tmp_view[i].pt() << "\t" << tmp_view[i].eta() << "\t" << tmp_view[i].chi2() << "\t"
                 << (int)tmp_view[i].quality() << "\t" << (int)tmp_view[i].nLayers() << "\t"
-                << tracks_h.hitIndices.off[i] << std::endl;
+                << tmp_view.hitIndices().off[i] << std::endl;
     }
+
     cudaCheck(cudaFree(mem));
   }
   cudaCheck(cudaStreamDestroy(stream));

@@ -1,6 +1,7 @@
 #ifndef CUDADataFormats_Track_TrackHeterogeneousT_H
 #define CUDADataFormats_Track_TrackHeterogeneousT_H
 
+#include <bits/stdint-uintn.h>
 #include <string>
 #include <algorithm>
 
@@ -19,6 +20,15 @@ namespace pixelTrack {
     auto qp = std::find(qualityName, qualityName + qualitySize, name) - qualityName;
     return static_cast<Quality>(qp);
   }
+
+#ifdef GPU_SMALL_EVENTS
+  // kept for testing and debugging
+  constexpr uint32_t maxNumber() { return 2 * 1024; }
+#else
+  // tested on MC events with 55-75 pileup events
+  constexpr uint32_t maxNumber() { return 32 * 1024; }
+#endif
+
 }  // namespace pixelTrack
 
 using Vector5f = Eigen::Matrix<float, 5, 1>;
@@ -26,6 +36,7 @@ using Vector15f = Eigen::Matrix<float, 15, 1>;
 
 using Vector5d = Eigen::Matrix<double, 5, 1>;
 using Matrix5d = Eigen::Matrix<double, 5, 5>;
+using HitContainer = cms::cuda::OneToManyAssoc<uint32_t, pixelTrack::maxNumber() + 1, 5 * pixelTrack::maxNumber()>;
 
 GENERATE_SOA_LAYOUT(TrackSoAHeterogeneousT_test,
                     SOA_COLUMN(uint8_t, quality),
@@ -35,7 +46,9 @@ GENERATE_SOA_LAYOUT(TrackSoAHeterogeneousT_test,
                     SOA_COLUMN(float, pt),
                     SOA_EIGEN_COLUMN(Vector5f, state),
                     SOA_EIGEN_COLUMN(Vector15f, covariance),
-                    SOA_SCALAR(int, nTracks))
+                    SOA_SCALAR(int, nTracks),
+                    SOA_SCALAR(HitContainer, hitIndices),
+                    SOA_SCALAR(HitContainer, detIndices))
 
 // Previous TrajectoryStateSoAT class methods
 namespace pixelTrack {
@@ -110,7 +123,7 @@ public:
 
   using Quality = pixelTrack::Quality;
   using hindex_type = uint32_t;
-  using HitContainer = cms::cuda::OneToManyAssoc<hindex_type, S + 1, 5 * S>;
+  // using HitContainer = cms::cuda::OneToManyAssoc<hindex_type, S + 1, 5 * S>;
 
   // Always check quality is at least loose!
   // CUDA does not support enums  in __lgc ...
@@ -142,19 +155,11 @@ public:
 
 namespace pixelTrack {
 
-#ifdef GPU_SMALL_EVENTS
-  // kept for testing and debugging
-  constexpr uint32_t maxNumber() { return 2 * 1024; }
-#else
-  // tested on MC events with 55-75 pileup events
-  constexpr uint32_t maxNumber() { return 32 * 1024; }
-#endif
-
   using TrackSoA = TrackSoAHeterogeneousT<maxNumber()>;
   using TrackSoAView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::View;
   using TrackSoAConstView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::ConstView;
 
-  using HitContainer = TrackSoA::HitContainer;
+  // using HitContainer = TrackSoA::HitContainer;
 
 }  // namespace pixelTrack
 
