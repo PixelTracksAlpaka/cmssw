@@ -29,6 +29,8 @@ namespace pixelTrack {
   constexpr uint32_t maxNumber() { return 32 * 1024; }
 #endif
 
+  using HitContainer = cms::cuda::OneToManyAssoc<uint32_t, pixelTrack::maxNumber() + 1, 5 * pixelTrack::maxNumber()>;
+
 }  // namespace pixelTrack
 
 using Vector5f = Eigen::Matrix<float, 5, 1>;
@@ -36,7 +38,7 @@ using Vector15f = Eigen::Matrix<float, 15, 1>;
 
 using Vector5d = Eigen::Matrix<double, 5, 1>;
 using Matrix5d = Eigen::Matrix<double, 5, 5>;
-using HitContainer = cms::cuda::OneToManyAssoc<uint32_t, pixelTrack::maxNumber() + 1, 5 * pixelTrack::maxNumber()>;
+using HitContainer = pixelTrack::HitContainer;
 
 GENERATE_SOA_LAYOUT(TrackSoAHeterogeneousT_test,
                     SOA_COLUMN(uint8_t, quality),
@@ -55,6 +57,8 @@ namespace pixelTrack {
   namespace utilities {
     using TrackSoAView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::View;
     using TrackSoAConstView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::ConstView;
+    using Quality = pixelTrack::Quality;
+    using hindex_type = uint32_t;
     // State at the Beam spot
     // phi,tip,1/pt,cotan(theta),zip
     __host__ __device__ inline float charge(TrackSoAConstView tracks, int32_t i) {
@@ -121,6 +125,9 @@ namespace pixelTrack {
       return nl;
     }
 
+    __host__ __device__ inline const Quality *qualityData(TrackSoAConstView tracks) { return reinterpret_cast<Quality const *>(tracks.quality()); }
+    __host__ __device__ inline Quality *qualityData(TrackSoAView tracks) { return reinterpret_cast<Quality *>(tracks.quality()); }
+
     __host__ __device__ inline int nHits(TrackSoAConstView tracks, int i) { return tracks.detIndices().size(i); }
   }  // namespace utilities
 }  // namespace pixelTrack
@@ -133,18 +140,7 @@ public:
   explicit TrackSoAHeterogeneousT(cudaStream_t stream)
       : PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>(S, stream) {}
 
-  static constexpr int32_t stride() { return S; }
-
-  using Quality = pixelTrack::Quality;
-  using hindex_type = uint32_t;
-
-  // Always check quality is at least loose!
-  // CUDA does not support enums  in __lgc ...
-private:
-public:
-  constexpr Quality const *qualityData() const { return reinterpret_cast<Quality const *>(view().quality()); }
-  constexpr Quality *qualityData() { return reinterpret_cast<Quality *>(view().quality()); }
-};
+}
 
 namespace pixelTrack {
 
