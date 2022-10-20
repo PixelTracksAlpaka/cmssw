@@ -1,5 +1,5 @@
 /**
-   Simple test of the pixelTrack::TrackSoA data structure
+   Simple test for the pixelTrack::TrackSoA data structure
    which inherits from PortableDeviceCollection.
 
    Creates an instance of the class (automatically allocates
@@ -7,7 +7,10 @@
    the CUDA kernels which:
    - Fill the SoA with data.
    - Verify that the data written is correct.
-
+   
+   Then, the SoA data are copied back to Host, where
+   a temporary host-side view (tmp_view) is created using
+   the same Layout to access the data on host and print it.
  */
 
 #include <bits/stdint-uintn.h>
