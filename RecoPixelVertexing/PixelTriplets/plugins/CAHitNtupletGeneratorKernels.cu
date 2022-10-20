@@ -4,8 +4,8 @@
 template <>
 void CAHitNtupletGeneratorKernelsGPU::launchKernels(HitsOnCPU const &hh, TkSoA *tracks_d, cudaStream_t cudaStream) {
   // these are pointer on GPU!
-  auto *tuples_d = &tracks_d->hitIndices;
-  auto *detId_d = &tracks_d->detIndices;
+  auto *tuples_d = &tracks_d->hitIndices();
+  auto *detId_d = &tracks_d->detIndices();
   auto *quality_d = tracks_d->qualityData();
 
   // zero tuples
@@ -102,8 +102,8 @@ void CAHitNtupletGeneratorKernelsGPU::launchKernels(HitsOnCPU const &hh, TkSoA *
 
   blockSize = 128;
   numberOfBlocks = (3 * caConstants::maxTuples / 4 + blockSize - 1) / blockSize;
-  kernel_countMultiplicity<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
-      tuples_d, tracks_d->view(), device_tupleMultiplicity_.get());
+  kernel_countMultiplicity<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tracks_d->view(),
+                                                                         device_tupleMultiplicity_.get());
   cms::cuda::launchFinalize(device_tupleMultiplicity_.get(), cudaStream);
   kernel_fillMultiplicity<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
       tuples_d, tracks_d->view(), device_tupleMultiplicity_.get());

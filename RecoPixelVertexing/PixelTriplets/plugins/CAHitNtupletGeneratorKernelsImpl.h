@@ -375,12 +375,11 @@ __global__ void kernel_mark_used(GPUCACell *__restrict__ cells, uint32_t const *
   }
 }
 
-__global__ void kernel_countMultiplicity(HitContainer const *__restrict__ foundNtuplets,
-                                         TkSoAConstView tracks_view,
+__global__ void kernel_countMultiplicity(TkSoAConstView tracks_view,
                                          caConstants::TupleMultiplicity *tupleMultiplicity) {
   auto first = blockIdx.x * blockDim.x + threadIdx.x;
-  for (int it = first, nt = foundNtuplets->nOnes(); it < nt; it += gridDim.x * blockDim.x) {
-    auto nhits = foundNtuplets->size(it);
+  for (int it = first, nt = tracks_view.hitIndices().nOnes(); it < nt; it += gridDim.x * blockDim.x) {
+    auto nhits = tracks_view.hitIndices().size(it);
     if (nhits < 3)
       continue;
     if (tracks_view[it].quality() == (uint8_t)pixelTrack::Quality::edup)
@@ -393,12 +392,10 @@ __global__ void kernel_countMultiplicity(HitContainer const *__restrict__ foundN
   }
 }
 
-__global__ void kernel_fillMultiplicity(HitContainer const *__restrict__ foundNtuplets,
-                                        TkSoAConstView tracks_view,
-                                        caConstants::TupleMultiplicity *tupleMultiplicity) {
+__global__ void kernel_fillMultiplicity(TkSoAConstView tracks_view, caConstants::TupleMultiplicity *tupleMultiplicity) {
   auto first = blockIdx.x * blockDim.x + threadIdx.x;
-  for (int it = first, nt = foundNtuplets->nOnes(); it < nt; it += gridDim.x * blockDim.x) {
-    auto nhits = foundNtuplets->size(it);
+  for (int it = first, nt = tracks_view.hitIndices().nOnes(); it < nt; it += gridDim.x * blockDim.x) {
+    auto nhits = tracks_view.hitIndices().size(it);
     if (nhits < 3)
       continue;
     if (tracks_view[it].quality() == (uint8_t)pixelTrack::Quality::edup)
