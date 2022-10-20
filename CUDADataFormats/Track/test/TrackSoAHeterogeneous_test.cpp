@@ -1,3 +1,15 @@
+/**
+   Simple test of the pixelTrack::TrackSoA data structure
+   which inherits from PortableDeviceCollection.
+
+   Creates an instance of the class (automatically allocates
+   memory on device), passes the view of the SoA data to
+   the CUDA kernels which:
+   - Fill the SoA with data.
+   - Verify that the data written is correct.
+
+ */
+
 #include <bits/stdint-uintn.h>
 #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/requireDevices.h"
