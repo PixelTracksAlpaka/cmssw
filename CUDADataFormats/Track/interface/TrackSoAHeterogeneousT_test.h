@@ -35,9 +35,6 @@ namespace pixelTrack {
 
 using Vector5f = Eigen::Matrix<float, 5, 1>;
 using Vector15f = Eigen::Matrix<float, 15, 1>;
-
-using Vector5d = Eigen::Matrix<double, 5, 1>;
-using Matrix5d = Eigen::Matrix<double, 5, 5>;
 using HitContainer = pixelTrack::HitContainer;
 
 GENERATE_SOA_LAYOUT(TrackSoAHeterogeneousT_test,
