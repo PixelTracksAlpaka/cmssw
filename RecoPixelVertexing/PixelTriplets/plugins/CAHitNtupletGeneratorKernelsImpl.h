@@ -338,9 +338,8 @@ __global__ void kernel_find_ntuplets(GPUCACell::Hits const *__restrict__ hhp,
                                      GPUCACell *__restrict__ cells,
                                      uint32_t const *nCells,
                                      gpuPixelDoublets::CellTracksVector *cellTracks,
-                                     HitContainer *foundNtuplets,
+                                     pixelTrack::TrackSoaView tracks_view,
                                      cms::cuda::AtomicPairCounter *apc,
-                                     Quality *__restrict__ quality,
                                      unsigned int minHitsPerNtuplet) {
   // recursive: not obvious to widen
   auto const &hh = *hhp;
@@ -358,8 +357,15 @@ __global__ void kernel_find_ntuplets(GPUCACell::Hits const *__restrict__ hhp,
     if (doit) {
       GPUCACell::TmpTuple stack;
       stack.reset();
-      thisCell.find_ntuplets<6>(
-          hh, cells, *cellTracks, *foundNtuplets, *apc, quality, stack, minHitsPerNtuplet, pid < 3);
+      thisCell.find_ntuplets<6>(hh,
+                                cells,
+                                *cellTracks,
+                                tracks_view.hitIndices(),
+                                *apc,
+                                tracks_view.qualityData(),
+                                stack,
+                                minHitsPerNtuplet,
+                                pid < 3);
       assert(stack.empty());
       // printf("in %d found quadruplets: %d\n", cellIndex, apc->get());
     }
@@ -412,14 +418,13 @@ __global__ void kernel_fillMultiplicity(TkSoAConstView tracks_view, caConstants:
   Supply both the original TkSoA and the TkSoAView which contains
 the SoA Data
  */
-__global__ void kernel_classifyTracks(HitContainer const *__restrict__ tuples,
-                                      TkSoAView tracks_view,
+__global__ void kernel_classifyTracks(TkSoAView tracks_view,
                                       Quality *__restrict__ quality,
                                       CAHitNtupletGeneratorKernelsGPU::QualityCuts cuts) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
 
-  for (int it = first, nt = tuples->nOnes(); it < nt; it += gridDim.x * blockDim.x) {
-    auto nhits = tuples->size(it);
+  for (int it = first, nt = tracks_view.hitIndices().nOnes(); it < nt; it += gridDim.x * blockDim.x) {
+    auto nhits = tracks_view.hitIndices().size(it);
     if (nhits == 0)
       break;  // guard
 
@@ -440,7 +445,7 @@ __global__ void kernel_classifyTracks(HitContainer const *__restrict__ tuples,
     }
     if (isNaN) {
 #ifdef NTUPLE_DEBUG
-      printf("NaN in fit %d size %d chi2 %f\n", it, tuples->size(it), tracks_view[it].chi2());
+      printf("NaN in fit %d size %d chi2 %f\n", it, tracks_view.hitIndices().size(it), tracks_view[it].chi2());
 #endif
       continue;
     }
@@ -477,7 +482,7 @@ __global__ void kernel_classifyTracks(HitContainer const *__restrict__ tuples,
 #ifdef NTUPLE_FIT_DEBUG
       printf("Bad chi2 %d size %d pt %f eta %f chi2 %f\n",
              it,
-             tuples->size(it),
+             tracks_view.hitIndices().size(it),
              tracks_view[it].pt(),
              tracks_view[it].eta(),
              tracks_view[it].chi2());
@@ -561,19 +566,16 @@ __global__ void kernel_fillHitDetIndices(HitContainer const *__restrict__ tuples
 /*
   Needs both TkSoA and TkSoAView for accessing SoA, computeNumberOfLayers(), nHits(), stride()
  */
-__global__ void kernel_fillNLayers(TkSoA *__restrict__ ptracks,
-                                   TkSoAView tracks_view,
-                                   cms::cuda::AtomicPairCounter *apc) {
-  auto &tracks = *ptracks;
+__global__ void kernel_fillNLayers(TkSoAView tracks_view, cms::cuda::AtomicPairCounter *apc) {
   auto first = blockIdx.x * blockDim.x + threadIdx.x;
   // clamp the number of tracks to the capacity of the SoA
-  auto ntracks = std::min<int>(apc->get().m, tracks.stride() - 1);
+  auto ntracks = std::min<int>(apc->get().m, tracks_view.metadata().size() - 1);
   if (0 == first)
     tracks_view.nTracks() = ntracks;
   for (int idx = first, nt = ntracks; idx < nt; idx += gridDim.x * blockDim.x) {
-    auto nHits = tracks.nHits(idx);
+    auto nHits = pixelTrack::nHits(tracks_view, idx);
     assert(nHits >= 3);
-    tracks_view[idx].nLayers() = tracks.computeNumberOfLayers(idx);
+    tracks_view[idx].nLayers() = pixelTrack::computeNumberOfLayers(tracks_view, idx);
   }
 }
 

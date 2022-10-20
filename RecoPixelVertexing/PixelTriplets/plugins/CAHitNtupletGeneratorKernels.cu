@@ -4,12 +4,12 @@
 template <>
 void CAHitNtupletGeneratorKernelsGPU::launchKernels(HitsOnCPU const &hh, TkSoA *tracks_d, cudaStream_t cudaStream) {
   // these are pointer on GPU!
-  auto *tuples_d = &tracks_d->hitIndices();
-  auto *detId_d = &tracks_d->detIndices();
+  // auto *tuples_d = &tracks_d->hitIndices();
+  auto *detId_d = tracks_d->view().detIndices();
   auto *quality_d = tracks_d->qualityData();
 
   // zero tuples
-  cms::cuda::launchZero(tuples_d, cudaStream);
+  cms::cuda::launchZero(tracks_d->view().hitIndices(), cudaStream);
 
   int32_t nhits = hh.nHits();
 
@@ -70,9 +70,8 @@ void CAHitNtupletGeneratorKernelsGPU::launchKernels(HitsOnCPU const &hh, TkSoA *
                                                                      device_theCells_.get(),
                                                                      device_nCells_,
                                                                      device_theCellTracks_.get(),
-                                                                     tuples_d,
+                                                                     tracks_d->view(),
                                                                      device_hitTuple_apc_,
-                                                                     quality_d,
                                                                      params_.minHitsPerNtuplet_);
   cudaCheck(cudaGetLastError());
 
@@ -87,9 +86,11 @@ void CAHitNtupletGeneratorKernelsGPU::launchKernels(HitsOnCPU const &hh, TkSoA *
 
   blockSize = 128;
   numberOfBlocks = (HitContainer::ctNOnes() + blockSize - 1) / blockSize;
-  cms::cuda::finalizeBulk<<<numberOfBlocks, blockSize, 0, cudaStream>>>(device_hitTuple_apc_, tuples_d);
+  cms::cuda::finalizeBulk<<<numberOfBlocks, blockSize, 0, cudaStream>>>(device_hitTuple_apc_,
+                                                                        tracks_d->view().hitIndices());
 
-  kernel_fillHitDetIndices<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tuples_d, hh.view(), detId_d);
+  kernel_fillHitDetIndices<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
+      tracks_d->view().hitIndices(), hh.view(), tracks_d->view().detIndices());
   cudaCheck(cudaGetLastError());
   kernel_fillNLayers<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tracks_d, tracks_d->view(), device_hitTuple_apc_);
   cudaCheck(cudaGetLastError());
@@ -105,8 +106,8 @@ void CAHitNtupletGeneratorKernelsGPU::launchKernels(HitsOnCPU const &hh, TkSoA *
   kernel_countMultiplicity<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tracks_d->view(),
                                                                          device_tupleMultiplicity_.get());
   cms::cuda::launchFinalize(device_tupleMultiplicity_.get(), cudaStream);
-  kernel_fillMultiplicity<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
-      tuples_d, tracks_d->view(), device_tupleMultiplicity_.get());
+  kernel_fillMultiplicity<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tracks_d->view(),
+                                                                        device_tupleMultiplicity_.get());
   cudaCheck(cudaGetLastError());
 
   // do not run the fishbone if there are hits only in BPIX1
@@ -233,8 +234,7 @@ void CAHitNtupletGeneratorKernelsGPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
 
   // classify tracks based on kinematics
   auto numberOfBlocks = nQuadrupletBlocks(blockSize);
-  kernel_classifyTracks<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
-      tuples_d, tracks_d->view(), quality_d, params_.cuts_);
+  kernel_classifyTracks<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tracks_d->view(), quality_d, params_.cuts_);
 
   cudaCheck(cudaGetLastError());
 
