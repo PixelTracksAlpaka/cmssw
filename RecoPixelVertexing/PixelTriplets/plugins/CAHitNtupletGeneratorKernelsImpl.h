@@ -43,7 +43,7 @@ namespace {
 
 }  // namespace
 
-__global__ void kernel_checkOverflows(HitContainer const *foundNtuplets,
+__global__ void kernel_checkOverflows(pixelTrack::TrackSoAView tracks_view,
                                       caConstants::TupleMultiplicity const *tupleMultiplicity,
                                       CAHitNtupletGeneratorKernelsGPU::HitToTuple const *hitToTuple,
                                       cms::cuda::AtomicPairCounter *apc,
@@ -76,16 +76,16 @@ __global__ void kernel_checkOverflows(HitContainer const *foundNtuplets,
            nHits,
            hitToTuple->totOnes());
     if (apc->get().m < caConstants::maxNumberOfQuadruplets) {
-      assert(foundNtuplets->size(apc->get().m) == 0);
-      assert(foundNtuplets->size() == apc->get().n);
+      assert(tracks_view.hitIndices().size(apc->get().m) == 0);
+      assert(tracks_view.hitIndices().size() == apc->get().n);
     }
   }
 
-  for (int idx = first, nt = foundNtuplets->nOnes(); idx < nt; idx += gridDim.x * blockDim.x) {
-    if (foundNtuplets->size(idx) > 7)  // current real limit
-      printf("ERROR %d, %d\n", idx, foundNtuplets->size(idx));
-    assert(foundNtuplets->size(idx) <= caConstants::maxHitsOnTrack);
-    for (auto ih = foundNtuplets->begin(idx); ih != foundNtuplets->end(idx); ++ih)
+  for (int idx = first, nt = tracks_view.hitIndices().nOnes(); idx < nt; idx += gridDim.x * blockDim.x) {
+    if (tracks_view.hitIndices().size(idx) > 7)  // current real limit
+      printf("ERROR %d, %d\n", idx, tracks_view.hitIndices().size(idx));
+    assert(tracks_view.hitIndices().size(idx) <= caConstants::maxHitsOnTrack);
+    for (auto ih = tracks_view.hitIndices().begin(idx); ih != tracks_view.hitIndices().end(idx); ++ih)
       assert(int(*ih) < nHits);
   }
 #endif
@@ -524,24 +524,24 @@ __global__ void kernel_doStatsForTracks(HitContainer const *__restrict__ tuples,
   }
 }
 
-__global__ void kernel_countHitInTracks(HitContainer const *__restrict__ tuples,
+__global__ void kernel_countHitInTracks(pixelTrack::TrackSoAView tracks_view,
                                         CAHitNtupletGeneratorKernelsGPU::HitToTuple *hitToTuple) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
-  for (int idx = first, ntot = tuples->nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
-    if (tuples->size(idx) == 0)
+  for (int idx = first, ntot = tracks_view.hitIndices().nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
+    if (tracks_view.hitIndices().size(idx) == 0)
       break;  // guard
-    for (auto h = tuples->begin(idx); h != tuples->end(idx); ++h)
+    for (auto h = tracks_view.hitIndices().begin(idx); h != tracks_view.hitIndices().end(idx); ++h)
       hitToTuple->count(*h);
   }
 }
 
-__global__ void kernel_fillHitInTracks(HitContainer const *__restrict__ tuples,
+__global__ void kernel_fillHitInTracks(pixelTrack::TrackSoAView tracks_view,  // TODO: Make ConstView
                                        CAHitNtupletGeneratorKernelsGPU::HitToTuple *hitToTuple) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
-  for (int idx = first, ntot = tuples->nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
-    if (tuples->size(idx) == 0)
+  for (int idx = first, ntot = tracks_view.hitIndices().nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
+    if (tracks_view.hitIndices().size(idx) == 0)
       break;  // guard
-    for (auto h = tuples->begin(idx); h != tuples->end(idx); ++h)
+    for (auto h = tracks_view.hitIndices().begin(idx); h != tracks_view.hitIndices().end(idx); ++h)
       hitToTuple->fill(*h, idx);
   }
 }

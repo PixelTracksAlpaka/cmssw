@@ -225,7 +225,7 @@ void CAHitNtupletGeneratorKernelsGPU::buildDoublets(HitsOnCPU const &hh, cudaStr
 template <>
 void CAHitNtupletGeneratorKernelsGPU::classifyTuples(HitsOnCPU const &hh, TkSoA *tracks_d, cudaStream_t cudaStream) {
   // these are pointer on GPU!
-  auto const *tuples_d = &tracks_d->hitIndices;
+  // auto const *tuples_d = &tracks_d->hitIndices;
   auto *quality_d = tracks_d->qualityData();
 
   int32_t nhits = hh.nHits();
@@ -259,13 +259,13 @@ void CAHitNtupletGeneratorKernelsGPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
     // fill hit->track "map"
     assert(hitToTupleView_.offSize > nhits);
     numberOfBlocks = nQuadrupletBlocks(blockSize);
-    kernel_countHitInTracks<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tuples_d, device_hitToTuple_.get());
+    kernel_countHitInTracks<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tracks_d->view(), device_hitToTuple_.get());
     cudaCheck(cudaGetLastError());
     assert((hitToTupleView_.assoc == device_hitToTuple_.get()) &&
            (hitToTupleView_.offStorage == device_hitToTupleStorage_.get()) && (hitToTupleView_.offSize > 0));
     cms::cuda::launchFinalize(hitToTupleView_, cudaStream);
     cudaCheck(cudaGetLastError());
-    kernel_fillHitInTracks<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tuples_d, device_hitToTuple_.get());
+    kernel_fillHitInTracks<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tracks_d->view(), device_hitToTuple_.get());
     cudaCheck(cudaGetLastError());
 #ifdef GPU_DEBUG
     cudaCheck(cudaDeviceSynchronize());
@@ -297,7 +297,7 @@ void CAHitNtupletGeneratorKernelsGPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
 
   if (params_.doStats_) {
     numberOfBlocks = (std::max(nhits, int(params_.maxNumberOfDoublets_)) + blockSize - 1) / blockSize;
-    kernel_checkOverflows<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tuples_d,
+    kernel_checkOverflows<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tracks_d->view(),
                                                                         device_tupleMultiplicity_.get(),
                                                                         device_hitToTuple_.get(),
                                                                         device_hitTuple_apc_,
