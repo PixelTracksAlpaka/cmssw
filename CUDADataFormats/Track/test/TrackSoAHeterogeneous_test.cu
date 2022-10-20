@@ -19,6 +19,7 @@ namespace testTrackSoAHeterogeneousT {
     }
   }
 
+  // TODO: Using TrackSoAConstView fails to assert hitIndices correctly
   __global__ void verify(pixelTrack::TrackSoAView tracks_view) {
     int i = threadIdx.x;
 
