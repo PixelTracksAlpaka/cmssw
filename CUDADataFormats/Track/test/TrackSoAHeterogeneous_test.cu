@@ -36,7 +36,7 @@ namespace testTrackSoAHeterogeneousT {
     }
   }
 
-  void runKernels(pixelTrack::TrackSoAView tracks_view, uint32_t soaSize) {
+  void runKernels(pixelTrack::TrackSoAView tracks_view) {
     fill<<<1, 1024>>>(tracks_view);
     cudaDeviceSynchronize();
     verify<<<1, 1024>>>(tracks_view);

@@ -7,7 +7,7 @@
 
 namespace testTrackSoAHeterogeneousT {
 
-  void runKernels(pixelTrack::TrackSoAView tracks_view, uint32_t soaSize);
+  void runKernels(pixelTrack::TrackSoAView tracks_view);
 }
 
 int main() {
@@ -16,33 +16,26 @@ int main() {
   cudaStream_t stream;
   cudaCheck(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));
 
-  // inner scope to deallocate memory before destroying the stream
+  // Inner scope to deallocate memory before destroying the stream
   {
     // Instantiate tracks on host. Portabledevicecollection allocates
     // SoA on device automatically.
-    int dev = cms::cuda::currentDevice();
-    pixelTrack::TrackSoA tracks_h(stream);
-
-    // Make a copy of tracks_h to device, so that we can
-    // modify hitIndices.
-    void *mem = cms::cuda::allocate_device(dev, sizeof(pixelTrack::TrackSoA), stream);
-    cudaCheck(cudaMemcpy(mem, &tracks_h, sizeof(pixelTrack::TrackSoA), cudaMemcpyHostToDevice));
+    pixelTrack::TrackSoA tracks(stream);
+    uint32_t soaSize = tracks.bufferSize();               // SoA Layout size (bytes)
+    uint32_t soaNumElements = tracks->metadata().size();  // Length of each SoA array in elements
 
     // Run the tests
-    testTrackSoAHeterogeneousT::runKernels(tracks_h.view(), tracks_h->metadata().size());
+    testTrackSoAHeterogeneousT::runKernels(tracks.view());
 
     // Copy SoA data back to host
-    auto ret = cms::cuda::make_host_unique<std::byte[]>(tracks_h.bufferSize(), stream);
-    cudaCheck(cudaMemcpy(ret.get(),
-                         tracks_h.buffer().get(),
-                         TrackSoAHeterogeneousT_test<>::computeDataSize(tracks_h.stride()),
-                         cudaMemcpyDeviceToHost));
-
-    cudaCheck(cudaMemcpy(&tracks_h, mem, sizeof(pixelTrack::TrackSoA), cudaMemcpyDeviceToHost));
+    auto tracks_h_soa = cms::cuda::make_host_unique<std::byte[]>(soaSize, stream);
+    cudaCheck(cudaMemcpy(tracks_h_soa.get(), tracks.const_buffer().get(), soaSize, cudaMemcpyDeviceToHost));
 
     // Create a view to access the copied data
-    TrackSoAHeterogeneousT_test<> tmp_layout(ret.get(), tracks_h.stride());
+    TrackSoAHeterogeneousT_test<> tmp_layout(tracks_h_soa.get(), soaNumElements);
     TrackSoAHeterogeneousT_test<>::View tmp_view(tmp_layout);
+
+    // Print results
     std::cout << "pt"
               << "\t"
               << "eta"
@@ -54,14 +47,12 @@ int main() {
               << "nLayers"
               << "\t"
               << "hitIndices off" << std::endl;
-    // for (int i = 0; i < tracks_h.stride(); ++i) {
+
     for (int i = 0; i < 10; ++i) {
       std::cout << tmp_view[i].pt() << "\t" << tmp_view[i].eta() << "\t" << tmp_view[i].chi2() << "\t"
                 << (int)tmp_view[i].quality() << "\t" << (int)tmp_view[i].nLayers() << "\t"
                 << tmp_view.hitIndices().off[i] << std::endl;
     }
-
-    cudaCheck(cudaFree(mem));
   }
   cudaCheck(cudaStreamDestroy(stream));
 
