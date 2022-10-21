@@ -240,7 +240,7 @@ pixelTrack::TrackSoA CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2DCPU 
 
   // now fit
   HelixFitOnGPU fitter(bfield, m_params.fitNas4_);
-  fitter.allocateOnGPU(&(soa->hitIndices), kernels.tupleMultiplicity(), soa->view());
+  fitter.allocateOnGPU(&(soa->view().hitIndices()), kernels.tupleMultiplicity(), soa->view());
 
   if (m_params.useRiemannFit_) {
     fitter.launchRiemannKernelsOnCPU(hits_d.view(), hits_d.nHits(), caConstants::maxNumberOfQuadruplets);
@@ -255,9 +255,9 @@ pixelTrack::TrackSoA CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2DCPU 
 #endif
 
   // check that the fixed-size SoA does not overflow
-  auto const& tsoa = *soa;
-  auto maxTracks = tsoa.stride();
-  auto nTracks = tsoa.view().nTracks();
+
+  auto maxTracks = soa->view().metadata().size();
+  auto nTracks = soa->view().nTracks();
   assert(nTracks < maxTracks);
   if (nTracks == maxTracks - 1) {
     edm::LogWarning("PixelTracks") << "Unsorted reconstructed pixel tracks truncated to " << maxTracks - 1

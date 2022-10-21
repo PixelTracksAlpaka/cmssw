@@ -43,7 +43,7 @@ namespace {
 
 }  // namespace
 
-__global__ void kernel_checkOverflows(pixelTrack::TrackSoAView tracks_view,
+__global__ void kernel_checkOverflows(TkSoAView tracks_view,
                                       caConstants::TupleMultiplicity const *tupleMultiplicity,
                                       CAHitNtupletGeneratorKernelsGPU::HitToTuple const *hitToTuple,
                                       cms::cuda::AtomicPairCounter *apc,
@@ -362,7 +362,7 @@ __global__ void kernel_find_ntuplets(GPUCACell::Hits const *__restrict__ hhp,
                                 *cellTracks,
                                 tracks_view.hitIndices(),
                                 *apc,
-                                tracks_view.qualityData(),
+                                pixelTrack::utilities::qualityData(tracks_view),
                                 stack,
                                 minHitsPerNtuplet,
                                 pid < 3);
@@ -508,12 +508,12 @@ __global__ void kernel_classifyTracks(TkSoAView tracks_view,
   }
 }
 
-__global__ void kernel_doStatsForTracks(HitContainer const *__restrict__ tuples,
+__global__ void kernel_doStatsForTracks(TkSoAView tracks_view,
                                         Quality const *__restrict__ quality,
                                         CAHitNtupletGeneratorKernelsGPU::Counters *counters) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
-  for (int idx = first, ntot = tuples->nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
-    if (tuples->size(idx) == 0)
+  for (int idx = first, ntot = tracks_view.hitIndices().nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
+    if (tracks_view.hitIndices().size(idx) == 0)
       break;  //guard
     if (quality[idx] < pixelTrack::Quality::loose)
       continue;
@@ -524,7 +524,7 @@ __global__ void kernel_doStatsForTracks(HitContainer const *__restrict__ tuples,
   }
 }
 
-__global__ void kernel_countHitInTracks(pixelTrack::TrackSoAView tracks_view,
+__global__ void kernel_countHitInTracks(TkSoAView tracks_view,
                                         CAHitNtupletGeneratorKernelsGPU::HitToTuple *hitToTuple) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
   for (int idx = first, ntot = tracks_view.hitIndices().nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
@@ -535,7 +535,7 @@ __global__ void kernel_countHitInTracks(pixelTrack::TrackSoAView tracks_view,
   }
 }
 
-__global__ void kernel_fillHitInTracks(pixelTrack::TrackSoAView tracks_view,  // TODO: Make ConstView
+__global__ void kernel_fillHitInTracks(TkSoAView tracks_view,  // TODO: Make ConstView
                                        CAHitNtupletGeneratorKernelsGPU::HitToTuple *hitToTuple) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
   for (int idx = first, ntot = tracks_view.hitIndices().nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
@@ -546,20 +546,18 @@ __global__ void kernel_fillHitInTracks(pixelTrack::TrackSoAView tracks_view,  //
   }
 }
 
-__global__ void kernel_fillHitDetIndices(HitContainer const *__restrict__ tuples,
-                                         TrackingRecHit2DSOAView const *__restrict__ hhp,
-                                         HitContainer *__restrict__ hitDetIndices) {
+__global__ void kernel_fillHitDetIndices(TkSoAView tracks_view, TrackingRecHit2DSOAView const *__restrict__ hhp) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
   // copy offsets
-  for (int idx = first, ntot = tuples->totOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
-    hitDetIndices->off[idx] = tuples->off[idx];
+  for (int idx = first, ntot = tracks_view.hitIndices().totOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
+    tracks_view.detIndices().off[idx] = tracks_view.hitIndices().off[idx];
   }
   // fill hit indices
   auto const &hh = *hhp;
   auto nhits = hh.nHits();
-  for (int idx = first, ntot = tuples->size(); idx < ntot; idx += gridDim.x * blockDim.x) {
-    assert(tuples->content[idx] < nhits);
-    hitDetIndices->content[idx] = hh.detectorIndex(tuples->content[idx]);
+  for (int idx = first, ntot = tracks_view.hitIndices().size(); idx < ntot; idx += gridDim.x * blockDim.x) {
+    assert(tracks_view.hitIndices().content[idx] < nhits);
+    tracks_view.detIndices().content[idx] = hh.detectorIndex(tracks_view.hitIndices().content[idx]);
   }
 }
 
@@ -573,7 +571,7 @@ __global__ void kernel_fillNLayers(TkSoAView tracks_view, cms::cuda::AtomicPairC
   if (0 == first)
     tracks_view.nTracks() = ntracks;
   for (int idx = first, nt = ntracks; idx < nt; idx += gridDim.x * blockDim.x) {
-    auto nHits = pixelTrack::nHits(tracks_view, idx);
+    auto nHits = pixelTrack::utilities::nHits(tracks_view, idx);
     assert(nHits >= 3);
     tracks_view[idx].nLayers() = pixelTrack::utilities::computeNumberOfLayers(tracks_view, idx);
   }
@@ -859,7 +857,6 @@ __global__ void kernel_simpleTripletCleaner(
 }
 
 __global__ void kernel_print_found_ntuplets(TrackingRecHit2DSOAView const *__restrict__ hhp,
-                                            HitContainer const *__restrict__ ptuples,
                                             TkSoAConstView tracks_view,
                                             CAHitNtupletGeneratorKernelsGPU::HitToTuple const *__restrict__ phitToTuple,
                                             int32_t firstPrint,
@@ -867,11 +864,11 @@ __global__ void kernel_print_found_ntuplets(TrackingRecHit2DSOAView const *__res
                                             int iev) {
   constexpr auto loose = (uint8_t)pixelTrack::Quality::loose;
   auto const &hh = *hhp;
-  auto const &foundNtuplets = *ptuples;
+  // auto const &foundNtuplets = *ptuples;
 
   int first = firstPrint + blockDim.x * blockIdx.x + threadIdx.x;
-  for (int i = first, np = std::min(lastPrint, foundNtuplets.nOnes()); i < np; i += blockDim.x * gridDim.x) {
-    auto nh = foundNtuplets.size(i);
+  for (int i = first, np = std::min(lastPrint, tracks_view.hitIndices().nOnes()); i < np; i += blockDim.x * gridDim.x) {
+    auto nh = tracks_view.hitIndices().size(i);
     if (nh < 3)
       continue;
     if (tracks_view[i].quality() < loose)
@@ -889,13 +886,13 @@ __global__ void kernel_print_found_ntuplets(TrackingRecHit2DSOAView const *__res
            pixelTrack::utilities::zip(tracks_view, i),
            //           asinhf(fit_results[i].par(3)),
            tracks_view[i].chi2(),
-           hh.zGlobal(*foundNtuplets.begin(i)),
-           hh.zGlobal(*(foundNtuplets.begin(i) + 1)),
-           hh.zGlobal(*(foundNtuplets.begin(i) + 2)),
-           nh > 3 ? hh.zGlobal(int(*(foundNtuplets.begin(i) + 3))) : 0,
-           nh > 4 ? hh.zGlobal(int(*(foundNtuplets.begin(i) + 4))) : 0,
-           nh > 5 ? hh.zGlobal(int(*(foundNtuplets.begin(i) + 5))) : 0,
-           nh > 6 ? hh.zGlobal(int(*(foundNtuplets.begin(i) + nh - 1))) : 0);
+           hh.zGlobal(*tracks_view.hitIndices().begin(i)),
+           hh.zGlobal(*(tracks_view.hitIndices().begin(i) + 1)),
+           hh.zGlobal(*(tracks_view.hitIndices().begin(i) + 2)),
+           nh > 3 ? hh.zGlobal(int(*(tracks_view.hitIndices().begin(i) + 3))) : 0,
+           nh > 4 ? hh.zGlobal(int(*(tracks_view.hitIndices().begin(i) + 4))) : 0,
+           nh > 5 ? hh.zGlobal(int(*(tracks_view.hitIndices().begin(i) + 5))) : 0,
+           nh > 6 ? hh.zGlobal(int(*(tracks_view.hitIndices().begin(i) + nh - 1))) : 0);
   }
 }
 
