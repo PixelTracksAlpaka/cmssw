@@ -33,15 +33,15 @@ private:
                edm::WaitingTaskWithArenaHolder waitingTaskHolder) override;
   void produce(edm::Event& iEvent, edm::EventSetup const& iSetup) override;
 
-  edm::EDGetTokenT<cms::cuda::Product<pixelTrack::TrackSoALayout>> tokenCUDA_;
+  edm::EDGetTokenT<pixelTrack::TrackSoAView> tokenCUDA_;
   edm::EDPutTokenT<pixelTrack::TrackSoAView> tokenSOA_;
 
   pixelTrack::TrackSoAView soa_view_h;
-  pixelTrack::TrackSoALayout soa_layout_h;
+  //pixelTrack::TrackSoALayout soa_layout_h;
 };
 
 PixelTrackSoAFromCUDA::PixelTrackSoAFromCUDA(const edm::ParameterSet& iConfig)
-    : tokenCUDA_(consumes<cms::cuda::Product<pixelTrack::TrackSoALayout>>(iConfig.getParameter<edm::InputTag>("src"))),
+    : tokenCUDA_(consumes<pixelTrack::TrackSoAView>(iConfig.getParameter<edm::InputTag>("src"))),
       tokenSOA_(produces<pixelTrack::TrackSoAView>()) {}
 
 void PixelTrackSoAFromCUDA::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
@@ -54,11 +54,11 @@ void PixelTrackSoAFromCUDA::fillDescriptions(edm::ConfigurationDescriptions& des
 void PixelTrackSoAFromCUDA::acquire(edm::Event const& iEvent,
                                     edm::EventSetup const& iSetup,
                                     edm::WaitingTaskWithArenaHolder waitingTaskHolder) {
-  cms::cuda::Product<pixelTrack::TrackSoALayout> const& inputDataWrapped = iEvent.get(tokenCUDA_);
-  cms::cuda::ScopedContextAcquire ctx{inputDataWrapped, std::move(waitingTaskHolder)};
-  auto const& soa_layout_d = ctx.get(inputDataWrapped);  // Layout of data on device
+  soa_view_h = iEvent.get(tokenCUDA_);
+  //cms::cuda::ScopedContextAcquire ctx{inputDataWrapped, std::move(waitingTaskHolder)};
+  //auto const& soa_view_h = ctx.get(inputDataWrapped);  // Layout of data on device
 
-  auto soa_buffer_h = cms::cuda::make_host_unique<std::byte[]>(soa_layout_d.metadata().byteSize(), ctx.stream());
+  /*auto soa_buffer_h = cms::cuda::make_host_unique<std::byte[]>(soa_layout_d.metadata().byteSize(), ctx.stream());
 
   cudaCheck(cudaMemcpyAsync(soa_buffer_h.get(),
                             soa_layout_d.metadata().data(),
@@ -66,7 +66,7 @@ void PixelTrackSoAFromCUDA::acquire(edm::Event const& iEvent,
                             cudaMemcpyDeviceToHost,
                             ctx.stream()));
   pixelTrack::TrackSoALayout soa_layout_h(soa_buffer_h.get(), soa_layout_d.metadata().size());
-  pixelTrack::TrackSoAView soa_view_h(soa_layout_h);
+  pixelTrack::TrackSoAView soa_view_h(soa_layout_h);*/
 
   // // Allocate enough host memory to fit the SoA data in the input view
   // auto soa_buffer_host = cms::cuda::make_host_unique<std::byte[]>(soa_.layout()., ctx.stream());
@@ -79,7 +79,7 @@ void PixelTrackSoAFromCUDA::acquire(edm::Event const& iEvent,
 
 void PixelTrackSoAFromCUDA::produce(edm::Event& iEvent, edm::EventSetup const& iSetup) {
   // check that the fixed-size SoA does not overflow
-  auto maxTracks = soa_layout_h.metadata().size();
+  auto maxTracks = soa_view_h.metadata().size();
   auto nTracks = soa_view_h.nTracks();
   assert(nTracks < maxTracks);
   if (nTracks == maxTracks - 1) {
@@ -88,8 +88,8 @@ void PixelTrackSoAFromCUDA::produce(edm::Event& iEvent, edm::EventSetup const& i
   }
 
 #ifdef PIXEL_DEBUG_PRODUCE
-  std::cout << "size of SoA " << soa_layout_h.metadata().byteSize() << " stride " << maxTracks << std::endl;
-  std::cout << "found " << nTracks << " tracks in cpu SoA at " << soa_layout_h.metadata().data() << std::endl;
+  std::cout << " stride " << maxTracks << std::endl;
+  std::cout << "found " << nTracks << std::endl;
 
   int32_t nt = 0;
   for (int32_t it = 0; it < maxTracks; ++it) {

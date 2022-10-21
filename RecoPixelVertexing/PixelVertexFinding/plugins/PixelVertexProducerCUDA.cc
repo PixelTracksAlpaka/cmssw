@@ -16,6 +16,7 @@
 #include "FWCore/Utilities/interface/EDGetToken.h"
 #include "FWCore/Utilities/interface/RunningAverage.h"
 #include "HeterogeneousCore/CUDACore/interface/ScopedContext.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
 
 #include "gpuVertexFinder.h"
 
@@ -35,9 +36,9 @@ private:
 
   bool onGPU_;
 
-  edm::EDGetTokenT<cms::cuda::Product<PixelTrackHeterogeneous>> tokenGPUTrack_;
+  edm::EDGetTokenT<cms::cuda::Product<pixelTrack::TrackSoALayout>> tokenGPUTrack_;
   edm::EDPutTokenT<ZVertexCUDAProduct> tokenGPUVertex_;
-  edm::EDGetTokenT<PixelTrackHeterogeneous> tokenCPUTrack_;
+  edm::EDGetTokenT<pixelTrack::TrackSoAView> tokenCPUTrack_;
   edm::EDPutTokenT<ZVertexHeterogeneous> tokenCPUVertex_;
 
   const gpuVertexFinder::Producer gpuAlgo_;
@@ -62,10 +63,10 @@ PixelVertexProducerCUDA::PixelVertexProducerCUDA(const edm::ParameterSet& conf)
 {
   if (onGPU_) {
     tokenGPUTrack_ =
-        consumes<cms::cuda::Product<PixelTrackHeterogeneous>>(conf.getParameter<edm::InputTag>("pixelTrackSrc"));
+        consumes<cms::cuda::Product<pixelTrack::TrackSoALayout>>(conf.getParameter<edm::InputTag>("pixelTrackSrc"));
     tokenGPUVertex_ = produces<ZVertexCUDAProduct>();
   } else {
-    tokenCPUTrack_ = consumes<PixelTrackHeterogeneous>(conf.getParameter<edm::InputTag>("pixelTrackSrc"));
+    tokenCPUTrack_ = consumes<pixelTrack::TrackSoAView>(conf.getParameter<edm::InputTag>("pixelTrackSrc"));
     tokenCPUVertex_ = produces<ZVertexHeterogeneous>();
   }
 }
@@ -97,7 +98,7 @@ void PixelVertexProducerCUDA::fillDescriptions(edm::ConfigurationDescriptions& d
 void PixelVertexProducerCUDA::produceOnGPU(edm::StreamID streamID,
                                            edm::Event& iEvent,
                                            const edm::EventSetup& iSetup) const {
-  edm::Handle<cms::cuda::Product<PixelTrackHeterogeneous>> hTracks;
+  edm::Handle<cms::cuda::Product<pixelTrack::TrackSoALayout>> hTracks;
   iEvent.getByToken(tokenGPUTrack_, hTracks);
 
   cms::cuda::ScopedContextProduce ctx{*hTracks};

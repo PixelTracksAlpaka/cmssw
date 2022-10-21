@@ -43,7 +43,7 @@ private:
   // GPU
   // Produces a view on GPU, which is used by PixelTrackSoAFromCUDA
   edm::EDGetTokenT<cms::cuda::Product<TrackingRecHit2DGPU>> tokenHitGPU_;
-  edm::EDPutTokenT<cms::cuda::Product<pixelTrack::TrackSoALayout>> tokenTrackGPU_;
+  edm::EDPutTokenT<pixelTrack::TrackSoAView> tokenTrackGPU_;
 
   // CPU
   // Produces a view on CPU, which is used by PixelTrackProducerFromSoA
@@ -58,7 +58,7 @@ CAHitNtupletCUDA::CAHitNtupletCUDA(const edm::ParameterSet& iConfig)
   if (onGPU_) {
     tokenHitGPU_ =
         consumes<cms::cuda::Product<TrackingRecHit2DGPU>>(iConfig.getParameter<edm::InputTag>("pixelRecHitSrc"));
-    tokenTrackGPU_ = produces<cms::cuda::Product<pixelTrack::TrackSoALayout>>();
+    tokenTrackGPU_ = produces<pixelTrack::TrackSoAView>();
   } else {
     tokenHitCPU_ = consumes<TrackingRecHit2DCPU>(iConfig.getParameter<edm::InputTag>("pixelRecHitSrc"));
     tokenTrackCPU_ = produces<pixelTrack::TrackSoAView>();

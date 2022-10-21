@@ -48,7 +48,7 @@ public:
   void endJob();
 
   // On GPU
-  pixelTrack::TrackSoALayout makeTuplesAsync(TrackingRecHit2DGPU const& hits_d,
+  pixelTrack::TrackSoAView makeTuplesAsync(TrackingRecHit2DGPU const& hits_d,
                                              float bfield,
                                              cudaStream_t stream) const;
 
