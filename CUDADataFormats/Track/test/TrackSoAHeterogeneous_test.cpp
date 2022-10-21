@@ -7,7 +7,7 @@
    the CUDA kernels which:
    - Fill the SoA with data.
    - Verify that the data written is correct.
-   
+
    Then, the SoA data are copied back to Host, where
    a temporary host-side view (tmp_view) is created using
    the same Layout to access the data on host and print it.
@@ -36,17 +36,13 @@ int main() {
     // Instantiate tracks on host. Portabledevicecollection allocates
     // SoA on device automatically.
     pixelTrack::TrackSoA tracks(stream);
-    uint32_t soaSize = tracks.bufferSize();               // SoA Layout size (bytes)
     uint32_t soaNumElements = tracks->metadata().size();  // Length of each SoA array in elements
 
     // Run the tests
     testTrackSoAHeterogeneousT::runKernels(tracks.view());
 
-    // Copy SoA data back to host
-    auto tracks_h_soa = cms::cuda::make_host_unique<std::byte[]>(soaSize, stream);
-    cudaCheck(cudaMemcpy(tracks_h_soa.get(), tracks.const_buffer().get(), soaSize, cudaMemcpyDeviceToHost));
-
     // Create a view to access the copied data
+    auto tracks_h_soa = tracks.copyToHost(stream);
     TrackSoAHeterogeneousT_test<> tmp_layout(tracks_h_soa.get(), soaNumElements);
     TrackSoAHeterogeneousT_test<>::View tmp_view(tmp_layout);
 

@@ -11,6 +11,10 @@
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 #include "CUDADataFormats/Common/interface/HeterogeneousSoA.h"
 #include "CUDADataFormats/Common/interface/PortableDeviceCollection.h"
+#include "HeterogeneousCore/CUDAUtilities/interface/requireDevices.h"
+#include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
+#include "HeterogeneousCore/CUDAUtilities/interface/allocate_device.h"
+#include "HeterogeneousCore/CUDAUtilities/interface/allocate_host.h"
 
 namespace pixelTrack {
   enum class Quality : uint8_t { bad = 0, edup, dup, loose, strict, tight, highPurity, notQuality };
@@ -147,11 +151,19 @@ public:
   // Constructor which specifies the SoA size
   explicit TrackSoAHeterogeneousT(cudaStream_t stream)
       : PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>(S, stream) {}
+
+  // Copy data from device to host
+  __host__ cms::cuda::host::unique_ptr<std::byte[]> copyToHost(cudaStream_t stream) {
+    auto tracks_h_soa = cms::cuda::make_host_unique<std::byte[]>(bufferSize(), stream);
+    cudaCheck(cudaMemcpy(tracks_h_soa.get(), const_buffer().get(), bufferSize(), cudaMemcpyDeviceToHost));
+    return tracks_h_soa;
+  }
 };
 
 namespace pixelTrack {
 
   using TrackSoA = TrackSoAHeterogeneousT<maxNumber()>;
+  using TrackSoALayout = TrackSoAHeterogeneousT_test<>;
   using TrackSoAView = TrackSoAHeterogeneousT_test<>::View;
   using TrackSoAConstView = TrackSoAHeterogeneousT_test<>::ConstView;
 
