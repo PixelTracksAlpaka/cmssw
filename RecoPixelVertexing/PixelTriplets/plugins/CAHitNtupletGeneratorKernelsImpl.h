@@ -338,7 +338,7 @@ __global__ void kernel_find_ntuplets(GPUCACell::Hits const *__restrict__ hhp,
                                      GPUCACell *__restrict__ cells,
                                      uint32_t const *nCells,
                                      gpuPixelDoublets::CellTracksVector *cellTracks,
-                                     pixelTrack::TrackSoaView tracks_view,
+                                     TkSoAView tracks_view,
                                      cms::cuda::AtomicPairCounter *apc,
                                      unsigned int minHitsPerNtuplet) {
   // recursive: not obvious to widen
@@ -575,7 +575,7 @@ __global__ void kernel_fillNLayers(TkSoAView tracks_view, cms::cuda::AtomicPairC
   for (int idx = first, nt = ntracks; idx < nt; idx += gridDim.x * blockDim.x) {
     auto nHits = pixelTrack::nHits(tracks_view, idx);
     assert(nHits >= 3);
-    tracks_view[idx].nLayers() = pixelTrack::computeNumberOfLayers(tracks_view, idx);
+    tracks_view[idx].nLayers() = pixelTrack::utilities::computeNumberOfLayers(tracks_view, idx);
   }
 }
 

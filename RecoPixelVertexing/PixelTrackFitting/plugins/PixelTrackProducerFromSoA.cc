@@ -154,9 +154,9 @@ void PixelTrackProducerFromSoA::produce(edm::StreamID streamID,
 
   const auto &tsoa = *iEvent.get(tokenTrack_);
 
-  auto const *quality = tsoa.qualityData();
+  auto const *quality = pixelTrack::utilities::qualityData(tsoa.view());
   // auto const &fit = tsoa.stateAtBS;
-  auto const &hitIndices = tsoa.hitIndices;
+  auto const &hitIndices = tsoa.view().hitIndices();
   auto nTracks = tsoa.view().nTracks();
 
   tracks.reserve(nTracks);
@@ -173,7 +173,7 @@ void PixelTrackProducerFromSoA::produce(edm::StreamID streamID,
   //store the index of the SoA: indToEdm[index_SoAtrack] -> index_edmTrack (if it exists)
   indToEdm.resize(sortIdxs.size(), -1);
   for (const auto &it : sortIdxs) {
-    auto nHits = tsoa.nHits(it);
+    auto nHits = pixelTrack::utilities::nHits(tsoa.view(), it);
     assert(nHits >= 3);
     auto q = quality[it];
     if (q < minQuality_)
