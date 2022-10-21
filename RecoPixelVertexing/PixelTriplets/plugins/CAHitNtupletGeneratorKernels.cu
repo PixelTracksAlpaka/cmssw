@@ -4,12 +4,10 @@
 template <>
 void CAHitNtupletGeneratorKernelsGPU::launchKernels(HitsOnCPU const &hh, TkSoA *tracks_d, cudaStream_t cudaStream) {
   // these are pointer on GPU!
-  // auto *tuples_d = &tracks_d->hitIndices();
-  auto *detId_d = tracks_d->view().detIndices();
-  auto *quality_d = tracks_d->qualityData();
+  auto *quality_d = pixelTrack::utilities::qualityData(tracks_d->view());
 
   // zero tuples
-  cms::cuda::launchZero(tracks_d->view().hitIndices(), cudaStream);
+  cms::cuda::launchZero(&(tracks_d->view().hitIndices()), cudaStream);
 
   int32_t nhits = hh.nHits();
 
@@ -87,12 +85,11 @@ void CAHitNtupletGeneratorKernelsGPU::launchKernels(HitsOnCPU const &hh, TkSoA *
   blockSize = 128;
   numberOfBlocks = (HitContainer::ctNOnes() + blockSize - 1) / blockSize;
   cms::cuda::finalizeBulk<<<numberOfBlocks, blockSize, 0, cudaStream>>>(device_hitTuple_apc_,
-                                                                        tracks_d->view().hitIndices());
+                                                                        &tracks_d->view().hitIndices());
 
-  kernel_fillHitDetIndices<<<numberOfBlocks, blockSize, 0, cudaStream>>>(
-      tracks_d->view().hitIndices(), hh.view(), tracks_d->view().detIndices());
+  kernel_fillHitDetIndices<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tracks_d->view(), hh.view());
   cudaCheck(cudaGetLastError());
-  kernel_fillNLayers<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tracks_d, tracks_d->view(), device_hitTuple_apc_);
+  kernel_fillNLayers<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tracks_d->view(), device_hitTuple_apc_);
   cudaCheck(cudaGetLastError());
 
   // remove duplicates (tracks that share a doublet)
@@ -225,8 +222,7 @@ void CAHitNtupletGeneratorKernelsGPU::buildDoublets(HitsOnCPU const &hh, cudaStr
 template <>
 void CAHitNtupletGeneratorKernelsGPU::classifyTuples(HitsOnCPU const &hh, TkSoA *tracks_d, cudaStream_t cudaStream) {
   // these are pointer on GPU!
-  // auto const *tuples_d = &tracks_d->hitIndices;
-  auto *quality_d = tracks_d->qualityData();
+  auto *quality_d = pixelTrack::utilities::qualityData(tracks_d->view());
 
   int32_t nhits = hh.nHits();
 
@@ -318,7 +314,7 @@ void CAHitNtupletGeneratorKernelsGPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
     kernel_doStatsForHitInTracks<<<numberOfBlocks, blockSize, 0, cudaStream>>>(device_hitToTuple_.get(), counters_);
     cudaCheck(cudaGetLastError());
     numberOfBlocks = (3 * caConstants::maxNumberOfQuadruplets / 4 + blockSize - 1) / blockSize;
-    kernel_doStatsForTracks<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tuples_d, quality_d, counters_);
+    kernel_doStatsForTracks<<<numberOfBlocks, blockSize, 0, cudaStream>>>(tracks_d->view(), quality_d, counters_);
     cudaCheck(cudaGetLastError());
   }
 #ifdef GPU_DEBUG
@@ -334,11 +330,11 @@ void CAHitNtupletGeneratorKernelsGPU::classifyTuples(HitsOnCPU const &hh, TkSoA 
     ++iev;
     for (int k = 0; k < 20000; k += 500) {
       kernel_print_found_ntuplets<<<1, 32, 0, cudaStream>>>(
-          hh.view(), tuples_d, tracks_d->view(), device_hitToTuple_.get(), k, k + 500, iev);
+          hh.view(), tracks_d->view(), device_hitToTuple_.get(), k, k + 500, iev);
       cudaDeviceSynchronize();
     }
     kernel_print_found_ntuplets<<<1, 32, 0, cudaStream>>>(
-        hh.view(), tuples_d, tracks_d->view(), device_hitToTuple_.get(), 20000, 1000000, iev);
+        hh.view(), tracks_d->view(), device_hitToTuple_.get(), 20000, 1000000, iev);
     cudaDeviceSynchronize();
     // cudaStreamSynchronize(cudaStream);
   }

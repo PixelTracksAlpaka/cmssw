@@ -1,10 +1,8 @@
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 #include "HelixFitOnGPU.h"
 
-void HelixFitOnGPU::allocateOnGPU(Tuples const *tuples,
-                                  TupleMultiplicity const *tupleMultiplicity,
-                                  OutputSoAView helix_fit_results) {
-  tuples_ = tuples;
+void HelixFitOnGPU::allocateOnGPU(TupleMultiplicity const *tupleMultiplicity, OutputSoAView helix_fit_results) {
+  tuples_ = &helix_fit_results.hitIndices();
   tupleMultiplicity_ = tupleMultiplicity;
   outputSoa_ = helix_fit_results;
 

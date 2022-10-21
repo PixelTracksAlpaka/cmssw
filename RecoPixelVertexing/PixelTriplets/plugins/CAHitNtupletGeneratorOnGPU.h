@@ -47,9 +47,9 @@ public:
   void beginJob();
   void endJob();
 
-  pixelTrack::TrackSoA makeTuplesAsync(TrackingRecHit2DGPU const& hits_d, float bfield, cudaStream_t stream) const;
+  pixelTrack::TrackSoAView makeTuplesAsync(TrackingRecHit2DGPU const& hits_d, float bfield, cudaStream_t stream) const;
 
-  pixelTrack::TrackSoA makeTuples(TrackingRecHit2DCPU const& hits_d, float bfield) const;
+  pixelTrack::TrackSoAView makeTuples(TrackingRecHit2DCPU const& hits_d, float bfield) const;
 
 private:
   void buildDoublets(HitsOnCPU const& hh, cudaStream_t stream) const;

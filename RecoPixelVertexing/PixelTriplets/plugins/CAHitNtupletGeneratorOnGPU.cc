@@ -190,9 +190,9 @@ void CAHitNtupletGeneratorOnGPU::endJob() {
                                                                     float bfield,
                                                                     cudaStream_t stream) const {
   PixelTrackHeterogeneous tracks(cms::cuda::make_device_unique<pixelTrack::TrackSoA>(stream));*/
-  pixelTrack::TrackSoA CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DGPU const& hits_d,
-                                                                      float bfield,
-                                                                      cudaStream_t stream) const {
+pixelTrack::TrackSoAView CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DGPU const& hits_d,
+                                                                     float bfield,
+                                                                     cudaStream_t stream) const {
   pixelTrack::TrackSoA tracks(stream);
   auto* soa = &tracks;
 
@@ -204,7 +204,7 @@ void CAHitNtupletGeneratorOnGPU::endJob() {
   kernels.launchKernels(hits_d, soa, stream);
 
   HelixFitOnGPU fitter(bfield, m_params.fitNas4_);
-  fitter.allocateOnGPU(&(soa->hitIndices), kernels.tupleMultiplicity(), soa->view());
+  fitter.allocateOnGPU(kernels.tupleMultiplicity(), soa->view());
   if (m_params.useRiemannFit_) {
     fitter.launchRiemannKernels(hits_d.view(), hits_d.nHits(), caConstants::maxNumberOfQuadruplets, stream);
   } else {
@@ -218,10 +218,10 @@ void CAHitNtupletGeneratorOnGPU::endJob() {
   std::cout << "finished building pixel tracks on GPU" << std::endl;
 #endif
 
-  return tracks;
+  return tracks.view();
 }
 
-pixelTrack::TrackSoA CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2DCPU const& hits_d, float bfield) const {
+pixelTrack::TrackSoAView CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2DCPU const& hits_d, float bfield) const {
   //PixelTrackHeterogeneous tracks(std::make_unique<pixelTrack::TrackSoA>());
   pixelTrack::TrackSoA tracks;
 
@@ -236,11 +236,11 @@ pixelTrack::TrackSoA CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2DCPU 
   kernels.launchKernels(hits_d, soa, nullptr);
 
   if (0 == hits_d.nHits())
-    return tracks;
+    return tracks.view();
 
   // now fit
   HelixFitOnGPU fitter(bfield, m_params.fitNas4_);
-  fitter.allocateOnGPU(&(soa->view().hitIndices()), kernels.tupleMultiplicity(), soa->view());
+  fitter.allocateOnGPU(kernels.tupleMultiplicity(), soa->view());
 
   if (m_params.useRiemannFit_) {
     fitter.launchRiemannKernelsOnCPU(hits_d.view(), hits_d.nHits(), caConstants::maxNumberOfQuadruplets);
@@ -264,5 +264,5 @@ pixelTrack::TrackSoA CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2DCPU 
                                    << " candidates";
   }
 
-  return tracks;
+  return tracks.view();
 }
