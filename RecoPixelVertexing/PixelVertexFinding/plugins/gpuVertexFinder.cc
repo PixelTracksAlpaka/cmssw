@@ -18,27 +18,24 @@ namespace gpuVertexFinder {
   // split vertices with a chi2/NDoF greater than this
   constexpr float maxChi2ForSplit = 9.f;
 
-  __global__ void loadTracks(TkSoA const* ptracks, ZVertexSoA* soa, WorkSpace* pws, float ptMin, float ptMax) {
-    assert(ptracks);
+  __global__ void loadTracks(TkSoAView tracks_view, ZVertexSoA* soa, WorkSpace* pws, float ptMin, float ptMax) {
     assert(soa);
-    auto const& tracks = *ptracks;
-    auto const& fit = tracks.stateAtBS;
-    auto const* quality = tracks.qualityData();
+    auto const* quality = pixelTrack::utilities::qualityData(tracks_view);
 
     auto first = blockIdx.x * blockDim.x + threadIdx.x;
-    for (int idx = first, nt = tracks.nTracks(); idx < nt; idx += gridDim.x * blockDim.x) {
-      auto nHits = tracks.nHits(idx);
+    for (int idx = first, nt = tracks_view.nTracks(); idx < nt; idx += gridDim.x * blockDim.x) {
+      auto nHits = pixelTrack::utilities::nHits(tracks_view, idx);
       assert(nHits >= 3);
 
       // initialize soa...
       soa->idv[idx] = -1;
 
-      if (tracks.isTriplet(idx))
+      if (pixelTrack::utilities::isTriplet(tracks_view, idx))
         continue;  // no triplets
       if (quality[idx] < pixelTrack::Quality::highPurity)
         continue;
 
-      auto pt = tracks.pt(idx);
+      auto pt = tracks_view[idx].pt();
 
       if (pt < ptMin)
         continue;
@@ -49,8 +46,8 @@ namespace gpuVertexFinder {
       auto& data = *pws;
       auto it = atomicAdd(&data.ntrks, 1);
       data.itrk[it] = idx;
-      data.zt[it] = tracks.zip(idx);
-      data.ezt2[it] = fit.covariance(idx)(14);
+      data.zt[it] = pixelTrack::utilities::zip(tracks_view, idx);
+      data.ezt2[it] = tracks_view[idx].covariance()(14);
       data.ptt2[it] = pt * pt;
     }
   }
@@ -95,19 +92,19 @@ namespace gpuVertexFinder {
 #endif
 
 #ifdef __CUDACC__
-  ZVertexHeterogeneous Producer::makeAsync(cudaStream_t stream, TkSoA const* tksoa, float ptMin, float ptMax) const {
+  ZVertexHeterogeneous Producer::makeAsync(cudaStream_t stream, TkSoAView tracks_view, float ptMin, float ptMax) const {
 #ifdef PIXVERTEX_DEBUG_PRODUCE
     std::cout << "producing Vertices on GPU" << std::endl;
 #endif  // PIXVERTEX_DEBUG_PRODUCE
     ZVertexHeterogeneous vertices(cms::cuda::make_device_unique<ZVertexSoA>(stream));
 #else
-  ZVertexHeterogeneous Producer::make(TkSoA const* tksoa, float ptMin, float ptMax) const {
+  ZVertexHeterogeneous Producer::make(TkSoAView tracks_view, float ptMin, float ptMax) const {
 #ifdef PIXVERTEX_DEBUG_PRODUCE
     std::cout << "producing Vertices on  CPU" << std::endl;
 #endif  // PIXVERTEX_DEBUG_PRODUCE
     ZVertexHeterogeneous vertices(std::make_unique<ZVertexSoA>());
 #endif
-    assert(tksoa);
+    // assert(tksoa);
     auto* soa = vertices.get();
     assert(soa);
 
@@ -120,12 +117,12 @@ namespace gpuVertexFinder {
 #ifdef __CUDACC__
     init<<<1, 1, 0, stream>>>(soa, ws_d.get());
     auto blockSize = 128;
-    auto numberOfBlocks = (TkSoA::stride() + blockSize - 1) / blockSize;
-    loadTracks<<<numberOfBlocks, blockSize, 0, stream>>>(tksoa, soa, ws_d.get(), ptMin, ptMax);
+    auto numberOfBlocks = (tracks_view.metadata().size() + blockSize - 1) / blockSize;
+    loadTracks<<<numberOfBlocks, blockSize, 0, stream>>>(tracks_view, soa, ws_d.get(), ptMin, ptMax);
     cudaCheck(cudaGetLastError());
 #else
     init(soa, ws_d.get());
-    loadTracks(tksoa, soa, ws_d.get(), ptMin, ptMax);
+    loadTracks(tracks_view, soa, ws_d.get(), ptMin, ptMax);
 #endif
 
 #ifdef __CUDACC__

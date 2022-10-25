@@ -11,6 +11,7 @@ namespace gpuVertexFinder {
 
   using ZVertices = ZVertexSoA;
   using TkSoA = pixelTrack::TrackSoA;
+  using TkSoAView = pixelTrack::TrackSoAView;
 
   // workspace used in the vertex reco algos
   struct WorkSpace {
@@ -42,7 +43,6 @@ namespace gpuVertexFinder {
   public:
     using ZVertices = ZVertexSoA;
     using WorkSpace = gpuVertexFinder::WorkSpace;
-    using TkSoA = pixelTrack::TrackSoA;
 
     Producer(bool oneKernel,
              bool useDensity,
@@ -64,8 +64,8 @@ namespace gpuVertexFinder {
 
     ~Producer() = default;
 
-    ZVertexHeterogeneous makeAsync(cudaStream_t stream, TkSoA const* tksoa, float ptMin, float ptMax) const;
-    ZVertexHeterogeneous make(TkSoA const* tksoa, float ptMin, float ptMax) const;
+    ZVertexHeterogeneous makeAsync(cudaStream_t stream, TkSoAView tracks_view, float ptMin, float ptMax) const;
+    ZVertexHeterogeneous make(TkSoAView tracks_view, float ptMin, float ptMax) const;
 
   private:
     const bool oneKernel_;
