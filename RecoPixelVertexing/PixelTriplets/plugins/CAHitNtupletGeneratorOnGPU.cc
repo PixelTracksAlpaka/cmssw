@@ -191,8 +191,8 @@ void CAHitNtupletGeneratorOnGPU::endJob() {
                                                                     cudaStream_t stream) const {
   PixelTrackHeterogeneous tracks(cms::cuda::make_device_unique<pixelTrack::TrackSoA>(stream));*/
 pixelTrack::TrackSoAView CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DGPU const& hits_d,
-                                                                       float bfield,
-                                                                       cudaStream_t stream) const {
+                                                                     float bfield,
+                                                                     cudaStream_t stream) const {
   pixelTrack::TrackSoA tracks(stream);
   auto* soa = &tracks;
 
@@ -201,7 +201,7 @@ pixelTrack::TrackSoAView CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRec
   kernels.allocateOnGPU(hits_d.nHits(), stream);
 
   kernels.buildDoublets(hits_d, stream);
-  kernels.launchKernels(hits_d, soa, stream);
+  kernels.launchKernels(hits_d, soa->view(), stream);
 
   HelixFitOnGPU fitter(bfield, m_params.fitNas4_);
   fitter.allocateOnGPU(kernels.tupleMultiplicity(), soa->view());
@@ -210,7 +210,7 @@ pixelTrack::TrackSoAView CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRec
   } else {
     fitter.launchBrokenLineKernels(hits_d.view(), hits_d.nHits(), caConstants::maxNumberOfQuadruplets, stream);
   }
-  kernels.classifyTuples(hits_d, soa, stream);
+  kernels.classifyTuples(hits_d, soa->view(), stream);
 
 #ifdef GPU_DEBUG
   cudaDeviceSynchronize();
@@ -223,9 +223,12 @@ pixelTrack::TrackSoAView CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRec
 
 pixelTrack::TrackSoAView CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2DCPU const& hits_d, float bfield) const {
   //PixelTrackHeterogeneous tracks(std::make_unique<pixelTrack::TrackSoA>());
-  pixelTrack::TrackSoA tracks;
+  // pixelTrack::TrackSoA tracks;
 
-  auto* soa = &tracks;
+  auto tracks_h_soa =
+      std::make_unique<std::byte[]>(TrackSoAHeterogeneousLayout<>::computeDataSize(pixelTrack::maxNumber()));
+  TrackSoAHeterogeneousLayout<> tracks_layout(tracks_h_soa.get(), pixelTrack::maxNumber());
+  TrackSoAHeterogeneousLayout<>::View tracks_view(tracks_layout);
   //assert(soa);
 
   CAHitNtupletGeneratorKernelsCPU kernels(m_params);
@@ -233,14 +236,14 @@ pixelTrack::TrackSoAView CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2D
   kernels.allocateOnGPU(hits_d.nHits(), nullptr);
 
   kernels.buildDoublets(hits_d, nullptr);
-  kernels.launchKernels(hits_d, soa, nullptr);
+  kernels.launchKernels(hits_d, tracks_view, nullptr);
 
   if (0 == hits_d.nHits())
-    return tracks.view();
+    return tracks_view;
 
   // now fit
   HelixFitOnGPU fitter(bfield, m_params.fitNas4_);
-  fitter.allocateOnGPU(kernels.tupleMultiplicity(), soa->view());
+  fitter.allocateOnGPU(kernels.tupleMultiplicity(), tracks_view);
 
   if (m_params.useRiemannFit_) {
     fitter.launchRiemannKernelsOnCPU(hits_d.view(), hits_d.nHits(), caConstants::maxNumberOfQuadruplets);
@@ -248,7 +251,7 @@ pixelTrack::TrackSoAView CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2D
     fitter.launchBrokenLineKernelsOnCPU(hits_d.view(), hits_d.nHits(), caConstants::maxNumberOfQuadruplets);
   }
 
-  kernels.classifyTuples(hits_d, soa, nullptr);
+  kernels.classifyTuples(hits_d, tracks_view, nullptr);
 
 #ifdef GPU_DEBUG
   std::cout << "finished building pixel tracks on CPU" << std::endl;
@@ -256,13 +259,13 @@ pixelTrack::TrackSoAView CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2D
 
   // check that the fixed-size SoA does not overflow
 
-  auto maxTracks = soa->view().metadata().size();
-  auto nTracks = soa->view().nTracks();
+  auto maxTracks = tracks_view.metadata().size();
+  auto nTracks = tracks_view.nTracks();
   assert(nTracks < maxTracks);
   if (nTracks == maxTracks - 1) {
     edm::LogWarning("PixelTracks") << "Unsorted reconstructed pixel tracks truncated to " << maxTracks - 1
                                    << " candidates";
   }
 
-  return tracks.view();
+  return tracks_view;
 }

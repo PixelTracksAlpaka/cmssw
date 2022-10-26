@@ -153,8 +153,9 @@ public:
       : PortableDeviceCollection<TrackSoAHeterogeneousLayout<>>(S, stream) {}
 
   // Copy data from device to host
-  __host__ cms::cuda::host::unique_ptr<std::byte[]> copyToHost(cudaStream_t stream) {
-    auto tracks_h_soa = cms::cuda::make_host_unique<std::byte[]>(bufferSize(), stream);
+  // Copy data from device to host
+  __host__ std::unique_ptr<std::byte[]> copyToHost(cudaStream_t stream) {
+    auto tracks_h_soa = std::make_unique<std::byte[]>(bufferSize());
     cudaCheck(cudaMemcpy(tracks_h_soa.get(), const_buffer().get(), bufferSize(), cudaMemcpyDeviceToHost));
     return tracks_h_soa;
   }
