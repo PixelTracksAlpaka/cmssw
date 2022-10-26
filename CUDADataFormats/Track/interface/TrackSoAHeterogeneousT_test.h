@@ -43,7 +43,7 @@ using Vector5f = Eigen::Matrix<float, 5, 1>;
 using Vector15f = Eigen::Matrix<float, 15, 1>;
 using HitContainer = pixelTrack::HitContainer;
 
-GENERATE_SOA_LAYOUT(TrackSoAHeterogeneousT_test,
+GENERATE_SOA_LAYOUT(TrackSoAHeterogeneousLayout,
                     SOA_COLUMN(uint8_t, quality),
                     SOA_COLUMN(float, chi2),  // this is chi2/ndof as not necessarely all hits are used in the fit
                     SOA_COLUMN(int8_t, nLayers),
@@ -59,8 +59,8 @@ GENERATE_SOA_LAYOUT(TrackSoAHeterogeneousT_test,
 // They operate on View and ConstView of the TrackSoA.
 namespace pixelTrack {
   namespace utilities {
-    using TrackSoAView = TrackSoAHeterogeneousT_test<>::View;
-    using TrackSoAConstView = TrackSoAHeterogeneousT_test<>::ConstView;
+    using TrackSoAView = TrackSoAHeterogeneousLayout<>::View;
+    using TrackSoAConstView = TrackSoAHeterogeneousLayout<>::ConstView;
     using Quality = pixelTrack::Quality;
     using hindex_type = uint32_t;
     // State at the Beam spot
@@ -144,13 +144,13 @@ namespace pixelTrack {
 }  // namespace pixelTrack
 
 template <int32_t S>
-class TrackSoAHeterogeneousT : public cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>> {
+class TrackSoAHeterogeneousT : public cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousLayout<>> {
 public:
   TrackSoAHeterogeneousT() = default;
 
   // Constructor which specifies the SoA size
   explicit TrackSoAHeterogeneousT(cudaStream_t stream)
-      : PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>(S, stream) {}
+      : PortableDeviceCollection<TrackSoAHeterogeneousLayout<>>(S, stream) {}
 
   // Copy data from device to host
   __host__ cms::cuda::host::unique_ptr<std::byte[]> copyToHost(cudaStream_t stream) {
@@ -163,9 +163,9 @@ public:
 namespace pixelTrack {
 
   using TrackSoA = TrackSoAHeterogeneousT<maxNumber()>;
-  using TrackSoALayout = TrackSoAHeterogeneousT_test<>;
-  using TrackSoAView = TrackSoAHeterogeneousT_test<>::View;
-  using TrackSoAConstView = TrackSoAHeterogeneousT_test<>::ConstView;
+  using TrackSoALayout = TrackSoAHeterogeneousLayout<>;
+  using TrackSoAView = TrackSoAHeterogeneousLayout<>::View;
+  using TrackSoAConstView = TrackSoAHeterogeneousLayout<>::ConstView;
 
 }  // namespace pixelTrack
 

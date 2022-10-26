@@ -43,8 +43,8 @@ int main() {
 
     // Create a view to access the copied data
     auto tracks_h_soa = tracks.copyToHost(stream);
-    TrackSoAHeterogeneousT_test<> tmp_layout(tracks_h_soa.get(), soaNumElements);
-    TrackSoAHeterogeneousT_test<>::View tmp_view(tmp_layout);
+    TrackSoAHeterogeneousLayout<> tmp_layout(tracks_h_soa.get(), soaNumElements);
+    TrackSoAHeterogeneousLayout<>::View tmp_view(tmp_layout);
 
     // Print results
     std::cout << "pt"
