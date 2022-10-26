@@ -1,8 +1,4 @@
 <lcgdict>
   <class name="IntermediateHitTriplets" persistent="false"/>
   <class name="edm::Wrapper<IntermediateHitTriplets>" persistent="false"/>
-  <class name="pixelTrack::TrackSoAView" persistent="false"/>
-  <class name="edm::Wrapper<pixelTrack::TrackSoAView>" persistent="false"/>
-  <!-- <class name="cms::cuda::Product<pixelTrack::TrackSoAView>" persistent="false"/> -->
-  <!-- <class name="edm::Wrapper<cms::cuda::Product<pixelTrack::TrackSoAView>>" persistent="false"/> -->
 </lcgdict>
