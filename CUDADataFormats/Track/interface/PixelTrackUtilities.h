@@ -55,21 +55,21 @@ namespace pixelTrack {
     using hindex_type = uint32_t;
     // State at the Beam spot
     // phi,tip,1/pt,cotan(theta),zip
-    __host__ __device__ inline float charge(TrackSoAConstView tracks, int32_t i) {
+    __host__ __device__ inline float charge(TrackSoAConstView &tracks, int32_t i) {
       return std::copysign(1.f, tracks[i].state()(2));
     }
 
-    __host__ __device__ inline float phi(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(0); }
+    __host__ __device__ inline float phi(TrackSoAConstView &tracks, int32_t i) { return tracks[i].state()(0); }
 
-    __host__ __device__ inline float tip(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(1); }
+    __host__ __device__ inline float tip(TrackSoAConstView &tracks, int32_t i) { return tracks[i].state()(1); }
 
-    __host__ __device__ inline float zip(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(4); }
+    __host__ __device__ inline float zip(TrackSoAConstView &tracks, int32_t i) { return tracks[i].state()(4); }
 
-    __host__ __device__ inline bool isTriplet(TrackSoAConstView tracks, int i) { return tracks[i].nLayers() == 3; }
+    __host__ __device__ inline bool isTriplet(TrackSoAConstView &tracks, int i) { return tracks[i].nLayers() == 3; }
 
     template <typename V3, typename M3, typename V2, typename M2>
     __host__ __device__ inline void copyFromCircle(
-        TrackSoAView tracks, V3 const &cp, M3 const &ccov, V2 const &lp, M2 const &lcov, float b, int32_t i) {
+        TrackSoAView &tracks, V3 const &cp, M3 const &ccov, V2 const &lp, M2 const &lcov, float b, int32_t i) {
       tracks[i].state() << cp.template cast<float>(), lp.template cast<float>();
 
       tracks[i].state()(2) = tracks[i].state()(2) * b;
@@ -89,7 +89,7 @@ namespace pixelTrack {
     }
 
     template <typename V5, typename M5>
-    __host__ __device__ inline void copyFromDense(TrackSoAView tracks, V5 const &v, M5 const &cov, int32_t i) {
+    __host__ __device__ inline void copyFromDense(TrackSoAView &tracks, V5 const &v, M5 const &cov, int32_t i) {
       tracks[i].state() = v.template cast<float>();
       for (int j = 0, ind = 0; j < 5; ++j)
         for (auto k = j; k < 5; ++k)
@@ -97,7 +97,7 @@ namespace pixelTrack {
     }
 
     template <typename V5, typename M5>
-    __host__ __device__ inline void copyToDense(TrackSoAConstView tracks, V5 &v, M5 &cov, int32_t i) {
+    __host__ __device__ inline void copyToDense(TrackSoAConstView &tracks, V5 &v, M5 &cov, int32_t i) {
       v = tracks[i].state().template cast<typename V5::Scalar>();
       for (int j = 0, ind = 0; j < 5; ++j) {
         cov(j, j) = tracks[i].covariance()(ind++);
@@ -107,7 +107,7 @@ namespace pixelTrack {
     }
 
     // TODO: Not using TrackSoAConstView due to weird bugs with HitContainer
-    __host__ __device__ inline int computeNumberOfLayers(TrackSoAView tracks, int32_t i) {
+    __host__ __device__ inline int computeNumberOfLayers(TrackSoAView &tracks, int32_t i) {
       auto pdet = tracks.detIndices().begin(i);
       int nl = 1;
       auto ol = phase1PixelTopology::getLayer(*pdet);
@@ -119,14 +119,14 @@ namespace pixelTrack {
       }
       return nl;
     }
-    __host__ __device__ inline int nHits(TrackSoAConstView tracks, int i) { return tracks.detIndices().size(i); }
+    __host__ __device__ inline int nHits(TrackSoAConstView &tracks, int i) { return tracks.detIndices().size(i); }
 
     // Casts quality SoA data (uint8_t) to pixelTrack::Quality. This is required
     // to use the data as an enum instead of a plain uint8_t
-    __host__ __device__ inline const Quality *qualityData(TrackSoAConstView tracks) {
+    __host__ __device__ inline const Quality *qualityData(TrackSoAConstView &tracks) {
       return reinterpret_cast<Quality const *>(tracks.quality());
     }
-    __host__ __device__ inline Quality *qualityData(TrackSoAView tracks) {
+    __host__ __device__ inline Quality *qualityData(TrackSoAView &tracks) {
       return reinterpret_cast<Quality *>(tracks.quality());
     }
 

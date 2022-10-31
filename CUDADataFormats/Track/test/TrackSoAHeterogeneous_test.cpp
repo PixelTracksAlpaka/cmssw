@@ -69,8 +69,8 @@ int main() {
               << "hitIndices off" << std::endl;
 
     for (int i = 0; i < 10; ++i) {
-      std::cout << tracks_h.view()[i].pt() << "\t" << tracks_h.view()[i].eta() << "\t" << tracks_h.view()[i].chi2() << "\t"
-                << (int)tracks_h.view()[i].quality() << "\t" << (int)tracks_h.view()[i].nLayers() << "\t"
+      std::cout << tracks_h.view()[i].pt() << "\t" << tracks_h.view()[i].eta() << "\t" << tracks_h.view()[i].chi2()
+                << "\t" << (int)tracks_h.view()[i].quality() << "\t" << (int)tracks_h.view()[i].nLayers() << "\t"
                 << tracks_h.view().hitIndices().off[i] << std::endl;
     }
   }

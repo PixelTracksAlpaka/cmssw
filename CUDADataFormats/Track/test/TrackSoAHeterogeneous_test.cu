@@ -21,8 +21,8 @@ namespace testTrackSoAHeterogeneousT {
     }
   }
 
-  // TODO: Using TrackSoAConstView fails to assert hitIndices correctly
-  __global__ void verify(pixelTrack::TrackSoAConstView tracks_view) {
+  // TODO: Use TrackSoAConstView when https://github.com/cms-sw/cmssw/pull/39919 is merged
+  __global__ void verify(pixelTrack::TrackSoAView tracks_view) {
     int i = threadIdx.x;
 
     if (i == 0) {
@@ -43,6 +43,7 @@ namespace testTrackSoAHeterogeneousT {
     fill<<<1, 1024, 0, stream>>>(tracks_view);
     cudaCheck(cudaGetLastError());
     cudaCheck(cudaDeviceSynchronize());
+
     verify<<<1, 1024, 0, stream>>>(tracks_view);
     cudaCheck(cudaGetLastError());
     cudaCheck(cudaDeviceSynchronize());
