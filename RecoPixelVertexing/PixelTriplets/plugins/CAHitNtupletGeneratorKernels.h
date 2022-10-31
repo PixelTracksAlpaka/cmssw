@@ -3,8 +3,8 @@
 
 // #define GPU_DEBUG
 
-//#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
-#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
+#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
+
 #include "GPUCACell.h"
 
 // #define DUMP_GPU_TK_TUPLES
@@ -35,7 +35,6 @@ namespace cAHitNtupletGenerator {
   using TupleMultiplicity = caConstants::TupleMultiplicity;
 
   using Quality = pixelTrack::Quality;
-  using TkSoA = pixelTrack::TrackSoA;
   using TkSoAView = pixelTrack::TrackSoAView;
   using TkSoAConstView = pixelTrack::TrackSoAConstView;
   using HitContainer = pixelTrack::HitContainer;
@@ -176,7 +175,6 @@ public:
   using TupleMultiplicity = caConstants::TupleMultiplicity;
 
   using Quality = pixelTrack::Quality;
-  using TkSoA = pixelTrack::TrackSoA;
   using TkSoAView = pixelTrack::TrackSoAView;
   using TkSoAConstView = pixelTrack::TrackSoAConstView;
   using HitContainer = pixelTrack::HitContainer;

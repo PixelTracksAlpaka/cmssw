@@ -15,7 +15,7 @@
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cuda_assert.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforGPU.h"
-#include "CUDADataFormats/Track/interface/TrajectoryStateSoAT.h"
+#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 
 #include "CAConstants.h"
 #include "CAHitNtupletGeneratorKernels.h"
@@ -30,7 +30,6 @@ using HitToTuple = caConstants::HitToTuple;
 using TupleMultiplicity = caConstants::TupleMultiplicity;
 
 using Quality = pixelTrack::Quality;
-using TkSoA = pixelTrack::TrackSoA;
 using TkSoAView = pixelTrack::TrackSoAView;
 using TkSoAConstView = pixelTrack::TrackSoAConstView;
 using HitContainer = pixelTrack::HitContainer;
