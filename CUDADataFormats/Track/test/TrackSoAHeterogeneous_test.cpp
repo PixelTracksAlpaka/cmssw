@@ -34,26 +34,15 @@ int main() {
 
   // Inner scope to deallocate memory before destroying the stream
   {
-    // Instantiate tracks on host. Portabledevicecollection allocates
+    // Instantiate tracks on device. PortableDeviceCollection allocates
     // SoA on device automatically.
-    // pixelTrack::TrackSoADevice tracks(stream);
-    // uint32_t soaNumElements = tracks->metadata().size();  // Length of each SoA array in elements
-    //
-    // // Run the tests
-    // testTrackSoAHeterogeneousT::runKernels(tracks.view());
-    //
-    // // Create a view to access the copied data
-    // auto tracks_h_soa = tracks.copyToHost(stream);
-    // TrackSoAHeterogeneousLayout<> tmp_layout(tracks_h_soa.get(), soaNumElements);
-    // TrackSoAHeterogeneousLayout<>::View tmp_view(tmp_layout);
+    pixelTrack::TrackSoADevice tracks_d(stream);
+    testTrackSoAHeterogeneousT::runKernels(tracks_d.view(), stream);
 
-    // pixelTrack::TrackSoAHost tracks_h(stream);
-    // pixelTrack::TrackSoADevice tracks_d(stream);
-    // testTrackSoAHeterogeneousT::runKernels(tracks_d.view());
-    // tracks_d.copyToHost(tracks_h.buffer(), stream);
-
+    // Instantate tracks on host. This is where the data will be
+    // copied to from device.
     pixelTrack::TrackSoAHost tracks_h(stream);
-    testTrackSoAHeterogeneousT::runKernels(tracks_h.view(), stream);
+    tracks_d.copyToHost(tracks_h.buffer(), stream);
 
     // Print results
     std::cout << "pt"
