@@ -187,9 +187,9 @@ public:
 
   TupleMultiplicity const* tupleMultiplicity() const { return device_tupleMultiplicity_.get(); }
 
-  void launchKernels(HitsOnCPU const& hh, TkSoA* tuples_d, cudaStream_t cudaStream);
+  void launchKernels(HitsOnCPU const& hh, TkSoAView tracks_view, cudaStream_t cudaStream);
 
-  void classifyTuples(HitsOnCPU const& hh, TkSoA* tuples_d, cudaStream_t cudaStream);
+  void classifyTuples(HitsOnCPU const& hh, TkSoAView tracks_view, cudaStream_t cudaStream);
 
   void buildDoublets(HitsOnCPU const& hh, cudaStream_t stream);
   void allocateOnGPU(int32_t nHits, cudaStream_t stream);

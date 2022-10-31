@@ -1,6 +1,7 @@
 #ifndef CUDADataFormats_Track_TrackHeterogeneousT_H
 #define CUDADataFormats_Track_TrackHeterogeneousT_H
 
+#include <bits/stdint-uintn.h>
 #include <string>
 #include <algorithm>
 
@@ -10,6 +11,10 @@
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 #include "CUDADataFormats/Common/interface/HeterogeneousSoA.h"
 #include "CUDADataFormats/Common/interface/PortableDeviceCollection.h"
+#include "HeterogeneousCore/CUDAUtilities/interface/requireDevices.h"
+#include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
+#include "HeterogeneousCore/CUDAUtilities/interface/allocate_device.h"
+#include "HeterogeneousCore/CUDAUtilities/interface/allocate_host.h"
 
 namespace pixelTrack {
   enum class Quality : uint8_t { bad = 0, edup, dup, loose, strict, tight, highPurity, notQuality };
@@ -19,15 +24,26 @@ namespace pixelTrack {
     auto qp = std::find(qualityName, qualityName + qualitySize, name) - qualityName;
     return static_cast<Quality>(qp);
   }
+
+#ifdef GPU_SMALL_EVENTS
+  // kept for testing and debugging
+  constexpr uint32_t maxNumber() { return 2 * 1024; }
+#else
+  // tested on MC events with 55-75 pileup events
+  constexpr uint32_t maxNumber() { return 32 * 1024; }
+#endif
+
+  using HitContainer = cms::cuda::OneToManyAssoc<uint32_t, pixelTrack::maxNumber() + 1, 5 * pixelTrack::maxNumber()>;
+
 }  // namespace pixelTrack
 
+// Aliases in order to not confuse the GENERATE_SOA_LAYOUT
+// macro with weird colons and angled brackets.
 using Vector5f = Eigen::Matrix<float, 5, 1>;
 using Vector15f = Eigen::Matrix<float, 15, 1>;
+using HitContainer = pixelTrack::HitContainer;
 
-using Vector5d = Eigen::Matrix<double, 5, 1>;
-using Matrix5d = Eigen::Matrix<double, 5, 5>;
-
-GENERATE_SOA_LAYOUT(TrackSoAHeterogeneousT_test,
+GENERATE_SOA_LAYOUT(TrackSoAHeterogeneousLayout,
                     SOA_COLUMN(uint8_t, quality),
                     SOA_COLUMN(float, chi2),  // this is chi2/ndof as not necessarely all hits are used in the fit
                     SOA_COLUMN(int8_t, nLayers),
@@ -35,13 +51,18 @@ GENERATE_SOA_LAYOUT(TrackSoAHeterogeneousT_test,
                     SOA_COLUMN(float, pt),
                     SOA_EIGEN_COLUMN(Vector5f, state),
                     SOA_EIGEN_COLUMN(Vector15f, covariance),
-                    SOA_SCALAR(int, nTracks))
+                    SOA_SCALAR(int, nTracks),
+                    SOA_SCALAR(HitContainer, hitIndices),
+                    SOA_SCALAR(HitContainer, detIndices))
 
-// Previous TrajectoryStateSoAT class methods
+// Previous TrajectoryStateSoAT class methods.
+// They operate on View and ConstView of the TrackSoA.
 namespace pixelTrack {
   namespace utilities {
-    using TrackSoAView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::View;
-    using TrackSoAConstView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::ConstView;
+    using TrackSoAView = TrackSoAHeterogeneousLayout<>::View;
+    using TrackSoAConstView = TrackSoAHeterogeneousLayout<>::ConstView;
+    using Quality = pixelTrack::Quality;
+    using hindex_type = uint32_t;
     // State at the Beam spot
     // phi,tip,1/pt,cotan(theta),zip
     __host__ __device__ inline float charge(TrackSoAConstView tracks, int32_t i) {
@@ -94,67 +115,58 @@ namespace pixelTrack {
           cov(k, j) = cov(j, k) = tracks[i].covariance()(ind++);
       }
     }
+
+    // TODO: Not using TrackSoAConstView due to weird bugs with HitContainer
+    __host__ __device__ inline int computeNumberOfLayers(TrackSoAView tracks, int32_t i) {
+      auto pdet = tracks.detIndices().begin(i);
+      int nl = 1;
+      auto ol = phase1PixelTopology::getLayer(*pdet);
+      for (; pdet < tracks.detIndices().end(i); ++pdet) {
+        auto il = phase1PixelTopology::getLayer(*pdet);
+        if (il != ol)
+          ++nl;
+        ol = il;
+      }
+      return nl;
+    }
+    __host__ __device__ inline int nHits(TrackSoAConstView tracks, int i) { return tracks.detIndices().size(i); }
+
+    // Casts quality SoA data (uint8_t) to pixelTrack::Quality. This is required
+    // to use the data as an enum instead of a plain uint8_t
+    __host__ __device__ inline const Quality *qualityData(TrackSoAConstView tracks) {
+      return reinterpret_cast<Quality const *>(tracks.quality());
+    }
+    __host__ __device__ inline Quality *qualityData(TrackSoAView tracks) {
+      return reinterpret_cast<Quality *>(tracks.quality());
+    }
+
   }  // namespace utilities
 }  // namespace pixelTrack
 
 template <int32_t S>
-class TrackSoAHeterogeneousT : public cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>> {
+class TrackSoAHeterogeneousT : public cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousLayout<>> {
 public:
-  // using cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::PortableDeviceCollection;
   TrackSoAHeterogeneousT() = default;
 
+  // Constructor which specifies the SoA size
   explicit TrackSoAHeterogeneousT(cudaStream_t stream)
-      : PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>(S, stream) {}
+      : PortableDeviceCollection<TrackSoAHeterogeneousLayout<>>(S, stream) {}
 
-  static constexpr int32_t stride() { return S; }
-
-  using Quality = pixelTrack::Quality;
-  using hindex_type = uint32_t;
-  using HitContainer = cms::cuda::OneToManyAssoc<hindex_type, S + 1, 5 * S>;
-
-  // Always check quality is at least loose!
-  // CUDA does not support enums  in __lgc ...
-private:
-public:
-  // TODO: static did not work; using reinterpret_cast
-  constexpr Quality const *qualityData() const { return reinterpret_cast<Quality const *>(view().quality()); }
-  constexpr Quality *qualityData() { return reinterpret_cast<Quality *>(view().quality()); }
-
-  constexpr int nHits(int i) const { return detIndices.size(i); }
-
-  constexpr int computeNumberOfLayers(int32_t i) const {
-    // layers are in order and we assume tracks are either forward or backward
-    auto pdet = detIndices.begin(i);
-    int nl = 1;
-    auto ol = phase1PixelTopology::getLayer(*pdet);
-    for (; pdet < detIndices.end(i); ++pdet) {
-      auto il = phase1PixelTopology::getLayer(*pdet);
-      if (il != ol)
-        ++nl;
-      ol = il;
-    }
-    return nl;
+  // Copy data from device to host
+  // Copy data from device to host
+  __host__ std::unique_ptr<std::byte[]> copyToHost(cudaStream_t stream) {
+    auto tracks_h_soa = std::make_unique<std::byte[]>(bufferSize());
+    cudaCheck(cudaMemcpy(tracks_h_soa.get(), const_buffer().get(), bufferSize(), cudaMemcpyDeviceToHost));
+    return tracks_h_soa;
   }
-
-  HitContainer hitIndices;
-  HitContainer detIndices;
 };
 
 namespace pixelTrack {
 
-#ifdef GPU_SMALL_EVENTS
-  // kept for testing and debugging
-  constexpr uint32_t maxNumber() { return 2 * 1024; }
-#else
-  // tested on MC events with 55-75 pileup events
-  constexpr uint32_t maxNumber() { return 32 * 1024; }
-#endif
-
   using TrackSoA = TrackSoAHeterogeneousT<maxNumber()>;
-  using TrackSoAView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::View;
-  using TrackSoAConstView = cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousT_test<>>::ConstView;
-
-  using HitContainer = TrackSoA::HitContainer;
+  using TrackSoALayout = TrackSoAHeterogeneousLayout<>;
+  using TrackSoAView = TrackSoAHeterogeneousLayout<>::View;
+  using TrackSoAConstView = TrackSoAHeterogeneousLayout<>::ConstView;
 
 }  // namespace pixelTrack
 

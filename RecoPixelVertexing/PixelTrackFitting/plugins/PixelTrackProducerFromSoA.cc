@@ -56,7 +56,7 @@ private:
   // Event Data tokens
   const edm::EDGetTokenT<reco::BeamSpot> tBeamSpot_;
   //const edm::EDGetTokenT<PixelTrackHeterogeneous> tokenTrack_;
-  const edm::EDGetTokenT<pixelTrack::TrackSoA> tokenTrack_;
+  const edm::EDGetTokenT<pixelTrack::TrackSoAView> tokenTrack_;
   const edm::EDGetTokenT<SiPixelRecHitCollectionNew> cpuHits_;
   const edm::EDGetTokenT<HMSstorage> hmsToken_;
   // Event Setup tokens
@@ -70,7 +70,7 @@ private:
 PixelTrackProducerFromSoA::PixelTrackProducerFromSoA(const edm::ParameterSet &iConfig)
     : tBeamSpot_(consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamSpot"))),
       //tokenTrack_(consumes<PixelTrackHeterogeneous>(iConfig.getParameter<edm::InputTag>("trackSrc"))),
-      tokenTrack_(consumes<pixelTrack::TrackSoA>(iConfig.getParameter<edm::InputTag>("trackSrc"))),
+      tokenTrack_(consumes<pixelTrack::TrackSoAView>(iConfig.getParameter<edm::InputTag>("trackSrc"))),
       cpuHits_(consumes<SiPixelRecHitCollectionNew>(iConfig.getParameter<edm::InputTag>("pixelRecHitLegacySrc"))),
       hmsToken_(consumes<HMSstorage>(iConfig.getParameter<edm::InputTag>("pixelRecHitLegacySrc"))),
       idealMagneticFieldToken_(esConsumes()),
@@ -155,12 +155,16 @@ void PixelTrackProducerFromSoA::produce(edm::StreamID streamID,
   std::vector<const TrackingRecHit *> hits;
   hits.reserve(5);
 
-  const auto &tsoa = iEvent.get(tokenTrack_);
+  //const auto &tsoa = *iEvent.get(tokenTrack_);
+  auto tsoa = iEvent.get(tokenTrack_);
 
-  auto const *quality = tsoa.qualityData();
+  //auto const *quality = pixelTrack::utilities::qualityData(tsoa.view());
   // auto const &fit = tsoa.stateAtBS;
-  auto const &hitIndices = tsoa.hitIndices;
-  auto nTracks = tsoa.view().nTracks();
+  //auto const &hitIndices = tsoa.view().hitIndices();
+  //auto nTracks = tsoa.view().nTracks();
+  auto const *quality = pixelTrack::utilities::qualityData(tsoa);
+  auto const hitIndices = tsoa.hitIndices();
+  auto nTracks = tsoa.nTracks();
 
   tracks.reserve(nTracks);
 
@@ -170,13 +174,15 @@ void PixelTrackProducerFromSoA::produce(edm::StreamID streamID,
   std::vector<int32_t> sortIdxs(nTracks);
   std::iota(sortIdxs.begin(), sortIdxs.end(), 0);
   std::sort(sortIdxs.begin(), sortIdxs.end(), [&](int32_t const i1, int32_t const i2) {
-    return tsoa.view()[i1].pt() > tsoa.view()[i2].pt();
+    //return tsoa.view()[i1].pt() > tsoa.view()[i2].pt();
+    return tsoa[i1].pt() > tsoa[i2].pt();
   });
 
   //store the index of the SoA: indToEdm[index_SoAtrack] -> index_edmTrack (if it exists)
   indToEdm.resize(sortIdxs.size(), -1);
   for (const auto &it : sortIdxs) {
-    auto nHits = tsoa.nHits(it);
+    //auto nHits = pixelTrack::utilities::nHits(tsoa.view(), it);
+    auto nHits = pixelTrack::utilities::nHits(tsoa, it);
     assert(nHits >= 3);
     auto q = quality[it];
     if (q < minQuality_)
@@ -193,12 +199,15 @@ void PixelTrackProducerFromSoA::produce(edm::StreamID streamID,
 
     // mind: this values are respect the beamspot!
 
-    float chi2 = tsoa.view()[it].chi2();
-    float phi = pixelTrack::utilities::phi(tsoa.view(), it);
+    //float chi2 = tsoa.view()[it].chi2();
+    //float phi = pixelTrack::utilities::phi(tsoa.view(), it);
+    float chi2 = tsoa[it].chi2();
+    float phi = pixelTrack::utilities::phi(tsoa, it);
 
     riemannFit::Vector5d ipar, opar;
     riemannFit::Matrix5d icov, ocov;
-    pixelTrack::utilities::copyToDense<riemannFit::Vector5d, riemannFit::Matrix5d>(tsoa.view(), ipar, icov, it);
+    //pixelTrack::utilities::copyToDense<riemannFit::Vector5d, riemannFit::Matrix5d>(tsoa.view(), ipar, icov, it);
+    pixelTrack::utilities::copyToDense<riemannFit::Vector5d, riemannFit::Matrix5d>(tsoa, ipar, icov, it);
     riemannFit::transformToPerigeePlane(ipar, icov, opar, ocov);
 
     LocalTrajectoryParameters lpar(opar(0), opar(1), opar(2), opar(3), opar(4), 1.);
