@@ -7,7 +7,7 @@
 #include "gpuSortByPt2.h"
 #include "gpuSplitVertices.h"
 
-#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
+#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 
 #undef PIXVERTEX_DEBUG_PRODUCE
 
@@ -19,9 +19,10 @@ namespace gpuVertexFinder {
 
   // split vertices with a chi2/NDoF greater than this
   constexpr float maxChi2ForSplit = 9.f;
+  //using TkSoAView = pixelTrack::TrackSoAView;
   using TkSoAConstView = pixelTrack::TrackSoAConstView;
 
-  __global__ void loadTracks(TkSoAView tracks_view, ZVertexSoA* soa, WorkSpace* pws, float ptMin, float ptMax) {
+  __global__ void loadTracks(TkSoAConstView tracks_view, ZVertexSoA* soa, WorkSpace* pws, float ptMin, float ptMax) {
     assert(soa);
     auto const* quality = pixelTrack::utilities::qualityData(tracks_view);
 
@@ -95,13 +96,13 @@ namespace gpuVertexFinder {
 #endif
 
 #ifdef __CUDACC__
-  ZVertexHeterogeneous Producer::makeAsync(cudaStream_t stream, TkSoAView tracks_view, float ptMin, float ptMax) const {
+  ZVertexHeterogeneous Producer::makeAsync(cudaStream_t stream, TkSoAConstView tracks_view, float ptMin, float ptMax) const {
 #ifdef PIXVERTEX_DEBUG_PRODUCE
     std::cout << "producing Vertices on GPU" << std::endl;
 #endif  // PIXVERTEX_DEBUG_PRODUCE
     ZVertexHeterogeneous vertices(cms::cuda::make_device_unique<ZVertexSoA>(stream));
 #else
-  ZVertexHeterogeneous Producer::make(TkSoAView tracks_view, float ptMin, float ptMax) const {
+  ZVertexHeterogeneous Producer::make(TkSoAConstView tracks_view, float ptMin, float ptMax) const {
 #ifdef PIXVERTEX_DEBUG_PRODUCE
     std::cout << "producing Vertices on  CPU" << std::endl;
 #endif  // PIXVERTEX_DEBUG_PRODUCE

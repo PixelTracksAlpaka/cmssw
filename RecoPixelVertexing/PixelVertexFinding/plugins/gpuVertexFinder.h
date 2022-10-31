@@ -6,13 +6,12 @@
 
 #include "CUDADataFormats/Vertex/interface/ZVertexHeterogeneous.h"
 //#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
-#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
+#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 
 namespace gpuVertexFinder {
 
   using ZVertices = ZVertexSoA;
-  using TkSoA = pixelTrack::TrackSoA;
-  using TkSoAView = pixelTrack::TrackSoAView;
+  using TkSoAConstView = pixelTrack::TrackSoAConstView;
 
   // workspace used in the vertex reco algos
   struct WorkSpace {
@@ -65,8 +64,8 @@ namespace gpuVertexFinder {
 
     ~Producer() = default;
 
-    ZVertexHeterogeneous makeAsync(cudaStream_t stream, TkSoAView tracks_view, float ptMin, float ptMax) const;
-    ZVertexHeterogeneous make(TkSoAView tracks_view, float ptMin, float ptMax) const;
+    ZVertexHeterogeneous makeAsync(cudaStream_t stream, TkSoAConstView tracks_view, float ptMin, float ptMax) const;
+    ZVertexHeterogeneous make(TkSoAConstView tracks_view, float ptMin, float ptMax) const;
 
   private:
     const bool oneKernel_;
