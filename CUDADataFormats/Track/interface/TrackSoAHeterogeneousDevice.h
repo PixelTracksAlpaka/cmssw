@@ -18,7 +18,7 @@ public:
       : PortableDeviceCollection<TrackSoAHeterogeneousLayout<>>(S, stream) {}
 
   // Copy data from device to host
-  __host__ void copyToHost(cms::cuda::host::unique_ptr<std::byte[]> &host_ptr, cudaStream_t stream) {
+  __host__ void copyToHost(cms::cuda::host::unique_ptr<std::byte[]> &host_ptr, cudaStream_t stream) const {
     cudaCheck(cudaMemcpy(host_ptr.get(), const_buffer().get(), bufferSize(), cudaMemcpyDeviceToHost));
   }
 };

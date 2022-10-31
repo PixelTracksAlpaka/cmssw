@@ -56,7 +56,7 @@ void PixelTrackSoAFromCUDA::acquire(edm::Event const& iEvent,
                                     edm::WaitingTaskWithArenaHolder waitingTaskHolder) {
   cms::cuda::Product<pixelTrack::TrackSoADevice> const& inputDataWrapped = iEvent.get(tokenCUDA_);
   cms::cuda::ScopedContextAcquire ctx{inputDataWrapped, std::move(waitingTaskHolder)};
-  auto const tracks_d = ctx.get(inputDataWrapped);  // Tracks on device
+  auto const& tracks_d = ctx.get(inputDataWrapped);  // Tracks on device
 
   pixelTrack::TrackSoAHost tracks_h(ctx.stream());
   tracks_d.copyToHost(tracks_h.buffer(), ctx.stream());
