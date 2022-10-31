@@ -14,7 +14,8 @@
  */
 
 #include <bits/stdint-uintn.h>
-#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/requireDevices.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/allocate_device.h"
@@ -22,7 +23,7 @@
 
 namespace testTrackSoAHeterogeneousT {
 
-  void runKernels(pixelTrack::TrackSoAView tracks_view);
+  void runKernels(pixelTrack::TrackSoAView tracks_view, cudaStream_t stream);
 }
 
 int main() {
@@ -35,16 +36,24 @@ int main() {
   {
     // Instantiate tracks on host. Portabledevicecollection allocates
     // SoA on device automatically.
-    pixelTrack::TrackSoA tracks(stream);
-    uint32_t soaNumElements = tracks->metadata().size();  // Length of each SoA array in elements
+    // pixelTrack::TrackSoADevice tracks(stream);
+    // uint32_t soaNumElements = tracks->metadata().size();  // Length of each SoA array in elements
+    //
+    // // Run the tests
+    // testTrackSoAHeterogeneousT::runKernels(tracks.view());
+    //
+    // // Create a view to access the copied data
+    // auto tracks_h_soa = tracks.copyToHost(stream);
+    // TrackSoAHeterogeneousLayout<> tmp_layout(tracks_h_soa.get(), soaNumElements);
+    // TrackSoAHeterogeneousLayout<>::View tmp_view(tmp_layout);
 
-    // Run the tests
-    testTrackSoAHeterogeneousT::runKernels(tracks.view());
+    // pixelTrack::TrackSoAHost tracks_h(stream);
+    // pixelTrack::TrackSoADevice tracks_d(stream);
+    // testTrackSoAHeterogeneousT::runKernels(tracks_d.view());
+    // tracks_d.copyToHost(tracks_h.buffer(), stream);
 
-    // Create a view to access the copied data
-    auto tracks_h_soa = tracks.copyToHost(stream);
-    TrackSoAHeterogeneousLayout<> tmp_layout(tracks_h_soa.get(), soaNumElements);
-    TrackSoAHeterogeneousLayout<>::View tmp_view(tmp_layout);
+    pixelTrack::TrackSoAHost tracks_h(stream);
+    testTrackSoAHeterogeneousT::runKernels(tracks_h.view(), stream);
 
     // Print results
     std::cout << "pt"
@@ -60,9 +69,9 @@ int main() {
               << "hitIndices off" << std::endl;
 
     for (int i = 0; i < 10; ++i) {
-      std::cout << tmp_view[i].pt() << "\t" << tmp_view[i].eta() << "\t" << tmp_view[i].chi2() << "\t"
-                << (int)tmp_view[i].quality() << "\t" << (int)tmp_view[i].nLayers() << "\t"
-                << tmp_view.hitIndices().off[i] << std::endl;
+      std::cout << tracks_h.view()[i].pt() << "\t" << tracks_h.view()[i].eta() << "\t" << tracks_h.view()[i].chi2() << "\t"
+                << (int)tracks_h.view()[i].quality() << "\t" << (int)tracks_h.view()[i].nLayers() << "\t"
+                << tracks_h.view().hitIndices().off[i] << std::endl;
     }
   }
   cudaCheck(cudaStreamDestroy(stream));

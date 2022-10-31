@@ -1,5 +1,7 @@
-#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/OneToManyAssoc.h"
+#include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 
 namespace testTrackSoAHeterogeneousT {
 
@@ -20,7 +22,7 @@ namespace testTrackSoAHeterogeneousT {
   }
 
   // TODO: Using TrackSoAConstView fails to assert hitIndices correctly
-  __global__ void verify(pixelTrack::TrackSoAView tracks_view) {
+  __global__ void verify(pixelTrack::TrackSoAConstView tracks_view) {
     int i = threadIdx.x;
 
     if (i == 0) {
@@ -37,10 +39,13 @@ namespace testTrackSoAHeterogeneousT {
     }
   }
 
-  void runKernels(pixelTrack::TrackSoAView tracks_view) {
-    fill<<<1, 1024>>>(tracks_view);
-    cudaDeviceSynchronize();
-    verify<<<1, 1024>>>(tracks_view);
+  void runKernels(pixelTrack::TrackSoAView tracks_view, cudaStream_t stream) {
+    fill<<<1, 1024, 0, stream>>>(tracks_view);
+    cudaCheck(cudaGetLastError());
+    cudaCheck(cudaDeviceSynchronize());
+    verify<<<1, 1024, 0, stream>>>(tracks_view);
+    cudaCheck(cudaGetLastError());
+    cudaCheck(cudaDeviceSynchronize());
   }
 
 }  // namespace testTrackSoAHeterogeneousT

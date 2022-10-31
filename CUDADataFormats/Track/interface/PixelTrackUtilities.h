@@ -1,20 +1,10 @@
-#ifndef CUDADataFormats_Track_TrackHeterogeneousT_H
-#define CUDADataFormats_Track_TrackHeterogeneousT_H
-
-#include <bits/stdint-uintn.h>
-#include <string>
-#include <algorithm>
+#ifndef CUDADataFormats_Track_PixelTrackUtilities_h
+#define CUDADataFormats_Track_PixelTrackUtilities_h
 
 #include <Eigen/Dense>
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/HistoContainer.h"
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
-#include "CUDADataFormats/Common/interface/HeterogeneousSoA.h"
-#include "CUDADataFormats/Common/interface/PortableDeviceCollection.h"
-#include "HeterogeneousCore/CUDAUtilities/interface/requireDevices.h"
-#include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
-#include "HeterogeneousCore/CUDAUtilities/interface/allocate_device.h"
-#include "HeterogeneousCore/CUDAUtilities/interface/allocate_host.h"
 
 namespace pixelTrack {
   enum class Quality : uint8_t { bad = 0, edup, dup, loose, strict, tight, highPurity, notQuality };
@@ -143,31 +133,12 @@ namespace pixelTrack {
   }  // namespace utilities
 }  // namespace pixelTrack
 
-template <int32_t S>
-class TrackSoAHeterogeneousT : public cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousLayout<>> {
-public:
-  TrackSoAHeterogeneousT() = default;
-
-  // Constructor which specifies the SoA size
-  explicit TrackSoAHeterogeneousT(cudaStream_t stream)
-      : PortableDeviceCollection<TrackSoAHeterogeneousLayout<>>(S, stream) {}
-
-  // Copy data from device to host
-  // Copy data from device to host
-  __host__ std::unique_ptr<std::byte[]> copyToHost(cudaStream_t stream) {
-    auto tracks_h_soa = std::make_unique<std::byte[]>(bufferSize());
-    cudaCheck(cudaMemcpy(tracks_h_soa.get(), const_buffer().get(), bufferSize(), cudaMemcpyDeviceToHost));
-    return tracks_h_soa;
-  }
-};
-
 namespace pixelTrack {
 
-  using TrackSoA = TrackSoAHeterogeneousT<maxNumber()>;
   using TrackSoALayout = TrackSoAHeterogeneousLayout<>;
   using TrackSoAView = TrackSoAHeterogeneousLayout<>::View;
   using TrackSoAConstView = TrackSoAHeterogeneousLayout<>::ConstView;
 
 }  // namespace pixelTrack
 
-#endif  // CUDADataFormats_Track_TrackHeterogeneousT_H
+#endif  // #ifndef CUDADataFormats_Track_PixelTrackHeterogeneous_h
