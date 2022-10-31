@@ -6,10 +6,7 @@
 #include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 #include "CUDADataFormats/Common/interface/PortableDeviceCollection.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/host_unique_ptr.h"
-//#include "HeterogeneousCore/CUDAUtilities/interface/requireDevices.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
-//#include "HeterogeneousCore/CUDAUtilities/interface/allocate_device.h"
-//#include "HeterogeneousCore/CUDAUtilities/interface/allocate_host.h"
 
 template <int32_t S>
 class TrackSoAHeterogeneousDevice : public cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousLayout<>> {
@@ -28,7 +25,7 @@ public:
 
 namespace pixelTrack {
 
-  using TrackSoADevice = TrackSoAHeterogeneousDevice<maxNumber()>;
+  using TrackSoADevice = TrackSoAHeterogeneousDevice<pixelTrack::maxNumber()>;
 
 }  // namespace pixelTrack
 

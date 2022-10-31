@@ -119,7 +119,7 @@ namespace pixelTrack {
       }
       return nl;
     }
-    __host__ __device__ inline int nHits(TrackSoAConstView &tracks, int i) { return tracks.detIndices().size(i); }
+    __host__ __device__ inline int nHits(TrackSoAView &tracks, int i) { return tracks.detIndices().size(i); }
 
     // Casts quality SoA data (uint8_t) to pixelTrack::Quality. This is required
     // to use the data as an enum instead of a plain uint8_t
@@ -134,11 +134,11 @@ namespace pixelTrack {
 }  // namespace pixelTrack
 
 namespace pixelTrack {
-
+  // Common types for both Host and Device code
   using TrackSoALayout = TrackSoAHeterogeneousLayout<>;
   using TrackSoAView = TrackSoAHeterogeneousLayout<>::View;
   using TrackSoAConstView = TrackSoAHeterogeneousLayout<>::ConstView;
 
 }  // namespace pixelTrack
 
-#endif  // #ifndef CUDADataFormats_Track_PixelTrackHeterogeneous_h
+#endif

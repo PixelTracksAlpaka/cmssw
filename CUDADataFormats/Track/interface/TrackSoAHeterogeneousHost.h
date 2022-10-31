@@ -5,10 +5,7 @@
 
 #include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 #include "CUDADataFormats/Common/interface/PortableHostCollection.h"
-//#include "HeterogeneousCore/CUDAUtilities/interface/requireDevices.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
-//#include "HeterogeneousCore/CUDAUtilities/interface/allocate_device.h"
-//#include "HeterogeneousCore/CUDAUtilities/interface/allocate_host.h"
 
 template <int32_t S>
 class TrackSoAHeterogeneousHost : public cms::cuda::PortableHostCollection<TrackSoAHeterogeneousLayout<>> {
@@ -18,14 +15,11 @@ public:
   // Constructor which specifies the SoA size
   explicit TrackSoAHeterogeneousHost(cudaStream_t stream)
       : PortableHostCollection<TrackSoAHeterogeneousLayout<>>(S, stream) {}
-
-
-
 };
 
 namespace pixelTrack {
 
-  using TrackSoAHost = TrackSoAHeterogeneousHost<maxNumber()>;
+  using TrackSoAHost = TrackSoAHeterogeneousHost<pixelTrack::maxNumber()>;
 
 }  // namespace pixelTrack
 
