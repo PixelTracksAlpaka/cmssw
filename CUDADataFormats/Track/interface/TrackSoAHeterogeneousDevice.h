@@ -11,7 +11,7 @@
 template <int32_t S>
 class TrackSoAHeterogeneousDevice : public cms::cuda::PortableDeviceCollection<TrackSoAHeterogeneousLayout<>> {
 public:
-  //TrackSoAHeterogeneousDevice() = default;
+  TrackSoAHeterogeneousDevice() = default;  // cms::cuda::Product needs this
 
   // Constructor which specifies the SoA size
   explicit TrackSoAHeterogeneousDevice(cudaStream_t stream)

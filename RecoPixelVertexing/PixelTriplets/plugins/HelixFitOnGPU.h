@@ -1,8 +1,7 @@
 #ifndef RecoPixelVertexing_PixelTriplets_plugins_HelixFitOnGPU_h
 #define RecoPixelVertexing_PixelTriplets_plugins_HelixFitOnGPU_h
 
-//#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
-#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
+#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 #include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHit2DHeterogeneous.h"
 #include "RecoPixelVertexing/PixelTrackFitting/interface/FitResult.h"
 
