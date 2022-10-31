@@ -19,8 +19,8 @@
 #include "FWCore/Utilities/interface/isFinite.h"
 #include "HeterogeneousCore/CUDAServices/interface/CUDAService.h"
 #include "TrackingTools/DetLayers/interface/BarrelDetLayer.h"
-
-#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
 
 #include "CAHitNtupletGeneratorOnGPU.h"
 
@@ -190,10 +190,10 @@ void CAHitNtupletGeneratorOnGPU::endJob() {
                                                                     float bfield,
                                                                     cudaStream_t stream) const {
   PixelTrackHeterogeneous tracks(cms::cuda::make_device_unique<pixelTrack::TrackSoA>(stream));*/
-pixelTrack::TrackSoAView CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DGPU const& hits_d,
-                                                                     float bfield,
-                                                                     cudaStream_t stream) const {
-  pixelTrack::TrackSoA tracks(stream);
+pixelTrack::TrackSoADevice CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DGPU const& hits_d,
+                                                                       float bfield,
+                                                                       cudaStream_t stream) const {
+  pixelTrack::TrackSoADevice tracks(stream);
   auto* soa = &tracks;
 
   CAHitNtupletGeneratorKernelsGPU kernels(m_params);
@@ -218,32 +218,26 @@ pixelTrack::TrackSoAView CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRec
   std::cout << "finished building pixel tracks on GPU" << std::endl;
 #endif
 
-  return tracks.view();
+  return tracks;
 }
 
-pixelTrack::TrackSoAView CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2DCPU const& hits_d, float bfield) const {
-  //PixelTrackHeterogeneous tracks(std::make_unique<pixelTrack::TrackSoA>());
-  // pixelTrack::TrackSoA tracks;
-
-  auto tracks_h_soa =
-      std::make_unique<std::byte[]>(TrackSoAHeterogeneousLayout<>::computeDataSize(pixelTrack::maxNumber()));
-  TrackSoAHeterogeneousLayout<> tracks_layout(tracks_h_soa.get(), pixelTrack::maxNumber());
-  TrackSoAHeterogeneousLayout<>::View tracks_view(tracks_layout);
-  //assert(soa);
+pixelTrack::TrackSoAHost CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2DCPU const& hits_d, float bfield) const {
+  pixelTrack::TrackSoADevice tracks(stream);
+  auto* soa = &tracks;
 
   CAHitNtupletGeneratorKernelsCPU kernels(m_params);
   kernels.setCounters(m_counters);
   kernels.allocateOnGPU(hits_d.nHits(), nullptr);
 
   kernels.buildDoublets(hits_d, nullptr);
-  kernels.launchKernels(hits_d, tracks_view, nullptr);
+  kernels.launchKernels(hits_d, tracks.view(), nullptr);
 
   if (0 == hits_d.nHits())
-    return tracks_view;
+    return tracks;
 
   // now fit
   HelixFitOnGPU fitter(bfield, m_params.fitNas4_);
-  fitter.allocateOnGPU(kernels.tupleMultiplicity(), tracks_view);
+  fitter.allocateOnGPU(kernels.tupleMultiplicity(), tracks.view());
 
   if (m_params.useRiemannFit_) {
     fitter.launchRiemannKernelsOnCPU(hits_d.view(), hits_d.nHits(), caConstants::maxNumberOfQuadruplets);
@@ -251,7 +245,7 @@ pixelTrack::TrackSoAView CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2D
     fitter.launchBrokenLineKernelsOnCPU(hits_d.view(), hits_d.nHits(), caConstants::maxNumberOfQuadruplets);
   }
 
-  kernels.classifyTuples(hits_d, tracks_view, nullptr);
+  kernels.classifyTuples(hits_d, tracks.view(), nullptr);
 
 #ifdef GPU_DEBUG
   std::cout << "finished building pixel tracks on CPU" << std::endl;
@@ -259,13 +253,13 @@ pixelTrack::TrackSoAView CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2D
 
   // check that the fixed-size SoA does not overflow
 
-  auto maxTracks = tracks_view.metadata().size();
-  auto nTracks = tracks_view.nTracks();
+  auto maxTracks = tracks.view().metadata().size();
+  auto nTracks = tracks.view().nTracks();
   assert(nTracks < maxTracks);
   if (nTracks == maxTracks - 1) {
     edm::LogWarning("PixelTracks") << "Unsorted reconstructed pixel tracks truncated to " << maxTracks - 1
                                    << " candidates";
   }
 
-  return tracks_view;
+  return tracks;
 }

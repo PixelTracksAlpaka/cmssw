@@ -20,8 +20,8 @@
 #include "RecoTracker/TkMSParametrization/interface/PixelRecoUtilities.h"
 
 #include "CAHitNtupletGeneratorOnGPU.h"
-//#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
-#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
 #include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHit2DHeterogeneous.h"
 
 class CAHitNtupletCUDA : public edm::global::EDProducer<> {
@@ -43,12 +43,12 @@ private:
   // GPU
   // Produces a view on GPU, which is used by PixelTrackSoAFromCUDA
   edm::EDGetTokenT<cms::cuda::Product<TrackingRecHit2DGPU>> tokenHitGPU_;
-  edm::EDPutTokenT<cms::cuda::Product<pixelTrack::TrackSoAView>> tokenTrackGPU_;
+  edm::EDPutTokenT<cms::cuda::Product<pixelTrack::TrackSoADevice>> tokenTrackGPU_;
 
   // CPU
   // Produces a view on CPU, which is used by PixelTrackProducerFromSoA
   edm::EDGetTokenT<TrackingRecHit2DCPU> tokenHitCPU_;
-  edm::EDPutTokenT<pixelTrack::TrackSoAView> tokenTrackCPU_;
+  edm::EDPutTokenT<pixelTrack::TrackSoAHost> tokenTrackCPU_;
 
   CAHitNtupletGeneratorOnGPU gpuAlgo_;
 };
@@ -58,10 +58,10 @@ CAHitNtupletCUDA::CAHitNtupletCUDA(const edm::ParameterSet& iConfig)
   if (onGPU_) {
     tokenHitGPU_ =
         consumes<cms::cuda::Product<TrackingRecHit2DGPU>>(iConfig.getParameter<edm::InputTag>("pixelRecHitSrc"));
-    tokenTrackGPU_ = produces<cms::cuda::Product<pixelTrack::TrackSoAView>>();
+    tokenTrackGPU_ = produces<cms::cuda::Product<pixelTrack::TrackSoADevice>>();
   } else {
     tokenHitCPU_ = consumes<TrackingRecHit2DCPU>(iConfig.getParameter<edm::InputTag>("pixelRecHitSrc"));
-    tokenTrackCPU_ = produces<pixelTrack::TrackSoAView>();
+    tokenTrackCPU_ = produces<pixelTrack::TrackSoAHost>();
   }
 }
 

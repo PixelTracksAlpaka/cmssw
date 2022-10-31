@@ -27,8 +27,9 @@
 #include "RecoPixelVertexing/PixelTrackFitting/interface/FitUtils.h"
 
 #include "CUDADataFormats/Common/interface/HostProduct.h"
-//#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
-#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT_test.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
+#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 #include "CUDADataFormats/SiPixelCluster/interface/gpuClusteringConstants.h"
 
 #include "storeTracks.h"
@@ -56,7 +57,7 @@ private:
   // Event Data tokens
   const edm::EDGetTokenT<reco::BeamSpot> tBeamSpot_;
   //const edm::EDGetTokenT<PixelTrackHeterogeneous> tokenTrack_;
-  const edm::EDGetTokenT<pixelTrack::TrackSoAView> tokenTrack_;
+  const edm::EDGetTokenT<pixelTrack::TrackSoAHost> tokenTrack_;
   const edm::EDGetTokenT<SiPixelRecHitCollectionNew> cpuHits_;
   const edm::EDGetTokenT<HMSstorage> hmsToken_;
   // Event Setup tokens
