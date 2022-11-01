@@ -154,7 +154,8 @@ void PixelTrackProducerFromSoA::produce(edm::StreamID streamID,
   std::vector<const TrackingRecHit *> hits;
   hits.reserve(5);
 
-  const auto &tsoa = *iEvent.get(tokenTrack_);
+  //const auto &tsoa = *iEvent.get(tokenTrack_);
+  auto & tsoa = iEvent.get(tokenTrack_);
 
   //auto const *quality = pixelTrack::utilities::qualityData(tsoa.view());
   // auto const &fit = tsoa.stateAtBS;
