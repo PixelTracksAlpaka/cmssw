@@ -55,7 +55,7 @@ namespace pixelTrack {
     using hindex_type = uint32_t;
     // State at the Beam spot
     // phi,tip,1/pt,cotan(theta),zip
-    __host__ __device__ inline float charge(TrackSoAConstView &tracks, int32_t i) {
+    __host__ __device__ inline float charge(const TrackSoAConstView &tracks, int32_t i) {
       return std::copysign(1.f, tracks[i].state()(2));
     }
 

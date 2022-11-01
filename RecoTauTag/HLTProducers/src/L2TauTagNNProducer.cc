@@ -45,10 +45,11 @@
 #include "DataFormats/TrajectoryState/interface/LocalTrajectoryParameters.h"
 #include "DataFormats/GeometrySurface/interface/Plane.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
-#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "CUDADataFormats/SiPixelCluster/interface/gpuClusteringConstants.h"
-#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT.h"
+#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexSoA.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexHeterogeneous.h"
 
@@ -179,16 +180,16 @@ private:
                        const caloRecHitCollections& caloRecHits);
   void fillPatatracks(tensorflow::Tensor& cellGridMatrix,
                       const std::vector<l1t::TauRef>& allTaus,
-                      const pixelTrack::TrackSoA& patatracks_tsoa,
+                      const pixelTrack::TrackSoAHost& patatracks_tsoa,
                       const ZVertexSoA& patavtx_soa,
                       const reco::BeamSpot& beamspot,
                       const MagneticField* magfi);
   void selectGoodTracksAndVertices(const ZVertexSoA& patavtx_soa,
-                                   const pixelTrack::TrackSoA& patatracks_tsoa,
+                                   const pixelTrack::TrackSoAHost& patatracks_tsoa,
                                    std::vector<int>& trkGood,
                                    std::vector<int>& vtxGood);
   std::pair<float, float> impactParameter(int it,
-                                          const pixelTrack::TrackSoA& patatracks_tsoa,
+                                          const pixelTrack::TrackSoAHost& patatracks_tsoa,
                                           float patatrackPhi,
                                           const reco::BeamSpot& beamspot,
                                           const MagneticField* magfi);
@@ -208,7 +209,7 @@ private:
   const edm::ESGetToken<CaloGeometry, CaloGeometryRecord> geometryToken_;
   const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> bFieldToken_;
   const edm::EDGetTokenT<ZVertexHeterogeneous> pataVerticesToken_;
-  const edm::EDGetTokenT<PixelTrackHeterogeneous> pataTracksToken_;
+  const edm::EDGetTokenT<pixelTrack::TrackSoAHost> pataTracksToken_;
   const edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;
   const unsigned int maxVtx_;
   const float fractionSumPt2_;
@@ -293,7 +294,7 @@ L2TauNNProducer::L2TauNNProducer(const edm::ParameterSet& cfg, const L2TauNNProd
       geometryToken_(esConsumes<CaloGeometry, CaloGeometryRecord>()),
       bFieldToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
       pataVerticesToken_(consumes<ZVertexHeterogeneous>(cfg.getParameter<edm::InputTag>("pataVertices"))),
-      pataTracksToken_(consumes<PixelTrackHeterogeneous>(cfg.getParameter<edm::InputTag>("pataTracks"))),
+      pataTracksToken_(consumes<pixelTrack::TrackSoAHost>(cfg.getParameter<edm::InputTag>("pataTracks"))),
       beamSpotToken_(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("BeamSpot"))),
       maxVtx_(cfg.getParameter<uint>("maxVtx")),
       fractionSumPt2_(cfg.getParameter<double>("fractionSumPt2")),
@@ -570,31 +571,31 @@ void L2TauNNProducer::fillCaloRecHits(tensorflow::Tensor& cellGridMatrix,
 }
 
 void L2TauNNProducer::selectGoodTracksAndVertices(const ZVertexSoA& patavtx_soa,
-                                                  const pixelTrack::TrackSoA& patatracks_tsoa,
+                                                  const pixelTrack::TrackSoAHost& patatracks_tsoa,
                                                   std::vector<int>& trkGood,
                                                   std::vector<int>& vtxGood) {
-  const auto maxTracks = patatracks_tsoa.stride();
+  const auto maxTracks = patatracks_tsoa.view().metadata().size();
   const int nv = patavtx_soa.nvFinal;
   trkGood.clear();
   trkGood.reserve(maxTracks);
   vtxGood.clear();
   vtxGood.reserve(nv);
-  auto const* quality = patatracks_tsoa.qualityData();
+  auto const* quality = pixelTrack::utilities::qualityData(patatracks_tsoa.view());
 
   // No need to sort either as the algorithms is just using the max (not even the location, just the max value of pt2sum).
   std::vector<float> pTSquaredSum(nv, 0);
   std::vector<int> nTrkAssociated(nv, 0);
 
   for (int32_t trk_idx = 0; trk_idx < maxTracks; ++trk_idx) {
-    auto nHits = patatracks_tsoa.nHits(trk_idx);
+    auto nHits = pixelTrack::utilities::nHits(patatracks_tsoa.view(), trk_idx);
     if (nHits == 0) {
       break;
     }
     int vtx_ass_to_track = patavtx_soa.idv[trk_idx];
     if (vtx_ass_to_track >= 0 && vtx_ass_to_track < nv) {
-      auto patatrackPt = patatracks_tsoa.pt[trk_idx];
+      auto patatrackPt = patatracks_tsoa.view()[trk_idx].pt();
       ++nTrkAssociated[vtx_ass_to_track];
-      if (patatrackPt >= trackPtMin_ && patatracks_tsoa.chi2(trk_idx) <= trackChi2Max_) {
+      if (patatrackPt >= trackPtMin_ && patatracks_tsoa.const_view()[trk_idx].chi2() <= trackChi2Max_) {
         patatrackPt = std::min(patatrackPt, trackPtMax_);
         pTSquaredSum[vtx_ass_to_track] += patatrackPt * patatrackPt;
       }
@@ -617,15 +618,15 @@ void L2TauNNProducer::selectGoodTracksAndVertices(const ZVertexSoA& patavtx_soa,
 }
 
 std::pair<float, float> L2TauNNProducer::impactParameter(int it,
-                                                         const pixelTrack::TrackSoA& patatracks_tsoa,
+                                                         const pixelTrack::TrackSoAHost& patatracks_tsoa,
                                                          float patatrackPhi,
                                                          const reco::BeamSpot& beamspot,
                                                          const MagneticField* magfi) {
-  auto const& fit = patatracks_tsoa.stateAtBS;
+  // auto const& fit = patatracks_tsoa.stateAtBS;
   /* dxy and dz */
   riemannFit::Vector5d ipar, opar;
   riemannFit::Matrix5d icov, ocov;
-  fit.copyToDense(ipar, icov, it);
+  pixelTrack::utilities::copyToDense(patatracks_tsoa.view(), ipar, icov, it);
   riemannFit::transformToPerigeePlane(ipar, icov, opar, ocov);
   LocalTrajectoryParameters lpar(opar(0), opar(1), opar(2), opar(3), opar(4), 1.);
   float sp = std::sin(patatrackPhi);
@@ -650,7 +651,7 @@ std::pair<float, float> L2TauNNProducer::impactParameter(int it,
 
 void L2TauNNProducer::fillPatatracks(tensorflow::Tensor& cellGridMatrix,
                                      const std::vector<l1t::TauRef>& allTaus,
-                                     const pixelTrack::TrackSoA& patatracks_tsoa,
+                                     const pixelTrack::TrackSoAHost& patatracks_tsoa,
                                      const ZVertexSoA& patavtx_soa,
                                      const reco::BeamSpot& beamspot,
                                      const MagneticField* magfi) {
@@ -675,14 +676,14 @@ void L2TauNNProducer::fillPatatracks(tensorflow::Tensor& cellGridMatrix,
     const float tauPhi = allTaus[tau_idx]->phi();
 
     for (const auto it : trkGood) {
-      const float patatrackPt = patatracks_tsoa.pt[it];
+      const float patatrackPt = patatracks_tsoa.const_view()[it].pt();
       if (patatrackPt <= 0)
         continue;
-      const float patatrackPhi = patatracks_tsoa.phi(it);
-      const float patatrackEta = patatracks_tsoa.eta(it);
-      const float patatrackCharge = patatracks_tsoa.charge(it);
-      const float patatrackChi2OverNdof = patatracks_tsoa.chi2(it);
-      const auto nHits = patatracks_tsoa.nHits(it);
+      const float patatrackPhi = pixelTrack::utilities::phi(patatracks_tsoa.const_view(), it);
+      const float patatrackEta = patatracks_tsoa.const_view()[it].eta();
+      const float patatrackCharge = pixelTrack::utilities::charge(patatracks_tsoa.const_view(), it);
+      const float patatrackChi2OverNdof = patatracks_tsoa.view()[it].chi2();
+      const auto nHits = pixelTrack::utilities::nHits(patatracks_tsoa.const_view(), it);
       if (nHits <= 0)
         continue;
       const int patatrackNdof = 2 * std::min(6, nHits) - 5;
@@ -763,7 +764,7 @@ void L2TauNNProducer::produce(edm::Event& event, const edm::EventSetup& eventset
   const auto eeCal = event.getHandle(eeToken_);
   const auto hbhe = event.getHandle(hbheToken_);
   const auto ho = event.getHandle(hoToken_);
-  const auto& patatracks_SoA = *event.get(pataTracksToken_);
+  auto& patatracks_SoA = event.get(pataTracksToken_);
   const auto& vertices_SoA = *event.get(pataVerticesToken_);
   const auto bsHandle = event.getHandle(beamSpotToken_);
 
