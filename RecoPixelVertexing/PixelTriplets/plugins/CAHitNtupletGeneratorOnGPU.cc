@@ -222,7 +222,7 @@ pixelTrack::TrackSoADevice CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingR
 }
 
 pixelTrack::TrackSoAHost CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2DCPU const& hits_d, float bfield) const {
-  pixelTrack::TrackSoAHost tracks;
+  pixelTrack::TrackSoAHost tracks(nullptr);
 
   CAHitNtupletGeneratorKernelsCPU kernels(m_params);
   kernels.setCounters(m_counters);
