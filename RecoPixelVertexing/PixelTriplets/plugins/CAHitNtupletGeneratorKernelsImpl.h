@@ -380,8 +380,8 @@ __global__ void kernel_mark_used(GPUCACell *__restrict__ cells, uint32_t const *
   }
 }
 
-__global__ void kernel_countMultiplicity(TkSoAConstView tracks_view,
-                                         caConstants::TupleMultiplicity *tupleMultiplicity) {
+// TODO: change arg type to TkSoAConstview
+__global__ void kernel_countMultiplicity(TkSoAView tracks_view, caConstants::TupleMultiplicity *tupleMultiplicity) {
   auto first = blockIdx.x * blockDim.x + threadIdx.x;
   for (int it = first, nt = tracks_view.hitIndices().nOnes(); it < nt; it += gridDim.x * blockDim.x) {
     auto nhits = tracks_view.hitIndices().size(it);
@@ -397,7 +397,8 @@ __global__ void kernel_countMultiplicity(TkSoAConstView tracks_view,
   }
 }
 
-__global__ void kernel_fillMultiplicity(TkSoAConstView tracks_view, caConstants::TupleMultiplicity *tupleMultiplicity) {
+// TODO: change arg type to TkSoAConstview
+__global__ void kernel_fillMultiplicity(TkSoAView tracks_view, caConstants::TupleMultiplicity *tupleMultiplicity) {
   auto first = blockIdx.x * blockDim.x + threadIdx.x;
   for (int it = first, nt = tracks_view.hitIndices().nOnes(); it < nt; it += gridDim.x * blockDim.x) {
     auto nhits = tracks_view.hitIndices().size(it);
@@ -856,7 +857,7 @@ __global__ void kernel_simpleTripletCleaner(
 }
 
 __global__ void kernel_print_found_ntuplets(TrackingRecHit2DSOAView const *__restrict__ hhp,
-                                            TkSoAConstView tracks_view,
+                                            TkSoAView tracks_view,
                                             CAHitNtupletGeneratorKernelsGPU::HitToTuple const *__restrict__ phitToTuple,
                                             int32_t firstPrint,
                                             int32_t lastPrint,

@@ -17,6 +17,7 @@
 #include "FWCore/Utilities/interface/EDGetToken.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "HeterogeneousCore/CUDACore/interface/ScopedContext.h"
+#include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 
 // Switch on to enable checks and printout for found tracks
 // #define PIXEL_DEBUG_PRODUCE
@@ -56,10 +57,9 @@ void PixelTrackSoAFromCUDA::acquire(edm::Event const& iEvent,
                                     edm::WaitingTaskWithArenaHolder waitingTaskHolder) {
   cms::cuda::Product<pixelTrack::TrackSoADevice> const& inputDataWrapped = iEvent.get(tokenCUDA_);
   cms::cuda::ScopedContextAcquire ctx{inputDataWrapped, std::move(waitingTaskHolder)};
-  auto const& tracks_d = ctx.get(inputDataWrapped);  // Tracks on device
-
-  pixelTrack::TrackSoAHost tracks_h(ctx.stream());
-  tracks_d.copyToHost(tracks_h.buffer(), ctx.stream());
+  auto const& tracks_d = ctx.get(inputDataWrapped);      // Tracks on device
+  tracks_h = pixelTrack::TrackSoAHost(ctx.stream());     // Create an instance of Tracks on Host, using the stream
+  tracks_d.copyToHost(tracks_h.buffer(), ctx.stream());  // Copy data from Device to Host
 }
 
 void PixelTrackSoAFromCUDA::produce(edm::Event& iEvent, edm::EventSetup const& iSetup) {
@@ -67,6 +67,7 @@ void PixelTrackSoAFromCUDA::produce(edm::Event& iEvent, edm::EventSetup const& i
   auto maxTracks = tracks_h.view().metadata().size();
   auto nTracks = tracks_h.view().nTracks();
   assert(nTracks < maxTracks);
+
   if (nTracks == maxTracks - 1) {
     edm::LogWarning("PixelTracks") << "Unsorted reconstructed pixel tracks truncated to " << maxTracks - 1
                                    << " candidates";
@@ -86,11 +87,8 @@ void PixelTrackSoAFromCUDA::produce(edm::Event& iEvent, edm::EventSetup const& i
   }
   assert(nTracks == nt);
 #endif
-
   // DO NOT  make a copy  (actually TWO....)
-  iEvent.emplace(tokenSOA_, std::move(tracks_h));  //, std::move(ret)); // view
-
-  //assert(!soa_);
+  iEvent.emplace(tokenSOA_, std::move(tracks_h));
 }
 
 DEFINE_FWK_MODULE(PixelTrackSoAFromCUDA);
