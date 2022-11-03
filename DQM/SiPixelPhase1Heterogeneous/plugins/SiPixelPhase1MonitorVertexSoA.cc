@@ -21,7 +21,7 @@
 #include "DQMServices/Core/interface/MonitorElement.h"
 #include "DQMServices/Core/interface/DQMEDAnalyzer.h"
 #include "DQMServices/Core/interface/DQMStore.h"
-#include "CUDADataFormats/Vertex/interface/ZVertexHeterogeneousHost.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousHost.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
 class SiPixelPhase1MonitorVertexSoA : public DQMEDAnalyzer {
@@ -61,13 +61,13 @@ SiPixelPhase1MonitorVertexSoA::SiPixelPhase1MonitorVertexSoA(const edm::Paramete
 // -- Analyze
 //
 void SiPixelPhase1MonitorVertexSoA::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  auto& vsoaHandle = iEvent.getHandle(tokenSoAVertex_);
+  const auto& vsoaHandle = iEvent.getHandle(tokenSoAVertex_);
   if (!vsoaHandle.isValid()) {
     edm::LogWarning("SiPixelPhase1MonitorTrackSoA") << "No Vertex SoA found \n returning!" << std::endl;
     return;
   }
 
-  auto& vsoa = *((vsoaHandle.product())->get());
+  auto& vsoa = *vsoaHandle.product();
   int nVertices = vsoa.view().nvFinal();
   auto bsHandle = iEvent.getHandle(tokenBeamSpot_);
   float x0 = 0., y0 = 0., z0 = 0., dxdz = 0., dydz = 0.;

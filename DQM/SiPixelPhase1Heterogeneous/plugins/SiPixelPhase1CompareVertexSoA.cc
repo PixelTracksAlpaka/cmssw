@@ -65,8 +65,8 @@ SiPixelPhase1CompareVertexSoA::SiPixelPhase1CompareVertexSoA(const edm::Paramete
 // -- Analyze
 //
 void SiPixelPhase1CompareVertexSoA::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  auto& vsoaHandleCPU = iEvent.getHandle(tokenSoAVertexCPU_);
-  auto& vsoaHandleGPU = iEvent.getHandle(tokenSoAVertexGPU_);
+  const auto& vsoaHandleCPU = iEvent.getHandle(tokenSoAVertexCPU_);
+  const auto& vsoaHandleGPU = iEvent.getHandle(tokenSoAVertexGPU_);
   if (not vsoaHandleCPU or not vsoaHandleGPU) {
     edm::LogWarning out("SiPixelPhase1CompareTrackSoA");
     if (not vsoaHandleCPU) {
@@ -79,9 +79,9 @@ void SiPixelPhase1CompareVertexSoA::analyze(const edm::Event& iEvent, const edm:
     return;
   }
 
-  auto& vsoaCPU = *vsoaHandleCPU->get();
+  auto& vsoaCPU = *vsoaHandleCPU;
   int nVerticesCPU = vsoaCPU.view().nvFinal();
-  auto& vsoaGPU = *vsoaHandleGPU->get();
+  auto& vsoaGPU = *vsoaHandleGPU;
   int nVerticesGPU = vsoaGPU.view().nvFinal();
 
   auto bsHandle = iEvent.getHandle(tokenBeamSpot_);
