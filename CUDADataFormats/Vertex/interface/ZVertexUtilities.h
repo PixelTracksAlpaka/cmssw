@@ -1,9 +1,7 @@
 #ifndef CUDADataFormats_Vertex_ZVertexUtilities_h
 #define CUDADataFormats_Vertex_ZVertexUtilities_h
 
-//#include <Eigen/Dense>
-//#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
-#include "HeterogeneousCore/CUDAUtilities/interface/HistoContainer.h"
+#include <cuda_runtime.h>
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 
 GENERATE_SOA_LAYOUT(ZVertexSoAHeterogeneousLayout,
@@ -16,8 +14,8 @@ GENERATE_SOA_LAYOUT(ZVertexSoAHeterogeneousLayout,
                     SOA_COLUMN(uint16_t, sortInd),
                     SOA_SCALAR(uint32_t, nvFinal))
 
-// Previous TrajectoryStateSoAT class methods.
-// They operate on View and ConstView of the TrackSoA.
+// Previous ZVertexSoA class methods.
+// They operate on View and ConstView of the ZVertexSoA.
 namespace ZVertex {
   namespace utilities {
     using ZVertexSoAView = ZVertexSoAHeterogeneousLayout<>::View;
@@ -28,7 +26,7 @@ namespace ZVertex {
     __host__ __device__ inline void init(ZVertexSoAView &vertices) { vertices.nvFinal() = 0; }
 
   }  // namespace utilities
-}  // namespace pixelTrack
+}  // namespace ZVertex
 
 namespace ZVertex {
   // Common types for both Host and Device code
@@ -36,6 +34,6 @@ namespace ZVertex {
   using ZVertexSoAView = ZVertexSoAHeterogeneousLayout<>::View;
   using ZVertexSoAConstView = ZVertexSoAHeterogeneousLayout<>::ConstView;
 
-}  // namespace pixelTrack
+}  // namespace ZVertex
 
 #endif
