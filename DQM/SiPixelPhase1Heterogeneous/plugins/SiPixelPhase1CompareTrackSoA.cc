@@ -74,7 +74,7 @@ public:
 
 private:
   const edm::EDGetTokenT<pixelTrack::TrackSoAHost> tokenSoATrackCPU_;
-  const edm::EDGetTokenT<pixelTrack::TrackSoADevice> tokenSoATrackGPU_;
+  const edm::EDGetTokenT<pixelTrack::TrackSoAHost> tokenSoATrackGPU_;
   const std::string topFolderName_;
   const bool useQualityCut_;
   const pixelTrack::Quality minQuality_;
@@ -113,10 +113,12 @@ private:
 //
 // constructors
 //
+// Note that the GPU TrackSoA is also of type TrackSoAHost, as the data have
+// been copied from Device to Host
 
 SiPixelPhase1CompareTrackSoA::SiPixelPhase1CompareTrackSoA(const edm::ParameterSet& iConfig)
     : tokenSoATrackCPU_(consumes<pixelTrack::TrackSoAHost>(iConfig.getParameter<edm::InputTag>("pixelTrackSrcCPU"))),
-      tokenSoATrackGPU_(consumes<pixelTrack::TrackSoADevice>(iConfig.getParameter<edm::InputTag>("pixelTrackSrcGPU"))),
+      tokenSoATrackGPU_(consumes<pixelTrack::TrackSoAHost>(iConfig.getParameter<edm::InputTag>("pixelTrackSrcGPU"))),
       topFolderName_(iConfig.getParameter<std::string>("topFolderName")),
       useQualityCut_(iConfig.getParameter<bool>("useQualityCut")),
       minQuality_(pixelTrack::qualityByName(iConfig.getParameter<std::string>("minQuality"))),
