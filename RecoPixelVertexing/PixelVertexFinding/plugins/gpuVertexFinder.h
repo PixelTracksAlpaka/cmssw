@@ -4,18 +4,21 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "CUDADataFormats/Vertex/interface/ZVertexHeterogeneous.h"
+//#include "CUDADataFormats/Vertex/interface/ZVertexHeterogeneous.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousHost.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousDevice.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
 #include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 
 namespace gpuVertexFinder {
 
-  using ZVertices = ZVertexSoA;
+  using VtxSoAView = ZVertex::ZVertexSoAView;
   using TkSoAConstView = pixelTrack::TrackSoAConstView;
 
   // workspace used in the vertex reco algos
   struct WorkSpace {
-    static constexpr uint32_t MAXTRACKS = ZVertexSoA::MAXTRACKS;
-    static constexpr uint32_t MAXVTX = ZVertexSoA::MAXVTX;
+    static constexpr uint32_t MAXTRACKS = ZVertex::utilities::MAXTRACKS;
+    static constexpr uint32_t MAXVTX = ZVertex::utilities::MAXVTX;
 
     uint32_t ntrks;            // number of "selected tracks"
     uint16_t itrk[MAXTRACKS];  // index of original track
@@ -33,14 +36,14 @@ namespace gpuVertexFinder {
     }
   };
 
-  __global__ void init(ZVertexSoA* pdata, WorkSpace* pws) {
-    pdata->init();
+  __global__ void init(VtxSoAView pdata, WorkSpace* pws) {
+    ZVertex::utilities::init(pdata);
     pws->init();
   }
 
   class Producer {
   public:
-    using ZVertices = ZVertexSoA;
+    using VtxSoAView = ZVertex::ZVertexSoAView;
     using WorkSpace = gpuVertexFinder::WorkSpace;
 
     Producer(bool oneKernel,
@@ -63,8 +66,8 @@ namespace gpuVertexFinder {
 
     ~Producer() = default;
 
-    ZVertexHeterogeneous makeAsync(cudaStream_t stream, TkSoAConstView tracks_view, float ptMin, float ptMax) const;
-    ZVertexHeterogeneous make(TkSoAConstView tracks_view, float ptMin, float ptMax) const;
+    ZVertex::ZVertexSoADevice makeAsync(cudaStream_t stream, TkSoAConstView tracks_view, float ptMin, float ptMax) const;
+    ZVertex::ZVertexSoAHost make(TkSoAConstView tracks_view, float ptMin, float ptMax) const;
 
   private:
     const bool oneKernel_;

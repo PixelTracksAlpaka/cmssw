@@ -1,5 +1,7 @@
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 
+#include <Eigen/Core> //TODO: understand why this is needed
+
 #include "gpuClusterTracksByDensity.h"
 #include "gpuClusterTracksDBSCAN.h"
 #include "gpuClusterTracksIterative.h"
@@ -8,6 +10,7 @@
 #include "gpuSplitVertices.h"
 
 #include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
 
 #undef PIXVERTEX_DEBUG_PRODUCE
 
@@ -20,9 +23,11 @@ namespace gpuVertexFinder {
   // split vertices with a chi2/NDoF greater than this
   constexpr float maxChi2ForSplit = 9.f;
   using TkSoAConstView = pixelTrack::TrackSoAConstView;
+  using VtxSoAView = ZVertex::ZVertexSoAView;
 
-  __global__ void loadTracks(TkSoAConstView tracks_view, ZVertexSoA* soa, WorkSpace* pws, float ptMin, float ptMax) {
-    assert(soa);
+  __global__ void loadTracks(TkSoAConstView tracks_view, VtxSoAView soa, WorkSpace* pws, float ptMin, float ptMax) {
+    //TODO: check if there is a way to assert this
+    //assert(soa);
     auto const* quality = pixelTrack::utilities::qualityData(tracks_view);
 
     auto first = blockIdx.x * blockDim.x + threadIdx.x;
@@ -31,7 +36,7 @@ namespace gpuVertexFinder {
       assert(nHits >= 3);
 
       // initialize soa...
-      soa->idv[idx] = -1;
+      soa[idx].idv() = -1;
 
       if (pixelTrack::utilities::isTriplet(tracks_view, idx))
         continue;  // no triplets
@@ -57,7 +62,7 @@ namespace gpuVertexFinder {
 
 // #define THREE_KERNELS
 #ifndef THREE_KERNELS
-  __global__ void vertexFinderOneKernel(gpuVertexFinder::ZVertices* pdata,
+  __global__ void vertexFinderOneKernel(VtxSoAView pdata,
                                         gpuVertexFinder::WorkSpace* pws,
                                         int minT,      // min number of neighbours to be "seed"
                                         float eps,     // max absolute distance to cluster
@@ -75,7 +80,7 @@ namespace gpuVertexFinder {
     sortByPt2(pdata, pws);
   }
 #else
-  __global__ void vertexFinderKernel1(gpuVertexFinder::ZVertices* pdata,
+  __global__ void vertexFinderKernel1(gpuVertexFinder::VtxSoAView pdata,
                                       gpuVertexFinder::WorkSpace* pws,
                                       int minT,      // min number of neighbours to be "seed"
                                       float eps,     // max absolute distance to cluster
@@ -87,7 +92,7 @@ namespace gpuVertexFinder {
     fitVertices(pdata, pws, maxChi2ForFirstFit);
   }
 
-  __global__ void vertexFinderKernel2(gpuVertexFinder::ZVertices* pdata, gpuVertexFinder::WorkSpace* pws) {
+  __global__ void vertexFinderKernel2(gpuVertexFinder::VtxSoAView pdata, gpuVertexFinder::WorkSpace* pws) {
     fitVertices(pdata, pws, maxChi2ForFinalFit);
     __syncthreads();
     sortByPt2(pdata, pws);
@@ -95,23 +100,24 @@ namespace gpuVertexFinder {
 #endif
 
 #ifdef __CUDACC__
-  ZVertexHeterogeneous Producer::makeAsync(cudaStream_t stream,
+  ZVertex::ZVertexSoADevice Producer::makeAsync(cudaStream_t stream,
                                            TkSoAConstView tracks_view,
                                            float ptMin,
                                            float ptMax) const {
 #ifdef PIXVERTEX_DEBUG_PRODUCE
     std::cout << "producing Vertices on GPU" << std::endl;
 #endif  // PIXVERTEX_DEBUG_PRODUCE
-    ZVertexHeterogeneous vertices(cms::cuda::make_device_unique<ZVertexSoA>(stream));
+    ZVertex::ZVertexSoADevice vertices(stream);
 #else
-  ZVertexHeterogeneous Producer::make(TkSoAConstView tracks_view, float ptMin, float ptMax) const {
+  ZVertex::ZVertexSoAHost Producer::make(TkSoAConstView tracks_view, float ptMin, float ptMax) const {
 #ifdef PIXVERTEX_DEBUG_PRODUCE
     std::cout << "producing Vertices on  CPU" << std::endl;
 #endif  // PIXVERTEX_DEBUG_PRODUCE
-    ZVertexHeterogeneous vertices(std::make_unique<ZVertexSoA>());
+    ZVertex::ZVertexSoAHost vertices;
 #endif
-    auto* soa = vertices.get();
-    assert(soa);
+    auto soa = vertices.view();
+    //TODO: check if there is a way to assert this
+    //assert(soa);
 
 #ifdef __CUDACC__
     auto ws_d = cms::cuda::make_device_unique<WorkSpace>(stream);

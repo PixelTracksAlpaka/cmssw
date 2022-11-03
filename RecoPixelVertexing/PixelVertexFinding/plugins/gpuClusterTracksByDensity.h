@@ -17,7 +17,7 @@ namespace gpuVertexFinder {
   //
   // based on Rodrighez&Laio algo
   //
-  __device__ __forceinline__ void clusterTracksByDensity(gpuVertexFinder::ZVertices* pdata,
+  __device__ __forceinline__ void clusterTracksByDensity(VtxSoAView pdata,
                                                          gpuVertexFinder::WorkSpace* pws,
                                                          int minT,      // min number of neighbours to be "seed"
                                                          float eps,     // max absolute distance to cluster
@@ -32,20 +32,21 @@ namespace gpuVertexFinder {
 
     auto er2mx = errmax * errmax;
 
-    auto& __restrict__ data = *pdata;
+    auto& __restrict__ data = pdata;
     auto& __restrict__ ws = *pws;
     auto nt = ws.ntrks;
     float const* __restrict__ zt = ws.zt;
     float const* __restrict__ ezt2 = ws.ezt2;
 
-    uint32_t& nvFinal = data.nvFinal;
+    uint32_t& nvFinal = data.nvFinal();
     uint32_t& nvIntermediate = ws.nvIntermediate;
 
     uint8_t* __restrict__ izt = ws.izt;
-    int32_t* __restrict__ nn = data.ndof;
+    int32_t* __restrict__ nn = data.ndof();
     int32_t* __restrict__ iv = ws.iv;
 
-    assert(pdata);
+    //TODO: check if there is a way to assert this
+    //assert(pdata);
     assert(zt);
 
     using Hist = cms::cuda::HistoContainer<uint8_t, 256, 16000, 8, uint16_t>;
@@ -63,7 +64,7 @@ namespace gpuVertexFinder {
 
     // fill hist  (bin shall be wider than "eps")
     for (auto i = threadIdx.x; i < nt; i += blockDim.x) {
-      assert(i < ZVertices::MAXTRACKS);
+      assert(i < ZVertex::utilities::MAXTRACKS);
       int iz = int(zt[i] * 10.);  // valid if eps<=0.1
       // iz = std::clamp(iz, INT8_MIN, INT8_MAX);  // sorry c++17 only
       iz = std::min(std::max(iz, INT8_MIN), INT8_MAX);
@@ -197,7 +198,7 @@ namespace gpuVertexFinder {
     }
     __syncthreads();
 
-    assert(foundClusters < ZVertices::MAXVTX);
+    assert(foundClusters < ZVertex::utilities::MAXVTX);
 
     // propagate the negative id to all the tracks in the cluster.
     for (auto i = threadIdx.x; i < nt; i += blockDim.x) {
@@ -219,7 +220,7 @@ namespace gpuVertexFinder {
       printf("found %d proto vertices\n", foundClusters);
   }
 
-  __global__ void clusterTracksByDensityKernel(gpuVertexFinder::ZVertices* pdata,
+  __global__ void clusterTracksByDensityKernel(VtxSoAView pdata,
                                                gpuVertexFinder::WorkSpace* pws,
                                                int minT,      // min number of neighbours to be "seed"
                                                float eps,     // max absolute distance to cluster

@@ -18,6 +18,8 @@
 #include "HeterogeneousCore/CUDACore/interface/ScopedContext.h"
 #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
 #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousDevice.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousHost.h"
 
 #include "gpuVertexFinder.h"
 
@@ -38,9 +40,9 @@ private:
   bool onGPU_;
 
   edm::EDGetTokenT<cms::cuda::Product<pixelTrack::TrackSoADevice>> tokenGPUTrack_;
-  edm::EDPutTokenT<ZVertexCUDAProduct> tokenGPUVertex_;
+  edm::EDPutTokenT<cms::cuda::Product<ZVertex::ZVertexSoADevice>> tokenGPUVertex_;
   edm::EDGetTokenT<pixelTrack::TrackSoAHost> tokenCPUTrack_;
-  edm::EDPutTokenT<ZVertexHeterogeneous> tokenCPUVertex_;
+  edm::EDPutTokenT<ZVertex::ZVertexSoAHost> tokenCPUVertex_;
 
   const gpuVertexFinder::Producer gpuAlgo_;
 
@@ -65,10 +67,10 @@ PixelVertexProducerCUDA::PixelVertexProducerCUDA(const edm::ParameterSet& conf)
   if (onGPU_) {
     tokenGPUTrack_ =
         consumes<cms::cuda::Product<pixelTrack::TrackSoADevice>>(conf.getParameter<edm::InputTag>("pixelTrackSrc"));
-    tokenGPUVertex_ = produces<ZVertexCUDAProduct>();
+    tokenGPUVertex_ = produces<cms::cuda::Product<ZVertex::ZVertexSoADevice>>();
   } else {
     tokenCPUTrack_ = consumes<pixelTrack::TrackSoAHost>(conf.getParameter<edm::InputTag>("pixelTrackSrc"));
-    tokenCPUVertex_ = produces<ZVertexHeterogeneous>();
+    tokenCPUVertex_ = produces<ZVertex::ZVertexSoAHost>();
   }
 }
 

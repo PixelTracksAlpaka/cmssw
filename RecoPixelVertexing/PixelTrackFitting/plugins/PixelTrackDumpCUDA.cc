@@ -4,7 +4,9 @@
 #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
 #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
 #include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHit2DHeterogeneous.h"
-#include "CUDADataFormats/Vertex/interface/ZVertexHeterogeneous.h"
+//#include "CUDADataFormats/Vertex/interface/ZVertexHeterogeneous.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousHost.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousDevice.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -33,11 +35,11 @@ private:
   const bool m_onGPU;
   // GPU
   edm::EDGetTokenT<cms::cuda::Product<pixelTrack::TrackSoADevice>> tokenGPUTrack_;
-  edm::EDGetTokenT<cms::cuda::Product<ZVertexHeterogeneous>> tokenGPUVertex_;
+  edm::EDGetTokenT<cms::cuda::Product<ZVertex::ZVertexSoADevice>> tokenGPUVertex_;
 
   // CPU
   edm::EDGetTokenT<pixelTrack::TrackSoAHost> tokenSoATrack_;
-  edm::EDGetTokenT<ZVertexHeterogeneous> tokenSoAVertex_;
+  edm::EDGetTokenT<ZVertex::ZVertexSoAHost> tokenSoAVertex_;
 };
 
 PixelTrackDumpCUDA::PixelTrackDumpCUDA(const edm::ParameterSet& iConfig)
@@ -46,10 +48,10 @@ PixelTrackDumpCUDA::PixelTrackDumpCUDA(const edm::ParameterSet& iConfig)
     tokenGPUTrack_ =
         consumes<cms::cuda::Product<pixelTrack::TrackSoADevice>>(iConfig.getParameter<edm::InputTag>("pixelTrackSrc"));
     tokenGPUVertex_ =
-        consumes<cms::cuda::Product<ZVertexHeterogeneous>>(iConfig.getParameter<edm::InputTag>("pixelVertexSrc"));
+        consumes<cms::cuda::Product<ZVertex::ZVertexSoADevice>>(iConfig.getParameter<edm::InputTag>("pixelVertexSrc"));
   } else {
     tokenSoATrack_ = consumes<pixelTrack::TrackSoAHost>(iConfig.getParameter<edm::InputTag>("pixelTrackSrc"));
-    tokenSoAVertex_ = consumes<ZVertexHeterogeneous>(iConfig.getParameter<edm::InputTag>("pixelVertexSrc"));
+    tokenSoAVertex_ = consumes<ZVertex::ZVertexSoAHost>(iConfig.getParameter<edm::InputTag>("pixelVertexSrc"));
   }
 }
 
@@ -74,15 +76,16 @@ void PixelTrackDumpCUDA::analyze(edm::StreamID streamID,
     assert(tsoa);
 
     auto const& vertices = ctx.get(iEvent.get(tokenGPUVertex_));
-    auto const* vsoa = vertices.get();
+    //auto const* vsoa = vertices.get();
+    auto const* vsoa = &vertices;
     assert(vsoa);
 
   } else {
     auto const& tsoa = iEvent.get(tokenSoATrack_);
     assert(tsoa.buffer());
 
-    auto const* vsoa = iEvent.get(tokenSoAVertex_).get();
-    assert(vsoa);
+    auto const& vsoa = iEvent.get(tokenSoAVertex_);
+    assert(vsoa.buffer());
   }
 }
 

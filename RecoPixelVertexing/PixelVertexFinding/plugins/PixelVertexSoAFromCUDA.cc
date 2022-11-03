@@ -2,7 +2,8 @@
 
 #include "CUDADataFormats/Common/interface/Product.h"
 #include "CUDADataFormats/Common/interface/HostProduct.h"
-#include "CUDADataFormats/Vertex/interface/ZVertexHeterogeneous.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousHost.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousDevice.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -30,15 +31,15 @@ private:
                edm::WaitingTaskWithArenaHolder waitingTaskHolder) override;
   void produce(edm::Event& iEvent, edm::EventSetup const& iSetup) override;
 
-  edm::EDGetTokenT<cms::cuda::Product<ZVertexHeterogeneous>> tokenCUDA_;
-  edm::EDPutTokenT<ZVertexHeterogeneous> tokenSOA_;
+  edm::EDGetTokenT<cms::cuda::Product<ZVertex::ZVertexSoADevice>> tokenCUDA_;
+  edm::EDPutTokenT<ZVertex::ZVertexSoAHost> tokenSOA_;
 
-  cms::cuda::host::unique_ptr<ZVertexSoA> m_soa;
+  ZVertex::ZVertexSoAHost zvertex_h;
 };
 
 PixelVertexSoAFromCUDA::PixelVertexSoAFromCUDA(const edm::ParameterSet& iConfig)
-    : tokenCUDA_(consumes<cms::cuda::Product<ZVertexHeterogeneous>>(iConfig.getParameter<edm::InputTag>("src"))),
-      tokenSOA_(produces<ZVertexHeterogeneous>()) {}
+    : tokenCUDA_(consumes<cms::cuda::Product<ZVertex::ZVertexSoADevice>>(iConfig.getParameter<edm::InputTag>("src"))),
+      tokenSOA_(produces<ZVertex::ZVertexSoAHost>()) {}
 
 void PixelVertexSoAFromCUDA::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
@@ -50,16 +51,16 @@ void PixelVertexSoAFromCUDA::fillDescriptions(edm::ConfigurationDescriptions& de
 void PixelVertexSoAFromCUDA::acquire(edm::Event const& iEvent,
                                      edm::EventSetup const& iSetup,
                                      edm::WaitingTaskWithArenaHolder waitingTaskHolder) {
-  auto const& inputDataWrapped = iEvent.get(tokenCUDA_);
+  cms::cuda::Product<ZVertex::ZVertexSoADevice> const& inputDataWrapped = iEvent.get(tokenCUDA_);
   cms::cuda::ScopedContextAcquire ctx{inputDataWrapped, std::move(waitingTaskHolder)};
-  auto const& inputData = ctx.get(inputDataWrapped);
-
-  m_soa = inputData.toHostAsync(ctx.stream());
+  auto const& zvertex_d = ctx.get(inputDataWrapped);
+  zvertex_h = ZVertex::ZVertexSoAHost(ctx.stream());
+  zvertex_d.copyToHost(zvertex_h.buffer(), ctx.stream());
 }
 
 void PixelVertexSoAFromCUDA::produce(edm::Event& iEvent, edm::EventSetup const& iSetup) {
   // No copies....
-  iEvent.emplace(tokenSOA_, ZVertexHeterogeneous(std::move(m_soa)));
+  iEvent.emplace(tokenSOA_, std::move(zvertex_h));
 }
 
 DEFINE_FWK_MODULE(PixelVertexSoAFromCUDA);
