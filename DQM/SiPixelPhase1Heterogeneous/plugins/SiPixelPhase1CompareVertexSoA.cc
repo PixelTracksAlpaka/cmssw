@@ -31,9 +31,9 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:
-  const edm::EDGetTokenT<ZVertexSoAHeterogeneousHost> tokenSoAVertexCPU_;
+  const edm::EDGetTokenT<ZVertex::ZVertexSoAHost> tokenSoAVertexCPU_;
   // Note that this has been copied from device to host, hence is a HostCollection
-  const edm::EDGetTokenT<ZVertexSoAHeterogeneousHost> tokenSoAVertexGPU_;
+  const edm::EDGetTokenT<ZVertex::ZVertexSoAHost> tokenSoAVertexGPU_;
   const edm::EDGetTokenT<reco::BeamSpot> tokenBeamSpot_;
   const std::string topFolderName_;
   const float dzCut_;
@@ -55,8 +55,8 @@ private:
 //
 
 SiPixelPhase1CompareVertexSoA::SiPixelPhase1CompareVertexSoA(const edm::ParameterSet& iConfig)
-    : tokenSoAVertexCPU_(consumes<ZVertexHeterogeneousHost>(iConfig.getParameter<edm::InputTag>("pixelVertexSrcCPU"))),
-      tokenSoAVertexGPU_(consumes<ZVertexHeterogeneousHost>(iConfig.getParameter<edm::InputTag>("pixelVertexSrcGPU"))),
+    : tokenSoAVertexCPU_(consumes<ZVertex::ZVertexSoAHost>(iConfig.getParameter<edm::InputTag>("pixelVertexSrcCPU"))),
+      tokenSoAVertexGPU_(consumes<ZVertex::ZVertexSoAHost>(iConfig.getParameter<edm::InputTag>("pixelVertexSrcGPU"))),
       tokenBeamSpot_(consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamSpotSrc"))),
       topFolderName_(iConfig.getParameter<std::string>("topFolderName")),
       dzCut_(iConfig.getParameter<double>("dzCut")) {}
