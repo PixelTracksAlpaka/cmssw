@@ -186,10 +186,6 @@ void CAHitNtupletGeneratorOnGPU::endJob() {
   }
 }
 
-/*PixelTrackHeterogeneous CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DGPU const& hits_d,
-                                                                    float bfield,
-                                                                    cudaStream_t stream) const {
-  PixelTrackHeterogeneous tracks(cms::cuda::make_device_unique<pixelTrack::TrackSoA>(stream));*/
 pixelTrack::TrackSoADevice CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DGPU const& hits_d,
                                                                        float bfield,
                                                                        cudaStream_t stream) const {

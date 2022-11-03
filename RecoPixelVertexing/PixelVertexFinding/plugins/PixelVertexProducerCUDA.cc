@@ -111,12 +111,11 @@ void PixelVertexProducerCUDA::produceOnGPU(edm::StreamID streamID,
 void PixelVertexProducerCUDA::produceOnCPU(edm::StreamID streamID,
                                            edm::Event& iEvent,
                                            const edm::EventSetup& iSetup) const {
-  auto & tracks = iEvent.get(tokenCPUTrack_);
+  auto& tracks = iEvent.get(tokenCPUTrack_);
 
 #ifdef PIXVERTEX_DEBUG_PRODUCE
 
   auto maxTracks = tracks.view().metadata().size();
-  // std::cout << "size of SoA " << sizeof(tsoa) << " stride " << maxTracks << std::endl;
 
   int32_t nt = 0;
   for (int32_t it = 0; it < maxTracks; ++it) {
@@ -126,7 +125,6 @@ void PixelVertexProducerCUDA::produceOnCPU(edm::StreamID streamID,
       break;  // this is a guard: maybe we need to move to nTracks...
     nt++;
   }
-  // std::cout << "found " << nt << " tracks in cpu SoA for Vertexing at " << tracks << std::endl;
 #endif  // PIXVERTEX_DEBUG_PRODUCE
 
   iEvent.emplace(tokenCPUVertex_, gpuAlgo_.make(tracks.view(), ptMin_, ptMax_));

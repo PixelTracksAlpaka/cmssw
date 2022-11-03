@@ -106,7 +106,6 @@ void PixelTrackProducerFromSoA::fillDescriptions(edm::ConfigurationDescriptions 
 void PixelTrackProducerFromSoA::produce(edm::StreamID streamID,
                                         edm::Event &iEvent,
                                         const edm::EventSetup &iSetup) const {
-  // enum class Quality : uint8_t { bad = 0, edup, dup, loose, strict, tight, highPurity };
   reco::TrackBase::TrackQuality recoQuality[] = {reco::TrackBase::undefQuality,
                                                  reco::TrackBase::undefQuality,
                                                  reco::TrackBase::discarded,
@@ -154,13 +153,7 @@ void PixelTrackProducerFromSoA::produce(edm::StreamID streamID,
   std::vector<const TrackingRecHit *> hits;
   hits.reserve(5);
 
-  //const auto &tsoa = *iEvent.get(tokenTrack_);
-  auto & tsoa = iEvent.get(tokenTrack_);
-
-  //auto const *quality = pixelTrack::utilities::qualityData(tsoa.view());
-  // auto const &fit = tsoa.stateAtBS;
-  //auto const &hitIndices = tsoa.view().hitIndices();
-  //auto nTracks = tsoa.view().nTracks();
+  auto &tsoa = iEvent.get(tokenTrack_);
   auto const *quality = pixelTrack::utilities::qualityData(tsoa.view());
   auto const hitIndices = tsoa.view().hitIndices();
   auto nTracks = tsoa.view().nTracks();
@@ -246,7 +239,6 @@ void PixelTrackProducerFromSoA::produce(edm::StreamID streamID,
     // filter???
     tracks.emplace_back(track.release(), hits);
   }
-  // std::cout << "processed " << nt << " good tuples " << tracks.size() << "out of " << indToEdm.size() << std::endl;
 
   // store tracks
   storeTracks(iEvent, tracks, httopo);

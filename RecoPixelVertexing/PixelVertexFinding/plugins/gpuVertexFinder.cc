@@ -19,7 +19,6 @@ namespace gpuVertexFinder {
 
   // split vertices with a chi2/NDoF greater than this
   constexpr float maxChi2ForSplit = 9.f;
-  //using TkSoAView = pixelTrack::TrackSoAView;
   using TkSoAConstView = pixelTrack::TrackSoAConstView;
 
   __global__ void loadTracks(TkSoAConstView tracks_view, ZVertexSoA* soa, WorkSpace* pws, float ptMin, float ptMax) {
@@ -96,7 +95,10 @@ namespace gpuVertexFinder {
 #endif
 
 #ifdef __CUDACC__
-  ZVertexHeterogeneous Producer::makeAsync(cudaStream_t stream, TkSoAConstView tracks_view, float ptMin, float ptMax) const {
+  ZVertexHeterogeneous Producer::makeAsync(cudaStream_t stream,
+                                           TkSoAConstView tracks_view,
+                                           float ptMin,
+                                           float ptMax) const {
 #ifdef PIXVERTEX_DEBUG_PRODUCE
     std::cout << "producing Vertices on GPU" << std::endl;
 #endif  // PIXVERTEX_DEBUG_PRODUCE
@@ -108,7 +110,6 @@ namespace gpuVertexFinder {
 #endif  // PIXVERTEX_DEBUG_PRODUCE
     ZVertexHeterogeneous vertices(std::make_unique<ZVertexSoA>());
 #endif
-    // assert(tksoa);
     auto* soa = vertices.get();
     assert(soa);
 

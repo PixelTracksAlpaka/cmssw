@@ -8,7 +8,6 @@
 
 #include <cuda_runtime.h>
 
-#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
 #include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHit2DHeterogeneous.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cuda_assert.h"

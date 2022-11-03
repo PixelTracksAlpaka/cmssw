@@ -81,12 +81,6 @@ template <>
 void CAHitNtupletGeneratorKernelsCPU::launchKernels(HitsOnCPU const &hh,
                                                     TkSoAView tracks_view,
                                                     cudaStream_t cudaStream) {
-  // auto *tuples_d = tracks_d->view().hitIndices();
-  // auto *detId_d = tracks_d->view().detIndices();
-  // auto *quality_d = tracks_d->qualityData();
-
-  // assert(tuples_d && quality_d); // TODO Find equivalent for View
-
   // zero tuples
   cms::cuda::launchZero(&tracks_view.hitIndices(), cudaStream);
 
@@ -149,7 +143,6 @@ void CAHitNtupletGeneratorKernelsCPU::classifyTuples(HitsOnCPU const &hh,
                                                      cudaStream_t cudaStream) {
   int32_t nhits = hh.nHits();
 
-  // auto const *tuples_d = &tracks_d->hitIndices;
   auto *quality_d = pixelTrack::utilities::qualityData(tracks_view);
   // classify tracks based on kinematics
   kernel_classifyTracks(tracks_view, quality_d, params_.cuts_);

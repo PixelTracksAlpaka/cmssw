@@ -5,7 +5,6 @@
 #include <cstdint>
 
 #include "CUDADataFormats/Vertex/interface/ZVertexHeterogeneous.h"
-//#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
 #include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 
 namespace gpuVertexFinder {

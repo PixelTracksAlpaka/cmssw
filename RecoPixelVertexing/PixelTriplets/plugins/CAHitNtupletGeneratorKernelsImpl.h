@@ -630,10 +630,8 @@ __global__ void kernel_markSharedHit(int const *__restrict__ nshared,
                                      HitContainer const *__restrict__ tuples,
                                      Quality *__restrict__ quality,
                                      bool dupPassThrough) {
-  // constexpr auto bad = (uint8_t)pixelTrack::Quality::bad;
   constexpr auto dup = pixelTrack::Quality::dup;
   constexpr auto loose = pixelTrack::Quality::loose;
-  // constexpr auto strict = (uint8_t)pixelTrack::Quality::strict;
 
   // quality to mark rejected
   auto const reject = dupPassThrough ? loose : dup;
