@@ -23,4 +23,4 @@ namespace ZVertex {
 
 }  // namespace ZVertex
 
-#endif  // CUDADataFormats_Vertex_ZVertexHeterogeneousT_H
+#endif  // CUDADataFormats_Vertex_ZVertexHeterogeneousHost_H
