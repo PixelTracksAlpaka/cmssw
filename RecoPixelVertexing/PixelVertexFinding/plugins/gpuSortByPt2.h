@@ -15,14 +15,14 @@
 
 namespace gpuVertexFinder {
 
-  __device__ __forceinline__ void sortByPt2(VtxSoAView pdata, WorkSpace* pws) {
+  __device__ __forceinline__ void sortByPt2(VtxSoAView pdata, WsSoAView pws) {
     auto& __restrict__ data = pdata;
-    auto& __restrict__ ws = *pws;
-    auto nt = ws.ntrks;
-    float const* __restrict__ ptt2 = ws.ptt2;
+    auto& __restrict__ ws = pws;
+    auto nt = ws.ntrks();
+    float const* __restrict__ ptt2 = ws.ptt2();
     uint32_t const& nvFinal = data.nvFinal();
 
-    int32_t const* __restrict__ iv = ws.iv;
+    int32_t const* __restrict__ iv = ws.iv();
     float* __restrict__ ptv2 = data.ptv2();
     uint16_t* __restrict__ sortInd = data.sortInd();
 
@@ -34,7 +34,7 @@ namespace gpuVertexFinder {
 
     // fill indexing
     for (auto i = threadIdx.x; i < nt; i += blockDim.x) {
-      data[ws.itrk[i]].idv() = iv[i];
+      data[ws[i].itrk(i)].idv() = iv[i];
     }
 
     // can be done asynchronoisly at the end of previous event
@@ -66,7 +66,7 @@ namespace gpuVertexFinder {
 #endif
   }
 
-  __global__ void sortByPt2Kernel(VtxSoAView pdata, WorkSpace* pws) { sortByPt2(pdata, pws); }
+  __global__ void sortByPt2Kernel(VtxSoAView pdata, WsSoAView pws) { sortByPt2(pdata, pws); }
 
 }  // namespace gpuVertexFinder
 
