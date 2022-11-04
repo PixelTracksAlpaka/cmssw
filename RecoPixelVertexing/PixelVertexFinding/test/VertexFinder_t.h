@@ -113,7 +113,7 @@ struct ClusterGenerator {
 };
 
 __global__ void print(gpuVertexFinder::VtxSoAView pdata, gpuVertexFinder::WsSoAView pws) {
-  auto & __restrict__ ws = pws;
+  auto& __restrict__ ws = pws;
   printf("nt,nv %d %d,%d\n", ws.ntrks(), pdata.nvFinal(), ws.nvIntermediate());
 }
 

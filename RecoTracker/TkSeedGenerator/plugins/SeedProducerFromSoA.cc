@@ -91,7 +91,7 @@ void SeedProducerFromSoA::produce(edm::StreamID streamID, edm::Event& iEvent, co
   // std::cout << "beamspot " << bsh.x0() << ' ' << bsh.y0() << ' ' << bsh.z0() << std::endl;
   GlobalPoint bs(bsh.x0(), bsh.y0(), bsh.z0());
 
-  auto & tsoa = iEvent.get(tokenTrack_);
+  auto& tsoa = iEvent.get(tokenTrack_);
 
   auto const* quality = pixelTrack::utilities::qualityData(tsoa.view());
   //auto const& fit = tsoa.stateAtBS;
@@ -100,7 +100,7 @@ void SeedProducerFromSoA::produce(edm::StreamID streamID, edm::Event& iEvent, co
 
   int32_t nt = 0;
   for (int32_t it = 0; it < maxTracks; ++it) {
-    auto nHits = pixelTrack::utilities::nHits(tsoa.view(),it);
+    auto nHits = pixelTrack::utilities::nHits(tsoa.view(), it);
     if (nHits == 0)
       break;  // this is a guard: maybe we need to move to nTracks...
 
@@ -122,11 +122,11 @@ void SeedProducerFromSoA::produce(edm::StreamID streamID, edm::Event& iEvent, co
 
     // mind: this values are respect the beamspot!
 
-    float phi = pixelTrack::utilities::phi(tsoa.view(),it);
+    float phi = pixelTrack::utilities::phi(tsoa.view(), it);
 
     riemannFit::Vector5d ipar, opar;
     riemannFit::Matrix5d icov, ocov;
-    pixelTrack::utilities::copyToDense(tsoa.view(),ipar, icov, it);
+    pixelTrack::utilities::copyToDense(tsoa.view(), ipar, icov, it);
     riemannFit::transformToPerigeePlane(ipar, icov, opar, ocov);
 
     LocalTrajectoryParameters lpar(opar(0), opar(1), opar(2), opar(3), opar(4), 1.);

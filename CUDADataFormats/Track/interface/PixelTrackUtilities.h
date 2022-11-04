@@ -65,7 +65,9 @@ namespace pixelTrack {
 
     __host__ __device__ inline float zip(const TrackSoAConstView &tracks, int32_t i) { return tracks[i].state()(4); }
 
-    __host__ __device__ inline bool isTriplet(const TrackSoAConstView &tracks, int i) { return tracks[i].nLayers() == 3; }
+    __host__ __device__ inline bool isTriplet(const TrackSoAConstView &tracks, int i) {
+      return tracks[i].nLayers() == 3;
+    }
 
     template <typename V3, typename M3, typename V2, typename M2>
     __host__ __device__ inline void copyFromCircle(

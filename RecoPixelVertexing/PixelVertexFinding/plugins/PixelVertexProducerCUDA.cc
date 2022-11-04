@@ -105,7 +105,7 @@ void PixelVertexProducerCUDA::produceOnGPU(edm::StreamID streamID,
   iEvent.getByToken(tokenGPUTrack_, hTracks);
 
   cms::cuda::ScopedContextProduce ctx{*hTracks};
-  auto &tracks = ctx.get(*hTracks);
+  auto& tracks = ctx.get(*hTracks);
 
   ctx.emplace(iEvent, tokenGPUVertex_, gpuAlgo_.makeAsync(ctx.stream(), tracks.view(), ptMin_, ptMax_));
 }

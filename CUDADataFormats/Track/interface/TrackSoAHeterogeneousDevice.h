@@ -16,7 +16,6 @@ public:
   // Constructor which specifies the SoA size
   explicit TrackSoAHeterogeneousDevice(cudaStream_t stream)
       : PortableDeviceCollection<TrackSoAHeterogeneousLayout<>>(S, stream) {}
-
 };
 
 namespace pixelTrack {

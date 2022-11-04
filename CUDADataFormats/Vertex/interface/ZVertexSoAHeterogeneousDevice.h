@@ -16,13 +16,12 @@ public:
   // Constructor which specifies the SoA size
   explicit ZVertexSoAHeterogeneousDevice(cudaStream_t stream)
       : PortableDeviceCollection<ZVertexSoAHeterogeneousLayout<>>(S, stream) {}
-
 };
 
 namespace ZVertex {
 
   using ZVertexSoADevice = ZVertexSoAHeterogeneousDevice<ZVertex::utilities::MAXTRACKS>;
 
-}  // namespace pixelTrack
+}  // namespace ZVertex
 
 #endif  // CUDADataFormats_Vertex_ZVertexHeterogeneousDevice_H
