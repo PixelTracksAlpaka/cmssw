@@ -111,7 +111,7 @@ namespace gpuVertexFinder {
 #ifdef PIXVERTEX_DEBUG_PRODUCE
     std::cout << "producing Vertices on  CPU" << std::endl;
 #endif  // PIXVERTEX_DEBUG_PRODUCE
-    ZVertex::ZVertexSoAHost vertices;
+    ZVertex::ZVertexSoAHost vertices(nullptr);
 #endif
     auto soa = vertices.view();
     //TODO: check if there is a way to assert this
