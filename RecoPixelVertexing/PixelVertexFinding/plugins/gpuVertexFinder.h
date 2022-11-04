@@ -8,43 +8,23 @@
 #include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousHost.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousDevice.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
+#include "WorkSpaceUtilities.h"
+#include "WorkSpaceSoAHeterogeneousHost.h"
+#include "WorkSpaceSoAHeterogeneousDevice.h"
 
 namespace gpuVertexFinder {
 
   using VtxSoAView = ZVertex::ZVertexSoAView;
   using TkSoAConstView = pixelTrack::TrackSoAConstView;
+  using WsSoAView = gpuVertexFinder::workSpace::WorkSpaceSoAView;
 
-  // workspace used in the vertex reco algos
-  struct WorkSpace {
-    static constexpr uint32_t MAXTRACKS = ZVertex::utilities::MAXTRACKS;
-    static constexpr uint32_t MAXVTX = ZVertex::utilities::MAXVTX;
-
-    uint32_t ntrks;            // number of "selected tracks"
-    uint16_t itrk[MAXTRACKS];  // index of original track
-    float zt[MAXTRACKS];       // input track z at bs
-    float ezt2[MAXTRACKS];     // input error^2 on the above
-    float ptt2[MAXTRACKS];     // input pt^2 on the above
-    uint8_t izt[MAXTRACKS];    // interized z-position of input tracks
-    int32_t iv[MAXTRACKS];     // vertex index for each associated track
-
-    uint32_t nvIntermediate;  // the number of vertices after splitting pruning etc.
-
-    __host__ __device__ void init() {
-      ntrks = 0;
-      nvIntermediate = 0;
-    }
-  };
-
-  __global__ void init(VtxSoAView pdata, WorkSpace* pws) {
+  __global__ void init(VtxSoAView pdata, WsSoAview pws) {
     ZVertex::utilities::init(pdata);
-    pws->init();
+    gpuVertexFinder::workSpace::utilities::init(pws);
   }
 
   class Producer {
   public:
-    using VtxSoAView = ZVertex::ZVertexSoAView;
-    using WorkSpace = gpuVertexFinder::WorkSpace;
-
     Producer(bool oneKernel,
              bool useDensity,
              bool useDBSCAN,

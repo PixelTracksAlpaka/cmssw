@@ -6,7 +6,7 @@
 
 GENERATE_SOA_LAYOUT(ZVertexSoAHeterogeneousLayout,
                     SOA_COLUMN(int16_t, idv),
-                    SOA_COLUMN(float, zv),  // this is chi2/ndof as not necessarely all hits are used in the fit
+                    SOA_COLUMN(float, zv),
                     SOA_COLUMN(float, wv),
                     SOA_COLUMN(float, chi2),
                     SOA_COLUMN(float, ptv2),
@@ -17,8 +17,12 @@ GENERATE_SOA_LAYOUT(ZVertexSoAHeterogeneousLayout,
 // Previous ZVertexSoA class methods.
 // They operate on View and ConstView of the ZVertexSoA.
 namespace ZVertex {
+  // Common types for both Host and Device code
+  using ZVertexSoALayout = ZVertexSoAHeterogeneousLayout<>;
+  using ZVertexSoAView = ZVertexSoAHeterogeneousLayout<>::View;
+  using ZVertexSoAConstView = ZVertexSoAHeterogeneousLayout<>::ConstView;
+
   namespace utilities {
-    using ZVertexSoAView = ZVertexSoAHeterogeneousLayout<>::View;
 
     static constexpr uint32_t MAXTRACKS = 32 * 1024;
     static constexpr uint32_t MAXVTX = 1024;
@@ -26,14 +30,6 @@ namespace ZVertex {
     __host__ __device__ inline void init(ZVertexSoAView &vertices) { vertices.nvFinal() = 0; }
 
   }  // namespace utilities
-}  // namespace ZVertex
-
-namespace ZVertex {
-  // Common types for both Host and Device code
-  using ZVertexSoALayout = ZVertexSoAHeterogeneousLayout<>;
-  using ZVertexSoAView = ZVertexSoAHeterogeneousLayout<>::View;
-  using ZVertexSoAConstView = ZVertexSoAHeterogeneousLayout<>::ConstView;
-
 }  // namespace ZVertex
 
 #endif

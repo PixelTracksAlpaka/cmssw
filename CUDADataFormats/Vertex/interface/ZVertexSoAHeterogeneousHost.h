@@ -5,14 +5,13 @@
 
 #include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
 #include "CUDADataFormats/Common/interface/PortableHostCollection.h"
-#include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 
 template <int32_t S>
 class ZVertexSoAHeterogeneousHost : public cms::cuda::PortableHostCollection<ZVertexSoAHeterogeneousLayout<>> {
 public:
   ZVertexSoAHeterogeneousHost() = default;
 
-  // Constructor which specifies the SoA size
+  // Constructor which specifies the SoA size and CUDA stream
   explicit ZVertexSoAHeterogeneousHost(cudaStream_t stream)
       : PortableHostCollection<ZVertexSoAHeterogeneousLayout<>>(S, stream) {}
 };
