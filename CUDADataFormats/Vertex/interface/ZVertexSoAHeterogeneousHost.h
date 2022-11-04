@@ -1,7 +1,7 @@
 #ifndef CUDADataFormats_Vertex_ZVertexHeterogeneousHost_H
 #define CUDADataFormats_Vertex_ZVertexHeterogeneousHost_H
 
-#include <bits/stdint-uintn.h>
+#include <cstdint>
 
 #include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
 #include "CUDADataFormats/Common/interface/PortableHostCollection.h"

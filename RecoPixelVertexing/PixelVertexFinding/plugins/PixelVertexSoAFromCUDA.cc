@@ -53,9 +53,10 @@ void PixelVertexSoAFromCUDA::acquire(edm::Event const& iEvent,
                                      edm::WaitingTaskWithArenaHolder waitingTaskHolder) {
   cms::cuda::Product<ZVertex::ZVertexSoADevice> const& inputDataWrapped = iEvent.get(tokenCUDA_);
   cms::cuda::ScopedContextAcquire ctx{inputDataWrapped, std::move(waitingTaskHolder)};
-  auto const& zvertex_d = ctx.get(inputDataWrapped);
-  zvertex_h = ZVertex::ZVertexSoAHost(ctx.stream());
-  zvertex_d.copyToHost(zvertex_h.buffer(), ctx.stream());
+  auto const& zvertex_d = ctx.get(inputDataWrapped); // Tracks on device
+  zvertex_h = ZVertex::ZVertexSoAHost(ctx.stream()); // Create an instance of Tracks on Host, using the stream
+  cudaCheck(cudaMemcpyAsync(zvertex_h.buffer().get(), zvertex_d.const_buffer().get(), zvertex_d.bufferSize(), cudaMemcpyDeviceToHost, ctx.stream())); // Copy data from Device to Host
+  cudaCheck(cudaGetLastError());
 }
 
 void PixelVertexSoAFromCUDA::produce(edm::Event& iEvent, edm::EventSetup const& iSetup) {

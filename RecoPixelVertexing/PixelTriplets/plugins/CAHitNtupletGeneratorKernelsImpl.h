@@ -9,7 +9,6 @@
 #include <cstdint>
 #include <limits>
 
-#include <bits/stdint-uintn.h>
 #include <cuda_runtime.h>
 
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
@@ -196,7 +195,7 @@ __global__ void kernel_fastDuplicateRemover(GPUCACell const *__restrict__ cells,
 
     /* chi2 penalize higher-pt tracks  (try rescale it?)
     auto score = [&](auto it) {
-      return tracks_view[it].nLayers() < 4 ? 
+      return tracks_view[it].nLayers() < 4 ?
               std::abs(pixelTrack::utilities::tip(tracks_view, it)) :  // tip for triplets
               tracks_view[it].chi2(it);            //chi2 for quads
     };

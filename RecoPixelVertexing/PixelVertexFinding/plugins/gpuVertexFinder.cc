@@ -1,6 +1,7 @@
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 
-#include <Eigen/Core> //TODO: understand why this is needed
+#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
 
 #include "gpuClusterTracksByDensity.h"
 #include "gpuClusterTracksDBSCAN.h"
@@ -8,9 +9,6 @@
 #include "gpuFitVertices.h"
 #include "gpuSortByPt2.h"
 #include "gpuSplitVertices.h"
-
-#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
-#include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
 
 #undef PIXVERTEX_DEBUG_PRODUCE
 

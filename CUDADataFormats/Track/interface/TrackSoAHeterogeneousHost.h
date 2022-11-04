@@ -1,7 +1,7 @@
 #ifndef CUDADataFormats_Track_TrackHeterogeneousHost_H
 #define CUDADataFormats_Track_TrackHeterogeneousHost_H
 
-#include <bits/stdint-uintn.h>
+#include <cstdint>
 
 #include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 #include "CUDADataFormats/Common/interface/PortableHostCollection.h"

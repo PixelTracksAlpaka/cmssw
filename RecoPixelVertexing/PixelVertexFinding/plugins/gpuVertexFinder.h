@@ -4,11 +4,10 @@
 #include <cstddef>
 #include <cstdint>
 
-//#include "CUDADataFormats/Vertex/interface/ZVertexHeterogeneous.h"
+#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousHost.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousDevice.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
-#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 
 namespace gpuVertexFinder {
 

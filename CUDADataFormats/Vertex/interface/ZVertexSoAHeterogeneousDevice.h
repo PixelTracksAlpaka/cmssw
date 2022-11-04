@@ -1,7 +1,7 @@
 #ifndef CUDADataFormats_Vertex_ZVertexHeterogeneousDevice_H
 #define CUDADataFormats_Vertex_ZVertexHeterogeneousDevice_H
 
-#include <bits/stdint-uintn.h>
+#include <cstdint>
 
 #include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
 #include "CUDADataFormats/Common/interface/PortableDeviceCollection.h"
@@ -17,11 +17,6 @@ public:
   explicit ZVertexSoAHeterogeneousDevice(cudaStream_t stream)
       : PortableDeviceCollection<ZVertexSoAHeterogeneousLayout<>>(S, stream) {}
 
-  // Copy data from device to host
-  __host__ void copyToHost(cms::cuda::host::unique_ptr<std::byte[]> &host_ptr, cudaStream_t stream) const {
-    cudaCheck(cudaMemcpyAsync(host_ptr.get(), const_buffer().get(), bufferSize(), cudaMemcpyDeviceToHost, stream));
-    cudaCheck(cudaGetLastError());
-  }
 };
 
 namespace ZVertex {

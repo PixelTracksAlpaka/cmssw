@@ -59,7 +59,8 @@ void PixelTrackSoAFromCUDA::acquire(edm::Event const& iEvent,
   cms::cuda::ScopedContextAcquire ctx{inputDataWrapped, std::move(waitingTaskHolder)};
   auto const& tracks_d = ctx.get(inputDataWrapped);      // Tracks on device
   tracks_h = pixelTrack::TrackSoAHost(ctx.stream());     // Create an instance of Tracks on Host, using the stream
-  tracks_d.copyToHost(tracks_h.buffer(), ctx.stream());  // Copy data from Device to Host
+  cudaCheck(cudaMemcpyAsync(tracks_h.buffer().get(), tracks_d.const_buffer().get(), tracks_d.bufferSize(), cudaMemcpyDeviceToHost, ctx.stream())); // Copy data from Device to Host
+  cudaCheck(cudaGetLastError());
 }
 
 void PixelTrackSoAFromCUDA::produce(edm::Event& iEvent, edm::EventSetup const& iSetup) {
