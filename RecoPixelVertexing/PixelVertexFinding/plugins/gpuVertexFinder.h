@@ -18,7 +18,7 @@ namespace gpuVertexFinder {
   using TkSoAConstView = pixelTrack::TrackSoAConstView;
   using WsSoAView = gpuVertexFinder::workSpace::WorkSpaceSoAView;
 
-  __global__ void init(VtxSoAView pdata, WsSoAview pws) {
+  __global__ void init(VtxSoAView pdata, WsSoAView pws) {
     ZVertex::utilities::init(pdata);
     gpuVertexFinder::workSpace::utilities::init(pws);
   }

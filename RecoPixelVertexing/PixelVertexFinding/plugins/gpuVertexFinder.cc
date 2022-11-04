@@ -116,9 +116,9 @@ namespace gpuVertexFinder {
     //assert(soa);
 
 #ifdef __CUDACC__
-    auto ws_d = gpuVertexing::workSpace::WorkSpaceSoAHeterogeneousDevice(stream);
+    auto ws_d = gpuVertexFinder::workSpace::WorkSpaceSoADevice(stream);
 #else
-    auto ws_d = gpuVertexing::workSpace::WorkSpaceSoAHeterogeneousHost(nullptr);
+    auto ws_d = gpuVertexFinder::workSpace::WorkSpaceSoAHost(nullptr);
 #endif
 
 #ifdef __CUDACC__

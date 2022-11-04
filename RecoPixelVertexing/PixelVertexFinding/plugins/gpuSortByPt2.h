@@ -34,7 +34,7 @@ namespace gpuVertexFinder {
 
     // fill indexing
     for (auto i = threadIdx.x; i < nt; i += blockDim.x) {
-      data[ws[i].itrk(i)].idv() = iv[i];
+      data[ws[i].itrk()].idv() = iv[i];
     }
 
     // can be done asynchronoisly at the end of previous event

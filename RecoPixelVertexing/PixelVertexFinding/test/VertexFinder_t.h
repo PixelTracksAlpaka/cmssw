@@ -9,14 +9,15 @@
 #include "HeterogeneousCore/CUDAUtilities/interface/launch.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/allocate_device.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/currentDevice.h"
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/WorkSpaceUtilities.h"
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/WorkSpaceSoAHeterogeneousHost.h"
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/WorkSpaceSoAHeterogeneousDevice.h"
 
 #include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"  // TODO: included in order to compile Eigen columns first!!!
 #include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousHost.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousDevice.h"
+
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/WorkSpaceUtilities.h"
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/WorkSpaceSoAHeterogeneousHost.h"
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/WorkSpaceSoAHeterogeneousDevice.h"
 #ifdef USE_DBSCAN
 #include "RecoPixelVertexing/PixelVertexFinding/plugins/gpuClusterTracksDBSCAN.h"
 #define CLUSTERIZE gpuVertexFinder::clusterTracksDBSCAN
@@ -40,15 +41,15 @@ __global__ void vertexFinderOneKernel(gpuVertexFinder::VtxSoAView pdata,
                                       float errmax,  // max error to be "seed"
                                       float chi2max  // max normalized distance to cluster,
 ) {
-  clusterTracksByDensity(pdata, pws, minT, eps, errmax, chi2max);
+  gpuVertexFinder::clusterTracksByDensity(pdata, pws, minT, eps, errmax, chi2max);
   __syncthreads();
-  fitVertices(pdata, pws, 50.);
+  gpuVertexFinder::fitVertices(pdata, pws, 50.);
   __syncthreads();
-  splitVertices(pdata, pws, 9.f);
+  gpuVertexFinder::splitVertices(pdata, pws, 9.f);
   __syncthreads();
-  fitVertices(pdata, pws, 5000.);
+  gpuVertexFinder::fitVertices(pdata, pws, 5000.);
   __syncthreads();
-  sortByPt2(pdata, pws);
+  gpuVertexFinder::sortByPt2(pdata, pws);
 }
 #endif
 #endif
@@ -112,7 +113,7 @@ struct ClusterGenerator {
 };
 
 __global__ void print(gpuVertexFinder::VtxSoAView pdata, gpuVertexFinder::WsSoAView pws) {
-  auto const& __restrict__ ws = pws;
+  auto & __restrict__ ws = pws;
   printf("nt,nv %d %d,%d\n", ws.ntrks(), pdata.nvFinal(), ws.nvIntermediate());
 }
 
@@ -123,12 +124,12 @@ int main() {
   cudaCheck(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));
 
   ZVertex::ZVertexSoADevice onGPU_d(stream);
-  gpuVertexing::workSpace::WorkSpaceSoAHeterogeneousDevice ws_d(stream);
+  gpuVertexFinder::workSpace::WorkSpaceSoADevice ws_d(stream);
 #else
   stream = nullptr;
 
   ZVertex::ZVertexSoAHost onGPU_d(stream);
-  gpuVertexing::workSpace::WorkSpaceSoAHeterogeneousHost ws_d(stream);
+  gpuVertexFinder::workSpace::WorkSpaceSoAHost ws_d(stream);
 #endif
 
   Event ev;
@@ -201,7 +202,7 @@ int main() {
       print(onGPU_d.view(), ws_d.view());
       CLUSTERIZE(onGPU_d.view(), ws_d.view(), kk, par[0], par[1], par[2]);
       print(onGPU_d.view(), ws_d.view());
-      fitVertices(onGPU_d.view(), ws_d.view(), 50.f);
+      gpuVertexFinder::fitVertices(onGPU_d.view(), ws_d.view(), 50.f);
       nv = onGPU_d.view().nvFinal();
 #endif
 
@@ -260,7 +261,7 @@ int main() {
       cudaCheck(cudaMemcpy(nn, onGPU_d.view().ndof(), nv * sizeof(int32_t), cudaMemcpyDeviceToHost));
       cudaCheck(cudaMemcpy(chi2, onGPU_d.view().chi2(), nv * sizeof(float), cudaMemcpyDeviceToHost));
 #else
-      fitVertices(onGPU_d.view(), ws_d.view(), 50.f);
+      gpuVertexFinder::fitVertices(onGPU_d.view(), ws_d.view(), 50.f);
       nv = onGPU_d.view().nvFinal();
       memcpy(chi2, onGPU_d.view().chi2(), nv * sizeof(float));
 #endif
@@ -278,7 +279,7 @@ int main() {
       cms::cuda::launch(gpuVertexFinder::splitVerticesKernel, {1024, 64}, onGPU_d.view(), ws_d.view(), 9.f);
       cudaCheck(cudaMemcpy(&nv, &ws_d.view().nvIntermediate(), sizeof(uint32_t), cudaMemcpyDeviceToHost));
 #else
-      splitVertices(onGPU_d.view(), ws_d.view(), 9.f);
+      gpuVertexFinder::splitVertices(onGPU_d.view(), ws_d.view(), 9.f);
       nv = ws_d.view().nvIntermediate();
 #endif
       std::cout << "after split " << nv << std::endl;
@@ -291,8 +292,8 @@ int main() {
       cudaCheck(cudaGetLastError());
       cudaCheck(cudaMemcpy(&nv, &onGPU_d.view().nvFinal(), sizeof(uint32_t), cudaMemcpyDeviceToHost));
 #else
-      fitVertices(onGPU_d.view(), ws_d.view(), 5000.f);
-      sortByPt2(onGPU_d.view(), ws_d.view());
+      gpuVertexFinder::fitVertices(onGPU_d.view(), ws_d.view(), 5000.f);
+      gpuVertexFinder::sortByPt2(onGPU_d.view(), ws_d.view());
       nv = onGPU_d.view().nvFinal();
       memcpy(chi2, onGPU_d.view().chi2(), nv * sizeof(float));
 #endif

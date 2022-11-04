@@ -4,11 +4,12 @@
 #include <cstdint>
 #include "WorkSpaceUtilities.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
-#include "CUDADataFormats/Vertex/interface/WorkSpaceUtilities.h"
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/WorkSpaceUtilities.h"
 #include "CUDADataFormats/Common/interface/PortableHostCollection.h"
 
 template <int32_t S>
-class WorkSpaceSoAHeterogeneousHost : public cms::cuda::PortableHostCollection<WorksSpaceSoAHeterogeneousLayout> {
+class WorkSpaceSoAHeterogeneousHost : public cms::cuda::PortableHostCollection<WorkSpaceSoAHeterogeneousLayout<>> {
+public:
   WorkSpaceSoAHeterogeneousHost() = default;
 
   // Constructor which specifies the SoA size and CUDA stream
@@ -17,7 +18,7 @@ class WorkSpaceSoAHeterogeneousHost : public cms::cuda::PortableHostCollection<W
 };
 
 namespace gpuVertexFinder {
-  namespace WorkSpace {
+  namespace workSpace {
     using WorkSpaceSoAHost = WorkSpaceSoAHeterogeneousHost<ZVertex::utilities::MAXTRACKS>;
   }
 }  // namespace gpuVertexFinder
