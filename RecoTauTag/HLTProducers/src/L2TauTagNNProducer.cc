@@ -50,8 +50,9 @@
 #include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
 #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
-#include "CUDADataFormats/Vertex/interface/ZVertexSoA.h"
-#include "CUDADataFormats/Vertex/interface/ZVertexHeterogeneous.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousDevice.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousHost.h"
 
 namespace L2TauTagNNv1 {
   constexpr int nCellEta = 5;
@@ -181,10 +182,10 @@ private:
   void fillPatatracks(tensorflow::Tensor& cellGridMatrix,
                       const std::vector<l1t::TauRef>& allTaus,
                       const pixelTrack::TrackSoAHost& patatracks_tsoa,
-                      const ZVertexSoA& patavtx_soa,
+                      const ZVertex::ZVertexSoAHost& patavtx_soa,
                       const reco::BeamSpot& beamspot,
                       const MagneticField* magfi);
-  void selectGoodTracksAndVertices(const ZVertexSoA& patavtx_soa,
+  void selectGoodTracksAndVertices(const ZVertex::ZVertexSoAHost& patavtx_soa,
                                    const pixelTrack::TrackSoAHost& patatracks_tsoa,
                                    std::vector<int>& trkGood,
                                    std::vector<int>& vtxGood);
@@ -208,7 +209,7 @@ private:
   const edm::EDGetTokenT<EcalRecHitCollection> eeToken_;
   const edm::ESGetToken<CaloGeometry, CaloGeometryRecord> geometryToken_;
   const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> bFieldToken_;
-  const edm::EDGetTokenT<ZVertexHeterogeneous> pataVerticesToken_;
+  const edm::EDGetTokenT<ZVertex::ZVertexSoAHost> pataVerticesToken_;
   const edm::EDGetTokenT<pixelTrack::TrackSoAHost> pataTracksToken_;
   const edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;
   const unsigned int maxVtx_;
@@ -293,7 +294,7 @@ L2TauNNProducer::L2TauNNProducer(const edm::ParameterSet& cfg, const L2TauNNProd
       eeToken_(consumes<EcalRecHitCollection>(cfg.getParameter<edm::InputTag>("eeInput"))),
       geometryToken_(esConsumes<CaloGeometry, CaloGeometryRecord>()),
       bFieldToken_(esConsumes<MagneticField, IdealMagneticFieldRecord>()),
-      pataVerticesToken_(consumes<ZVertexHeterogeneous>(cfg.getParameter<edm::InputTag>("pataVertices"))),
+      pataVerticesToken_(consumes<ZVertex::ZVertexSoAHost>(cfg.getParameter<edm::InputTag>("pataVertices"))),
       pataTracksToken_(consumes<pixelTrack::TrackSoAHost>(cfg.getParameter<edm::InputTag>("pataTracks"))),
       beamSpotToken_(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("BeamSpot"))),
       maxVtx_(cfg.getParameter<uint>("maxVtx")),
@@ -570,12 +571,12 @@ void L2TauNNProducer::fillCaloRecHits(tensorflow::Tensor& cellGridMatrix,
   }
 }
 
-void L2TauNNProducer::selectGoodTracksAndVertices(const ZVertexSoA& patavtx_soa,
+void L2TauNNProducer::selectGoodTracksAndVertices(const ZVertex::ZVertexSoAHost& patavtx_soa,
                                                   const pixelTrack::TrackSoAHost& patatracks_tsoa,
                                                   std::vector<int>& trkGood,
                                                   std::vector<int>& vtxGood) {
   const auto maxTracks = patatracks_tsoa.view().metadata().size();
-  const int nv = patavtx_soa.nvFinal;
+  const int nv = patavtx_soa.view().nvFinal();
   trkGood.clear();
   trkGood.reserve(maxTracks);
   vtxGood.clear();
@@ -591,7 +592,7 @@ void L2TauNNProducer::selectGoodTracksAndVertices(const ZVertexSoA& patavtx_soa,
     if (nHits == 0) {
       break;
     }
-    int vtx_ass_to_track = patavtx_soa.idv[trk_idx];
+    int vtx_ass_to_track = patavtx_soa.view()[trk_idx].idv();
     if (vtx_ass_to_track >= 0 && vtx_ass_to_track < nv) {
       auto patatrackPt = patatracks_tsoa.view()[trk_idx].pt();
       ++nTrkAssociated[vtx_ass_to_track];
@@ -607,7 +608,7 @@ void L2TauNNProducer::selectGoodTracksAndVertices(const ZVertexSoA& patavtx_soa,
   if (nv > 0) {
     const auto minFOM_fromFrac = (*std::max_element(pTSquaredSum.begin(), pTSquaredSum.end())) * fractionSumPt2_;
     for (int j = nv - 1; j >= 0 && vtxGood.size() < maxVtx_; --j) {
-      auto vtx_idx = patavtx_soa.sortInd[j];
+      auto vtx_idx = patavtx_soa.view()[j].sortInd();
       assert(vtx_idx < nv);
       if (nTrkAssociated[vtx_idx] >= 2 && pTSquaredSum[vtx_idx] >= minFOM_fromFrac &&
           pTSquaredSum[vtx_idx] > minSumPt2_) {
@@ -652,7 +653,7 @@ std::pair<float, float> L2TauNNProducer::impactParameter(int it,
 void L2TauNNProducer::fillPatatracks(tensorflow::Tensor& cellGridMatrix,
                                      const std::vector<l1t::TauRef>& allTaus,
                                      const pixelTrack::TrackSoAHost& patatracks_tsoa,
-                                     const ZVertexSoA& patavtx_soa,
+                                     const ZVertex::ZVertexSoAHost& patavtx_soa,
                                      const reco::BeamSpot& beamspot,
                                      const MagneticField* magfi) {
   using NNInputs = L2TauTagNNv1::NNInputs;
@@ -688,7 +689,7 @@ void L2TauNNProducer::fillPatatracks(tensorflow::Tensor& cellGridMatrix,
         continue;
       const int patatrackNdof = 2 * std::min(6, nHits) - 5;
 
-      const int vtx_idx_assTrk = patavtx_soa.idv[it];
+      const int vtx_idx_assTrk = patavtx_soa.view()[it].idv();
       if (reco::deltaR2(patatrackEta, patatrackPhi, tauEta, tauPhi) < dR2_max) {
         std::tie(deta, dphi, eta_idx, phi_idx) =
             getEtaPhiIndices(patatrackEta, patatrackPhi, allTaus[tau_idx]->polarP4());
@@ -765,7 +766,7 @@ void L2TauNNProducer::produce(edm::Event& event, const edm::EventSetup& eventset
   const auto hbhe = event.getHandle(hbheToken_);
   const auto ho = event.getHandle(hoToken_);
   auto& patatracks_SoA = event.get(pataTracksToken_);
-  const auto& vertices_SoA = *event.get(pataVerticesToken_);
+  auto& vertices_SoA = event.get(pataVerticesToken_);
   const auto bsHandle = event.getHandle(beamSpotToken_);
 
   auto const fieldESH = eventsetup.getHandle(bFieldToken_);

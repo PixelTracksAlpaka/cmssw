@@ -4,7 +4,6 @@
 #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
 #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
 #include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHit2DHeterogeneous.h"
-//#include "CUDADataFormats/Vertex/interface/ZVertexHeterogeneous.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousHost.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousDevice.h"
 #include "DataFormats/Common/interface/Handle.h"

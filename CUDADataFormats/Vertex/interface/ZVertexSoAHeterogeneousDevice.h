@@ -25,4 +25,4 @@ namespace ZVertex {
 
 }  // namespace pixelTrack
 
-#endif  // CUDADataFormats_Vertex_ZVertexHeterogeneousT_H
+#endif  // CUDADataFormats_Vertex_ZVertexHeterogeneousDevice_H
