@@ -3,7 +3,8 @@
 
 #include <cuda_runtime.h>
 #include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHit2DHeterogeneous.h"
-#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
 
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -28,7 +29,8 @@ public:
   using hindex_type = TrackingRecHit2DSOAView::hindex_type;
 
   using Quality = pixelTrack::Quality;
-  using OutputSoA = pixelTrack::TrackSoA;
+  using OutputSoAHost = pixelTrack::TrackSoAHost;
+  using OutputSoADevice = pixelTrack::TrackSoADevice;
   using HitContainer = pixelTrack::HitContainer;
   using Tuple = HitContainer;
 
@@ -47,9 +49,13 @@ public:
   void beginJob();
   void endJob();
 
-  PixelTrackHeterogeneous makeTuplesAsync(TrackingRecHit2DGPU const& hits_d, float bfield, cudaStream_t stream) const;
+  // On GPU
+  pixelTrack::TrackSoADevice makeTuplesAsync(TrackingRecHit2DGPU const& hits_d,
+                                             float bfield,
+                                             cudaStream_t stream) const;
 
-  PixelTrackHeterogeneous makeTuples(TrackingRecHit2DCPU const& hits_d, float bfield) const;
+  // On CPU
+  pixelTrack::TrackSoAHost makeTuples(TrackingRecHit2DCPU const& hits_d, float bfield) const;
 
 private:
   void buildDoublets(HitsOnCPU const& hh, cudaStream_t stream) const;
