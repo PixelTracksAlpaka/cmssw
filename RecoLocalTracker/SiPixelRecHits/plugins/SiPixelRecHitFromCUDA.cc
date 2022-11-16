@@ -24,6 +24,8 @@
 #include "HeterogeneousCore/CUDACore/interface/ScopedContext.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforGPU.h"
 
+#include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHitSoADevice.h"
+
 class SiPixelRecHitFromCUDA : public edm::stream::EDProducer<edm::ExternalWork> {
 public:
   explicit SiPixelRecHitFromCUDA(const edm::ParameterSet& iConfig);
@@ -40,7 +42,7 @@ private:
   void produce(edm::Event& iEvent, edm::EventSetup const& iSetup) override;
 
   const edm::ESGetToken<TrackerGeometry, TrackerDigiGeometryRecord> geomToken_;
-  const edm::EDGetTokenT<cms::cuda::Product<TrackingRecHit2DGPU>> hitsToken_;  // CUDA hits
+  const edm::EDGetTokenT<cms::cuda::Product<TrackingRecHitSoADevice>> hitsToken_;  // CUDA hits
   const edm::EDGetTokenT<SiPixelClusterCollectionNew> clusterToken_;           // legacy clusters
   const edm::EDPutTokenT<SiPixelRecHitCollection> rechitsPutToken_;            // legacy rechits
   const edm::EDPutTokenT<HMSstorage> hostPutToken_;
@@ -54,7 +56,7 @@ private:
 SiPixelRecHitFromCUDA::SiPixelRecHitFromCUDA(const edm::ParameterSet& iConfig)
     : geomToken_(esConsumes()),
       hitsToken_(
-          consumes<cms::cuda::Product<TrackingRecHit2DGPU>>(iConfig.getParameter<edm::InputTag>("pixelRecHitSrc"))),
+          consumes<cms::cuda::Product<TrackingRecHitSoADevice>>(iConfig.getParameter<edm::InputTag>("pixelRecHitSrc"))),
       clusterToken_(consumes<SiPixelClusterCollectionNew>(iConfig.getParameter<edm::InputTag>("src"))),
       rechitsPutToken_(produces<SiPixelRecHitCollection>()),
       hostPutToken_(produces<HMSstorage>()) {}
@@ -69,12 +71,12 @@ void SiPixelRecHitFromCUDA::fillDescriptions(edm::ConfigurationDescriptions& des
 void SiPixelRecHitFromCUDA::acquire(edm::Event const& iEvent,
                                     edm::EventSetup const& iSetup,
                                     edm::WaitingTaskWithArenaHolder waitingTaskHolder) {
-  cms::cuda::Product<TrackingRecHit2DGPU> const& inputDataWrapped = iEvent.get(hitsToken_);
+  cms::cuda::Product<TrackingRecHitSoADevice> const& inputDataWrapped = iEvent.get(hitsToken_);
   cms::cuda::ScopedContextAcquire ctx{inputDataWrapped, std::move(waitingTaskHolder)};
   auto const& inputData = ctx.get(inputDataWrapped);
 
   nHits_ = inputData.nHits();
-  nMaxModules_ = inputData.nMaxModules();
+  nMaxModules_ = inputData.nModules();
   LogDebug("SiPixelRecHitFromCUDA") << "converting " << nHits_ << " Hits";
 
   if (0 == nHits_)

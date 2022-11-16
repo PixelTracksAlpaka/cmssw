@@ -7,4 +7,8 @@
   <class name="edm::Wrapper<cms::cuda::Product<TrackingRecHit2DGPU>>" persistent="false"/>
   <class name="TrackingRecHit2DReduced" persistent="false"/>
   <class name="edm::Wrapper<TrackingRecHit2DReduced>" persistent="false"/>
+  <class name="TrackingRecHitSoAHost" persistent="false"/>
+  <class name="edm::Wrapper<TrackingRecHitSoAHost>" persistent="false"/>
+  <class name="cms::cuda::Product<TrackingRecHitSoADevice>" persistent="false"/>
+  <class name="edm::Wrapper<cms::cuda::Product<TrackingRecHitSoADevice>>" persistent="false"/>
 </lcgdict>

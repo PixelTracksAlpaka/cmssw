@@ -8,7 +8,7 @@
 #include "CUDADataFormats/BeamSpot/interface/BeamSpotCUDA.h"
 #include "CUDADataFormats/SiPixelCluster/interface/SiPixelClustersCUDA.h"
 #include "CUDADataFormats/SiPixelDigi/interface/SiPixelDigisCUDA.h"
-#include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHit2DHeterogeneous.h"
+#include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHitSoADevice.h"
 
 namespace pixelgpudetails {
 
@@ -22,7 +22,7 @@ namespace pixelgpudetails {
     PixelRecHitGPUKernel& operator=(const PixelRecHitGPUKernel&) = delete;
     PixelRecHitGPUKernel& operator=(PixelRecHitGPUKernel&&) = delete;
 
-    TrackingRecHit2DGPU makeHitsAsync(SiPixelDigisCUDA const& digis_d,
+    TrackingRecHitSoADevice makeHitsAsync(SiPixelDigisCUDA const& digis_d,
                                       SiPixelClustersCUDA const& clusters_d,
                                       BeamSpotCUDA const& bs_d,
                                       pixelCPEforGPU::ParamsOnGPU const* cpeParams,
