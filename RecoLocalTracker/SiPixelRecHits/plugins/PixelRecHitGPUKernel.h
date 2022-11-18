@@ -10,6 +10,7 @@
 #include "CUDADataFormats/SiPixelDigi/interface/SiPixelDigisCUDA.h"
 #include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHitSoADevice.h"
 
+#define GPU_DEBUG
 namespace pixelgpudetails {
 
   class PixelRecHitGPUKernel {

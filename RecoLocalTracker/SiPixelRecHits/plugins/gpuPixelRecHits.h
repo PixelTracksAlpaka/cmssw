@@ -14,6 +14,7 @@
 #include "CUDADataFormats/SiPixelDigi/interface/SiPixelDigisCUDASOAView.h"
 #include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHitsUtilities.h"
 
+#define GPU_DEBUG
 namespace gpuPixelRecHits {
 
   __global__ void getHits(pixelCPEforGPU::ParamsOnGPU const* __restrict__ cpeParams,

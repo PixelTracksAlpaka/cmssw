@@ -18,7 +18,7 @@ namespace testTrackingRecHit2DNew {
    soa[i].iphi() = i%10;
    soa.hitsLayerStart()[j] = j;
     //k = soa.test().a;
-
+    __syncthreads();
   }
 
   __global__ void show(trackingRecHitSoA::HitSoAView soa) {
@@ -26,9 +26,11 @@ namespace testTrackingRecHit2DNew {
 
     int i = threadIdx.x;
     int j = blockIdx.x;
+
     if(i==0 and j==0)
     {
       printf("nbins = %d \n", soa.phiBinner().nbins());
+      printf("mMaxModules = %d \n", soa.nMaxModules());
       printf("offsetBPIX %d ->%d \n",i,soa.offsetBPIX2());
       printf("nHits %d ->%d \n",i,soa.nHits());
       printf("hitsModuleStart %d ->%d \n",i,soa.hitsModuleStart().at(28));
@@ -39,7 +41,7 @@ namespace testTrackingRecHit2DNew {
 
   if(j*blockDim.x+i < soa.phiBinner().nbins())
    printf(">bin size %d ->%d \n",j*blockDim.x+i,soa.phiBinner().size(j*blockDim.x+i));
-
+   __syncthreads();
   }
 
 
@@ -48,8 +50,10 @@ namespace testTrackingRecHit2DNew {
     // assert(soa);
     printf("RUN!\n");
     int k = 0;
-    show<<<10, 100, 0, stream>>>(hits.view());
+    fill<<<10, 100, 0, stream>>>(hits.view());
     printf("k = %d\n",k);
+
+    cudaCheck(cudaDeviceSynchronize());
 
     cms::cuda::fillManyFromVector(hits.phiBinner(),
                                   10,
@@ -57,10 +61,11 @@ namespace testTrackingRecHit2DNew {
                                   hits.view().hitsLayerStart().data(),
                                   2000,
                                   256,
-                                  hits.phiBinnerStorage(),
+                                  hits.view().phiBinnerStorage(),
                                   stream);
-
+    cudaCheck(cudaDeviceSynchronize());
     show<<<10, 1000, 0, stream>>>(hits.view());
+    cudaCheck(cudaDeviceSynchronize());
   }
 
 }  // namespace testTrackingRecHit2D

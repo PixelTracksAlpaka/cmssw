@@ -13,6 +13,7 @@
 #include "PixelRecHitGPUKernel.h"
 #include "gpuPixelRecHits.h"
 
+#define GPU_DEBUG
 namespace {
   __global__ void setHitsLayerStart(uint32_t const* __restrict__ hitsModuleStart,
                                     pixelCPEforGPU::ParamsOnGPU const* cpeParams,
@@ -69,13 +70,13 @@ namespace pixelgpudetails {
         setHitsLayerStart<<<1, 32, 0, stream>>>(clusters_d.clusModuleStart(), cpeParams, hits_d.view().hitsLayerStart().data());
         cudaCheck(cudaGetLastError());
         auto nLayers = isPhase2 ? phase2PixelTopology::numberOfLayers : phase1PixelTopology::numberOfLayers;
-        cms::cuda::fillManyFromVector(&(hits_d.view().phiBinner()),
+        cms::cuda::fillManyFromVector(hits_d.phiBinner(),
                                       nLayers,
                                       hits_d.view().iphi(),
                                       hits_d.view().hitsLayerStart().data(),
                                       nHits,
                                       256,
-                                      hits_d.phiBinnerStorage(),
+                                      hits_d.view().phiBinnerStorage(),
                                       stream);
         cudaCheck(cudaGetLastError());
 
@@ -84,6 +85,10 @@ namespace pixelgpudetails {
 #endif
       }
     }
+    #ifdef GPU_DEBUG
+    cudaCheck(cudaDeviceSynchronize());
+          std::cout << "DONE" << std::endl;
+    #endif
 
     return hits_d;
   }

@@ -23,6 +23,8 @@
 
 #include "PixelRecHitGPUKernel.h"
 
+#define GPU_DEBUG
+
 class SiPixelRecHitCUDA : public edm::global::EDProducer<> {
 public:
   explicit SiPixelRecHitCUDA(const edm::ParameterSet& iConfig);
@@ -82,6 +84,7 @@ void SiPixelRecHitCUDA::produce(edm::StreamID streamID, edm::Event& iEvent, cons
               tokenHit_,
               gpuAlgo_.makeHitsAsync(
                   digis, clusters, bs, fcpe->getGPUProductAsync(ctx.stream()), fcpe->isPhase2(), ctx.stream()));
+ std::cout << __LINE__<<std::endl;
 }
 
 DEFINE_FWK_MODULE(SiPixelRecHitCUDA);

@@ -18,7 +18,7 @@ int main() {
   cms::cudatest::requireDevices();
 
   cudaStream_t stream;
-  cudaCheck(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));
+  cudaCheck(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
 
 
   // inner scope to deallocate memory before destroying the stream
@@ -34,9 +34,23 @@ int main() {
     TrackingRecHitSoADevice tkhit(nHits,false,offset,nullptr,&moduleStart[0],stream);
 
     testTrackingRecHit2DNew::run(tkhit,stream);
+    printf("tkhit hits %d \n",tkhit.nHits());
 
     auto test = tkhit.localCoordToHostAsync(stream);
-    printf("tkhit hits %d \n",tkhit.nHits());
+    printf("test[9] %.2f\n",test[9]);
+
+    // auto mods = tkhit.hitsModuleStartToHostAsync(stream);
+    // auto ret = cms::cuda::make_host_unique<uint32_t[]>(tkhit.nModules() + 1, stream);
+    // uint32_t* ret;
+    // // cudaCheck(cudaMemcpyAsync(ret, &(tkhit.view().hitsModuleStart()), sizeof(uint32_t) * (tkhit.nModules() + 1), cudaMemcpyDeviceToHost, stream));
+    // size_t skipSize = int(trackingRecHitSoA::columnsSizes * nHits);
+    // cudaCheck(cudaMemcpyAsync(ret,
+    //                           tkhit.const_buffer().get() + skipSize,
+    //                           sizeof(uint32_t) * (1856 + 1),
+    //                           cudaMemcpyDeviceToHost,
+    //                           ctx.stream()));
+
+    printf("mods[9] %d\n",tkhit.hitsModuleStart()[9]);
   }
 
   cudaCheck(cudaStreamDestroy(stream));
