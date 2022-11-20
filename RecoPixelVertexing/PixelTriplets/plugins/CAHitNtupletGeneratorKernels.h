@@ -3,7 +3,8 @@
 
 // #define GPU_DEBUG
 
-#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
+#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
+
 #include "GPUCACell.h"
 
 // #define DUMP_GPU_TK_TUPLES
@@ -34,7 +35,8 @@ namespace cAHitNtupletGenerator {
   using TupleMultiplicity = caConstants::TupleMultiplicity;
 
   using Quality = pixelTrack::Quality;
-  using TkSoA = pixelTrack::TrackSoA;
+  using TkSoAView = pixelTrack::TrackSoAView;
+  using TkSoAConstView = pixelTrack::TrackSoAConstView;
   using HitContainer = pixelTrack::HitContainer;
 
   struct QualityCuts {
@@ -173,7 +175,8 @@ public:
   using TupleMultiplicity = caConstants::TupleMultiplicity;
 
   using Quality = pixelTrack::Quality;
-  using TkSoA = pixelTrack::TrackSoA;
+  using TkSoAView = pixelTrack::TrackSoAView;
+  using TkSoAConstView = pixelTrack::TrackSoAConstView;
   using HitContainer = pixelTrack::HitContainer;
 
   CAHitNtupletGeneratorKernels(Params const& params)
@@ -182,9 +185,9 @@ public:
 
   TupleMultiplicity const* tupleMultiplicity() const { return device_tupleMultiplicity_.get(); }
 
-  void launchKernels(HitsOnCPU const& hh, TkSoA* tuples_d, cudaStream_t cudaStream);
+  void launchKernels(HitsOnCPU const& hh, TkSoAView tracks_view, cudaStream_t cudaStream);
 
-  void classifyTuples(HitsOnCPU const& hh, TkSoA* tuples_d, cudaStream_t cudaStream);
+  void classifyTuples(HitsOnCPU const& hh, TkSoAView tracks_view, cudaStream_t cudaStream);
 
   void buildDoublets(HitsOnCPU const& hh, cudaStream_t stream);
   void allocateOnGPU(int32_t nHits, cudaStream_t stream);

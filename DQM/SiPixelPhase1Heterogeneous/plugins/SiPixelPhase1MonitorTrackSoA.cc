@@ -21,7 +21,8 @@
 #include "DQMServices/Core/interface/MonitorElement.h"
 #include "DQMServices/Core/interface/DQMEDAnalyzer.h"
 #include "DQMServices/Core/interface/DQMStore.h"
-#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
+#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
 // for string manipulations
 #include <fmt/printf.h>
 
@@ -34,7 +35,7 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:
-  edm::EDGetTokenT<PixelTrackHeterogeneous> tokenSoATrack_;
+  edm::EDGetTokenT<pixelTrack::TrackSoAHost> tokenSoATrack_;
   std::string topFolderName_;
   bool useQualityCut_;
   pixelTrack::Quality minQuality_;
@@ -62,7 +63,7 @@ private:
 //
 
 SiPixelPhase1MonitorTrackSoA::SiPixelPhase1MonitorTrackSoA(const edm::ParameterSet& iConfig) {
-  tokenSoATrack_ = consumes<PixelTrackHeterogeneous>(iConfig.getParameter<edm::InputTag>("pixelTrackSrc"));
+  tokenSoATrack_ = consumes<pixelTrack::TrackSoAHost>(iConfig.getParameter<edm::InputTag>("pixelTrackSrc"));
   topFolderName_ = iConfig.getParameter<std::string>("topFolderName");  //"SiPixelHeterogeneous/PixelTrackSoA";
   useQualityCut_ = iConfig.getParameter<bool>("useQualityCut");
   minQuality_ = pixelTrack::qualityByName(iConfig.getParameter<std::string>("minQuality"));
@@ -78,23 +79,24 @@ void SiPixelPhase1MonitorTrackSoA::analyze(const edm::Event& iEvent, const edm::
     return;
   }
 
-  auto const& tsoa = *((tsoaHandle.product())->get());
-  auto maxTracks = tsoa.stride();
-  auto const* quality = tsoa.qualityData();
+  auto& tsoa = *tsoaHandle.product();
+  auto maxTracks = tsoa.view().metadata().size();
+  auto const* quality = pixelTrack::utilities::qualityData(tsoa.const_view());
   int32_t nTracks = 0;
   int32_t nLooseAndAboveTracks = 0;
 
   for (int32_t it = 0; it < maxTracks; ++it) {
-    auto nHits = tsoa.nHits(it);
-    auto nLayers = tsoa.nLayers(it);
+    auto nHits = pixelTrack::utilities::nHits(tsoa.const_view(), it);
+    auto nLayers = tsoa.view()[it].nLayers();
     if (nHits == 0)
       break;  // this is a guard
-    float pt = tsoa.pt(it);
+    float pt = tsoa.view()[it].pt();
     if (!(pt > 0.))
       continue;
 
     // fill the quality for all tracks
-    pixelTrack::Quality qual = tsoa.quality(it);
+    // pixelTrack::Quality qual = tsoa.view()[it].quality();
+    pixelTrack::Quality qual = quality[it];
     hquality->Fill(int(qual));
     nTracks++;
 
@@ -102,11 +104,11 @@ void SiPixelPhase1MonitorTrackSoA::analyze(const edm::Event& iEvent, const edm::
       continue;
 
     // fill parameters only for quality >= loose
-    float chi2 = tsoa.chi2(it);
-    float phi = tsoa.phi(it);
-    float zip = tsoa.zip(it);
-    float eta = tsoa.eta(it);
-    float tip = tsoa.tip(it);
+    float chi2 = tsoa.view()[it].chi2();
+    float phi = pixelTrack::utilities::phi(tsoa.const_view(), it);
+    float zip = pixelTrack::utilities::zip(tsoa.const_view(), it);
+    float eta = tsoa.view()[it].eta();
+    float tip = pixelTrack::utilities::tip(tsoa.const_view(), it);
 
     hchi2->Fill(chi2);
     hChi2VsPhi->Fill(phi, chi2);

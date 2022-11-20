@@ -16,6 +16,10 @@
 #include "FWCore/Utilities/interface/EDGetToken.h"
 #include "FWCore/Utilities/interface/RunningAverage.h"
 #include "HeterogeneousCore/CUDACore/interface/ScopedContext.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousDevice.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousHost.h"
 
 #include "gpuVertexFinder.h"
 
@@ -35,10 +39,10 @@ private:
 
   bool onGPU_;
 
-  edm::EDGetTokenT<cms::cuda::Product<PixelTrackHeterogeneous>> tokenGPUTrack_;
-  edm::EDPutTokenT<ZVertexCUDAProduct> tokenGPUVertex_;
-  edm::EDGetTokenT<PixelTrackHeterogeneous> tokenCPUTrack_;
-  edm::EDPutTokenT<ZVertexHeterogeneous> tokenCPUVertex_;
+  edm::EDGetTokenT<cms::cuda::Product<pixelTrack::TrackSoADevice>> tokenGPUTrack_;
+  edm::EDPutTokenT<cms::cuda::Product<ZVertex::ZVertexSoADevice>> tokenGPUVertex_;
+  edm::EDGetTokenT<pixelTrack::TrackSoAHost> tokenCPUTrack_;
+  edm::EDPutTokenT<ZVertex::ZVertexSoAHost> tokenCPUVertex_;
 
   const gpuVertexFinder::Producer gpuAlgo_;
 
@@ -62,11 +66,11 @@ PixelVertexProducerCUDA::PixelVertexProducerCUDA(const edm::ParameterSet& conf)
 {
   if (onGPU_) {
     tokenGPUTrack_ =
-        consumes<cms::cuda::Product<PixelTrackHeterogeneous>>(conf.getParameter<edm::InputTag>("pixelTrackSrc"));
-    tokenGPUVertex_ = produces<ZVertexCUDAProduct>();
+        consumes<cms::cuda::Product<pixelTrack::TrackSoADevice>>(conf.getParameter<edm::InputTag>("pixelTrackSrc"));
+    tokenGPUVertex_ = produces<cms::cuda::Product<ZVertex::ZVertexSoADevice>>();
   } else {
-    tokenCPUTrack_ = consumes<PixelTrackHeterogeneous>(conf.getParameter<edm::InputTag>("pixelTrackSrc"));
-    tokenCPUVertex_ = produces<ZVertexHeterogeneous>();
+    tokenCPUTrack_ = consumes<pixelTrack::TrackSoAHost>(conf.getParameter<edm::InputTag>("pixelTrackSrc"));
+    tokenCPUVertex_ = produces<ZVertex::ZVertexSoAHost>();
   }
 }
 
@@ -97,40 +101,35 @@ void PixelVertexProducerCUDA::fillDescriptions(edm::ConfigurationDescriptions& d
 void PixelVertexProducerCUDA::produceOnGPU(edm::StreamID streamID,
                                            edm::Event& iEvent,
                                            const edm::EventSetup& iSetup) const {
-  edm::Handle<cms::cuda::Product<PixelTrackHeterogeneous>> hTracks;
+  edm::Handle<cms::cuda::Product<pixelTrack::TrackSoADevice>> hTracks;
   iEvent.getByToken(tokenGPUTrack_, hTracks);
 
   cms::cuda::ScopedContextProduce ctx{*hTracks};
-  auto const* tracks = ctx.get(*hTracks).get();
+  auto& tracks = ctx.get(*hTracks);
 
-  assert(tracks);
-
-  ctx.emplace(iEvent, tokenGPUVertex_, gpuAlgo_.makeAsync(ctx.stream(), tracks, ptMin_, ptMax_));
+  ctx.emplace(iEvent, tokenGPUVertex_, gpuAlgo_.makeAsync(ctx.stream(), tracks.view(), ptMin_, ptMax_));
 }
 
 void PixelVertexProducerCUDA::produceOnCPU(edm::StreamID streamID,
                                            edm::Event& iEvent,
                                            const edm::EventSetup& iSetup) const {
-  auto const* tracks = iEvent.get(tokenCPUTrack_).get();
-  assert(tracks);
+  auto& tracks = iEvent.get(tokenCPUTrack_);
 
 #ifdef PIXVERTEX_DEBUG_PRODUCE
-  auto const& tsoa = *tracks;
-  auto maxTracks = tsoa.stride();
-  std::cout << "size of SoA " << sizeof(tsoa) << " stride " << maxTracks << std::endl;
+
+  auto maxTracks = tracks.view().metadata().size();
 
   int32_t nt = 0;
   for (int32_t it = 0; it < maxTracks; ++it) {
-    auto nHits = tsoa.nHits(it);
-    assert(nHits == int(tsoa.hitIndices.size(it)));
+    auto nHits = pixelTrack::utilities::nHits(tracks.view(), it);
+    assert(nHits == int(tracks.view().hitIndices().size(it)));
     if (nHits == 0)
       break;  // this is a guard: maybe we need to move to nTracks...
     nt++;
   }
-  std::cout << "found " << nt << " tracks in cpu SoA for Vertexing at " << tracks << std::endl;
 #endif  // PIXVERTEX_DEBUG_PRODUCE
 
-  iEvent.emplace(tokenCPUVertex_, gpuAlgo_.make(tracks, ptMin_, ptMax_));
+  iEvent.emplace(tokenCPUVertex_, gpuAlgo_.make(tracks.view(), ptMin_, ptMax_));
 }
 
 void PixelVertexProducerCUDA::produce(edm::StreamID streamID, edm::Event& iEvent, const edm::EventSetup& iSetup) const {
