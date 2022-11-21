@@ -1,7 +1,7 @@
 #include "BrokenLineFitOnGPU.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/device_unique_ptr.h"
 
-void HelixFitOnGPU::launchBrokenLineKernels(HitsView const *hv,
+void HelixFitOnGPU::launchBrokenLineKernels(HitSoAConstView const &hv,
                                             uint32_t hitsInFit,
                                             uint32_t maxNumberOfTuples,
                                             cudaStream_t stream) {

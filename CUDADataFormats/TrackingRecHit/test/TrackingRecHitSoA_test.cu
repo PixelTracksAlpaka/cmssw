@@ -46,7 +46,7 @@ namespace testTrackingRecHit2DNew {
 
 
 
-  void run(TrackingRecHitSoADevice& hits, cudaStream_t stream) {
+  void run(trackingRecHit::TrackingRecHitSoADevice& hits, cudaStream_t stream) {
     // assert(soa);
     printf("RUN!\n");
     int k = 0;

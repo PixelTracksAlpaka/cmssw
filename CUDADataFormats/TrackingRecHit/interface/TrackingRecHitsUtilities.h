@@ -30,7 +30,7 @@ namespace trackingRecHitSoA{
   using ParamsOnGPU = pixelCPEforGPU::ParamsOnGPU;
 
   using HitLayerStartArray = std::array<uint32_t,phase1PixelTopology::numberOfLayers+1>;
-  using HitModuleStartArray = std::array<uint32_t,phase1PixelTopology::numberOfModules>;
+  using HitModuleStartArray = std::array<uint32_t,phase1PixelTopology::numberOfModules+1>;
 
 }
 
@@ -70,12 +70,6 @@ namespace trackingRecHitSoA
 
   constexpr size_t columnsSizes = 8 * sizeof(float) + 4 * sizeof(int16_t) + sizeof(trackingRecHitSoA::SiPixelHitStatusAndCharge) + sizeof(trackingRecHitSoA::PhiBinnerStorageType);
 
-  // cms::cuda::host::unique_ptr<uint32_t[]> hitsModuleStartToHostAsync(HitSoAConstView& view, cudaStream_t stream) {
-  //   // printf("%d \n",nModules());
-  //   auto ret = cms::cuda::make_host_unique<uint32_t[]>(view.nMaxModules() + 1, stream);
-  //   cudaCheck(cudaMemcpyAsync(ret.get(), view.hitsModuleStart().data(), sizeof(uint32_t) * (view.nMaxModules() + 1), cudaMemcpyDeviceToHost, stream));
-  //   return ret;
-  // }
 
 
 }

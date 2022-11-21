@@ -27,6 +27,7 @@
 
 class SiPixelRecHitCUDA : public edm::global::EDProducer<> {
 public:
+  using TrackingRecHitSoADevice = trackingRecHit::TrackingRecHitSoADevice;
   explicit SiPixelRecHitCUDA(const edm::ParameterSet& iConfig);
   ~SiPixelRecHitCUDA() override = default;
 

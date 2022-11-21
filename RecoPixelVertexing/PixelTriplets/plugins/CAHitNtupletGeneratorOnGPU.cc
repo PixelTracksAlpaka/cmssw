@@ -19,8 +19,13 @@
 #include "FWCore/Utilities/interface/isFinite.h"
 #include "HeterogeneousCore/CUDAServices/interface/CUDAService.h"
 #include "TrackingTools/DetLayers/interface/BarrelDetLayer.h"
+#include "CUDADataFormats/Common/interface/HeterogeneousSoA.h"
+
 #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
 #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
+
+#include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHitSoAHost.h"
+#include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHitSoADevice.h"
 
 #include "CAHitNtupletGeneratorOnGPU.h"
 
@@ -186,7 +191,7 @@ void CAHitNtupletGeneratorOnGPU::endJob() {
   }
 }
 
-pixelTrack::TrackSoADevice CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DGPU const& hits_d,
+pixelTrack::TrackSoADevice CAHitNtupletGeneratorOnGPU::makeTuplesAsync(HitsOnGPU const& hits_d,
                                                                        float bfield,
                                                                        cudaStream_t stream) const {
   pixelTrack::TrackSoADevice tracks(stream);
@@ -196,17 +201,17 @@ pixelTrack::TrackSoADevice CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingR
   kernels.setCounters(m_counters);
   kernels.allocateOnGPU(hits_d.nHits(), stream);
 
-  kernels.buildDoublets(hits_d, stream);
-  kernels.launchKernels(hits_d, soa->view(), stream);
+  kernels.buildDoublets(hits_d.const_view(), hits_d.offsetBPIX2(), stream);
+  kernels.launchKernels(hits_d.const_view(), soa->view(), stream);
 
   HelixFitOnGPU fitter(bfield, m_params.fitNas4_);
   fitter.allocateOnGPU(kernels.tupleMultiplicity(), soa->view());
   if (m_params.useRiemannFit_) {
-    fitter.launchRiemannKernels(hits_d.view(), hits_d.nHits(), caConstants::maxNumberOfQuadruplets, stream);
+    fitter.launchRiemannKernels(hits_d.const_view(), hits_d.nHits(), caConstants::maxNumberOfQuadruplets, stream);
   } else {
-    fitter.launchBrokenLineKernels(hits_d.view(), hits_d.nHits(), caConstants::maxNumberOfQuadruplets, stream);
+    fitter.launchBrokenLineKernels(hits_d.const_view(), hits_d.nHits(), caConstants::maxNumberOfQuadruplets, stream);
   }
-  kernels.classifyTuples(hits_d, soa->view(), stream);
+  kernels.classifyTuples(hits_d.const_view(), soa->view(), stream);
 
 #ifdef GPU_DEBUG
   cudaDeviceSynchronize();
@@ -217,15 +222,15 @@ pixelTrack::TrackSoADevice CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingR
   return tracks;
 }
 
-pixelTrack::TrackSoAHost CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2DCPU const& hits_d, float bfield) const {
+pixelTrack::TrackSoAHost CAHitNtupletGeneratorOnGPU::makeTuples(HitsOnCPU const& hits_d, float bfield) const {
   pixelTrack::TrackSoAHost tracks(nullptr);
 
   CAHitNtupletGeneratorKernelsCPU kernels(m_params);
   kernels.setCounters(m_counters);
   kernels.allocateOnGPU(hits_d.nHits(), nullptr);
 
-  kernels.buildDoublets(hits_d, nullptr);
-  kernels.launchKernels(hits_d, tracks.view(), nullptr);
+  kernels.buildDoublets(hits_d.const_view(), hits_d.offsetBPIX2(), nullptr);
+  kernels.launchKernels(hits_d.const_view(), tracks.view(), nullptr);
 
   if (0 == hits_d.nHits())
     return tracks;
@@ -235,12 +240,12 @@ pixelTrack::TrackSoAHost CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2D
   fitter.allocateOnGPU(kernels.tupleMultiplicity(), tracks.view());
 
   if (m_params.useRiemannFit_) {
-    fitter.launchRiemannKernelsOnCPU(hits_d.view(), hits_d.nHits(), caConstants::maxNumberOfQuadruplets);
+    fitter.launchRiemannKernelsOnCPU(hits_d.const_view(), hits_d.nHits(), caConstants::maxNumberOfQuadruplets);
   } else {
-    fitter.launchBrokenLineKernelsOnCPU(hits_d.view(), hits_d.nHits(), caConstants::maxNumberOfQuadruplets);
+    fitter.launchBrokenLineKernelsOnCPU(hits_d.const_view(), hits_d.nHits(), caConstants::maxNumberOfQuadruplets);
   }
 
-  kernels.classifyTuples(hits_d, tracks.view(), nullptr);
+  kernels.classifyTuples(hits_d.const_view(), tracks.view(), nullptr);
 
 #ifdef GPU_DEBUG
   std::cout << "finished building pixel tracks on CPU" << std::endl;

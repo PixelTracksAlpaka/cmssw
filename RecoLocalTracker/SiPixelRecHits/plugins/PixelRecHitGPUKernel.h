@@ -18,6 +18,8 @@ namespace pixelgpudetails {
     PixelRecHitGPUKernel() = default;
     ~PixelRecHitGPUKernel() = default;
 
+    using TrackingRecHitSoADevice = trackingRecHit::TrackingRecHitSoADevice;
+    
     PixelRecHitGPUKernel(const PixelRecHitGPUKernel&) = delete;
     PixelRecHitGPUKernel(PixelRecHitGPUKernel&&) = delete;
     PixelRecHitGPUKernel& operator=(const PixelRecHitGPUKernel&) = delete;

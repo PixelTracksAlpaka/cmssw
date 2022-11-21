@@ -19,9 +19,11 @@ namespace gpuPixelRecHits {
 
   __global__ void getHits(pixelCPEforGPU::ParamsOnGPU const* __restrict__ cpeParams,
                           BeamSpotPOD const* __restrict__ bs,
-                          SiPixelDigisCUDASOAView const digis,
+                          // SiPixelDigisCUDASOAView const digis
+                          SiPixelDigisCUDASOAConstView const digis,
                           int numElements,
-                          SiPixelClustersCUDA::SiPixelClustersCUDASOAView const* __restrict__ pclusters,
+                          // SiPixelClustersCUDA::SiPixelClustersCUDASOAView const* __restrict__ pclusters,
+                          SiPixelClustersCUDASoA::ConstView const __restrict__ clusters,
                           trackingRecHitSoA::HitSoAView hits) {
     // FIXME
     // the compiler seems NOT to optimize loads from views (even in a simple test case)
@@ -31,7 +33,7 @@ namespace gpuPixelRecHits {
     assert(cpeParams);
     // auto& hits = *phits;
 
-    auto const& clusters = *pclusters;
+    // auto const& clusters = *pclusters;
     auto isPhase2 = cpeParams->commonParams().isPhase2;
     // copy average geometry corrected by beamspot . FIXME (move it somewhere else???)
     if (0 == blockIdx.x) {
@@ -73,13 +75,13 @@ namespace gpuPixelRecHits {
 #ifdef GPU_DEBUG
     if (threadIdx.x == 0) {
       auto k = clusters.moduleStart(1 + blockIdx.x);
-      while (digis.moduleInd(k) == invalidModuleId)
+      while (digis.moduleId(k) == invalidModuleId)
         ++k;
-      assert(digis.moduleInd(k) == me);
+      assert(digis.moduleId(k) == me);
     }
 #endif
 #ifdef GPU_DEBUG
-    if (me % 100 == 1)
+    // if (me % 100 == 1)
       if (threadIdx.x == 0)
         printf("hitbuilder: %d clusters in module %d. will write at %d\n", nclus, me, clusters.clusModuleStart(me));
 #endif
@@ -110,7 +112,7 @@ namespace gpuPixelRecHits {
       // one thread per "digi"
       auto first = clusters.moduleStart(1 + blockIdx.x) + threadIdx.x;
       for (int i = first; i < numElements; i += blockDim.x) {
-        auto id = digis.moduleInd(i);
+        auto id = digis.moduleId(i);
         if (id == invalidModuleId)
           continue;  // not valid
         if (id != me)
@@ -133,7 +135,7 @@ namespace gpuPixelRecHits {
 
       auto pixmx = cpeParams->detParams(me).pixmx;
       for (int i = first; i < numElements; i += blockDim.x) {
-        auto id = digis.moduleInd(i);
+        auto id = digis.moduleId(i);
         if (id == invalidModuleId)
           continue;  // not valid
         if (id != me)

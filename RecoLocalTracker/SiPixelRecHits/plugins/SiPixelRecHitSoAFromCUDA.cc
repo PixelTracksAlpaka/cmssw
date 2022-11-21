@@ -34,6 +34,8 @@ public:
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
   using HMSstorage = HostProduct<uint32_t[]>;
+  using TrackingRecHitSoADevice = trackingRecHit::TrackingRecHitSoADevice;
+  using TrackingRecHitSoAHost = trackingRecHit::TrackingRecHitSoAHost;
 
 private:
   void acquire(edm::Event const& iEvent,
@@ -74,12 +76,12 @@ void SiPixelRecHitSoAFromCUDA::acquire(edm::Event const& iEvent,
   cms::cuda::ScopedContextAcquire ctx{inputDataWrapped, std::move(waitingTaskHolder)};
   auto const& inputData = ctx.get(inputDataWrapped);
 
-  nHits_ = inputData.view().nHits();
+  nHits_ = inputData.nHits();
 
   if (0 == nHits_)
     return;
 
-  nMaxModules_ = inputData.view().nMaxModules();
+  nMaxModules_ = inputData.nModules();
 
   hits_h_ = TrackingRecHitSoAHost(nHits_,ctx.stream());
   cudaCheck(cudaMemcpyAsync(hits_h_.buffer().get(),

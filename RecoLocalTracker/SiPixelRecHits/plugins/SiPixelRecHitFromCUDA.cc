@@ -34,6 +34,7 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
   using HMSstorage = HostProduct<uint32_t[]>;
+  using TrackingRecHitSoADevice = trackingRecHit::TrackingRecHitSoADevice;
 
 private:
   void acquire(edm::Event const& iEvent,
@@ -80,15 +81,19 @@ void SiPixelRecHitFromCUDA::acquire(edm::Event const& iEvent,
   std::cout << __LINE__<<std::endl;
   nMaxModules_ = inputData.nModules();
   std::cout << __LINE__<<std::endl;
-  // LogDebug("SiPixelRecHitFromCUDA")
-  std::cout << "SiPixelRecHitFromCUDA " << "converting " << nHits_ << " Hits" << std::endl;
 
-  std::cout << inputData.hitsModuleStart()[2] << std::endl;
+  // LogDebug("SiPixelRecHitFromCUDA")
+  std::cout << "SiPixelRecHitFromCUDA " << "converting " << nHits_ << " Hits from " << nMaxModules_ << " modules." << std::endl;
+
+  // std::cout << inputData.hitsModuleStart()[2] << std::endl;
   if (0 == nHits_)
     return;
+  std::cout << __LINE__<<std::endl;
   store32_ = inputData.localCoordToHostAsync(ctx.stream());
   std::cout << __LINE__<<std::endl;
-
+  hitsModuleStart_ = inputData.hitsModuleStartToHostAsync(ctx.stream());
+  hitsModuleStart_[nMaxModules_] = nHits_;
+  // assert(nHits_==hitsModuleStart_[nMaxModules_]);
   // size_t skipSize = int(trackingRecHitSoA::columnsSizes * nHits_);
   // cudaCheck(cudaMemcpyAsync(hitsModuleStart_,
   //                           inputData.const_buffer().get() + skipSize,
@@ -97,8 +102,10 @@ void SiPixelRecHitFromCUDA::acquire(edm::Event const& iEvent,
   //                           ctx.stream()));  // Copy data from Device to Host
   //
   // cudaCheck(cudaMemcpyAsync(hitsModuleStart_, inputData.buffer() + int(trackingRecHitSoA::columnsSizes * nHits_), sizeof(uint32_t) * (nMaxModules_ + 1), cudaMemcpyDeviceToHost, ctx.stream()));
+  // cudaCheck(cudaMemcpyAsync(hitsModuleStart_.get(), inputData.view().hitsModuleStart().data(), sizeof(uint32_t) * (nMaxModules_ + 1), cudaMemcpyDeviceToHost, ctx.stream()));
+  // cudaMemcpyAsync(hitsModuleStart_.get(), inputData.view().hitsModuleStart().data(), sizeof(uint32_t) * (nMaxModules_ + 1), cudaMemcpyDeviceToHost, ctx.stream());
 
-  std::copy(inputData.hitsModuleStart(), inputData.hitsModuleStart() + nMaxModules_ + 1, hitsModuleStart_.get());
+  // std::copy(inputData.view().hitsModuleStart().data(), inputData.hitsModuleStart().view().data() + nMaxModules_ + 1, hitsModuleStart_.get());
 // trackingRecHitSoA::hitsModuleStartToHostAsync(inputData.view(), ctx.stream());
   std::cout << __LINE__ << std::endl;
 }
@@ -117,6 +124,7 @@ void SiPixelRecHitFromCUDA::produce(edm::Event& iEvent, edm::EventSetup const& e
   }
   output.reserve(nMaxModules_, nHits_);
   std::cout << __LINE__ << std::endl;
+  std::cout << hitsModuleStart_[8] << std::endl;
   std::copy(hitsModuleStart_.get(), hitsModuleStart_.get() + nMaxModules_ + 1, hmsp.get());
   // wrap the buffer in a HostProduct, and move it to the Event, without reallocating the buffer or affecting hitsModuleStart
   iEvent.emplace(hostPutToken_, std::move(hmsp));
@@ -148,9 +156,12 @@ void SiPixelRecHitFromCUDA::produce(edm::Event& iEvent, edm::EventSetup const& e
     auto lc = hitsModuleStart_[gind + 1];
     auto nhits = lc - fc;
 
+    // LogDebug("SiPixelRecHitFromCUDA")
+    std::cout << "SiPixelRecHitFromCUDA " << "in det " << gind << ": conv " << nhits << " hits from " << dsv.size()
+                                      << " legacy clusters" << ' ' << fc << ',' << lc << "\n";
+
     assert(lc > fc);
-    LogDebug("SiPixelRecHitFromCUDA") << "in det " << gind << ": conv " << nhits << " hits from " << dsv.size()
-                                      << " legacy clusters" << ' ' << fc << ',' << lc;
+
     if (nhits > maxHitsInModule)
       edm::LogWarning("SiPixelRecHitFromCUDA") << fmt::sprintf(
           "Too many clusters %d in module %d. Only the first %d hits will be converted", nhits, gind, maxHitsInModule);

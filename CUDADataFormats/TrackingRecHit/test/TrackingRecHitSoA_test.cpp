@@ -10,7 +10,7 @@
 
 namespace testTrackingRecHit2DNew {
 
-  void run(TrackingRecHitSoADevice& hits, cudaStream_t stream);
+  void run(trackingRecHit::TrackingRecHitSoADevice& hits, cudaStream_t stream);
 
 }
 
@@ -31,7 +31,7 @@ int main() {
       moduleStart[i] = i*2;
     }
 
-    TrackingRecHitSoADevice tkhit(nHits,false,offset,nullptr,&moduleStart[0],stream);
+    trackingRecHit::TrackingRecHitSoADevice tkhit(nHits,false,offset,nullptr,&moduleStart[0],stream);
 
     testTrackingRecHit2DNew::run(tkhit,stream);
     printf("tkhit hits %d \n",tkhit.nHits());
@@ -39,10 +39,14 @@ int main() {
     auto test = tkhit.localCoordToHostAsync(stream);
     printf("test[9] %.2f\n",test[9]);
 
+    printf("nModules %d \n",tkhit.nModules());
+
     // auto mods = tkhit.hitsModuleStartToHostAsync(stream);
     // auto ret = cms::cuda::make_host_unique<uint32_t[]>(tkhit.nModules() + 1, stream);
     // uint32_t* ret;
-    // // cudaCheck(cudaMemcpyAsync(ret, &(tkhit.view().hitsModuleStart()), sizeof(uint32_t) * (tkhit.nModules() + 1), cudaMemcpyDeviceToHost, stream));
+    // cudaCheck();
+    // cudaMemcpyAsync(ret, tkhit.view().hitsModuleStart().data(), sizeof(uint32_t) * (tkhit.nModules() + 1), cudaMemcpyDeviceToHost, stream);
+    auto ret = tkhit.hitsModuleStartToHostAsync(stream);
     // size_t skipSize = int(trackingRecHitSoA::columnsSizes * nHits);
     // cudaCheck(cudaMemcpyAsync(ret,
     //                           tkhit.const_buffer().get() + skipSize,
@@ -50,7 +54,7 @@ int main() {
     //                           cudaMemcpyDeviceToHost,
     //                           ctx.stream()));
 
-    printf("mods[9] %d\n",tkhit.hitsModuleStart()[9]);
+    printf("mods[9] %d\n",ret[9]);
   }
 
   cudaCheck(cudaStreamDestroy(stream));
