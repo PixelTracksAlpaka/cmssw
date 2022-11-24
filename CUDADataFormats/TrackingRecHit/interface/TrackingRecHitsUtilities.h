@@ -9,7 +9,7 @@
 #include "HeterogeneousCore/CUDAUtilities/interface/host_unique_ptr.h"
 #include "SiPixelHitStatus.h"
 
-namespace trackingRecHitSoA{
+namespace trackingRecHitSoA {
 
   // more information on bit fields : https://en.cppreference.com/w/cpp/language/bit_field
   struct SiPixelHitStatusAndCharge {
@@ -22,18 +22,22 @@ namespace trackingRecHitSoA{
   };
 
   using hindex_type = uint32_t;  // if above is <=2^32
-  using PhiBinner = cms::cuda::HistoContainer<int16_t, 256, -1, 8 * sizeof(int16_t), hindex_type, phase1PixelTopology::numberOfLayers>;  //28 for phase2 geometry
+  using PhiBinner = cms::cuda::HistoContainer<int16_t,
+                                              256,
+                                              -1,
+                                              8 * sizeof(int16_t),
+                                              hindex_type,
+                                              phase1PixelTopology::numberOfLayers>;  //28 for phase2 geometry
   using PhiBinnerStorageType = PhiBinner::index_type;
 
   using AverageGeometry = pixelTopology::AverageGeometry;
 
   using ParamsOnGPU = pixelCPEforGPU::ParamsOnGPU;
 
-  using HitLayerStartArray = std::array<uint32_t,phase1PixelTopology::numberOfLayers+1>;
-  using HitModuleStartArray = std::array<uint32_t,phase1PixelTopology::numberOfModules+1>;
+  using HitLayerStartArray = std::array<uint32_t, phase1PixelTopology::numberOfLayers + 1>;
+  using HitModuleStartArray = std::array<uint32_t, phase1PixelTopology::numberOfModules + 1>;
 
-}
-
+}  // namespace trackingRecHitSoA
 
 GENERATE_SOA_LAYOUT(TrackingRecHitSoALayout,
                     SOA_COLUMN(float, xLocal),
@@ -51,8 +55,8 @@ GENERATE_SOA_LAYOUT(TrackingRecHitSoALayout,
                     SOA_COLUMN(int16_t, detectorIndex),
                     SOA_COLUMN(trackingRecHitSoA::PhiBinnerStorageType, phiBinnerStorage),
 
-                    SOA_SCALAR(trackingRecHitSoA::HitModuleStartArray,hitsModuleStart),
-                    SOA_SCALAR(trackingRecHitSoA::HitLayerStartArray,hitsLayerStart),
+                    SOA_SCALAR(trackingRecHitSoA::HitModuleStartArray, hitsModuleStart),
+                    SOA_SCALAR(trackingRecHitSoA::HitLayerStartArray, hitsLayerStart),
 
                     SOA_SCALAR(trackingRecHitSoA::ParamsOnGPU, cpeParams),
                     SOA_SCALAR(trackingRecHitSoA::AverageGeometry, averageGeometry),
@@ -62,15 +66,14 @@ GENERATE_SOA_LAYOUT(TrackingRecHitSoALayout,
                     SOA_SCALAR(int32_t, offsetBPIX2),
                     SOA_SCALAR(uint32_t, nMaxModules))
 
-namespace trackingRecHitSoA
-{
+namespace trackingRecHitSoA {
 
   using HitSoAView = TrackingRecHitSoALayout<>::View;
   using HitSoAConstView = TrackingRecHitSoALayout<>::ConstView;
 
-  constexpr size_t columnsSizes = 8 * sizeof(float) + 4 * sizeof(int16_t) + sizeof(trackingRecHitSoA::SiPixelHitStatusAndCharge) + sizeof(trackingRecHitSoA::PhiBinnerStorageType);
+  constexpr size_t columnsSizes = 8 * sizeof(float) + 4 * sizeof(int16_t) +
+                                  sizeof(trackingRecHitSoA::SiPixelHitStatusAndCharge) +
+                                  sizeof(trackingRecHitSoA::PhiBinnerStorageType);
 
-
-
-}
+}  // namespace trackingRecHitSoA
 #endif

@@ -83,14 +83,13 @@ void SiPixelRecHitSoAFromCUDA::acquire(edm::Event const& iEvent,
 
   nMaxModules_ = inputData.nModules();
 
-  hits_h_ = TrackingRecHitSoAHost(nHits_,ctx.stream());
+  hits_h_ = TrackingRecHitSoAHost(nHits_, ctx.stream());
   cudaCheck(cudaMemcpyAsync(hits_h_.buffer().get(),
                             inputData.const_buffer().get(),
                             inputData.bufferSize(),
                             cudaMemcpyDeviceToHost,
                             ctx.stream()));  // Copy data from Device to Host
   cudaCheck(cudaGetLastError());
-
 
   LogDebug("SiPixelRecHitSoAFromCUDA") << "copying to cpu SoA" << inputData.nHits() << " Hits";
 
@@ -103,11 +102,12 @@ void SiPixelRecHitSoAFromCUDA::produce(edm::Event& iEvent, edm::EventSetup const
   auto hmsp = std::make_unique<uint32_t[]>(nMaxModules_ + 1);
 
   if (nHits_ > 0)
-    std::copy(hits_h_.view().hitsModuleStart().begin(),hits_h_.view().hitsModuleStart().end(),hmsp.get());
-    // std::copy(hitsModuleStart_.get(), hitsModuleStart_.get() + nMaxModules_ + 1, hmsp.get());
+    std::copy(hits_h_.view().hitsModuleStart().begin(), hits_h_.view().hitsModuleStart().end(), hmsp.get());
+  // std::copy(hitsModuleStart_.get(), hitsModuleStart_.get() + nMaxModules_ + 1, hmsp.get());
 
   iEvent.emplace(hostPutToken_, std::move(hmsp));
-  iEvent.emplace(hitsPutTokenCPU_, std::move(hits_h_));//store32_.get(), store16_.get(), hitsModuleStart_.get(), nHits_);
+  iEvent.emplace(hitsPutTokenCPU_,
+                 std::move(hits_h_));  //store32_.get(), store16_.get(), hitsModuleStart_.get(), nHits_);
 }
 
 DEFINE_FWK_MODULE(SiPixelRecHitSoAFromCUDA);

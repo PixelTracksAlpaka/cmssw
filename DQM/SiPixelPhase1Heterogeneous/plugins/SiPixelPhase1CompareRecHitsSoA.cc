@@ -77,8 +77,10 @@ private:
 SiPixelPhase1CompareRecHitsSoA::SiPixelPhase1CompareRecHitsSoA(const edm::ParameterSet& iConfig)
     : geomToken_(esConsumes<TrackerGeometry, TrackerDigiGeometryRecord, edm::Transition::BeginRun>()),
       topoToken_(esConsumes<TrackerTopology, TrackerTopologyRcd, edm::Transition::BeginRun>()),
-      tokenSoAHitsCPU_(consumes<trackingRecHit::TrackingRecHitSoAHost>(iConfig.getParameter<edm::InputTag>("pixelHitsSrcCPU"))),
-      tokenSoAHitsGPU_(consumes<trackingRecHit::TrackingRecHitSoAHost>(iConfig.getParameter<edm::InputTag>("pixelHitsSrcGPU"))),
+      tokenSoAHitsCPU_(
+          consumes<trackingRecHit::TrackingRecHitSoAHost>(iConfig.getParameter<edm::InputTag>("pixelHitsSrcCPU"))),
+      tokenSoAHitsGPU_(
+          consumes<trackingRecHit::TrackingRecHitSoAHost>(iConfig.getParameter<edm::InputTag>("pixelHitsSrcGPU"))),
       topFolderName_(iConfig.getParameter<std::string>("topFolderName")),
       mind2cut_(iConfig.getParameter<double>("minD2cut")) {}
 //

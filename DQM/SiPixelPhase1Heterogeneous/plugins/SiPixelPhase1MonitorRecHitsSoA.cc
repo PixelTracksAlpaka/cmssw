@@ -74,7 +74,8 @@ private:
 SiPixelPhase1MonitorRecHitsSoA::SiPixelPhase1MonitorRecHitsSoA(const edm::ParameterSet& iConfig)
     : geomToken_(esConsumes<TrackerGeometry, TrackerDigiGeometryRecord, edm::Transition::BeginRun>()),
       topoToken_(esConsumes<TrackerTopology, TrackerTopologyRcd, edm::Transition::BeginRun>()),
-      tokenSoAHitsCPU_(consumes<trackingRecHit::TrackingRecHitSoAHost>(iConfig.getParameter<edm::InputTag>("pixelHitsSrc"))),
+      tokenSoAHitsCPU_(
+          consumes<trackingRecHit::TrackingRecHitSoAHost>(iConfig.getParameter<edm::InputTag>("pixelHitsSrc"))),
       topFolderName_(iConfig.getParameter<std::string>("TopFolderName")) {}
 //
 // Begin Run
@@ -102,7 +103,8 @@ void SiPixelPhase1MonitorRecHitsSoA::analyze(const edm::Event& iEvent, const edm
   auto detIds = tkGeom_->detUnitIds();
   for (uint32_t i = 0; i < nHits_; i++) {
     DetId id = detIds[soa2d[i].detectorIndex()];
-    float xG = soa2d[i].xGlobal();;
+    float xG = soa2d[i].xGlobal();
+    ;
     float yG = soa2d[i].yGlobal();
     float zG = soa2d[i].zGlobal();
     float rG = soa2d[i].rGlobal();

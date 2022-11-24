@@ -8,8 +8,7 @@
 #include "HeterogeneousCore/CUDAUtilities/interface/host_unique_ptr.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 
-namespace trackingRecHit
-{
+namespace trackingRecHit {
 
   class TrackingRecHitSoAHost : public cms::cuda::PortableHostCollection<TrackingRecHitSoALayout<>> {
   public:
@@ -18,7 +17,7 @@ namespace trackingRecHit
     // This SoA Host is used basically only for DQM
     // so we  just need a slim constructor
     explicit TrackingRecHitSoAHost(uint32_t nHits, cudaStream_t stream)
-    : PortableHostCollection<TrackingRecHitSoALayout<>>(nHits, stream) {}
+        : PortableHostCollection<TrackingRecHitSoALayout<>>(nHits, stream) {}
 
     explicit TrackingRecHitSoAHost(uint32_t nHits,
                                    bool isPhase2,
@@ -44,15 +43,15 @@ namespace trackingRecHit
     uint32_t offsetBPIX2() const { return offsetBPIX2_; }
     auto phiBinnerStorage() { return phiBinnerStorage_; }
 
-    private:
-      uint32_t nHits_; //Needed for the host SoA size
-      pixelCPEforGPU::ParamsOnGPU const* cpeParams_;
-      uint32_t offsetBPIX2_;
+  private:
+    uint32_t nHits_;  //Needed for the host SoA size
+    pixelCPEforGPU::ParamsOnGPU const* cpeParams_;
+    uint32_t offsetBPIX2_;
 
-      uint32_t nModules_;
-      trackingRecHitSoA::PhiBinnerStorageType* phiBinnerStorage_;
+    uint32_t nModules_;
+    trackingRecHitSoA::PhiBinnerStorageType* phiBinnerStorage_;
   };
 
-}
+}  // namespace trackingRecHit
 
 #endif  // CUDADataFormats_Track_TrackHeterogeneousT_H

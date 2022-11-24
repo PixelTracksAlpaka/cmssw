@@ -8,8 +8,7 @@
 #include "HeterogeneousCore/CUDAUtilities/interface/host_unique_ptr.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 
-namespace trackingRecHit
-{
+namespace trackingRecHit {
   class TrackingRecHitSoADevice : public cms::cuda::PortableDeviceCollection<TrackingRecHitSoALayout<>> {
   public:
     TrackingRecHitSoADevice() = default;  // cms::cuda::Product needs this
@@ -49,7 +48,7 @@ namespace trackingRecHit
           &(view().cpeParams()), cpeParams, int(sizeof(pixelCPEforGPU::ParamsOnGPU)), cudaMemcpyDeviceToDevice, stream));
     }
 
-    uint32_t nHits() const { return nHits_; } //go to size of view
+    uint32_t nHits() const { return nHits_; }  //go to size of view
     uint32_t nModules() const { return nModules_; }
 
     cms::cuda::host::unique_ptr<float[]> localCoordToHostAsync(cudaStream_t stream) const {
@@ -67,7 +66,11 @@ namespace trackingRecHit
     cms::cuda::host::unique_ptr<uint32_t[]> hitsModuleStartToHostAsync(cudaStream_t stream) const {
       // printf("%d \n",nModules());
       auto ret = cms::cuda::make_host_unique<uint32_t[]>(nModules() + 1, stream);
-      cudaCheck(cudaMemcpyAsync(ret.get(), view().hitsModuleStart().data(), sizeof(uint32_t) * (nModules() + 1), cudaMemcpyDeviceToHost, stream));
+      cudaCheck(cudaMemcpyAsync(ret.get(),
+                                view().hitsModuleStart().data(),
+                                sizeof(uint32_t) * (nModules() + 1),
+                                cudaMemcpyDeviceToHost,
+                                stream));
       return ret;
     }
 
@@ -76,18 +79,17 @@ namespace trackingRecHit
     uint32_t offsetBPIX2() const { return offsetBPIX2_; }
     auto phiBinner() { return phiBinner_; }
 
-    private:
-      uint32_t nHits_; //Needed for the host SoA size
-      pixelCPEforGPU::ParamsOnGPU const*
-          cpeParams_;  //TODO: this is used not that much from the hits (only once in BrokenLineFit), would make sens to remove it from this class.
-      uint32_t const* hitsModuleStart_;
-      uint32_t offsetBPIX2_;
+  private:
+    uint32_t nHits_;  //Needed for the host SoA size
+    pixelCPEforGPU::ParamsOnGPU const*
+        cpeParams_;  //TODO: this is used not that much from the hits (only once in BrokenLineFit), would make sens to remove it from this class.
+    uint32_t const* hitsModuleStart_;
+    uint32_t offsetBPIX2_;
 
-      uint32_t nModules_;
-      trackingRecHitSoA::PhiBinnerStorageType* phiBinnerStorage_;
-      trackingRecHitSoA::PhiBinner* phiBinner_;
-
+    uint32_t nModules_;
+    trackingRecHitSoA::PhiBinnerStorageType* phiBinnerStorage_;
+    trackingRecHitSoA::PhiBinner* phiBinner_;
   };
-}
+}  // namespace trackingRecHit
 
 #endif  // CUDADataFormats_Track_TrackHeterogeneousT_H

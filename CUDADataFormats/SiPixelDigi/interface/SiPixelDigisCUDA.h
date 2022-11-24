@@ -10,7 +10,6 @@
 #include "CUDADataFormats/Common/interface/PortableDeviceCollection.h"
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 
-
 GENERATE_SOA_LAYOUT(SiPixelDigisSoALayout,
                     SOA_COLUMN(int32_t, clus),
                     SOA_COLUMN(uint32_t, pdigi),
@@ -50,8 +49,7 @@ public:
   cms::cuda::host::unique_ptr<std::byte[]> copyAllToHostAsync(cudaStream_t stream) const {
     // Copy to a host buffer the host-device shared part (m_hostDeviceLayout).
     auto ret = cms::cuda::make_host_unique<std::byte[]>(bufferSize(), stream);
-    cudaCheck(cudaMemcpyAsync(
-        ret.get(), buffer().get(), bufferSize(), cudaMemcpyDeviceToHost, stream));
+    cudaCheck(cudaMemcpyAsync(ret.get(), buffer().get(), bufferSize(), cudaMemcpyDeviceToHost, stream));
     return ret;
   }
 

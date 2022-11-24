@@ -20,7 +20,6 @@ int main() {
   cudaStream_t stream;
   cudaCheck(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
 
-
   // inner scope to deallocate memory before destroying the stream
   {
     uint32_t nHits = 2000;
@@ -28,18 +27,18 @@ int main() {
     uint32_t moduleStart[1856];
 
     for (size_t i = 0; i < 1856; i++) {
-      moduleStart[i] = i*2;
+      moduleStart[i] = i * 2;
     }
 
-    trackingRecHit::TrackingRecHitSoADevice tkhit(nHits,false,offset,nullptr,&moduleStart[0],stream);
+    trackingRecHit::TrackingRecHitSoADevice tkhit(nHits, false, offset, nullptr, &moduleStart[0], stream);
 
-    testTrackingRecHit2DNew::run(tkhit,stream);
-    printf("tkhit hits %d \n",tkhit.nHits());
+    testTrackingRecHit2DNew::run(tkhit, stream);
+    printf("tkhit hits %d \n", tkhit.nHits());
 
     auto test = tkhit.localCoordToHostAsync(stream);
-    printf("test[9] %.2f\n",test[9]);
+    printf("test[9] %.2f\n", test[9]);
 
-    printf("nModules %d \n",tkhit.nModules());
+    printf("nModules %d \n", tkhit.nModules());
 
     // auto mods = tkhit.hitsModuleStartToHostAsync(stream);
     // auto ret = cms::cuda::make_host_unique<uint32_t[]>(tkhit.nModules() + 1, stream);
@@ -54,7 +53,7 @@ int main() {
     //                           cudaMemcpyDeviceToHost,
     //                           ctx.stream()));
 
-    printf("mods[9] %d\n",ret[9]);
+    printf("mods[9] %d\n", ret[9]);
   }
 
   cudaCheck(cudaStreamDestroy(stream));

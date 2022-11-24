@@ -44,8 +44,8 @@ private:
 
   const edm::ESGetToken<TrackerGeometry, TrackerDigiGeometryRecord> geomToken_;
   const edm::EDGetTokenT<cms::cuda::Product<TrackingRecHitSoADevice>> hitsToken_;  // CUDA hits
-  const edm::EDGetTokenT<SiPixelClusterCollectionNew> clusterToken_;           // legacy clusters
-  const edm::EDPutTokenT<SiPixelRecHitCollection> rechitsPutToken_;            // legacy rechits
+  const edm::EDGetTokenT<SiPixelClusterCollectionNew> clusterToken_;               // legacy clusters
+  const edm::EDPutTokenT<SiPixelRecHitCollection> rechitsPutToken_;                // legacy rechits
   const edm::EDPutTokenT<HMSstorage> hostPutToken_;
 
   uint32_t nHits_;
@@ -154,8 +154,9 @@ void SiPixelRecHitFromCUDA::produce(edm::Event& iEvent, edm::EventSetup const& e
     auto nhits = lc - fc;
 
     // LogDebug("SiPixelRecHitFromCUDA")
-    std::cout << "SiPixelRecHitFromCUDA " << "in det " << gind << ": conv " << nhits << " hits from " << dsv.size()
-                                      << " legacy clusters" << ' ' << fc << ',' << lc << "\n";
+    std::cout << "SiPixelRecHitFromCUDA "
+              << "in det " << gind << ": conv " << nhits << " hits from " << dsv.size() << " legacy clusters" << ' '
+              << fc << ',' << lc << "\n";
 
     assert(lc > fc);
 

@@ -19,18 +19,18 @@ namespace pixelgpudetails {
     ~PixelRecHitGPUKernel() = default;
 
     using TrackingRecHitSoADevice = trackingRecHit::TrackingRecHitSoADevice;
-    
+
     PixelRecHitGPUKernel(const PixelRecHitGPUKernel&) = delete;
     PixelRecHitGPUKernel(PixelRecHitGPUKernel&&) = delete;
     PixelRecHitGPUKernel& operator=(const PixelRecHitGPUKernel&) = delete;
     PixelRecHitGPUKernel& operator=(PixelRecHitGPUKernel&&) = delete;
 
     TrackingRecHitSoADevice makeHitsAsync(SiPixelDigisCUDA const& digis_d,
-                                      SiPixelClustersCUDA const& clusters_d,
-                                      BeamSpotCUDA const& bs_d,
-                                      pixelCPEforGPU::ParamsOnGPU const* cpeParams,
-                                      bool isPhase2,
-                                      cudaStream_t stream) const;
+                                          SiPixelClustersCUDA const& clusters_d,
+                                          BeamSpotCUDA const& bs_d,
+                                          pixelCPEforGPU::ParamsOnGPU const* cpeParams,
+                                          bool isPhase2,
+                                          cudaStream_t stream) const;
   };
 }  // namespace pixelgpudetails
 

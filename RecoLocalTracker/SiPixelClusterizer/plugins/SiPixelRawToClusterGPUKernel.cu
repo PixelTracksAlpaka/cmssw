@@ -710,8 +710,10 @@ namespace pixelgpudetails {
       // synchronization/ExternalWork
       auto nModules_Clusters_d = cms::cuda::make_device_unique<uint32_t[]>(3, stream);
       // MUST be ONE block
-      fillHitsModuleStart<false><<<1, 1024, 0, stream>>>(
-          clusters_d->clusInModule(), clusters_d->clusModuleStart(), clusters_d->moduleStart(), nModules_Clusters_d.get());
+      fillHitsModuleStart<false><<<1, 1024, 0, stream>>>(clusters_d->clusInModule(),
+                                                         clusters_d->clusModuleStart(),
+                                                         clusters_d->moduleStart(),
+                                                         nModules_Clusters_d.get());
 
       // copy to host
       nModules_Clusters_h = cms::cuda::make_host_unique<uint32_t[]>(3, stream);
@@ -811,8 +813,10 @@ namespace pixelgpudetails {
 
     auto nModules_Clusters_d = cms::cuda::make_device_unique<uint32_t[]>(3, stream);
     // MUST be ONE block
-    fillHitsModuleStart<true><<<1, 1024, 0, stream>>>(
-        clusters_d->clusInModule(), clusters_d->clusModuleStart(), clusters_d->moduleStart(), nModules_Clusters_d.get());
+    fillHitsModuleStart<true><<<1, 1024, 0, stream>>>(clusters_d->clusInModule(),
+                                                      clusters_d->clusModuleStart(),
+                                                      clusters_d->moduleStart(),
+                                                      nModules_Clusters_d.get());
 
     nModules_Clusters_h = cms::cuda::make_host_unique<uint32_t[]>(3, stream);
     cudaCheck(cudaMemcpyAsync(
