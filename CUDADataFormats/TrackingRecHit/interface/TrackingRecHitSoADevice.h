@@ -39,22 +39,14 @@ namespace trackingRecHit
                                 sizeof(uint32_t) * int(nModules_ + 1),
                                 cudaMemcpyHostToDevice,
                                 stream));
-      // cudaCheck(cudaMemcpyAsync(&(view().cpeParams()), cpeParams, int(sizeof(pixelCPEforGPU::ParamsOnGPU)),cudaMemcpyHostToDevice,stream));
       cudaCheck(
           cudaMemcpyAsync(&(view().offsetBPIX2()), &offsetBPIX2, sizeof(int32_t), cudaMemcpyHostToDevice, stream));
 
-      // Device --> Host --> Other Device Memory
-      printf("AAAAAAAa!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-      std::cout << "Copying cpe params to host" << std::endl;
-      pixelCPEforGPU::ParamsOnGPU temp;
-      cudaCheck(
-          cudaMemcpyAsync(&temp, cpeParams, int(sizeof(pixelCPEforGPU::ParamsOnGPU)), cudaMemcpyDeviceToHost, stream));
-      std::cout << "Copying cpe params to device" << std::endl;
+      // cpeParams argument is a pointer to device memory, copy
+      // its contents into the Layout.
+
       cudaCheck(cudaMemcpyAsync(
-          &(view().cpeParams()), &temp, int(sizeof(pixelCPEforGPU::ParamsOnGPU)), cudaMemcpyHostToDevice, stream));
-      cudaCheck(cudaGetLastError());
-      cudaCheck(cudaDeviceSynchronize());
-      std::cout << "Done" << std::endl;
+          &(view().cpeParams()), cpeParams, int(sizeof(pixelCPEforGPU::ParamsOnGPU)), cudaMemcpyDeviceToDevice, stream));
     }
 
     uint32_t nHits() const { return nHits_; } //go to size of view
