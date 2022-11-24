@@ -9248,7 +9248,7 @@ fragment.hltSiPixelRecHits = SwitchProducerCUDA(
 fragment.hltSiPixelRecHitsSoA = SwitchProducerCUDA(
    cpu = cms.EDAlias(
        hltSiPixelRecHitsFromLegacy = cms.VPSet( 
-         cms.PSet(  type = cms.string( "trackingRecHitTrackingRecHitSoAHost" )         ),
+         cms.PSet(  type = cms.string( "cmscudacompatCPUTraitsTrackingRecHit2DHeterogeneous" )         ),
          cms.PSet(  type = cms.string( "uintAsHostProduct" )         )
        )
    ),
