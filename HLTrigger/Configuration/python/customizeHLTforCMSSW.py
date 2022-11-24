@@ -16,6 +16,15 @@ from HLTrigger.Configuration.common import *
 #                 if not hasattr(pset,'minGoodStripCharge'):
 #                     pset.minGoodStripCharge = cms.PSet(refToPSet_ = cms.string('HLTSiStripClusterChargeCutNone'))
 #     return process
+def customiseForX(process):
+	 if 'hltSiPixelRecHitsSoA' in process.__dict__:
+		process.hltSiPixelRecHitsSoA.cpu =  cms.EDAlias(hltSiPixelRecHitsFromLegacy = cms.VPSet(
+          		cms.PSet(
+                type = cms.string('trackingRecHitTrackingRecHitSoAHost')
+            ),
+            cms.PSet(
+                type = cms.string('uintAsHostProduct')
+            )))
 
 def customiseHCALFor2018Input(process):
     """Customise the HLT to run on Run 2 data/MC using the old readout for the HCAL barel"""
@@ -218,5 +227,6 @@ def customizeHLTforCMSSW(process, menuType="GRun"):
 
     # add call to action function in proper order: newest last!
     # process = customiseFor12718(process)
+    process = customiseForX(process)
 
     return process

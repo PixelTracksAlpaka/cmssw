@@ -18,7 +18,7 @@
 #include "DQMServices/Core/interface/MonitorElement.h"
 #include "DQMServices/Core/interface/DQMEDAnalyzer.h"
 #include "DQMServices/Core/interface/DQMStore.h"
-#include "CUDADataFormats/Vertex/interface/ZVertexHeterogeneous.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousHost.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
 class SiPixelPhase1CompareVertexSoA : public DQMEDAnalyzer {
@@ -31,8 +31,9 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:
-  const edm::EDGetTokenT<ZVertexHeterogeneous> tokenSoAVertexCPU_;
-  const edm::EDGetTokenT<ZVertexHeterogeneous> tokenSoAVertexGPU_;
+  const edm::EDGetTokenT<ZVertex::ZVertexSoAHost> tokenSoAVertexCPU_;
+  // Note that this has been copied from device to host, hence is a HostCollection
+  const edm::EDGetTokenT<ZVertex::ZVertexSoAHost> tokenSoAVertexGPU_;
   const edm::EDGetTokenT<reco::BeamSpot> tokenBeamSpot_;
   const std::string topFolderName_;
   const float dzCut_;
@@ -54,8 +55,8 @@ private:
 //
 
 SiPixelPhase1CompareVertexSoA::SiPixelPhase1CompareVertexSoA(const edm::ParameterSet& iConfig)
-    : tokenSoAVertexCPU_(consumes<ZVertexHeterogeneous>(iConfig.getParameter<edm::InputTag>("pixelVertexSrcCPU"))),
-      tokenSoAVertexGPU_(consumes<ZVertexHeterogeneous>(iConfig.getParameter<edm::InputTag>("pixelVertexSrcGPU"))),
+    : tokenSoAVertexCPU_(consumes<ZVertex::ZVertexSoAHost>(iConfig.getParameter<edm::InputTag>("pixelVertexSrcCPU"))),
+      tokenSoAVertexGPU_(consumes<ZVertex::ZVertexSoAHost>(iConfig.getParameter<edm::InputTag>("pixelVertexSrcGPU"))),
       tokenBeamSpot_(consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamSpotSrc"))),
       topFolderName_(iConfig.getParameter<std::string>("topFolderName")),
       dzCut_(iConfig.getParameter<double>("dzCut")) {}
@@ -78,10 +79,10 @@ void SiPixelPhase1CompareVertexSoA::analyze(const edm::Event& iEvent, const edm:
     return;
   }
 
-  auto const& vsoaCPU = *vsoaHandleCPU->get();
-  int nVerticesCPU = vsoaCPU.nvFinal;
-  auto const& vsoaGPU = *vsoaHandleGPU->get();
-  int nVerticesGPU = vsoaGPU.nvFinal;
+  auto& vsoaCPU = *vsoaHandleCPU;
+  int nVerticesCPU = vsoaCPU.view().nvFinal();
+  auto& vsoaGPU = *vsoaHandleGPU;
+  int nVerticesGPU = vsoaGPU.view().nvFinal();
 
   auto bsHandle = iEvent.getHandle(tokenBeamSpot_);
   float x0 = 0., y0 = 0., z0 = 0., dxdz = 0., dydz = 0.;
@@ -97,22 +98,22 @@ void SiPixelPhase1CompareVertexSoA::analyze(const edm::Event& iEvent, const edm:
   }
 
   for (int ivc = 0; ivc < nVerticesCPU; ivc++) {
-    auto sic = vsoaCPU.sortInd[ivc];
-    auto zc = vsoaCPU.zv[sic];
+    auto sic = vsoaCPU.view()[ivc].sortInd();
+    auto zc = vsoaCPU.view()[sic].zv();
     auto xc = x0 + dxdz * zc;
     auto yc = y0 + dydz * zc;
     zc += z0;
 
-    auto ndofCPU = vsoaCPU.ndof[sic];
-    auto chi2CPU = vsoaCPU.chi2[sic];
+    auto ndofCPU = vsoaCPU.view()[sic].ndof();
+    auto chi2CPU = vsoaCPU.view()[sic].chi2();
 
     const int32_t notFound = -1;
     int32_t closestVtxidx = notFound;
     float mindz = dzCut_;
 
     for (int ivg = 0; ivg < nVerticesGPU; ivg++) {
-      auto sig = vsoaGPU.sortInd[ivg];
-      auto zgc = vsoaGPU.zv[sig] + z0;
+      auto sig = vsoaGPU.view()[ivg].sortInd();
+      auto zgc = vsoaGPU.view()[sig].zv() + z0;
       auto zDist = std::abs(zc - zgc);
       //insert some matching condition
       if (zDist > dzCut_)
@@ -125,12 +126,12 @@ void SiPixelPhase1CompareVertexSoA::analyze(const edm::Event& iEvent, const edm:
     if (closestVtxidx == notFound)
       continue;
 
-    auto zg = vsoaGPU.zv[closestVtxidx];
+    auto zg = vsoaGPU.view()[closestVtxidx].zv();
     auto xg = x0 + dxdz * zg;
     auto yg = y0 + dydz * zg;
     zg += z0;
-    auto ndofGPU = vsoaGPU.ndof[closestVtxidx];
-    auto chi2GPU = vsoaGPU.chi2[closestVtxidx];
+    auto ndofGPU = vsoaGPU.view()[closestVtxidx].ndof();
+    auto chi2GPU = vsoaGPU.view()[closestVtxidx].chi2();
 
     hx_->Fill(xc - x0, xg - x0);
     hy_->Fill(yc - y0, yg - y0);
@@ -140,7 +141,7 @@ void SiPixelPhase1CompareVertexSoA::analyze(const edm::Event& iEvent, const edm:
     hzdiff_->Fill(zc - zg);
     hchi2_->Fill(chi2CPU, chi2GPU);
     hchi2oNdof_->Fill(chi2CPU / ndofCPU, chi2GPU / ndofGPU);
-    hptv2_->Fill(vsoaCPU.ptv2[sic], vsoaGPU.ptv2[closestVtxidx]);
+    hptv2_->Fill(vsoaCPU.view()[sic].ptv2(), vsoaGPU.view()[closestVtxidx].ptv2());
     hntrks_->Fill(ndofCPU + 1, ndofGPU + 1);
   }
   hnVertex_->Fill(nVerticesCPU, nVerticesGPU);

@@ -2,8 +2,8 @@
 // Original Author: Felice Pantaleo, CERN
 //
 
-// #define NTUPLE_DEBUG
-// #define GPU_DEBUG
+#define NTUPLE_DEBUG
+#define GPU_DEBUG
 
 #include <cmath>
 #include <cstdint>
@@ -14,6 +14,8 @@
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cuda_assert.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforGPU.h"
+#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
+#include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHitsUtilities.h"
 
 #include "CAConstants.h"
 #include "CAHitNtupletGeneratorKernels.h"
@@ -21,14 +23,17 @@
 #include "gpuFishbone.h"
 #include "gpuPixelDoublets.h"
 
-using HitsOnGPU = TrackingRecHit2DSOAView;
-using HitsOnCPU = TrackingRecHit2DGPU;
+// using HitsOnGPU = TrackingRecHit2DSOAView;
+// using HitsOnCPU = TrackingRecHit2DGPU;
 
+using HitSoAView = trackingRecHitSoA::HitSoAView;
+using HitSoAConstView = trackingRecHitSoA::HitSoAConstView;
 using HitToTuple = caConstants::HitToTuple;
 using TupleMultiplicity = caConstants::TupleMultiplicity;
 
 using Quality = pixelTrack::Quality;
-using TkSoA = pixelTrack::TrackSoA;
+using TkSoAView = pixelTrack::TrackSoAView;
+using TkSoAConstView = pixelTrack::TrackSoAConstView;
 using HitContainer = pixelTrack::HitContainer;
 
 namespace {
@@ -39,7 +44,7 @@ namespace {
 
 }  // namespace
 
-__global__ void kernel_checkOverflows(HitContainer const *foundNtuplets,
+__global__ void kernel_checkOverflows(TkSoAView tracks_view,
                                       caConstants::TupleMultiplicity const *tupleMultiplicity,
                                       CAHitNtupletGeneratorKernelsGPU::HitToTuple const *hitToTuple,
                                       cms::cuda::AtomicPairCounter *apc,
@@ -72,16 +77,16 @@ __global__ void kernel_checkOverflows(HitContainer const *foundNtuplets,
            nHits,
            hitToTuple->totOnes());
     if (apc->get().m < caConstants::maxNumberOfQuadruplets) {
-      assert(foundNtuplets->size(apc->get().m) == 0);
-      assert(foundNtuplets->size() == apc->get().n);
+      assert(tracks_view.hitIndices().size(apc->get().m) == 0);
+      assert(tracks_view.hitIndices().size() == apc->get().n);
     }
   }
 
-  for (int idx = first, nt = foundNtuplets->nOnes(); idx < nt; idx += gridDim.x * blockDim.x) {
-    if (foundNtuplets->size(idx) > 7)  // current real limit
-      printf("ERROR %d, %d\n", idx, foundNtuplets->size(idx));
-    assert(foundNtuplets->size(idx) <= caConstants::maxHitsOnTrack);
-    for (auto ih = foundNtuplets->begin(idx); ih != foundNtuplets->end(idx); ++ih)
+  for (int idx = first, nt = tracks_view.hitIndices().nOnes(); idx < nt; idx += gridDim.x * blockDim.x) {
+    if (tracks_view.hitIndices().size(idx) > 7)  // current real limit
+      printf("ERROR %d, %d\n", idx, tracks_view.hitIndices().size(idx));
+    assert(tracks_view.hitIndices().size(idx) <= caConstants::maxHitsOnTrack);
+    for (auto ih = tracks_view.hitIndices().begin(idx); ih != tracks_view.hitIndices().end(idx); ++ih)
       assert(int(*ih) < nHits);
   }
 #endif
@@ -139,13 +144,10 @@ __global__ void kernel_fishboneCleaner(GPUCACell const *cells, uint32_t const *_
 // It does not seem to affect efficiency in any way!
 __global__ void kernel_earlyDuplicateRemover(GPUCACell const *cells,
                                              uint32_t const *__restrict__ nCells,
-                                             TkSoA const *__restrict__ ptracks,
-                                             Quality *quality,
+                                             TkSoAView tracks_view,
                                              bool dupPassThrough) {
   // quality to mark rejected
-  constexpr auto reject = pixelTrack::Quality::edup;  /// cannot be loose
-
-  auto const &tracks = *ptracks;
+  constexpr auto reject = (uint8_t)pixelTrack::Quality::edup;  /// cannot be loose
 
   assert(nCells);
   auto first = threadIdx.x + blockIdx.x * blockDim.x;
@@ -159,7 +161,7 @@ __global__ void kernel_earlyDuplicateRemover(GPUCACell const *cells,
 
     // find maxNl
     for (auto it : thisCell.tracks()) {
-      auto nl = tracks.nLayers(it);
+      auto nl = tracks_view[it].nLayers();
       maxNl = std::max(nl, maxNl);
     }
 
@@ -168,8 +170,8 @@ __global__ void kernel_earlyDuplicateRemover(GPUCACell const *cells,
     //  maxNl = std::min(4, maxNl);
 
     for (auto it : thisCell.tracks()) {
-      if (tracks.nLayers(it) < maxNl)
-        quality[it] = reject;  //no race:  simple assignment of the same constant
+      if (tracks_view[it].nLayers() < maxNl)
+        tracks_view[it].quality() = reject;  //no race:  simple assignment of the same constant
     }
   }
 }
@@ -177,11 +179,11 @@ __global__ void kernel_earlyDuplicateRemover(GPUCACell const *cells,
 // assume the above (so, short tracks already removed)
 __global__ void kernel_fastDuplicateRemover(GPUCACell const *__restrict__ cells,
                                             uint32_t const *__restrict__ nCells,
-                                            TkSoA *__restrict__ tracks,
+                                            TkSoAView tracks_view,
                                             bool dupPassThrough) {
   // quality to mark rejected
-  auto const reject = dupPassThrough ? pixelTrack::Quality::loose : pixelTrack::Quality::dup;
-  constexpr auto loose = pixelTrack::Quality::loose;
+  auto const reject = dupPassThrough ? (uint8_t)pixelTrack::Quality::loose : (uint8_t)pixelTrack::Quality::dup;
+  constexpr auto loose = (uint8_t)pixelTrack::Quality::loose;
 
   assert(nCells);
 
@@ -196,42 +198,42 @@ __global__ void kernel_fastDuplicateRemover(GPUCACell const *__restrict__ cells,
 
     /* chi2 penalize higher-pt tracks  (try rescale it?)
     auto score = [&](auto it) {
-      return tracks->nLayers(it) < 4 ? 
-              std::abs(tracks->tip(it)) :  // tip for triplets
-              tracks->chi2(it);            //chi2 for quads
+      return tracks_view[it].nLayers() < 4 ?
+              std::abs(pixelTrack::utilities::tip(tracks_view, it)) :  // tip for triplets
+              tracks_view[it].chi2(it);            //chi2 for quads
     };
     */
 
-    auto score = [&](auto it) { return std::abs(tracks->tip(it)); };
+    auto score = [&](auto it) { return std::abs(pixelTrack::utilities::tip(tracks_view, it)); };
 
     // full crazy combinatorics
     int ntr = thisCell.tracks().size();
     for (int i = 0; i < ntr - 1; ++i) {
       auto it = thisCell.tracks()[i];
-      auto qi = tracks->quality(it);
+      auto qi = tracks_view[it].quality();
       if (qi <= reject)
         continue;
-      auto opi = tracks->stateAtBS.state(it)(2);
-      auto e2opi = tracks->stateAtBS.covariance(it)(9);
-      auto cti = tracks->stateAtBS.state(it)(3);
-      auto e2cti = tracks->stateAtBS.covariance(it)(12);
+      auto opi = tracks_view[it].state()(2);
+      auto e2opi = tracks_view[it].covariance()(9);
+      auto cti = tracks_view[it].state()(3);
+      auto e2cti = tracks_view[it].covariance()(12);
       for (auto j = i + 1; j < ntr; ++j) {
         auto jt = thisCell.tracks()[j];
-        auto qj = tracks->quality(jt);
+        auto qj = tracks_view[jt].quality();
         if (qj <= reject)
           continue;
-        auto opj = tracks->stateAtBS.state(jt)(2);
-        auto ctj = tracks->stateAtBS.state(jt)(3);
-        auto dct = nSigma2 * (tracks->stateAtBS.covariance(jt)(12) + e2cti);
+        auto opj = tracks_view[jt].state()(2);
+        auto ctj = tracks_view[jt].state()(3);
+        auto dct = nSigma2 * (tracks_view[jt].covariance()(12) + e2cti);
         if ((cti - ctj) * (cti - ctj) > dct)
           continue;
-        auto dop = nSigma2 * (tracks->stateAtBS.covariance(jt)(9) + e2opi);
+        auto dop = nSigma2 * (tracks_view[jt].covariance()(9) + e2opi);
         if ((opi - opj) * (opi - opj) > dop)
           continue;
         if ((qj < qi) || (qj == qi && score(it) < score(jt)))
-          tracks->quality(jt) = reject;
+          tracks_view[jt].quality() = reject;
         else {
-          tracks->quality(it) = reject;
+          tracks_view[it].quality() = reject;
           break;
         }
       }
@@ -240,8 +242,8 @@ __global__ void kernel_fastDuplicateRemover(GPUCACell const *__restrict__ cells,
     // find maxQual
     auto maxQual = reject;  // no duplicate!
     for (auto it : thisCell.tracks()) {
-      if (tracks->quality(it) > maxQual)
-        maxQual = tracks->quality(it);
+      if (tracks_view[it].quality() > maxQual)
+        maxQual = tracks_view[it].quality();
     }
 
     if (maxQual <= loose)
@@ -249,7 +251,7 @@ __global__ void kernel_fastDuplicateRemover(GPUCACell const *__restrict__ cells,
 
     // find min score
     for (auto it : thisCell.tracks()) {
-      if (tracks->quality(it) == maxQual && score(it) < mc) {
+      if (tracks_view[it].quality() == maxQual && score(it) < mc) {
         mc = score(it);
         im = it;
       }
@@ -260,15 +262,15 @@ __global__ void kernel_fastDuplicateRemover(GPUCACell const *__restrict__ cells,
 
     // mark all other duplicates  (not yet, keep it loose)
     for (auto it : thisCell.tracks()) {
-      if (tracks->quality(it) > loose && it != im)
-        tracks->quality(it) = loose;  //no race:  simple assignment of the same constant
+      if (tracks_view[it].quality() > loose && it != im)
+        tracks_view[it].quality() = loose;  //no race:  simple assignment of the same constant
     }
   }
 }
 
 __global__ void kernel_connect(cms::cuda::AtomicPairCounter *apc1,
                                cms::cuda::AtomicPairCounter *apc2,  // just to zero them,
-                               GPUCACell::Hits const *__restrict__ hhp,
+                               GPUCACell::HitsConstView hh,
                                GPUCACell *cells,
                                uint32_t const *__restrict__ nCells,
                                gpuPixelDoublets::CellNeighborsVector *cellNeighbors,
@@ -279,7 +281,7 @@ __global__ void kernel_connect(cms::cuda::AtomicPairCounter *apc1,
                                float CAThetaCutForward,
                                float dcaCutInnerTriplet,
                                float dcaCutOuterTriplet) {
-  auto const &hh = *hhp;
+  // auto &hh = *hhp;
 
   auto firstCellIndex = threadIdx.y + blockIdx.y * blockDim.y;
   auto first = threadIdx.x;
@@ -333,16 +335,15 @@ __global__ void kernel_connect(cms::cuda::AtomicPairCounter *apc1,
   }    // loop on outer cells
 }
 
-__global__ void kernel_find_ntuplets(GPUCACell::Hits const *__restrict__ hhp,
+__global__ void kernel_find_ntuplets(GPUCACell::HitsConstView hh,
                                      GPUCACell *__restrict__ cells,
                                      uint32_t const *nCells,
                                      gpuPixelDoublets::CellTracksVector *cellTracks,
-                                     HitContainer *foundNtuplets,
+                                     TkSoAView tracks_view,
                                      cms::cuda::AtomicPairCounter *apc,
-                                     Quality *__restrict__ quality,
                                      unsigned int minHitsPerNtuplet) {
   // recursive: not obvious to widen
-  auto const &hh = *hhp;
+  // auto &hh = *hhp;
 
   auto first = threadIdx.x + blockIdx.x * blockDim.x;
   for (int idx = first, nt = (*nCells); idx < nt; idx += gridDim.x * blockDim.x) {
@@ -357,8 +358,15 @@ __global__ void kernel_find_ntuplets(GPUCACell::Hits const *__restrict__ hhp,
     if (doit) {
       GPUCACell::TmpTuple stack;
       stack.reset();
-      thisCell.find_ntuplets<6>(
-          hh, cells, *cellTracks, *foundNtuplets, *apc, quality, stack, minHitsPerNtuplet, pid < 3);
+      thisCell.find_ntuplets<6>(hh,
+                                cells,
+                                *cellTracks,
+                                tracks_view.hitIndices(),
+                                *apc,
+                                pixelTrack::utilities::qualityData(tracks_view),
+                                stack,
+                                minHitsPerNtuplet,
+                                pid < 3);
       assert(stack.empty());
       // printf("in %d found quadruplets: %d\n", cellIndex, apc->get());
     }
@@ -374,17 +382,16 @@ __global__ void kernel_mark_used(GPUCACell *__restrict__ cells, uint32_t const *
   }
 }
 
-__global__ void kernel_countMultiplicity(HitContainer const *__restrict__ foundNtuplets,
-                                         Quality const *__restrict__ quality,
-                                         caConstants::TupleMultiplicity *tupleMultiplicity) {
+// TODO: change arg type to TkSoAConstview
+__global__ void kernel_countMultiplicity(TkSoAView tracks_view, caConstants::TupleMultiplicity *tupleMultiplicity) {
   auto first = blockIdx.x * blockDim.x + threadIdx.x;
-  for (int it = first, nt = foundNtuplets->nOnes(); it < nt; it += gridDim.x * blockDim.x) {
-    auto nhits = foundNtuplets->size(it);
+  for (int it = first, nt = tracks_view.hitIndices().nOnes(); it < nt; it += gridDim.x * blockDim.x) {
+    auto nhits = tracks_view.hitIndices().size(it);
     if (nhits < 3)
       continue;
-    if (quality[it] == pixelTrack::Quality::edup)
+    if (tracks_view[it].quality() == (uint8_t)pixelTrack::Quality::edup)
       continue;
-    assert(quality[it] == pixelTrack::Quality::bad);
+    assert(tracks_view[it].quality() == (uint8_t)pixelTrack::Quality::bad);
     if (nhits > 7)  // current limit
       printf("wrong mult %d %d\n", it, nhits);
     assert(nhits <= caConstants::maxHitsOnTrack);
@@ -392,17 +399,16 @@ __global__ void kernel_countMultiplicity(HitContainer const *__restrict__ foundN
   }
 }
 
-__global__ void kernel_fillMultiplicity(HitContainer const *__restrict__ foundNtuplets,
-                                        Quality const *__restrict__ quality,
-                                        caConstants::TupleMultiplicity *tupleMultiplicity) {
+// TODO: change arg type to TkSoAConstview
+__global__ void kernel_fillMultiplicity(TkSoAView tracks_view, caConstants::TupleMultiplicity *tupleMultiplicity) {
   auto first = blockIdx.x * blockDim.x + threadIdx.x;
-  for (int it = first, nt = foundNtuplets->nOnes(); it < nt; it += gridDim.x * blockDim.x) {
-    auto nhits = foundNtuplets->size(it);
+  for (int it = first, nt = tracks_view.hitIndices().nOnes(); it < nt; it += gridDim.x * blockDim.x) {
+    auto nhits = tracks_view.hitIndices().size(it);
     if (nhits < 3)
       continue;
-    if (quality[it] == pixelTrack::Quality::edup)
+    if (tracks_view[it].quality() == (uint8_t)pixelTrack::Quality::edup)
       continue;
-    assert(quality[it] == pixelTrack::Quality::bad);
+    assert(tracks_view[it].quality() == (uint8_t)pixelTrack::Quality::bad);
     if (nhits > 7)
       printf("wrong mult %d %d\n", it, nhits);
     assert(nhits <= caConstants::maxHitsOnTrack);
@@ -410,13 +416,17 @@ __global__ void kernel_fillMultiplicity(HitContainer const *__restrict__ foundNt
   }
 }
 
-__global__ void kernel_classifyTracks(HitContainer const *__restrict__ tuples,
-                                      TkSoA const *__restrict__ tracks,
-                                      CAHitNtupletGeneratorKernelsGPU::QualityCuts cuts,
-                                      Quality *__restrict__ quality) {
+/*
+  Supply both the original TkSoA and the TkSoAView which contains
+the SoA Data
+ */
+__global__ void kernel_classifyTracks(TkSoAView tracks_view,
+                                      Quality *__restrict__ quality,
+                                      CAHitNtupletGeneratorKernelsGPU::QualityCuts cuts) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
-  for (int it = first, nt = tuples->nOnes(); it < nt; it += gridDim.x * blockDim.x) {
-    auto nhits = tuples->size(it);
+
+  for (int it = first, nt = tracks_view.hitIndices().nOnes(); it < nt; it += gridDim.x * blockDim.x) {
+    auto nhits = tracks_view.hitIndices().size(it);
     if (nhits == 0)
       break;  // guard
 
@@ -433,11 +443,11 @@ __global__ void kernel_classifyTracks(HitContainer const *__restrict__ tuples,
     // if the fit has any invalid parameters, mark it as bad
     bool isNaN = false;
     for (int i = 0; i < 5; ++i) {
-      isNaN |= std::isnan(tracks->stateAtBS.state(it)(i));
+      isNaN |= std::isnan(tracks_view[it].state()(i));
     }
     if (isNaN) {
 #ifdef NTUPLE_DEBUG
-      printf("NaN in fit %d size %d chi2 %f\n", it, tuples->size(it), tracks->chi2(it));
+      printf("NaN in fit %d size %d chi2 %f\n", it, tracks_view.hitIndices().size(it), tracks_view[it].chi2());
 #endif
       continue;
     }
@@ -468,16 +478,16 @@ __global__ void kernel_classifyTracks(HitContainer const *__restrict__ tuples,
     };
 
     // (see CAHitNtupletGeneratorGPU.cc)
-    float pt = std::min<float>(tracks->pt(it), cuts.chi2MaxPt);
+    float pt = std::min<float>(tracks_view[it].pt(), cuts.chi2MaxPt);
     float chi2Cut = cuts.chi2Scale * (cuts.chi2Coeff[0] + roughLog(pt) * cuts.chi2Coeff[1]);
-    if (tracks->chi2(it) >= chi2Cut) {
+    if (tracks_view[it].chi2() >= chi2Cut) {
 #ifdef NTUPLE_FIT_DEBUG
       printf("Bad chi2 %d size %d pt %f eta %f chi2 %f\n",
              it,
-             tuples->size(it),
-             tracks->pt(it),
-             tracks->eta(it),
-             tracks->chi2(it));
+             tracks_view.hitIndices().size(it),
+             tracks_view[it].pt(),
+             tracks_view[it].eta(),
+             tracks_view[it].chi2());
 #endif
       continue;
     }
@@ -490,20 +500,22 @@ __global__ void kernel_classifyTracks(HitContainer const *__restrict__ tuples,
     //   - for quadruplets: |Tip| < 0.5 cm, pT > 0.3 GeV, |Zip| < 12.0 cm
     // (see CAHitNtupletGeneratorGPU.cc)
     auto const &region = (nhits > 3) ? cuts.quadruplet : cuts.triplet;
-    bool isOk = (std::abs(tracks->tip(it)) < region.maxTip) and (tracks->pt(it) > region.minPt) and
-                (std::abs(tracks->zip(it)) < region.maxZip);
+    bool isOk = (std::abs(pixelTrack::utilities::tip(tracks_view, it)) < region.maxTip) and
+                (tracks_view[it].pt() > region.minPt) and
+                (std::abs(pixelTrack::utilities::zip(tracks_view, it)) < region.maxZip);
 
-    if (isOk)
+    if (isOk) {
       quality[it] = pixelTrack::Quality::highPurity;
+    }
   }
 }
 
-__global__ void kernel_doStatsForTracks(HitContainer const *__restrict__ tuples,
+__global__ void kernel_doStatsForTracks(TkSoAView tracks_view,
                                         Quality const *__restrict__ quality,
                                         CAHitNtupletGeneratorKernelsGPU::Counters *counters) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
-  for (int idx = first, ntot = tuples->nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
-    if (tuples->size(idx) == 0)
+  for (int idx = first, ntot = tracks_view.hitIndices().nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
+    if (tracks_view.hitIndices().size(idx) == 0)
       break;  //guard
     if (quality[idx] < pixelTrack::Quality::loose)
       continue;
@@ -514,58 +526,55 @@ __global__ void kernel_doStatsForTracks(HitContainer const *__restrict__ tuples,
   }
 }
 
-__global__ void kernel_countHitInTracks(HitContainer const *__restrict__ tuples,
-                                        Quality const *__restrict__ quality,
+__global__ void kernel_countHitInTracks(TkSoAView tracks_view,
                                         CAHitNtupletGeneratorKernelsGPU::HitToTuple *hitToTuple) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
-  for (int idx = first, ntot = tuples->nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
-    if (tuples->size(idx) == 0)
+  for (int idx = first, ntot = tracks_view.hitIndices().nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
+    if (tracks_view.hitIndices().size(idx) == 0)
       break;  // guard
-    for (auto h = tuples->begin(idx); h != tuples->end(idx); ++h)
+    for (auto h = tracks_view.hitIndices().begin(idx); h != tracks_view.hitIndices().end(idx); ++h)
       hitToTuple->count(*h);
   }
 }
 
-__global__ void kernel_fillHitInTracks(HitContainer const *__restrict__ tuples,
-                                       Quality const *__restrict__ quality,
+__global__ void kernel_fillHitInTracks(TkSoAView tracks_view,  // TODO: Make ConstView
                                        CAHitNtupletGeneratorKernelsGPU::HitToTuple *hitToTuple) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
-  for (int idx = first, ntot = tuples->nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
-    if (tuples->size(idx) == 0)
+  for (int idx = first, ntot = tracks_view.hitIndices().nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
+    if (tracks_view.hitIndices().size(idx) == 0)
       break;  // guard
-    for (auto h = tuples->begin(idx); h != tuples->end(idx); ++h)
+    for (auto h = tracks_view.hitIndices().begin(idx); h != tracks_view.hitIndices().end(idx); ++h)
       hitToTuple->fill(*h, idx);
   }
 }
 
-__global__ void kernel_fillHitDetIndices(HitContainer const *__restrict__ tuples,
-                                         TrackingRecHit2DSOAView const *__restrict__ hhp,
-                                         HitContainer *__restrict__ hitDetIndices) {
+__global__ void kernel_fillHitDetIndices(TkSoAView tracks_view, HitSoAConstView hh) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
   // copy offsets
-  for (int idx = first, ntot = tuples->totOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
-    hitDetIndices->off[idx] = tuples->off[idx];
+  for (int idx = first, ntot = tracks_view.hitIndices().totOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
+    tracks_view.detIndices().off[idx] = tracks_view.hitIndices().off[idx];
   }
   // fill hit indices
-  auto const &hh = *hhp;
   auto nhits = hh.nHits();
-  for (int idx = first, ntot = tuples->size(); idx < ntot; idx += gridDim.x * blockDim.x) {
-    assert(tuples->content[idx] < nhits);
-    hitDetIndices->content[idx] = hh.detectorIndex(tuples->content[idx]);
+  for (int idx = first, ntot = tracks_view.hitIndices().size(); idx < ntot; idx += gridDim.x * blockDim.x) {
+    assert(tracks_view.hitIndices().content[idx] < nhits);
+    tracks_view.detIndices().content[idx] = hh[tracks_view.hitIndices().content[idx]].detectorIndex();
   }
 }
 
-__global__ void kernel_fillNLayers(TkSoA *__restrict__ ptracks, cms::cuda::AtomicPairCounter *apc) {
-  auto &tracks = *ptracks;
+/*
+  Needs both TkSoA and TkSoAView for accessing SoA, computeNumberOfLayers(), nHits(), stride()
+ */
+__global__ void kernel_fillNLayers(TkSoAView tracks_view, cms::cuda::AtomicPairCounter *apc) {
   auto first = blockIdx.x * blockDim.x + threadIdx.x;
   // clamp the number of tracks to the capacity of the SoA
-  auto ntracks = std::min<int>(apc->get().m, tracks.stride() - 1);
+  auto ntracks = std::min<int>(apc->get().m, tracks_view.metadata().size() - 1);
   if (0 == first)
-    tracks.setNTracks(ntracks);
+    tracks_view.nTracks() = ntracks;
   for (int idx = first, nt = ntracks; idx < nt; idx += gridDim.x * blockDim.x) {
-    auto nHits = tracks.nHits(idx);
+    auto nHits = pixelTrack::utilities::nHits(tracks_view, idx);
     assert(nHits >= 3);
-    tracks.nLayers(idx) = tracks.computeNumberOfLayers(idx);
+    tracks_view[idx].nLayers() = pixelTrack::utilities::computeNumberOfLayers(tracks_view, idx);
   }
 }
 
@@ -622,10 +631,8 @@ __global__ void kernel_markSharedHit(int const *__restrict__ nshared,
                                      HitContainer const *__restrict__ tuples,
                                      Quality *__restrict__ quality,
                                      bool dupPassThrough) {
-  // constexpr auto bad = pixelTrack::Quality::bad;
   constexpr auto dup = pixelTrack::Quality::dup;
   constexpr auto loose = pixelTrack::Quality::loose;
-  // constexpr auto strict = pixelTrack::Quality::strict;
 
   // quality to mark rejected
   auto const reject = dupPassThrough ? loose : dup;
@@ -642,16 +649,14 @@ __global__ void kernel_markSharedHit(int const *__restrict__ nshared,
 }
 
 // mostly for very forward triplets.....
-__global__ void kernel_rejectDuplicate(TkSoA const *__restrict__ ptracks,
-                                       Quality *__restrict__ quality,
+__global__ void kernel_rejectDuplicate(TkSoAView tracks_view,
                                        uint16_t nmin,
                                        bool dupPassThrough,
                                        CAHitNtupletGeneratorKernelsGPU::HitToTuple const *__restrict__ phitToTuple) {
   // quality to mark rejected
-  auto const reject = dupPassThrough ? pixelTrack::Quality::loose : pixelTrack::Quality::dup;
+  auto const reject = dupPassThrough ? (uint8_t)pixelTrack::Quality::loose : (uint8_t)pixelTrack::Quality::dup;
 
   auto &hitToTuple = *phitToTuple;
-  auto const &tracks = *ptracks;
 
   int first = blockDim.x * blockIdx.x + threadIdx.x;
   for (int idx = first, ntot = hitToTuple.nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
@@ -660,41 +665,41 @@ __global__ void kernel_rejectDuplicate(TkSoA const *__restrict__ ptracks,
 
     /* chi2 is bad for large pt
     auto score = [&](auto it, auto nl) {
-      return nl < 4 ? std::abs(tracks.tip(it)) :  // tip for triplets
-                 tracks.chi2(it);                 //chi2
+      return nl < 4 ? std::abs(pixelTrack::utilities::tip(tracks_view, it)) :  // tip for triplets
+                 pixelTrack::utilities::chi2(tracks_view, it);                 //chi2
     };
     */
-    auto score = [&](auto it, auto nl) { return std::abs(tracks.tip(it)); };
+    auto score = [&](auto it, auto nl) { return std::abs(pixelTrack::utilities::tip(tracks_view, it)); };
 
     // full combinatorics
     for (auto ip = hitToTuple.begin(idx); ip < hitToTuple.end(idx) - 1; ++ip) {
       auto const it = *ip;
-      auto qi = quality[it];
+      auto qi = tracks_view[it].quality();
       if (qi <= reject)
         continue;
-      auto opi = tracks.stateAtBS.state(it)(2);
-      auto e2opi = tracks.stateAtBS.covariance(it)(9);
-      auto cti = tracks.stateAtBS.state(it)(3);
-      auto e2cti = tracks.stateAtBS.covariance(it)(12);
-      auto nli = tracks.nLayers(it);
+      auto opi = tracks_view[it].state()(2);
+      auto e2opi = tracks_view[it].covariance()(9);
+      auto cti = tracks_view[it].state()(3);
+      auto e2cti = tracks_view[it].covariance()(12);
+      auto nli = tracks_view[it].nLayers();
       for (auto jp = ip + 1; jp < hitToTuple.end(idx); ++jp) {
         auto const jt = *jp;
-        auto qj = quality[jt];
+        auto qj = tracks_view[jt].quality();
         if (qj <= reject)
           continue;
-        auto opj = tracks.stateAtBS.state(jt)(2);
-        auto ctj = tracks.stateAtBS.state(jt)(3);
-        auto dct = nSigma2 * (tracks.stateAtBS.covariance(jt)(12) + e2cti);
+        auto opj = tracks_view[jt].state()(2);
+        auto ctj = tracks_view[jt].state()(3);
+        auto dct = nSigma2 * (tracks_view[jt].covariance()(12) + e2cti);
         if ((cti - ctj) * (cti - ctj) > dct)
           continue;
-        auto dop = nSigma2 * (tracks.stateAtBS.covariance(jt)(9) + e2opi);
+        auto dop = nSigma2 * (tracks_view[jt].covariance()(9) + e2opi);
         if ((opi - opj) * (opi - opj) > dop)
           continue;
-        auto nlj = tracks.nLayers(jt);
+        auto nlj = tracks_view[jt].nLayers();
         if (nlj < nli || (nlj == nli && (qj < qi || (qj == qi && score(it, nli) < score(jt, nlj)))))
-          quality[jt] = reject;
+          tracks_view[jt].quality() = reject;
         else {
-          quality[it] = reject;
+          tracks_view[it].quality() = reject;
           break;
         }
       }
@@ -702,21 +707,19 @@ __global__ void kernel_rejectDuplicate(TkSoA const *__restrict__ ptracks,
   }
 }
 
-__global__ void kernel_sharedHitCleaner(TrackingRecHit2DSOAView const *__restrict__ hhp,
-                                        TkSoA const *__restrict__ ptracks,
-                                        Quality *__restrict__ quality,
+__global__ void kernel_sharedHitCleaner(HitSoAConstView hh,
+                                        TkSoAView tracks_view,
                                         int nmin,
                                         bool dupPassThrough,
                                         CAHitNtupletGeneratorKernelsGPU::HitToTuple const *__restrict__ phitToTuple) {
   // quality to mark rejected
-  auto const reject = dupPassThrough ? pixelTrack::Quality::loose : pixelTrack::Quality::dup;
+  auto const reject = dupPassThrough ? (uint8_t)pixelTrack::Quality::loose : (uint8_t)pixelTrack::Quality::dup;
   // quality of longest track
-  auto const longTqual = pixelTrack::Quality::highPurity;
+  auto const longTqual = (uint8_t)pixelTrack::Quality::highPurity;
 
   auto &hitToTuple = *phitToTuple;
-  auto const &tracks = *ptracks;
 
-  auto const &hh = *hhp;
+  // auto const &hh = *hhp;
   int l1end = hh.hitsLayerStart()[1];
 
   int first = blockDim.x * blockIdx.x + threadIdx.x;
@@ -728,10 +731,10 @@ __global__ void kernel_sharedHitCleaner(TrackingRecHit2DSOAView const *__restric
 
     // find maxNl
     for (auto it = hitToTuple.begin(idx); it != hitToTuple.end(idx); ++it) {
-      if (quality[*it] < longTqual)
+      if (tracks_view[*it].quality() < longTqual)
         continue;
-      // if (tracks.nHits(*it)==3) continue;
-      auto nl = tracks.nLayers(*it);
+      // if (tracks_view[*it].nHits()==3) continue;
+      auto nl = tracks_view[*it].nLayers();
       maxNl = std::max(nl, maxNl);
     }
 
@@ -743,30 +746,28 @@ __global__ void kernel_sharedHitCleaner(TrackingRecHit2DSOAView const *__restric
 
     // kill all tracks shorter than maxHl (only triplets???
     for (auto it = hitToTuple.begin(idx); it != hitToTuple.end(idx); ++it) {
-      auto nl = tracks.nLayers(*it);
+      auto nl = tracks_view[*it].nLayers();
 
       //checking if shared hit is on bpix1 and if the tuple is short enough
       if (idx < l1end and nl > nmin)
         continue;
 
-      if (nl < maxNl && quality[*it] > reject)
-        quality[*it] = reject;
+      if (nl < maxNl && tracks_view[*it].quality() > reject)
+        tracks_view[*it].quality() = reject;
     }
   }
 }
 
-__global__ void kernel_tripletCleaner(TkSoA const *__restrict__ ptracks,
-                                      Quality *__restrict__ quality,
+__global__ void kernel_tripletCleaner(TkSoAView tracks_view,
                                       uint16_t nmin,
                                       bool dupPassThrough,
                                       CAHitNtupletGeneratorKernelsGPU::HitToTuple const *__restrict__ phitToTuple) {
   // quality to mark rejected
-  auto const reject = pixelTrack::Quality::loose;
+  auto const reject = (uint8_t)pixelTrack::Quality::loose;
   /// min quality of good
-  auto const good = pixelTrack::Quality::strict;
+  auto const good = (uint8_t)pixelTrack::Quality::strict;
 
   auto &hitToTuple = *phitToTuple;
-  auto const &tracks = *ptracks;
 
   int first = blockDim.x * blockIdx.x + threadIdx.x;
   for (int idx = first, ntot = hitToTuple.nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
@@ -779,9 +780,9 @@ __global__ void kernel_tripletCleaner(TkSoA const *__restrict__ ptracks,
 
     // check if only triplets
     for (auto it = hitToTuple.begin(idx); it != hitToTuple.end(idx); ++it) {
-      if (quality[*it] <= good)
+      if (tracks_view[*it].quality() <= good)
         continue;
-      onlyTriplets &= tracks.isTriplet(*it);
+      onlyTriplets &= pixelTrack::utilities::isTriplet(tracks_view, *it);
       if (!onlyTriplets)
         break;
     }
@@ -793,8 +794,8 @@ __global__ void kernel_tripletCleaner(TkSoA const *__restrict__ ptracks,
     // for triplets choose best tip!  (should we first find best quality???)
     for (auto ip = hitToTuple.begin(idx); ip != hitToTuple.end(idx); ++ip) {
       auto const it = *ip;
-      if (quality[it] >= good && std::abs(tracks.tip(it)) < mc) {
-        mc = std::abs(tracks.tip(it));
+      if (tracks_view[it].quality() >= good && std::abs(pixelTrack::utilities::tip(tracks_view, it)) < mc) {
+        mc = std::abs(pixelTrack::utilities::tip(tracks_view, it));
         im = it;
       }
     }
@@ -805,26 +806,24 @@ __global__ void kernel_tripletCleaner(TkSoA const *__restrict__ ptracks,
     // mark worse ambiguities
     for (auto ip = hitToTuple.begin(idx); ip != hitToTuple.end(idx); ++ip) {
       auto const it = *ip;
-      if (quality[it] > reject && it != im)
-        quality[it] = reject;  //no race:  simple assignment of the same constant
+      if (tracks_view[it].quality() > reject && it != im)
+        tracks_view[it].quality() = reject;  //no race:  simple assignment of the same constant
     }
 
   }  // loop over hits
 }
 
 __global__ void kernel_simpleTripletCleaner(
-    TkSoA const *__restrict__ ptracks,
-    Quality *__restrict__ quality,
+    TkSoAView tracks_view,
     uint16_t nmin,
     bool dupPassThrough,
     CAHitNtupletGeneratorKernelsGPU::HitToTuple const *__restrict__ phitToTuple) {
   // quality to mark rejected
-  auto const reject = pixelTrack::Quality::loose;
+  auto const reject = (uint8_t)pixelTrack::Quality::loose;
   /// min quality of good
-  auto const good = pixelTrack::Quality::loose;
+  auto const good = (uint8_t)pixelTrack::Quality::loose;
 
   auto &hitToTuple = *phitToTuple;
-  auto const &tracks = *ptracks;
 
   int first = blockDim.x * blockIdx.x + threadIdx.x;
   for (int idx = first, ntot = hitToTuple.nOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
@@ -837,8 +836,8 @@ __global__ void kernel_simpleTripletCleaner(
     // choose best tip!  (should we first find best quality???)
     for (auto ip = hitToTuple.begin(idx); ip != hitToTuple.end(idx); ++ip) {
       auto const it = *ip;
-      if (quality[it] >= good && std::abs(tracks.tip(it)) < mc) {
-        mc = std::abs(tracks.tip(it));
+      if (tracks_view[it].quality() >= good && std::abs(pixelTrack::utilities::tip(tracks_view, it)) < mc) {
+        mc = std::abs(pixelTrack::utilities::tip(tracks_view, it));
         im = it;
       }
     }
@@ -849,52 +848,50 @@ __global__ void kernel_simpleTripletCleaner(
     // mark worse ambiguities
     for (auto ip = hitToTuple.begin(idx); ip != hitToTuple.end(idx); ++ip) {
       auto const it = *ip;
-      if (quality[it] > reject && tracks.isTriplet(it) && it != im)
-        quality[it] = reject;  //no race:  simple assignment of the same constant
+      if (tracks_view[it].quality() > reject && pixelTrack::utilities::isTriplet(tracks_view, it) && it != im)
+        tracks_view[it].quality() = reject;  //no race:  simple assignment of the same constant
     }
 
   }  // loop over hits
 }
 
-__global__ void kernel_print_found_ntuplets(TrackingRecHit2DSOAView const *__restrict__ hhp,
-                                            HitContainer const *__restrict__ ptuples,
-                                            TkSoA const *__restrict__ ptracks,
-                                            Quality const *__restrict__ quality,
+__global__ void kernel_print_found_ntuplets(HitSoAView hh,
+                                            TkSoAView tracks_view,
                                             CAHitNtupletGeneratorKernelsGPU::HitToTuple const *__restrict__ phitToTuple,
                                             int32_t firstPrint,
                                             int32_t lastPrint,
                                             int iev) {
-  constexpr auto loose = pixelTrack::Quality::loose;
-  auto const &hh = *hhp;
-  auto const &foundNtuplets = *ptuples;
-  auto const &tracks = *ptracks;
+  constexpr auto loose = (uint8_t)pixelTrack::Quality::loose;
+  // auto const &hh = *hhp;
+  // auto const &foundNtuplets = *ptuples;
+
   int first = firstPrint + blockDim.x * blockIdx.x + threadIdx.x;
-  for (int i = first, np = std::min(lastPrint, foundNtuplets.nOnes()); i < np; i += blockDim.x * gridDim.x) {
-    auto nh = foundNtuplets.size(i);
+  for (int i = first, np = std::min(lastPrint, tracks_view.hitIndices().nOnes()); i < np; i += blockDim.x * gridDim.x) {
+    auto nh = tracks_view.hitIndices().size(i);
     if (nh < 3)
       continue;
-    if (quality[i] < loose)
+    if (tracks_view[i].quality() < loose)
       continue;
     printf("TK: %d %d %d %d %f %f %f %f %f %f %f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n",
            10000 * iev + i,
-           int(quality[i]),
+           int(tracks_view[i].quality()),
            nh,
-           tracks.nLayers(i),
-           tracks.charge(i),
-           tracks.pt(i),
-           tracks.eta(i),
-           tracks.phi(i),
-           tracks.tip(i),
-           tracks.zip(i),
+           tracks_view[i].nLayers(),
+           pixelTrack::utilities::charge(tracks_view, i),
+           tracks_view[i].pt(),
+           tracks_view[i].eta(),
+           pixelTrack::utilities::phi(tracks_view, i),
+           pixelTrack::utilities::tip(tracks_view, i),
+           pixelTrack::utilities::zip(tracks_view, i),
            //           asinhf(fit_results[i].par(3)),
-           tracks.chi2(i),
-           hh.zGlobal(*foundNtuplets.begin(i)),
-           hh.zGlobal(*(foundNtuplets.begin(i) + 1)),
-           hh.zGlobal(*(foundNtuplets.begin(i) + 2)),
-           nh > 3 ? hh.zGlobal(int(*(foundNtuplets.begin(i) + 3))) : 0,
-           nh > 4 ? hh.zGlobal(int(*(foundNtuplets.begin(i) + 4))) : 0,
-           nh > 5 ? hh.zGlobal(int(*(foundNtuplets.begin(i) + 5))) : 0,
-           nh > 6 ? hh.zGlobal(int(*(foundNtuplets.begin(i) + nh - 1))) : 0);
+           tracks_view[i].chi2(),
+           hh[*tracks_view.hitIndices().begin(i)].zGlobal(),
+           hh[*(tracks_view.hitIndices().begin(i) + 1)].zGlobal(),
+           hh[*(tracks_view.hitIndices().begin(i) + 2)].zGlobal(),
+           nh > 3 ? hh[int(*(tracks_view.hitIndices().begin(i) + 3))].zGlobal() : 0,
+           nh > 4 ? hh[int(*(tracks_view.hitIndices().begin(i) + 4))].zGlobal() : 0,
+           nh > 5 ? hh[int(*(tracks_view.hitIndices().begin(i) + 5))].zGlobal() : 0,
+           nh > 6 ? hh[int(*(tracks_view.hitIndices().begin(i) + nh - 1))].zGlobal() : 0);
   }
 }
 
