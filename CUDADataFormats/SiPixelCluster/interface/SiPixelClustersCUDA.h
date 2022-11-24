@@ -39,7 +39,7 @@ public:
 
 private:
   uint32_t nClusters_h = 0;
-  int32_t offsetBPIX2_h = 0;
+  int32_t offsetBPIX2_h = 0; 
 };
 
 #endif  // CUDADataFormats_SiPixelCluster_interface_SiPixelClustersCUDA_h
