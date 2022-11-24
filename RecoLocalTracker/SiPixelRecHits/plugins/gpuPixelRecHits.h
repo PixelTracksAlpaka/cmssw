@@ -20,10 +20,9 @@ namespace gpuPixelRecHits {
   __global__ void getHits(pixelCPEforGPU::ParamsOnGPU const* __restrict__ cpeParams,
                           BeamSpotPOD const* __restrict__ bs,
                           // SiPixelDigisCUDASOAView const digis
-                          SiPixelDigisCUDASOAConstView const digis,
+                          SiPixelDigisCUDASOAConstView digis,
                           int numElements,
-                          // SiPixelClustersCUDA::SiPixelClustersCUDASOAView const* __restrict__ pclusters,
-                          SiPixelClustersCUDASoA::ConstView const __restrict__ clusters,
+                          SiPixelClustersCUDASoA::ConstView clusters,
                           trackingRecHitSoA::HitSoAView hits) {
     // FIXME
     // the compiler seems NOT to optimize loads from views (even in a simple test case)
@@ -82,8 +81,8 @@ namespace gpuPixelRecHits {
 #endif
 #ifdef GPU_DEBUG
     // if (me % 100 == 1)
-      if (threadIdx.x == 0)
-        printf("hitbuilder: %d clusters in module %d. will write at %d\n", nclus, me, clusters.clusModuleStart(me));
+    if (threadIdx.x == 0)
+      printf("hitbuilder: %d clusters in module %d. will write at %d\n", nclus, me, clusters.clusModuleStart(me));
 #endif
     for (int startClus = 0, endClus = nclus; startClus < endClus; startClus += MaxHitsInIter) {
       int nClusInIter = std::min(MaxHitsInIter, endClus - startClus);

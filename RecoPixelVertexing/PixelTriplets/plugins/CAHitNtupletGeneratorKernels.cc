@@ -14,7 +14,7 @@ void CAHitNtupletGeneratorKernelsCPU::printCounters(Counters const *counters) {
 }
 
 template <>
-void CAHitNtupletGeneratorKernelsCPU::buildDoublets(HitsConstView const&hh, int32_t offsetBPIX2, cudaStream_t stream) {
+void CAHitNtupletGeneratorKernelsCPU::buildDoublets(HitsConstView hh, int32_t offsetBPIX2, cudaStream_t stream) {
   uint32_t nhits = hh.metadata().size();
 
 #ifdef NTUPLE_DEBUG
@@ -82,9 +82,7 @@ void CAHitNtupletGeneratorKernelsCPU::buildDoublets(HitsConstView const&hh, int3
 }
 
 template <>
-void CAHitNtupletGeneratorKernelsCPU::launchKernels(HitsConstView const&hh,
-                                                    TkSoAView tracks_view,
-                                                    cudaStream_t cudaStream) {
+void CAHitNtupletGeneratorKernelsCPU::launchKernels(HitsConstView hh, TkSoAView tracks_view, cudaStream_t cudaStream) {
   // zero tuples
   cms::cuda::launchZero(&tracks_view.hitIndices(), cudaStream);
 
@@ -142,9 +140,7 @@ void CAHitNtupletGeneratorKernelsCPU::launchKernels(HitsConstView const&hh,
 }
 
 template <>
-void CAHitNtupletGeneratorKernelsCPU::classifyTuples(HitsConstView const&hh,
-                                                     TkSoAView tracks_view,
-                                                     cudaStream_t cudaStream) {
+void CAHitNtupletGeneratorKernelsCPU::classifyTuples(HitsConstView hh, TkSoAView tracks_view, cudaStream_t cudaStream) {
   int32_t nhits = hh.metadata().size();
 
   auto *quality_d = pixelTrack::utilities::qualityData(tracks_view);
@@ -165,12 +161,10 @@ void CAHitNtupletGeneratorKernelsCPU::classifyTuples(HitsConstView const&hh,
     cms::cuda::launchFinalize(hitToTupleView_, cudaStream);
     kernel_fillHitInTracks(tracks_view, device_hitToTuple_.get());
   }
-
   // remove duplicates (tracks that share at least one hit)
   if (params_.doSharedHitCut_) {
     kernel_rejectDuplicate(
         tracks_view, params_.minHitsForSharingCut_, params_.dupPassThrough_, device_hitToTuple_.get());
-
     kernel_sharedHitCleaner(
         hh, tracks_view, params_.minHitsForSharingCut_, params_.dupPassThrough_, device_hitToTuple_.get());
     if (params_.useSimpleTripletCleaner_) {
@@ -197,7 +191,6 @@ void CAHitNtupletGeneratorKernelsCPU::classifyTuples(HitsConstView const&hh,
                           params_.maxNumberOfDoublets_,
                           counters_);
   }
-
   if (params_.doStats_) {
     // counters (add flag???)
     std::lock_guard guard(lock_stat);

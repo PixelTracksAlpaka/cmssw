@@ -27,7 +27,7 @@ constexpr auto invalidTkId = std::numeric_limits<tindex_type>::max();
 template <int N>
 __global__ void kernel_BLFastFit(Tuples const *__restrict__ foundNtuplets,
                                  caConstants::TupleMultiplicity const *__restrict__ tupleMultiplicity,
-                                 HitSoAConstView const &__restrict__ hh,
+                                 HitSoAConstView hh,
                                  tindex_type *__restrict__ ptkids,
                                  double *__restrict__ phits,
                                  float *__restrict__ phits_ge,
@@ -35,6 +35,8 @@ __global__ void kernel_BLFastFit(Tuples const *__restrict__ foundNtuplets,
                                  uint32_t nHitsL,
                                  uint32_t nHitsH,
                                  int32_t offset) {
+  // look in bin for this hit multiplicity
+  auto local_start = blockIdx.x * blockDim.x + threadIdx.x;
   constexpr uint32_t hitsInFit = N;
 
   assert(hitsInFit <= nHitsL);
@@ -45,18 +47,17 @@ __global__ void kernel_BLFastFit(Tuples const *__restrict__ foundNtuplets,
   assert(foundNtuplets);
   assert(tupleMultiplicity);
 
-  // look in bin for this hit multiplicity
-  auto local_start = blockIdx.x * blockDim.x + threadIdx.x;
   int totTK = tupleMultiplicity->end(nHitsH) - tupleMultiplicity->begin(nHitsL);
+
   assert(totTK <= int(tupleMultiplicity->size()));
   assert(totTK >= 0);
 
-#ifdef BROKENLINE_DEBUG
+  // #ifdef BROKENLINE_DEBUG
   if (0 == local_start) {
     printf("%d total Ntuple\n", tupleMultiplicity->size());
     printf("%d Ntuple of size %d/%d for %d hits to fit\n", totTK, nHitsL, nHitsH, hitsInFit);
   }
-#endif
+  // #endif
 
   for (int local_idx = local_start, nt = riemannFit::maxNumberOfConcurrentFits; local_idx < nt;
        local_idx += gridDim.x * blockDim.x) {
@@ -65,6 +66,7 @@ __global__ void kernel_BLFastFit(Tuples const *__restrict__ foundNtuplets,
       ptkids[local_idx] = invalidTkId;
       break;
     }
+
     // get it from the ntuple container (one to one to helix)
     auto tkid = *(tupleMultiplicity->begin(nHitsL) + tuple_idx);
     assert(tkid < foundNtuplets->nOnes());
@@ -92,10 +94,11 @@ __global__ void kernel_BLFastFit(Tuples const *__restrict__ foundNtuplets,
 
     // #define YERR_FROM_DC
 #ifdef YERR_FROM_DC
+
     // try to compute more precise error in y
-    auto dx = hh.xGlobal(hitId[hitsInFit - 1]) - hh.xGlobal(hitId[0]);
-    auto dy = hh.yGlobal(hitId[hitsInFit - 1]) - hh.yGlobal(hitId[0]);
-    auto dz = hh.zGlobal(hitId[hitsInFit - 1]) - hh.zGlobal(hitId[0]);
+    auto dx = hh[hitId[hitsInFit - 1]].xGlobal() - hh[hitId[0]].xGlobal();
+    auto dy = hh[hitId[hitsInFit - 1]].yGlobal() - hh[hitId[0]].yGlobal();
+    auto dz = hh[hitId[hitsInFit - 1]].zGlobal() - hh[hitId[0]].zGlobal();
     float ux, uy, uz;
 #endif
 
@@ -111,12 +114,14 @@ __global__ void kernel_BLFastFit(Tuples const *__restrict__ foundNtuplets,
       float ge[6];
 
 #ifdef YERR_FROM_DC
+
       auto const &dp = hh.cpeParams().detParams(hh.detectorIndex(hit));
-      auto status = hh.status(hit);
+      auto status = hh[hit].status();
       int qbin = CPEFastParametrisation::kGenErrorQBins - 1 - status.qBin;
       assert(qbin >= 0 && qbin < 5);
       bool nok = (status.isBigY | status.isOneY);
       // compute cotanbeta and use it to recompute error
+
       dp.frame.rotation().multiply(dx, dy, dz, ux, uy, uz);
       auto cb = std::abs(uy / uz);
       int bin =
@@ -125,16 +130,17 @@ __global__ void kernel_BLFastFit(Tuples const *__restrict__ foundNtuplets,
       int high_value = CPEFastParametrisation::kNumErrorBins - 1;
       // return estimated bin value truncated to [0, 15]
       bin = std::clamp(bin, low_value, high_value);
+
       float yerr = dp.sigmay[bin] * 1.e-4f;  // toCM
       yerr *= dp.yfact[qbin];                // inflate
       yerr *= yerr;
       yerr += dp.apeYY;
-      yerr = nok ? hh.yerrLocal(hit) : yerr;
-      dp.frame.toGlobal(hh.xerrLocal(hit), 0, yerr, ge);
+      yerr = nok ? hh[hit].yerrLocal() : yerr;
+      dp.frame.toGlobal(hh[hit].xerrLocal(), 0, yerr, ge);
 #else
-      hh.cpeParams()
-          .detParams(hh.detectorIndex(hit))
-          .frame.toGlobal(hh.xerrLocal(hit), 0, hh.yerrLocal(hit), ge);
+
+      hh.cpeParams().detParams(hh.detectorIndex(hit)).frame.toGlobal(hh.xerrLocal(hit), 0, hh.yerrLocal(hit), ge);
+
 #endif
 
 #ifdef BL_DUMP_HITS
@@ -144,16 +150,16 @@ __global__ void kernel_BLFastFit(Tuples const *__restrict__ foundNtuplets,
                local_idx,
                tkid,
                hit,
-               hh.detectorIndex(hit),
+               hh[hit].detectorIndex(),
                i,
-               hh.xGlobal(hit),
-               hh.yGlobal(hit),
-               hh.zGlobal(hit));
+               hh[hit].xGlobal(),
+               hh[hit].yGlobal(),
+               hh[hit].zGlobal());
         printf("Error: hits_ge.col(%d) << %e,%e,%e,%e,%e,%e\n", i, ge[0], ge[1], ge[2], ge[3], ge[4], ge[5]);
       }
 #endif
 
-      hits.col(i) << hh.xGlobal(hit), hh.yGlobal(hit), hh.zGlobal(hit);
+      hits.col(i) << hh[hit].xGlobal(), hh[hit].yGlobal(), hh[hit].zGlobal();
       hits_ge.col(i) << ge[0], ge[1], ge[2], ge[3], ge[4], ge[5];
     }
     brokenline::fastFit(hits, fast_fit);

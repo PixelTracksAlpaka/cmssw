@@ -22,7 +22,7 @@ template <int N>
 __global__ void kernel_FastFit(Tuples const *__restrict__ foundNtuplets,
                                caConstants::TupleMultiplicity const *__restrict__ tupleMultiplicity,
                                uint32_t nHits,
-                               HitSoAConstView const &__restrict__ hh,
+                               HitSoAConstView hh,
                                double *__restrict__ phits,
                                float *__restrict__ phits_ge,
                                double *__restrict__ pfast_fit,
@@ -65,9 +65,7 @@ __global__ void kernel_FastFit(Tuples const *__restrict__ foundNtuplets,
       auto hit = hitId[i];
       // printf("Hit global: %f,%f,%f\n", hh.xg_d[hit],hh.yg_d[hit],hh.zg_d[hit]);
       float ge[6];
-      hh.cpeParams()
-          .detParams(hh.detectorIndex(hit))
-          .frame.toGlobal(hh.xerrLocal(hit), 0, hh.yerrLocal(hit), ge);
+      hh.cpeParams().detParams(hh.detectorIndex(hit)).frame.toGlobal(hh.xerrLocal(hit), 0, hh.yerrLocal(hit), ge);
       // printf("Error: %d: %f,%f,%f,%f,%f,%f\n",hh.detInd_d[hit],ge[0],ge[1],ge[2],ge[3],ge[4],ge[5]);
 
       hits.col(i) << hh.xGlobal(hit), hh.yGlobal(hit), hh.zGlobal(hit);

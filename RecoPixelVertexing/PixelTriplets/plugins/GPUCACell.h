@@ -47,7 +47,7 @@ public:
 
   __device__ __forceinline__ void init(CellNeighborsVector& cellNeighbors,
                                        CellTracksVector& cellTracks,
-                                       HitsConstView const& hh,
+                                       HitsConstView hh,
                                        int layerPairId,
                                        hindex_type innerHitId,
                                        hindex_type outerHitId) {
@@ -113,22 +113,22 @@ public:
   __device__ __forceinline__ CellTracks const& tracks() const { return *theTracks; }
   __device__ __forceinline__ CellNeighbors& outerNeighbors() { return *theOuterNeighbors; }
   __device__ __forceinline__ CellNeighbors const& outerNeighbors() const { return *theOuterNeighbors; }
-  __device__ __forceinline__ float inner_x(HitsConstView const& hh) const { return hh[theInnerHitId].xGlobal(); }
-  __device__ __forceinline__ float outer_x(HitsConstView const& hh) const { return hh[theOuterHitId].xGlobal(); }
-  __device__ __forceinline__ float inner_y(HitsConstView const& hh) const { return hh[theInnerHitId].yGlobal(); }
-  __device__ __forceinline__ float outer_y(HitsConstView const& hh) const { return hh[theOuterHitId].yGlobal(); }
-  __device__ __forceinline__ float inner_z(HitsConstView const& hh) const { return theInnerZ; }
+  __device__ __forceinline__ float inner_x(HitsConstView hh) const { return hh[theInnerHitId].xGlobal(); }
+  __device__ __forceinline__ float outer_x(HitsConstView hh) const { return hh[theOuterHitId].xGlobal(); }
+  __device__ __forceinline__ float inner_y(HitsConstView hh) const { return hh[theInnerHitId].yGlobal(); }
+  __device__ __forceinline__ float outer_y(HitsConstView hh) const { return hh[theOuterHitId].yGlobal(); }
+  __device__ __forceinline__ float inner_z(HitsConstView hh) const { return theInnerZ; }
   // { return hh.zGlobal(theInnerHitId); } // { return theInnerZ; }
-  __device__ __forceinline__ float outer_z(HitsConstView const& hh) const { return hh[theOuterHitId].zGlobal(); }
-  __device__ __forceinline__ float inner_r(HitsConstView const& hh) const { return theInnerR; }
+  __device__ __forceinline__ float outer_z(HitsConstView hh) const { return hh[theOuterHitId].zGlobal(); }
+  __device__ __forceinline__ float inner_r(HitsConstView hh) const { return theInnerR; }
   // { return hh.rGlobal(theInnerHitId); } // { return theInnerR; }
-  __device__ __forceinline__ float outer_r(HitsConstView const& hh) const { return hh[theOuterHitId].rGlobal(); }
+  __device__ __forceinline__ float outer_r(HitsConstView hh) const { return hh[theOuterHitId].rGlobal(); }
 
-  __device__ __forceinline__ auto inner_iphi(HitsConstView const& hh) const { return hh[theInnerHitId].iphi(); }
-  __device__ __forceinline__ auto outer_iphi(HitsConstView const& hh) const { return hh[theOuterHitId].iphi(); }
+  __device__ __forceinline__ auto inner_iphi(HitsConstView hh) const { return hh[theInnerHitId].iphi(); }
+  __device__ __forceinline__ auto outer_iphi(HitsConstView hh) const { return hh[theOuterHitId].iphi(); }
 
-  __device__ __forceinline__ float inner_detIndex(HitsConstView const& hh) const { return hh[theInnerHitId].detectorIndex(); }
-  __device__ __forceinline__ float outer_detIndex(HitsConstView const& hh) const { return hh[theOuterHitId].detectorIndex(); }
+  __device__ __forceinline__ float inner_detIndex(HitsConstView hh) const { return hh[theInnerHitId].detectorIndex(); }
+  __device__ __forceinline__ float outer_detIndex(HitsConstView hh) const { return hh[theOuterHitId].detectorIndex(); }
 
   constexpr unsigned int inner_hit_id() const { return theInnerHitId; }
   constexpr unsigned int outer_hit_id() const { return theOuterHitId; }
@@ -140,7 +140,7 @@ public:
            theOuterHitId);
   }
 
-  __device__ bool check_alignment(HitsConstView const& hh,
+  __device__ bool check_alignment(HitsConstView hh,
                                   GPUCACell const& otherCell,
                                   const float ptmin,
                                   const float hardCurvCut,
@@ -187,7 +187,7 @@ public:
     return tan_12_13_half_mul_distance_13_squared * pMin <= thetaCut * distance_13_squared * radius_diff;
   }
 
-  __device__ inline bool dcaCut(HitsConstView const& hh,
+  __device__ inline bool dcaCut(HitsConstView hh,
                                 GPUCACell const& otherCell,
                                 const float region_origin_radius_plus_tolerance,
                                 const float maxCurv) const {
@@ -224,7 +224,7 @@ public:
     return std::abs(eq.dca0()) < region_origin_radius_plus_tolerance * std::abs(eq.curvature());
   }
 
-  __device__ inline bool hole0(HitsConstView const& hh, GPUCACell const& innerCell) const {
+  __device__ inline bool hole0(HitsConstView hh, GPUCACell const& innerCell) const {
     using caConstants::first_ladder_bpx0;
     using caConstants::max_ladder_bpx0;
     using caConstants::module_length_bpx0;
@@ -247,7 +247,7 @@ public:
     return gap;
   }
 
-  __device__ inline bool hole4(HitsConstView const& hh, GPUCACell const& innerCell) const {
+  __device__ inline bool hole4(HitsConstView hh, GPUCACell const& innerCell) const {
     using caConstants::first_ladder_bpx4;
     using caConstants::max_ladder_bpx4;
     using caConstants::module_length_bpx4;
@@ -275,7 +275,7 @@ public:
   // trying to free the track building process from hardcoded layers, leaving
   // the visit of the graph based on the neighborhood connections between cells.
   template <int DEPTH>
-  __device__ inline void find_ntuplets(HitsConstView const& hh,
+  __device__ inline void find_ntuplets(HitsConstView hh,
                                        GPUCACell* __restrict__ cells,
                                        CellTracksVector& cellTracks,
                                        HitContainer& foundNtuplets,
@@ -345,14 +345,14 @@ public:
   __device__ __forceinline__ bool unused() const { return 0 == (uint16_t(StatusBit::kUsed) & theStatus_); }
   __device__ __forceinline__ void setStatusBits(StatusBit mask) { theStatus_ |= uint16_t(mask); }
 
-  __device__ __forceinline__ void setFishbone(hindex_type id, float z, HitsConstView const& hh) {
+  __device__ __forceinline__ void setFishbone(hindex_type id, float z, HitsConstView hh) {
     // make it deterministic: use the farther apart (in z)
     auto old = theFishboneId;
-    while (
-        old !=
-        atomicCAS(&theFishboneId,
-                  old,
-                  (invalidHitId == old || std::abs(z - theInnerZ) > std::abs(hh[old].zGlobal() - theInnerZ)) ? id : old))
+    while (old !=
+           atomicCAS(
+               &theFishboneId,
+               old,
+               (invalidHitId == old || std::abs(z - theInnerZ) > std::abs(hh[old].zGlobal() - theInnerZ)) ? id : old))
       old = theFishboneId;
   }
   __device__ __forceinline__ auto fishboneId() const { return theFishboneId; }
@@ -373,7 +373,7 @@ private:
 };
 
 template <>
-__device__ inline void GPUCACell::find_ntuplets<0>(HitsConstView const& hh,
+__device__ inline void GPUCACell::find_ntuplets<0>(HitsConstView hh,
                                                    GPUCACell* __restrict__ cells,
                                                    CellTracksVector& cellTracks,
                                                    HitContainer& foundNtuplets,
