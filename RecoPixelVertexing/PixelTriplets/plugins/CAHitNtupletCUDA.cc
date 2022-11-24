@@ -87,15 +87,16 @@ void CAHitNtupletCUDA::produce(edm::StreamID streamID, edm::Event& iEvent, const
   auto bf = 1. / es.getData(tokenField_).inverseBzAtOriginInGeV();
 
   if (onGPU_) {
-    auto hHits = iEvent.getHandle(tokenHitGPU_);
+    edm::Handle<cms::cuda::Product<TrackingRecHitSoADevice>> hHits;
+    iEvent.getByToken(tokenHitGPU_, hHits);
+    // auto hHits = iEvent.getHandle(tokenHitGPU_);
 
     cms::cuda::ScopedContextProduce ctx{*hHits};
-    auto const& hits = ctx.get(*hHits);
-
-    ctx.emplace(iEvent, tokenTrackGPU_, gpuAlgo_.makeTuplesAsync(hits, bf, ctx.stream()));
+    auto& hits_d = ctx.get(*hHits);
+    ctx.emplace(iEvent, tokenTrackGPU_, gpuAlgo_.makeTuplesAsync(hits_d, bf, ctx.stream()));
   } else {
-    auto const& hits = iEvent.get(tokenHitCPU_);
-    iEvent.emplace(tokenTrackCPU_, gpuAlgo_.makeTuples(hits, bf));
+    auto& hits_h = iEvent.get(tokenHitCPU_);
+    iEvent.emplace(tokenTrackCPU_, gpuAlgo_.makeTuples(hits_h, bf));
   }
 }
 

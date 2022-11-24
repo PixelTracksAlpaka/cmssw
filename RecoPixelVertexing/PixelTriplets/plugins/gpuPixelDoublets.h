@@ -99,7 +99,7 @@ namespace gpuPixelDoublets {
                                 uint32_t* nCells,
                                 CellNeighborsVector* cellNeighbors,
                                 CellTracksVector* cellTracks,
-                                HitsConstView const& __restrict__ hh,
+                                HitsConstView hh,
                                 GPUCACell::OuterHitOfCell isOuterHitOfCell,
                                 int nActualPairs,
                                 bool ideal_cond,

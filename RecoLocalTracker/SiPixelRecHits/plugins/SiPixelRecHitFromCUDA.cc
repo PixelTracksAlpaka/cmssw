@@ -76,21 +76,18 @@ void SiPixelRecHitFromCUDA::acquire(edm::Event const& iEvent,
   cms::cuda::Product<TrackingRecHitSoADevice> const& inputDataWrapped = iEvent.get(hitsToken_);
   cms::cuda::ScopedContextAcquire ctx{inputDataWrapped, std::move(waitingTaskHolder)};
   auto const& inputData = ctx.get(inputDataWrapped);
-  std::cout << __LINE__<<std::endl;
+  std::cout << "SiPixelRecHitFromCUDA::acquire " << __LINE__ << std::endl;
   nHits_ = inputData.nHits();
-  std::cout << __LINE__<<std::endl;
+  std::cout << "SiPixelRecHitFromCUDA::acquire " << __LINE__ << std::endl;
   nMaxModules_ = inputData.nModules();
-  std::cout << __LINE__<<std::endl;
+  std::cout << "SiPixelRecHitFromCUDA::acquire " << __LINE__ << std::endl;
 
   // LogDebug("SiPixelRecHitFromCUDA")
-  std::cout << "SiPixelRecHitFromCUDA " << "converting " << nHits_ << " Hits from " << nMaxModules_ << " modules." << std::endl;
+  std::cout << "SiPixelRecHitFromCUDA "
+            << "converting " << nHits_ << " Hits from " << nMaxModules_ << " modules." << std::endl;
 
   // std::cout << inputData.hitsModuleStart()[2] << std::endl;
-  if (0 == nHits_)
-    return;
-  std::cout << __LINE__<<std::endl;
   store32_ = inputData.localCoordToHostAsync(ctx.stream());
-  std::cout << __LINE__<<std::endl;
   hitsModuleStart_ = inputData.hitsModuleStartToHostAsync(ctx.stream());
   hitsModuleStart_[nMaxModules_] = nHits_;
   // assert(nHits_==hitsModuleStart_[nMaxModules_]);
@@ -106,7 +103,7 @@ void SiPixelRecHitFromCUDA::acquire(edm::Event const& iEvent,
   // cudaMemcpyAsync(hitsModuleStart_.get(), inputData.view().hitsModuleStart().data(), sizeof(uint32_t) * (nMaxModules_ + 1), cudaMemcpyDeviceToHost, ctx.stream());
 
   // std::copy(inputData.view().hitsModuleStart().data(), inputData.hitsModuleStart().view().data() + nMaxModules_ + 1, hitsModuleStart_.get());
-// trackingRecHitSoA::hitsModuleStartToHostAsync(inputData.view(), ctx.stream());
+  // trackingRecHitSoA::hitsModuleStartToHostAsync(inputData.view(), ctx.stream());
   std::cout << __LINE__ << std::endl;
 }
 

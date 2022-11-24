@@ -32,6 +32,7 @@ namespace cAHitNtupletGenerator {
     unsigned long long nZeroTrackCells;
   };
 
+  using HitsView = trackingRecHitSoA::HitSoAView;
   using HitsConstView = trackingRecHitSoA::HitSoAConstView;
 
   // using HitsConstView = TrackingRecHit2DSOAView;
@@ -173,6 +174,7 @@ public:
   template <typename T>
   using unique_ptr = typename Traits::template unique_ptr<T>;
 
+  using HitsView = trackingRecHitSoA::HitSoAView;
   using HitsConstView = trackingRecHitSoA::HitSoAConstView;
   // using HitsOnGPU = TrackingRecHit2DSOAView;
   // using HitsOnCPU = TrackingRecHit2DHeterogeneous<Traits>;
@@ -191,11 +193,11 @@ public:
 
   TupleMultiplicity const* tupleMultiplicity() const { return device_tupleMultiplicity_.get(); }
 
-  void launchKernels(HitsConstView const& hh, TkSoAView tracks_view, cudaStream_t cudaStream);
+  void launchKernels(HitsConstView hh, TkSoAView tracks_view, cudaStream_t cudaStream);
 
-  void classifyTuples(HitsConstView const& hh, TkSoAView tracks_view, cudaStream_t cudaStream);
+  void classifyTuples(HitsConstView hh, TkSoAView tracks_view, cudaStream_t cudaStream);
 
-  void buildDoublets(HitsConstView const& hh, int32_t offsetBPIX2, cudaStream_t stream);
+  void buildDoublets(HitsConstView hh, int32_t offsetBPIX2, cudaStream_t stream);
   void allocateOnGPU(int32_t nHits, cudaStream_t stream);
   void cleanup(cudaStream_t cudaStream);
 

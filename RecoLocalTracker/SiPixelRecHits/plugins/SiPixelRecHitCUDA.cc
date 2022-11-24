@@ -66,26 +66,26 @@ void SiPixelRecHitCUDA::produce(edm::StreamID streamID, edm::Event& iEvent, cons
   if (not fcpe) {
     throw cms::Exception("Configuration") << "SiPixelRecHitSoAFromLegacy can only use a CPE of type PixelCPEFast";
   }
-
+  std::cout << "SiPixelRecHitCUDA::produce " << __LINE__ << std::endl;
   edm::Handle<cms::cuda::Product<SiPixelClustersCUDA>> hclusters;
   iEvent.getByToken(token_, hclusters);
-
+  std::cout << "SiPixelRecHitCUDA::produce " << __LINE__ << std::endl;
   cms::cuda::ScopedContextProduce ctx{*hclusters};
   auto const& clusters = ctx.get(*hclusters);
-
+  std::cout << "SiPixelRecHitCUDA::produce " << __LINE__ << std::endl;
   edm::Handle<cms::cuda::Product<SiPixelDigisCUDA>> hdigis;
   iEvent.getByToken(tokenDigi_, hdigis);
   auto const& digis = ctx.get(*hdigis);
-
+  std::cout << "SiPixelRecHitCUDA::produce " << __LINE__ << std::endl;
   edm::Handle<cms::cuda::Product<BeamSpotCUDA>> hbs;
   iEvent.getByToken(tBeamSpot, hbs);
   auto const& bs = ctx.get(*hbs);
-
+  std::cout << "SiPixelRecHitCUDA::produce " << __LINE__ << std::endl;
   ctx.emplace(iEvent,
               tokenHit_,
               gpuAlgo_.makeHitsAsync(
                   digis, clusters, bs, fcpe->getGPUProductAsync(ctx.stream()), fcpe->isPhase2(), ctx.stream()));
- std::cout << __LINE__<<std::endl;
+  std::cout << "SiPixelRecHitCUDA::produce " << __LINE__ << std::endl;
 }
 
 DEFINE_FWK_MODULE(SiPixelRecHitCUDA);

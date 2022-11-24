@@ -20,18 +20,24 @@ namespace trackingRecHit
     explicit TrackingRecHitSoAHost(uint32_t nHits, cudaStream_t stream)
     : PortableHostCollection<TrackingRecHitSoALayout<>>(nHits, stream) {}
 
-    explicit TrackingRecHitSoAHost(uint32_t nHits, bool isPhase2, int32_t offsetBPIX2, pixelCPEforGPU::ParamsOnGPU const* cpeParams, uint32_t const* hitsModuleStart, cudaStream_t stream)
-        : PortableHostCollection<TrackingRecHitSoALayout<>>(nHits, stream), nHits_(nHits), cpeParams_(cpeParams), offsetBPIX2_(offsetBPIX2)
-        {
-          nModules_ = isPhase2 ? phase2PixelTopology::numberOfModules : phase1PixelTopology::numberOfModules;
-
-          view().nHits() = nHits;
-          view().nMaxModules() = nModules_;
-          std::copy(hitsModuleStart,hitsModuleStart+nModules_+1,view().hitsModuleStart().begin());
-
-          view().offsetBPIX2() = offsetBPIX2;
-
-        }
+    explicit TrackingRecHitSoAHost(uint32_t nHits,
+                                   bool isPhase2,
+                                   int32_t offsetBPIX2,
+                                   pixelCPEforGPU::ParamsOnGPU const* cpeParams,
+                                   uint32_t const* hitsModuleStart,
+                                   cudaStream_t stream)
+        : PortableHostCollection<TrackingRecHitSoALayout<>>(nHits, stream),
+          nHits_(nHits),
+          cpeParams_(cpeParams),
+          offsetBPIX2_(offsetBPIX2) {
+      nModules_ = isPhase2 ? phase2PixelTopology::numberOfModules : phase1PixelTopology::numberOfModules;
+      std::cout << "PORCA MADONNA!!!!!!!!!!!!!!!!!" << std::endl;
+      view().nHits() = nHits;
+      view().nMaxModules() = nModules_;
+      std::copy(hitsModuleStart, hitsModuleStart + nModules_ + 1, view().hitsModuleStart().begin());
+      memcpy(&(view().cpeParams()), cpeParams, sizeof(pixelCPEforGPU::ParamsOnGPU));
+      view().offsetBPIX2() = offsetBPIX2;
+    }
 
     uint32_t nHits() const { return nHits_; }
     uint32_t nModules() const { return nModules_; }

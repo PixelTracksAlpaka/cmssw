@@ -16,7 +16,7 @@
 
 namespace gpuPixelDoublets {
 
-  __global__ void fishbone(GPUCACell::HitsConstView const& __restrict__ hh,
+  __global__ void fishbone(GPUCACell::HitsConstView hh,
                            GPUCACell* cells,
                            uint32_t const* __restrict__ nCells,
                            GPUCACell::OuterHitOfCell const isOuterHitOfCellWrap,

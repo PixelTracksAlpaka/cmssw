@@ -33,6 +33,7 @@ namespace riemannFit {
 
 class HelixFitOnGPU {
 public:
+  using HitSoAView = trackingRecHitSoA::HitSoAView;
   using HitSoAConstView = trackingRecHitSoA::HitSoAConstView;
 
   using Tuples = pixelTrack::HitContainer;
@@ -44,11 +45,11 @@ public:
   ~HelixFitOnGPU() { deallocateOnGPU(); }
 
   void setBField(double bField) { bField_ = bField; }
-  void launchRiemannKernels(HitSoAConstView const &hv, uint32_t nhits, uint32_t maxNumberOfTuples, cudaStream_t cudaStream);
-  void launchBrokenLineKernels(HitSoAConstView const &hv, uint32_t nhits, uint32_t maxNumberOfTuples, cudaStream_t cudaStream);
+  void launchRiemannKernels(HitSoAConstView hv, uint32_t nhits, uint32_t maxNumberOfTuples, cudaStream_t cudaStream);
+  void launchBrokenLineKernels(HitSoAConstView hv, uint32_t nhits, uint32_t maxNumberOfTuples, cudaStream_t cudaStream);
 
-  void launchRiemannKernelsOnCPU(HitSoAConstView const &hv, uint32_t nhits, uint32_t maxNumberOfTuples);
-  void launchBrokenLineKernelsOnCPU(HitSoAConstView const &hv, uint32_t nhits, uint32_t maxNumberOfTuples);
+  void launchRiemannKernelsOnCPU(HitSoAConstView hv, uint32_t nhits, uint32_t maxNumberOfTuples);
+  void launchBrokenLineKernelsOnCPU(HitSoAConstView hv, uint32_t nhits, uint32_t maxNumberOfTuples);
 
   void allocateOnGPU(TupleMultiplicity const *tupleMultiplicity, OutputSoAView outputSoA);
   void deallocateOnGPU();

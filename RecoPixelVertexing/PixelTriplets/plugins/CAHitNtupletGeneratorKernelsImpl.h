@@ -26,7 +26,8 @@
 // using HitsOnGPU = TrackingRecHit2DSOAView;
 // using HitsOnCPU = TrackingRecHit2DGPU;
 
-using HitSoAView = trackingRecHitSoA::HitSoAConstView;
+using HitSoAView = trackingRecHitSoA::HitSoAView;
+using HitSoAConstView = trackingRecHitSoA::HitSoAConstView;
 using HitToTuple = caConstants::HitToTuple;
 using TupleMultiplicity = caConstants::TupleMultiplicity;
 
@@ -269,7 +270,7 @@ __global__ void kernel_fastDuplicateRemover(GPUCACell const *__restrict__ cells,
 
 __global__ void kernel_connect(cms::cuda::AtomicPairCounter *apc1,
                                cms::cuda::AtomicPairCounter *apc2,  // just to zero them,
-                               GPUCACell::HitsConstView const& __restrict__ hh,
+                               GPUCACell::HitsConstView hh,
                                GPUCACell *cells,
                                uint32_t const *__restrict__ nCells,
                                gpuPixelDoublets::CellNeighborsVector *cellNeighbors,
@@ -334,7 +335,7 @@ __global__ void kernel_connect(cms::cuda::AtomicPairCounter *apc1,
   }    // loop on outer cells
 }
 
-__global__ void kernel_find_ntuplets(GPUCACell::HitsConstView const& __restrict__ hh,
+__global__ void kernel_find_ntuplets(GPUCACell::HitsConstView hh,
                                      GPUCACell *__restrict__ cells,
                                      uint32_t const *nCells,
                                      gpuPixelDoublets::CellTracksVector *cellTracks,
@@ -547,14 +548,13 @@ __global__ void kernel_fillHitInTracks(TkSoAView tracks_view,  // TODO: Make Con
   }
 }
 
-__global__ void kernel_fillHitDetIndices(TkSoAView tracks_view, HitSoAView const& __restrict__ hh) {
+__global__ void kernel_fillHitDetIndices(TkSoAView tracks_view, HitSoAConstView hh) {
   int first = blockDim.x * blockIdx.x + threadIdx.x;
   // copy offsets
   for (int idx = first, ntot = tracks_view.hitIndices().totOnes(); idx < ntot; idx += gridDim.x * blockDim.x) {
     tracks_view.detIndices().off[idx] = tracks_view.hitIndices().off[idx];
   }
   // fill hit indices
-  // auto const &hh = *hhp;
   auto nhits = hh.nHits();
   for (int idx = first, ntot = tracks_view.hitIndices().size(); idx < ntot; idx += gridDim.x * blockDim.x) {
     assert(tracks_view.hitIndices().content[idx] < nhits);
@@ -707,7 +707,7 @@ __global__ void kernel_rejectDuplicate(TkSoAView tracks_view,
   }
 }
 
-__global__ void kernel_sharedHitCleaner(HitSoAView const& __restrict__ hh,
+__global__ void kernel_sharedHitCleaner(HitSoAConstView hh,
                                         TkSoAView tracks_view,
                                         int nmin,
                                         bool dupPassThrough,
@@ -855,7 +855,7 @@ __global__ void kernel_simpleTripletCleaner(
   }  // loop over hits
 }
 
-__global__ void kernel_print_found_ntuplets(HitSoAView& __restrict__ hh,
+__global__ void kernel_print_found_ntuplets(HitSoAView hh,
                                             TkSoAView tracks_view,
                                             CAHitNtupletGeneratorKernelsGPU::HitToTuple const *__restrict__ phitToTuple,
                                             int32_t firstPrint,
