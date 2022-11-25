@@ -4,7 +4,7 @@
 template <>
 void CAHitNtupletGeneratorKernelsGPU::launchKernels(HitsConstView hh, TkSoAView tracks_view, cudaStream_t cudaStream) {
   // these are pointer on GPU!
-  auto *quality_d = pixelTrack::utilities::qualityData(tracks_view);
+  auto *quality_d = tracks_view.quality();
 
   // zero tuples
   cms::cuda::launchZero(&(tracks_view.hitIndices()), cudaStream);
@@ -220,7 +220,7 @@ void CAHitNtupletGeneratorKernelsGPU::buildDoublets(HitsConstView hh, int32_t of
 template <>
 void CAHitNtupletGeneratorKernelsGPU::classifyTuples(HitsConstView hh, TkSoAView tracks_view, cudaStream_t cudaStream) {
   // these are pointer on GPU!
-  auto *quality_d = pixelTrack::utilities::qualityData(tracks_view);
+  auto *quality_d = tracks_view.quality();
 
   int32_t nhits = hh.metadata().size();
   std::cout << "PSOFOS 1" << std::endl;

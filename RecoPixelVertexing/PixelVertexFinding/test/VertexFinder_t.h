@@ -9,8 +9,8 @@
 #include "HeterogeneousCore/CUDAUtilities/interface/launch.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/allocate_device.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/currentDevice.h"
-
-#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"  // TODO: included in order to compile Eigen columns first!!!
+// PixelTrackUtilities only included in order to compile SoALayout with Eigen columns
+#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousHost.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousDevice.h"
@@ -123,12 +123,12 @@ int main() {
   cms::cudatest::requireDevices();
   cudaCheck(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));
 
-  ZVertex::ZVertexSoADevice onGPU_d(stream);
+  zVertex::ZVertexSoADevice onGPU_d(stream);
   gpuVertexFinder::workSpace::WorkSpaceSoADevice ws_d(stream);
 #else
   stream = nullptr;
 
-  ZVertex::ZVertexSoAHost onGPU_d(stream);
+  zVertex::ZVertexSoAHost onGPU_d(stream);
   gpuVertexFinder::workSpace::WorkSpaceSoAHost ws_d(stream);
 #endif
 

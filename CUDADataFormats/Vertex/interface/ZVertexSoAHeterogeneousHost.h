@@ -9,17 +9,17 @@
 template <int32_t S>
 class ZVertexSoAHeterogeneousHost : public cms::cuda::PortableHostCollection<ZVertexSoAHeterogeneousLayout<>> {
 public:
-  ZVertexSoAHeterogeneousHost() = default;
+  ZVertexSoAHeterogeneousHost() = default;  // Required for cms::cuda::Product
 
   // Constructor which specifies the SoA size and CUDA stream
   explicit ZVertexSoAHeterogeneousHost(cudaStream_t stream)
       : PortableHostCollection<ZVertexSoAHeterogeneousLayout<>>(S, stream) {}
 };
 
-namespace ZVertex {
+namespace zVertex {
 
-  using ZVertexSoAHost = ZVertexSoAHeterogeneousHost<ZVertex::utilities::MAXTRACKS>;
+  using ZVertexSoAHost = ZVertexSoAHeterogeneousHost<zVertex::utilities::MAXTRACKS>;
 
-}  // namespace ZVertex
+}  // namespace zVertex
 
 #endif  // CUDADataFormats_Vertex_ZVertexHeterogeneousHost_H

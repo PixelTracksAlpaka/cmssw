@@ -22,9 +22,8 @@ namespace gpuVertexFinder {
   constexpr float maxChi2ForSplit = 9.f;
 
   __global__ void loadTracks(TkSoAConstView tracks_view, VtxSoAView soa, WsSoAView pws, float ptMin, float ptMax) {
-    //TODO: check if there is a way to assert this
-    //assert(soa);
-    auto const* quality = pixelTrack::utilities::qualityData(tracks_view);
+    assert(soa.idv());
+    auto const* quality = tracks_view.quality();
 
     auto first = blockIdx.x * blockDim.x + threadIdx.x;
     for (int idx = first, nt = tracks_view.nTracks(); idx < nt; idx += gridDim.x * blockDim.x) {
@@ -96,24 +95,30 @@ namespace gpuVertexFinder {
 #endif
 
 #ifdef __CUDACC__
-  ZVertex::ZVertexSoADevice Producer::makeAsync(cudaStream_t stream,
+  zVertex::ZVertexSoADevice Producer::makeAsync(cudaStream_t stream,
                                                 TkSoAConstView tracks_view,
                                                 float ptMin,
                                                 float ptMax) const {
 #ifdef PIXVERTEX_DEBUG_PRODUCE
     std::cout << "producing Vertices on GPU" << std::endl;
 #endif  // PIXVERTEX_DEBUG_PRODUCE
-    ZVertex::ZVertexSoADevice vertices(stream);
+    zVertex::ZVertexSoADevice vertices(stream);
 #else
-  ZVertex::ZVertexSoAHost Producer::make(TkSoAConstView tracks_view, float ptMin, float ptMax) const {
+  zVertex::ZVertexSoAHost Producer::make(TkSoAConstView tracks_view, float ptMin, float ptMax) const {
 #ifdef PIXVERTEX_DEBUG_PRODUCE
     std::cout << "producing Vertices on  CPU" << std::endl;
 #endif  // PIXVERTEX_DEBUG_PRODUCE
-    ZVertex::ZVertexSoAHost vertices(nullptr);
+    zVertex::ZVertexSoAHost vertices(nullptr);
 #endif
     auto soa = vertices.view();
-    //TODO: check if there is a way to assert this
-    //assert(soa);
+
+    assert(soa.idv());
+    assert(soa.zv());
+    assert(soa.wv());
+    assert(soa.chi2());
+    assert(soa.ptv2());
+    assert(soa.ndof());
+    assert(soa.sortInd());
 
 #ifdef __CUDACC__
     auto ws_d = gpuVertexFinder::workSpace::WorkSpaceSoADevice(stream);

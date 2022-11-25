@@ -50,12 +50,13 @@ void SiPixelDigisSoAFromCUDA::acquire(const edm::Event& iEvent,
   cms::cuda::ScopedContextAcquire ctx{iEvent.streamID(), std::move(waitingTaskHolder)};
 
   const auto& digis_d = ctx.get(iEvent, digiGetToken_);
-
+  
   nDigis_ = digis_d.nDigis();
   digis_h = cms::cuda::PortableHostCollection<SiPixelDigisSoALayout<>>(digis_d.view().metadata().size(), ctx.stream());
   cudaCheck(cudaMemcpyAsync(
       digis_h.buffer().get(), digis_d.const_buffer().get(), digis_d.bufferSize(), cudaMemcpyDeviceToHost, ctx.stream()));
-  cudaCheck(cudaGetLastError());
+
+cudaCheck(cudaGetLastError());
 }
 
 void SiPixelDigisSoAFromCUDA::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -65,6 +66,9 @@ void SiPixelDigisSoAFromCUDA::produce(edm::Event& iEvent, const edm::EventSetup&
                  digis_h.view().rawIdArr(),
                  digis_h.view().adc(),
                  digis_h.view().clus());
+                 
+  store_.reset();
+
 }
 
 // define as framework plugin

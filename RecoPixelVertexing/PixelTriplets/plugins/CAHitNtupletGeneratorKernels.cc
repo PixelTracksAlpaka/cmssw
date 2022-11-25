@@ -143,7 +143,7 @@ template <>
 void CAHitNtupletGeneratorKernelsCPU::classifyTuples(HitsConstView hh, TkSoAView tracks_view, cudaStream_t cudaStream) {
   int32_t nhits = hh.metadata().size();
 
-  auto *quality_d = pixelTrack::utilities::qualityData(tracks_view);
+  auto *quality_d = tracks_view.quality();
   // classify tracks based on kinematics
   kernel_classifyTracks(tracks_view, quality_d, params_.cuts_);
 

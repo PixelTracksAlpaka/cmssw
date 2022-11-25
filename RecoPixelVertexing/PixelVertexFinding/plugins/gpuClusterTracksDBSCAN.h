@@ -41,9 +41,10 @@ namespace gpuVertexFinder {
     int32_t* __restrict__ nn = data.ndof();
     int32_t* __restrict__ iv = ws.iv();
 
-    //TODO: check if there is a way to assert this
-    //assert(pdata);
     assert(zt);
+    assert(iv);
+    assert(nn);
+    assert(ezt2);
 
     using Hist = cms::cuda::HistoContainer<uint8_t, 256, 16000, 8, uint16_t>;
     __shared__ Hist hist;
@@ -60,7 +61,7 @@ namespace gpuVertexFinder {
 
     // fill hist  (bin shall be wider than "eps")
     for (auto i = threadIdx.x; i < nt; i += blockDim.x) {
-      assert(i < ZVertex::utilities::MAXTRACKS);
+      assert(i < zVertex::utilities::MAXTRACKS);
       int iz = int(zt[i] * 10.);  // valid if eps<=0.1
       iz = std::clamp(iz, INT8_MIN, INT8_MAX);
       izt[i] = iz - INT8_MIN;
@@ -215,7 +216,7 @@ namespace gpuVertexFinder {
     }
     __syncthreads();
 
-    assert(foundClusters < ZVertex::utilities::MAXVTX);
+    assert(foundClusters < zVertex::utilities::MAXVTX);
 
     // propagate the negative id to all the tracks in the cluster.
     for (auto i = threadIdx.x; i < nt; i += blockDim.x) {

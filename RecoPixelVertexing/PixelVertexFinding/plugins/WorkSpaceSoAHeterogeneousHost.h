@@ -1,11 +1,9 @@
 #ifndef RecoPixelVertexing_PixelVertexFinding_WorkSpaceSoAHeterogeneousHost_h
 #define RecoPixelVertexing_PixelVertexFinding_WorkSpaceSoAHeterogeneousHost_h
 
-#include <cstdint>
-#include "WorkSpaceUtilities.h"
+#include "CUDADataFormats/Common/interface/PortableHostCollection.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
 #include "RecoPixelVertexing/PixelVertexFinding/plugins/WorkSpaceUtilities.h"
-#include "CUDADataFormats/Common/interface/PortableHostCollection.h"
 
 template <int32_t S>
 class WorkSpaceSoAHeterogeneousHost : public cms::cuda::PortableHostCollection<WorkSpaceSoAHeterogeneousLayout<>> {
@@ -19,7 +17,7 @@ public:
 
 namespace gpuVertexFinder {
   namespace workSpace {
-    using WorkSpaceSoAHost = WorkSpaceSoAHeterogeneousHost<ZVertex::utilities::MAXTRACKS>;
+    using WorkSpaceSoAHost = WorkSpaceSoAHeterogeneousHost<zVertex::utilities::MAXTRACKS>;
   }
 }  // namespace gpuVertexFinder
 #endif
