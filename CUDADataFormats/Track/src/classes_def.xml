@@ -12,4 +12,18 @@
   <class name="edm::Wrapper<cms::cuda::Product<HeterogeneousSoA<pixelTrack::TrackSoAPhase2>>>" persistent="false"/>
   <class name="HeterogeneousSoA<pixelTrack::TrackSoAPhase2>" persistent="false" />
 
+  <!-- <class name="pixelTrackSoA::TrackSoAHostPhase1" persistent="false"/>
+  <class name="edm::Wrapper<pixelTrackSoA::TrackSoAHostPhase1>" persistent="false"/>
+  <class name="pixelTrackSoA::TrackSoADevicePhase1" persistent="false"/>
+  <class name="edm::Wrapper<pixelTrackSoA::TrackSoADevicePhase1>" persistent="false"/>
+  <class name="cms::cuda::Product<pixelTrackSoA::TrackSoADevicePhase1>" persistent="false"/>
+  <class name="edm::Wrapper<cms::cuda::Product<pixelTrackSoA::TrackSoADevicePhase1>>" persistent="false"/>
+
+  <class name="pixelTrackSoA::TrackSoAHostPhase2" persistent="false"/>
+  <class name="edm::Wrapper<pixelTrackSoA::TrackSoAHostPhase2>" persistent="false"/>
+  <class name="pixelTrackSoA::TrackSoADevicePhase2" persistent="false"/>
+  <class name="edm::Wrapper<pixelTrackSoA::TrackSoADevicePhase2>" persistent="false"/>
+  <class name="cms::cuda::Product<pixelTrackSoA::TrackSoADevicePhase2>" persistent="false"/>
+  <class name="edm::Wrapper<cms::cuda::Product<pixelTrackSoA::TrackSoADevicePhase2>>" persistent="false"/> -->
+
 </lcgdict>

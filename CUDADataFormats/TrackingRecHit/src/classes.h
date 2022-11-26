@@ -3,6 +3,8 @@
 
 #include "CUDADataFormats/Common/interface/Product.h"
 #include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHit2DHeterogeneous.h"
+#include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHitSoAHost.h"
+#include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHitSoADevice.h"
 #include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHit2DReduced.h"
 #include "DataFormats/Common/interface/Wrapper.h"
 
