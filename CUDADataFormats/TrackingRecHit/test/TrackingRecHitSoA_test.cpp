@@ -30,7 +30,7 @@ int main() {
       moduleStart[i] = i * 2;
     }
 
-    TrackingRecHitSoADevice<pixelTopology::Phase1> tkhit(nHits, false, offset, nullptr, &moduleStart[0], stream);
+    TrackingRecHitSoADevice<pixelTopology::Phase1> tkhit(nHits, offset, nullptr, &moduleStart[0], stream);
 
     testTrackingRecHitSoA::runKernels<pixelTopology::Phase1>(tkhit, stream);
     printf("tkhit hits %d \n", tkhit.nHits());

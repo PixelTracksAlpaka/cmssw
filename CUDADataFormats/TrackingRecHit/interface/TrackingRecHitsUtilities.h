@@ -12,7 +12,7 @@
 
 // more information on bit fields : https://en.cppreference.com/w/cpp/language/bit_field
 template <typename TrackerTraits>
-struct trackinRecHitSoA
+struct trackingRecHitSoA
 {
 
   using hindex_type = typename TrackerTraits::hindex_type;
@@ -64,10 +64,10 @@ struct trackinRecHitSoA
 };
 
   template<typename TrackerTraits>
-  using HitLayout = typename trackinRecHitSoA<TrackerTraits>::template TrackingRecHitSoALayout<>;
+  using HitLayout = typename trackingRecHitSoA<TrackerTraits>::template TrackingRecHitSoALayout<>;
   template<typename TrackerTraits>
-  using HitSoAView = typename trackinRecHitSoA<TrackerTraits>::template TrackingRecHitSoALayout<>::View;
+  using HitSoAView = typename trackingRecHitSoA<TrackerTraits>::template TrackingRecHitSoALayout<>::View;
   template<typename TrackerTraits>
-  using HitSoAConstView = typename trackinRecHitSoA<TrackerTraits>::template TrackingRecHitSoALayout<>::ConstView;
+  using HitSoAConstView = typename trackingRecHitSoA<TrackerTraits>::template TrackingRecHitSoALayout<>::ConstView;
 
 #endif

@@ -3,7 +3,9 @@
 #include "CUDADataFormats/BeamSpot/interface/BeamSpotCUDA.h"
 #include "CUDADataFormats/SiPixelCluster/interface/SiPixelClustersCUDA.h"
 #include "CUDADataFormats/SiPixelDigi/interface/SiPixelDigisCUDA.h"
-#include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHit2DHeterogeneous.h"
+// #include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHit2DHeterogeneous.h"
+#include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHitSoAHost.h"
+#include "CUDADataFormats/Common/interface/PortableHostCollection.h"
 #include "CUDADataFormats/Common/interface/HostProduct.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
@@ -37,6 +39,7 @@ public:
 
   using HitModuleStart = std::array<uint32_t, gpuClustering::maxNumModules + 1>;
   using HMSstorage = HostProduct<uint32_t[]>;
+  using HitsOnHost = TrackingRecHitSoAHost<TrackerTraits>;
 
 private:
   void produce(edm::StreamID streamID, edm::Event& iEvent, const edm::EventSetup& iSetup) const override;
@@ -45,7 +48,7 @@ private:
   const edm::ESGetToken<PixelClusterParameterEstimator, TkPixelCPERecord> cpeToken_;
   const edm::EDGetTokenT<reco::BeamSpot> bsGetToken_;
   const edm::EDGetTokenT<SiPixelClusterCollectionNew> clusterToken_;  // Legacy Clusters
-  const edm::EDPutTokenT<TrackingRecHit2DCPUT<TrackerTraits>> tokenHit_;
+  const edm::EDPutTokenT<HitsOnHost> tokenHit_;
   const edm::EDPutTokenT<HMSstorage> tokenModuleStart_;
   const bool convert2Legacy_;
 };
@@ -56,7 +59,7 @@ SiPixelRecHitSoAFromLegacyT<TrackerTraits>::SiPixelRecHitSoAFromLegacyT(const ed
       cpeToken_(esConsumes(edm::ESInputTag("", iConfig.getParameter<std::string>("CPE")))),
       bsGetToken_{consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamSpot"))},
       clusterToken_{consumes<SiPixelClusterCollectionNew>(iConfig.getParameter<edm::InputTag>("src"))},
-      tokenHit_{produces<TrackingRecHit2DCPUT<TrackerTraits>>()},
+      tokenHit_{produces<HitsOnHost>()},
       tokenModuleStart_{produces<HMSstorage>()},
       convert2Legacy_(iConfig.getParameter<bool>("convertToLegacy")) {
   if (convert2Legacy_)
@@ -99,13 +102,13 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
   iEvent.getByToken(clusterToken_, hclusters);
   auto const& input = *hclusters;
 
-  constexpr int maxModules = TrackerTraits::numberOfModules;
+  constexpr int nModules = TrackerTraits::numberOfModules;
   constexpr int startBPIX2 = pixelTopology::layerStart<TrackerTraits>(1);
 
   // allocate a buffer for the indices of the clusters
-  auto hmsp = std::make_unique<uint32_t[]>(maxModules + 1);
+  auto hmsp = std::make_unique<uint32_t[]>(nModules + 1);
   // hitsModuleStart is a non-owning pointer to the buffer
-  auto hitsModuleStart = hmsp.get();
+  // auto hitsModuleStart = hmsp.get();
   // wrap the buffer in a HostProduct
   auto hms = std::make_unique<HMSstorage>(std::move(hmsp));
   // move the HostProduct to the Event, without reallocating the buffer or affecting hitsModuleStart
@@ -125,17 +128,25 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
 
   constexpr uint32_t maxHitsInModule = gpuClustering::maxHitsInModule();
 
-  HitModuleStart moduleStart_;  // index of the first pixel of each module
-  HitModuleStart clusInModule_;
-  memset(&clusInModule_, 0, sizeof(HitModuleStart));  // needed??
-  memset(&moduleStart_, 0, sizeof(HitModuleStart));
-  assert(gpuClustering::maxNumModules + 1 == clusInModule_.size());
-  assert(0 == clusInModule_[gpuClustering::maxNumModules]);
-  uint32_t moduleId_;
-  moduleStart_[1] = 0;  // we run sequentially....
+  // HitModuleStart moduleStart_;  // index of the first pixel of each module
+  // HitModuleStart clusInModule_;
+  // memset(&clusInModule_, 0, sizeof(HitModuleStart));  // needed??
+  // memset(&moduleStart_, 0, sizeof(HitModuleStart));
+  // assert(gpuClustering::maxNumModules + 1 == clusInModule_.size());
+  // assert(0 == clusInModule_[gpuClustering::maxNumModules]);
+  // uint32_t moduleId_;
+  // moduleStart_[1] = 0;  // we run sequentially....
 
-  SiPixelClustersCUDA::SiPixelClustersCUDASOAView clusterView{
-      moduleStart_.data(), clusInModule_.data(), &moduleId_, hitsModuleStart};
+  cms::cuda::PortableHostCollection<SiPixelClustersCUDALayout<>> clusters_h(gpuClustering::maxNumModules + 1, nullptr);
+
+  memset(clusters_h.view().clusInModule(), 0, sizeof(HitModuleStart));  // needed??
+  memset(clusters_h.view().moduleStart(), 0, sizeof(HitModuleStart));
+
+  assert(0 == clusters_h.view()[gpuClustering::maxNumModules].clusInModule());
+  clusters_h.view()[1].moduleStart() = 0;
+
+  // SiPixelClustersCUDA::SiPixelClustersCUDASOAView clusterView{
+  //     moduleStart_.data(), clusInModule_.data(), &moduleId_, hitsModuleStart};
 
   // fill cluster arrays
   int numberOfClusters = 0;
@@ -144,33 +155,44 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
     DetId detIdObject(detid);
     const GeomDetUnit* genericDet = geom_->idToDetUnit(detIdObject);
     auto gind = genericDet->index();
-    assert(gind < maxModules);
+    assert(gind < nModules);
     auto const nclus = dsv.size();
-    clusInModule_[gind] = nclus;
+    // clusInModule_[gind] = nclus;
+    clusters_h.view()[gind].clusInModule() = nclus;
     numberOfClusters += nclus;
   }
-  hitsModuleStart[0] = 0;
+  clusters_h.view()[0].clusModuleStart() = 0;
+  // hitsModuleStart[0] = 0;
 
-  for (int i = 1, n = maxModules + 1; i < n; ++i)
-    hitsModuleStart[i] = hitsModuleStart[i - 1] + clusInModule_[i - 1];
+  // for (int i = 1, n = nModules + 1; i < n; ++i)
+  //   hitsModuleStart[i] = hitsModuleStart[i - 1] + clusInModule_[i - 1];
+  for (int i = 1, n = nModules + 1; i < n; ++i) {
+    clusters_h.view()[i].clusModuleStart() = clusters_h.view()[i - 1].clusModuleStart() + clusters_h.view()[i - 1].clusInModule();
+  }
 
-  assert(numberOfClusters == int(hitsModuleStart[maxModules]));
-
+  // assert(numberOfClusters == int(hitsModuleStart[nModules]));
+  assert((uint32_t)numberOfClusters == clusters_h.view()[nModules].clusModuleStart());
   // output SoA
   // element 96 is the start of BPIX2 (i.e. the number of clusters in BPIX1)
+  HitsOnHost output(numberOfClusters,
+                    clusters_h.view()[startBPIX2].clusModuleStart(),
+                    &cpeView,
+                    clusters_h.view().clusModuleStart(),
+                    nullptr);
 
-  auto output = std::make_unique<TrackingRecHit2DCPUT<TrackerTraits>>(
-      numberOfClusters, hitsModuleStart[startBPIX2], &cpeView, hitsModuleStart, nullptr);
+  // auto output = std::make_unique<TrackingRecHitSoAHost<TrackerTraits>>(
+  //     numberOfClusters, hitsModuleStart[startBPIX2], &cpeView, hitsModuleStart, nullptr);
 
   if (0 == numberOfClusters) {
-    iEvent.put(std::move(output));
+    iEvent.emplace(tokenHit_, std::move(output));
+    // iEvent.put(std::move(output));
     if (convert2Legacy_)
       iEvent.put(std::move(legacyOutput));
     return;
   }
 
   if (convert2Legacy_)
-    legacyOutput->reserve(maxModules, numberOfClusters);
+    legacyOutput->reserve(nModules, numberOfClusters);
 
   int numberOfDetUnits = 0;
   int numberOfHits = 0;
@@ -180,16 +202,19 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
     DetId detIdObject(detid);
     const GeomDetUnit* genericDet = geom_->idToDetUnit(detIdObject);
     auto const gind = genericDet->index();
-    assert(gind < maxModules);
+    assert(gind < nModules);
     const PixelGeomDetUnit* pixDet = dynamic_cast<const PixelGeomDetUnit*>(genericDet);
     assert(pixDet);
     auto const nclus = dsv.size();
-    assert(clusInModule_[gind] == nclus);
+    // assert(clusInModule_[gind] == nclus);Non
+    assert(clusters_h.view()[gind].clusInModule() == nclus);
     if (0 == nclus)
       continue;  // is this really possible?
 
-    auto const fc = hitsModuleStart[gind];
-    auto const lc = hitsModuleStart[gind + 1];
+    // auto const fc = hitsModuleStart[gind];
+    auto const fc = clusters_h.view()[gind].clusModuleStart();
+    // auto const lc = hitsModuleStart[gind + 1];
+    auto const lc = clusters_h.view()[gind + 1].clusModuleStart();
     assert(lc > fc);
     LogDebug("SiPixelRecHitSoAFromLegacy") << "in det " << gind << ": conv " << nclus << " hits from " << dsv.size()
                                            << " legacy clusters" << ' ' << fc << ',' << lc;
@@ -198,25 +223,41 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
       printf(
           "WARNING: too many clusters %d in Module %d. Only first %d Hits converted\n", nclus, gind, maxHitsInModule);
 
-    // fill digis
-    xx.clear();
-    yy.clear();
-    adc.clear();
-    moduleInd.clear();
-    clus.clear();
-    clusterRef.clear();
-    moduleId_ = gind;
-    uint32_t ic = 0;
+    // count digis
     uint32_t ndigi = 0;
     for (auto const& clust : dsv) {
       assert(clust.size() > 0);
       for (int i = 0, nd = clust.size(); i < nd; ++i) {
+        ndigi++;
+      }
+    }
+    std::cout << "ndigi=" << ndigi << std::endl;
+    cms::cuda::PortableHostCollection<SiPixelDigisSoALayout<>> digis_h(ndigi, nullptr);
+
+    // xx.clear();
+    // yy.clear();
+    // adc.clear();
+    // moduleInd.clear();
+    // clus.clear();
+    clusterRef.clear();
+    // moduleId_ = gind;
+    uint32_t ic = 0;
+    ndigi = 0;
+    //filling digis
+    for (auto const& clust : dsv) {
+      assert(clust.size() > 0);
+      for (int i = 0, nd = clust.size(); i < nd; ++i) {
         auto px = clust.pixel(i);
-        xx.push_back(px.x);
-        yy.push_back(px.y);
-        adc.push_back(px.adc);
-        moduleInd.push_back(gind);
-        clus.push_back(ic);
+        digis_h.view()[ndigi].xx() = px.x;
+        digis_h.view()[ndigi].yy() = px.y;
+        digis_h.view()[ndigi].adc() = px.adc;
+        digis_h.view()[ndigi].moduleId() = gind;
+        digis_h.view()[ndigi].clus() = ic;
+        // xx.push_back(px.x);
+        // yy.push_back(px.y);
+        // adc.push_back(px.adc);
+        // moduleInd.push_back(gind);
+        // clus.push_back(ic);
         ++ndigi;
       }
 
@@ -228,22 +269,26 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
     assert(clus.size() == ndigi);
     numberOfHits += nclus;
     // filled creates view
-    SiPixelDigisCUDASOAView digiView;
-    digiView.xx_ = xx.data();
-    digiView.yy_ = yy.data();
-    digiView.adc_ = adc.data();
-    digiView.moduleInd_ = moduleInd.data();
-    digiView.clus_ = clus.data();
-    digiView.pdigi_ = nullptr;
-    digiView.rawIdArr_ = nullptr;
-    assert(digiView.adc(0) != 0);
+    // SiPixelDigisCUDASOAView digiView;
+    // digiView.xx_ = xx.data();
+    // digiView.yy_ = yy.data();
+    // digiView.adc_ = adc.data();
+    // digiView.moduleInd_ = moduleInd.data();
+    // digiView.clus_ = clus.data();
+    // digiView.pdigi_ = nullptr;
+    // digiView.rawIdArr_ = nullptr;
+    // assert(digiView.adc(0) != 0);
+    assert(digis_h.view()[0].adc() != 0);
     // we run on blockId.x==0
-    gpuPixelRecHits::getHits(&cpeView, &bsHost, digiView, ndigi, &clusterView, output->view());
+    // gpuPixelRecHits::getHits(&cpeView, &bsHost, digiView, ndigi, &clusterView, output->view());
+    gpuPixelRecHits::getHits(&cpeView, &bsHost, digis_h.view(), ndigi, clusters_h.view(), output.view());
     for (auto h = fc; h < lc; ++h)
       if (h - fc < maxHitsInModule)
-        assert(gind == output->view()->detectorIndex(h));
+        // assert(gind == output->view()->detectorIndex(h));
+        assert(gind == output.view()[h].detectorIndex());
       else
-        assert(gpuClustering::invalidModuleId == output->view()->detectorIndex(h));
+        assert(gpuClustering::invalidModuleId == output.view()[h].detectorIndex());
+        // assert(gpuClustering::invalidModuleId == output->view()->detectorIndex(h));
     if (convert2Legacy_) {
       SiPixelRecHitCollectionNew::FastFiller recHitsOnDetUnit(*legacyOutput, detid);
       for (auto h = fc; h < lc; ++h) {
@@ -253,8 +298,10 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
           break;
 
         assert(ih < clusterRef.size());
-        LocalPoint lp(output->view()->xLocal(h), output->view()->yLocal(h));
-        LocalError le(output->view()->xerrLocal(h), 0, output->view()->yerrLocal(h));
+        // LocalPoint lp(output->view()->xLocal(h), output->view()->yLocal(h));
+        // LocalError le(output->view()->xerrLocal(h), 0, output->view()->yerrLocal(h));
+        LocalPoint lp(output.view()[h].xLocal(), output.view()[h].yLocal());
+        LocalError le(output.view()[h].xerrLocal(), 0, output.view()[h].yerrLocal());
         SiPixelRecHitQuality::QualWordType rqw = 0;
         SiPixelRecHit hit(lp, le, rqw, *genericDet, clusterRef[ih]);
         recHitsOnDetUnit.push_back(hit);
@@ -267,24 +314,34 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
   // fill data structure to support CA
   constexpr auto nLayers = TrackerTraits::numberOfLayers;
   for (auto i = 0U; i < nLayers + 1; ++i) {
-    output->hitsLayerStart()[i] = hitsModuleStart[cpeView.layerGeometry().layerStart[i]];
+    // output->hitsLayerStart()[i] = hitsModuleStart[cpeView.layerGeometry().layerStart[i]];
+    output.view().hitsLayerStart()[i] = clusters_h.view()[cpeView.layerGeometry().layerStart[i]].clusModuleStart();
     LogDebug("SiPixelRecHitSoAFromLegacy")
         << "Layer n." << i << " - starting at module: " << cpeView.layerGeometry().layerStart[i]
         << " - starts ad cluster: " << output->hitsLayerStart()[i] << "\n";
   }
 
-  cms::cuda::fillManyFromVector(output->phiBinner(),
+  cms::cuda::fillManyFromVector(&(output.view().phiBinner()),
                                 nLayers,
-                                output->iphi(),
-                                output->hitsLayerStart(),
-                                numberOfHits,
+                                output.view().iphi(),
+                                output.view().hitsLayerStart().data(),
+                                output.view().nHits(),
                                 256,
-                                output->phiBinnerStorage());
+                                output.view().phiBinnerStorage());
+
+  // cms::cuda::fillManyFromVector(output->phiBinner(),
+  //                               nLayers,
+  //                               output->iphi(),
+  //                               output->hitsLayerStart(),
+  //                               numberOfHits,
+  //                               256,
+  //                               output->phiBinnerStorage());
 
   LogDebug("SiPixelRecHitSoAFromLegacy") << "created HitSoa for " << numberOfClusters << " clusters in "
                                          << numberOfDetUnits << " Dets"
                                          << "\n";
-  iEvent.put(std::move(output));
+  // iEvent.put(std::move(output));
+  iEvent.emplace(tokenHit_, std::move(output));
   if (convert2Legacy_)
     iEvent.put(std::move(legacyOutput));
 }

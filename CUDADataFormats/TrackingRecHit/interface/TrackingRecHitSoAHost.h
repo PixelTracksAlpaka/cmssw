@@ -14,7 +14,7 @@ class TrackingRecHitSoAHost : public cms::cuda::PortableHostCollection<HitLayout
 public:
 
 
-  using hitSoA = trackinRecHitSoA<TrackerTraits>;
+  using hitSoA = trackingRecHitSoA<TrackerTraits>;
   //Need to decorate the class with the inherited portable accessors being now a template
   using cms::cuda::PortableHostCollection<HitLayout<TrackerTraits>>::view;
   using cms::cuda::PortableHostCollection<HitLayout<TrackerTraits>>::const_view;
@@ -34,7 +34,6 @@ public:
       : cms::cuda::PortableHostCollection<HitLayout<TrackerTraits>>(nHits, stream) {}
 
   explicit TrackingRecHitSoAHost(uint32_t nHits,
-                                 bool isPhase2,
                                  int32_t offsetBPIX2,
                                  ParamsOnGPU const* cpeParams,
                                  uint32_t const* hitsModuleStart,

@@ -2,9 +2,11 @@
 #define CUDADataFormats_Track_PixelTrackUtilities_h
 
 #include <Eigen/Dense>
+#include <Eigen/Core>
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/HistoContainer.h"
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
+
 
 namespace pixelTrackSoA {
 
@@ -55,28 +57,28 @@ template <typename TrackerTraits>
 struct tracksUtilities
 {
 
-  using TrackSoAView = typename trackSoA<TrackerTraits>::template TrackSoAHeterogeneousLayout<>::View;
-  using TrackSoAConstView = typename trackSoA<TrackerTraits>::template TrackSoAHeterogeneousLayout<>::ConstView;
+  using TrackSoAView = typename trackSoA<TrackerTraits>::template TrackSoALayout<>::View;
+  using TrackSoAConstView = typename trackSoA<TrackerTraits>::template TrackSoALayout<>::ConstView;
   using hindex_type = typename trackSoA<TrackerTraits>::hindex_type;
 
   // State at the Beam spot
   // phi,tip,1/pt,cotan(theta),zip
-  __host__ __device__ inline float charge(const TrackSoAConstView &tracks, int32_t i) {
+  static constexpr __host__ __device__ inline float charge(TrackSoAConstView tracks, int32_t i) {
     return std::copysign(1.f, tracks[i].state()(2));
   }
 
-  __host__ __device__ inline float phi(const TrackSoAConstView &tracks, int32_t i) { return tracks[i].state()(0); }
+  static constexpr __host__ __device__ inline float phi(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(0); }
 
-  __host__ __device__ inline float tip(const TrackSoAConstView &tracks, int32_t i) { return tracks[i].state()(1); }
+  static constexpr __host__ __device__ inline float tip(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(1); }
 
-  __host__ __device__ inline float zip(const TrackSoAConstView &tracks, int32_t i) { return tracks[i].state()(4); }
+  static constexpr __host__ __device__ inline float zip(TrackSoAConstView tracks, int32_t i) { return tracks[i].state()(4); }
 
-  __host__ __device__ inline bool isTriplet(const TrackSoAConstView &tracks, int i) {
+  static constexpr __host__ __device__ inline bool isTriplet(TrackSoAConstView tracks, int i) {
     return tracks[i].nLayers() == 3;
   }
 
   template <typename V3, typename M3, typename V2, typename M2>
-  __host__ __device__ inline void copyFromCircle(
+  static constexpr __host__ __device__ inline void copyFromCircle(
       TrackSoAView &tracks, V3 const &cp, M3 const &ccov, V2 const &lp, M2 const &lcov, float b, int32_t i) {
     tracks[i].state() << cp.template cast<float>(), lp.template cast<float>();
 
@@ -97,7 +99,7 @@ struct tracksUtilities
   }
 
   template <typename V5, typename M5>
-  __host__ __device__ inline void copyFromDense(TrackSoAView &tracks, V5 const &v, M5 const &cov, int32_t i) {
+  static constexpr __host__ __device__ inline void copyFromDense(TrackSoAView &tracks, V5 const &v, M5 const &cov, int32_t i) {
     tracks[i].state() = v.template cast<float>();
     for (int j = 0, ind = 0; j < 5; ++j)
       for (auto k = j; k < 5; ++k)
@@ -105,7 +107,7 @@ struct tracksUtilities
   }
 
   template <typename V5, typename M5>
-  __host__ __device__ inline void copyToDense(const TrackSoAConstView &tracks, V5 &v, M5 &cov, int32_t i) {
+  static constexpr __host__ __device__ inline void copyToDense(TrackSoAConstView tracks, V5 &v, M5 &cov, int32_t i) {
     v = tracks[i].state().template cast<typename V5::Scalar>();
     for (int j = 0, ind = 0; j < 5; ++j) {
       cov(j, j) = tracks[i].covariance()(ind++);
@@ -115,7 +117,7 @@ struct tracksUtilities
   }
 
   // TODO: Not using TrackSoAConstView due to weird bugs with HitContainer
-  __host__ __device__ inline int computeNumberOfLayers(TrackSoAView &tracks, int32_t i) {
+  static constexpr __host__ __device__ inline int computeNumberOfLayers(TrackSoAView &tracks, int32_t i) {
     auto pdet = tracks.detIndices().begin(i);
     int nl = 1;
     auto ol = pixelTopology::getLayer<TrackerTraits>(*pdet);
@@ -127,7 +129,8 @@ struct tracksUtilities
     }
     return nl;
   }
-  __host__ __device__ inline int nHits(const TrackSoAConstView &tracks, int i) { return tracks.detIndices().size(i); }
+
+ static constexpr __host__ __device__ inline int nHits(TrackSoAConstView tracks, int i) { return tracks.detIndices().size(i); }
 
 };
 
@@ -146,8 +149,9 @@ namespace pixelTrackSoA {
   template <typename TrackerTraits>
   struct QualityCutsT<TrackerTraits, pixelTopology::isPhase1Topology<TrackerTraits>> {
 
-    using TrackSoAView = typename trackSoA<TrackerTraits>::template TrackSoAHeterogeneousLayout<>::View;
-    using TrackSoAConstView = typename trackSoA<TrackerTraits>::template TrackSoAHeterogeneousLayout<>::ConstView;
+    using TrackSoAView = typename trackSoA<TrackerTraits>::template TrackSoALayout<>::View;
+    using TrackSoAConstView = typename trackSoA<TrackerTraits>::template TrackSoALayout<>::ConstView;
+    using tracksHelper = tracksUtilities<TrackerTraits>;
     // chi2 cut = chi2Scale * (chi2Coeff[0] + pT/GeV * (chi2Coeff[1] + pT/GeV * (chi2Coeff[2] + pT/GeV * chi2Coeff[3])))
     float chi2Coeff[4];
     float chi2MaxPt;  // GeV
@@ -162,7 +166,7 @@ namespace pixelTrackSoA {
     Region triplet;
     Region quadruplet;
 
-    __device__ __forceinline__ bool isHP(const TrackSoAConstView &tracks,
+    __device__ __forceinline__ bool isHP(TrackSoAConstView tracks,
                                          int nHits,
                                          int it) const {
       // impose "region cuts" based on the fit results (phi, Tip, pt, cotan(theta)), Zip)
@@ -171,11 +175,11 @@ namespace pixelTrackSoA {
       //   - for quadruplets: |Tip| < 0.5 cm, pT > 0.3 GeV, |Zip| < 12.0 cm
       // (see CAHitNtupletGeneratorGPU.cc)
       auto const &region = (nHits > 3) ? quadruplet : triplet;
-      return (std::abs(tracks.tip(it)) < region.maxTip) and (tracks.pt(it) > region.minPt) and
-             (std::abs(tracks.zip(it)) < region.maxZip);
+      return (std::abs(tracksHelper::tip(tracks,it)) < region.maxTip) and (tracks.pt(it) > region.minPt) and
+             (std::abs(tracksHelper::zip(tracks,it)) < region.maxZip);
     }
 
-    __device__ __forceinline__ bool strictCut(const TrackSoAConstView &tracks,
+    __device__ __forceinline__ bool strictCut(TrackSoAConstView tracks,
                                               int it) const {
       auto roughLog = [](float x) {
         // max diff [0.5,12] at 1.25 0.16143
@@ -213,20 +217,21 @@ namespace pixelTrackSoA {
   template <typename TrackerTraits>
   struct QualityCutsT<TrackerTraits, pixelTopology::isPhase2Topology<TrackerTraits>> {
 
-    using TrackSoAView = typename trackSoA<TrackerTraits>::template TrackSoAHeterogeneousLayout<>::View;
-    using TrackSoAConstView = typename trackSoA<TrackerTraits>::template TrackSoAHeterogeneousLayout<>::ConstView;
-    
+    using TrackSoAView = typename trackSoA<TrackerTraits>::template TrackSoALayout<>::View;
+    using TrackSoAConstView = typename trackSoA<TrackerTraits>::template TrackSoALayout<>::ConstView;
+    using tracksHelper = tracksUtilities<TrackerTraits>;
+
     float maxChi2;
     float minPt;
     float maxTip;
     float maxZip;
 
-    __device__ __forceinline__ bool isHP(const TrackSoAConstView &tracks,
+    __device__ __forceinline__ bool isHP(TrackSoAConstView tracks,
                                          int nHits,
                                          int it) const {
-      return (std::abs(tracks.tip(it)) < maxTip) and (tracks.pt(it) > minPt) and (std::abs(tracks.zip(it)) < maxZip);
+      return (std::abs(tracksHelper::tip(tracks,it)) < maxTip) and (tracks.pt(it) > minPt) and (std::abs(tracksHelper::zip(tracks,it)) < maxZip);
     }
-    __device__ __forceinline__ bool strictCut(const TrackSoAConstView &tracks,
+    __device__ __forceinline__ bool strictCut(TrackSoAConstView tracks,
                                               int it) const {
       return tracks.chi2(it) >= maxChi2;
     }
@@ -235,6 +240,7 @@ namespace pixelTrackSoA {
 
 }// pixelTrackSoA
 
+
 template<typename TrackerTraits>
 using TrackLayout = typename trackSoA<TrackerTraits>::template TrackSoALayout<>;
 template<typename TrackerTraits>
@@ -242,6 +248,8 @@ using TrackSoAView = typename trackSoA<TrackerTraits>::template TrackSoALayout<>
 template<typename TrackerTraits>
 using TrackSoAConstView = typename trackSoA<TrackerTraits>::template TrackSoALayout<>::ConstView;
 
+template struct tracksUtilities<pixelTopology::Phase1>;
+template struct tracksUtilities<pixelTopology::Phase2>;
 
 // namespace pixelTrack {
 //   // Common types for both Host and Device code

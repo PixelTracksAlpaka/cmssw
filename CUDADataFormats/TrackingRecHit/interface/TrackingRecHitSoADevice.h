@@ -12,7 +12,7 @@ template<typename TrackerTraits>
 class TrackingRecHitSoADevice : public cms::cuda::PortableDeviceCollection<HitLayout<TrackerTraits>> {
 public:
 
-  using hitSoA = trackinRecHitSoA<TrackerTraits>;
+  using hitSoA = trackingRecHitSoA<TrackerTraits>;
   //Need to decorate the class with the inherited portable accessors being now a template
   using cms::cuda::PortableDeviceCollection<HitLayout<TrackerTraits>>::view;
   using cms::cuda::PortableDeviceCollection<HitLayout<TrackerTraits>>::const_view;
@@ -27,7 +27,6 @@ public:
   using PhiBinner = typename hitSoA::PhiBinner;
   // Constructor which specifies the SoA size
   explicit TrackingRecHitSoADevice(uint32_t nHits,
-                                   bool isPhase2,
                                    int32_t offsetBPIX2,
                                    ParamsOnGPU const* cpeParams,
                                    uint32_t const* hitsModuleStart,
