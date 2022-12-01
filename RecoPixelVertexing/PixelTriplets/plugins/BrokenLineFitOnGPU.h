@@ -17,7 +17,7 @@
 #include "HelixFitOnGPU.h"
 
 template <typename TrackerTraits>
-using Tuples = pixelTrack::HitContainerT<TrackerTraits>;
+using Tuples = typename trackSoA<TrackerTraits>::HitContainer;
 template <typename TrackerTraits>
 using OutputSoAView = TrackSoAView<TrackerTraits>;
 template <typename TrackerTraits>

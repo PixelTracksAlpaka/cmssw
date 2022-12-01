@@ -1,10 +1,5 @@
 <use name="HeterogeneousCore/CUDAUtilities"/>
 
-<bin file="TrackSoAHeterogeneous_t.cpp">
-  <use name="eigen"/>
-  <flags CXXFLAGS="-g -DGPU_DEBUG"/>
-</bin>
-
 <use name="CUDADataFormats/Track"/>
 <flags CUDA_FLAGS="-g -DGPU_DEBUG"/>
 <iftool name="cuda-gcc-support">

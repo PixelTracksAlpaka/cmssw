@@ -21,13 +21,14 @@
 #include "DQMServices/Core/interface/MonitorElement.h"
 #include "DQMServices/Core/interface/DQMEDAnalyzer.h"
 #include "DQMServices/Core/interface/DQMStore.h"
-#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
+#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
 // for string manipulations
 #include <fmt/printf.h>
 
 class SiPixelPhase1MonitorTrackSoA : public DQMEDAnalyzer {
 public:
-  using PixelTrackHeterogeneousPhase1 = PixelTrackHeterogeneousT<pixelTopology::Phase1>;
+  using TrackSoAPhase1 = TrackSoAHeterogeneousHost<pixelTopology::Phase1>;
   explicit SiPixelPhase1MonitorTrackSoA(const edm::ParameterSet&);
   ~SiPixelPhase1MonitorTrackSoA() override = default;
   void bookHistograms(DQMStore::IBooker& ibooker, edm::Run const& iRun, edm::EventSetup const& iSetup) override;
@@ -35,10 +36,10 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:
-  edm::EDGetTokenT<PixelTrackHeterogeneousPhase1> tokenSoATrack_;
+  edm::EDGetTokenT<TrackSoAPhase1> tokenSoATrack_;
   std::string topFolderName_;
   bool useQualityCut_;
-  pixelTrack::Quality minQuality_;
+  pixelTrackSoA::Quality minQuality_;
   MonitorElement* hnTracks;
   MonitorElement* hnLooseAndAboveTracks;
   MonitorElement* hnHits;
@@ -63,10 +64,10 @@ private:
 //
 
 SiPixelPhase1MonitorTrackSoA::SiPixelPhase1MonitorTrackSoA(const edm::ParameterSet& iConfig) {
-  tokenSoATrack_ = consumes<PixelTrackHeterogeneousPhase1>(iConfig.getParameter<edm::InputTag>("pixelTrackSrc"));
+  tokenSoATrack_ = consumes(iConfig.getParameter<edm::InputTag>("pixelTrackSrc"));
   topFolderName_ = iConfig.getParameter<std::string>("topFolderName");  //"SiPixelHeterogeneous/PixelTrackSoA";
   useQualityCut_ = iConfig.getParameter<bool>("useQualityCut");
-  minQuality_ = pixelTrack::qualityByName(iConfig.getParameter<std::string>("minQuality"));
+  minQuality_ = pixelTrackSoA::qualityByName(iConfig.getParameter<std::string>("minQuality"));
 }
 
 //
@@ -79,23 +80,24 @@ void SiPixelPhase1MonitorTrackSoA::analyze(const edm::Event& iEvent, const edm::
     return;
   }
 
-  auto const& tsoa = *((tsoaHandle.product())->get());
-  auto maxTracks = tsoa.stride();
-  auto const* quality = tsoa.qualityData();
+  using helper = tracksUtilities<pixelTopology::Phase1>;
+  auto& tsoa = *tsoaHandle.product();
+  auto maxTracks = tsoa.view().metadata().size();
+  auto const* quality = tsoa.view().quality();
   int32_t nTracks = 0;
   int32_t nLooseAndAboveTracks = 0;
 
   for (int32_t it = 0; it < maxTracks; ++it) {
-    auto nHits = tsoa.nHits(it);
-    auto nLayers = tsoa.nLayers(it);
+    auto nHits = helper::nHits(tsoa.view(), it);
+    auto nLayers = tsoa.view()[it].nLayers();
     if (nHits == 0)
       break;  // this is a guard
-    float pt = tsoa.pt(it);
+    float pt = tsoa.view()[it].pt();
     if (!(pt > 0.))
       continue;
 
     // fill the quality for all tracks
-    pixelTrack::Quality qual = tsoa.quality(it);
+    pixelTrackSoA::Quality qual = quality[it];
     hquality->Fill(int(qual));
     nTracks++;
 
@@ -103,11 +105,11 @@ void SiPixelPhase1MonitorTrackSoA::analyze(const edm::Event& iEvent, const edm::
       continue;
 
     // fill parameters only for quality >= loose
-    float chi2 = tsoa.chi2(it);
-    float phi = tsoa.phi(it);
-    float zip = tsoa.zip(it);
-    float eta = tsoa.eta(it);
-    float tip = tsoa.tip(it);
+    float chi2 = tsoa.view()[it].chi2();
+    float phi = helper::phi(tsoa.view(), it);
+    float zip = helper::zip(tsoa.view(), it);
+    float eta = tsoa.view()[it].eta();
+    float tip = helper::tip(tsoa.view(), it);
 
     hchi2->Fill(chi2);
     hChi2VsPhi->Fill(phi, chi2);
@@ -166,7 +168,7 @@ void SiPixelPhase1MonitorTrackSoA::bookHistograms(DQMStore::IBooker& iBook,
   htip = iBook.book1D("tip", ";Track (quality #geq loose) TIP [cm];#tracks", 100, -0.5, 0.5);
   hquality = iBook.book1D("quality", ";Track Quality;#tracks", 7, -0.5, 6.5);
   uint i = 1;
-  for (const auto& q : pixelTrack::qualityName) {
+  for (const auto& q : pixelTrackSoA::qualityName) {
     hquality->setBinLabel(i, q, 1);
     i++;
   }

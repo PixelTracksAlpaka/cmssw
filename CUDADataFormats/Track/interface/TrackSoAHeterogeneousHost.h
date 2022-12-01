@@ -21,10 +21,10 @@ public:
       : cms::cuda::PortableHostCollection<TrackLayout<TrackerTraits>>(TrackerTraits::maxNumberOfTuples, stream) {}
 };
 
-namespace pixelTrackSoA {
+namespace pixelTrack {
 
   using TrackSoAHostPhase1 = TrackSoAHeterogeneousHost<pixelTopology::Phase1>;
-  using TrackSoAHostPhase2 = TrackSoAHeterogeneousHost<pixelTopology::Phase1>;
+  using TrackSoAHostPhase2 = TrackSoAHeterogeneousHost<pixelTopology::Phase2>;
 
 }  // namespace pixelTrack
 

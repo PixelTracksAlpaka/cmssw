@@ -3,7 +3,7 @@
 
 #include "CUDADataFormats/Common/interface/Product.h"
 #include "CUDADataFormats/Common/interface/HostProduct.h"
-#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT.h"
+// #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousT.h"
 
 #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
 #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
