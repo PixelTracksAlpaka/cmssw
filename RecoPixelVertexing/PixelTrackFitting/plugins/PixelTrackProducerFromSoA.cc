@@ -27,12 +27,16 @@
 #include "RecoPixelVertexing/PixelTrackFitting/interface/FitUtils.h"
 
 #include "CUDADataFormats/Common/interface/HostProduct.h"
-#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
+// #include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
 #include "CUDADataFormats/SiPixelCluster/interface/gpuClusteringConstants.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 
 #include "storeTracks.h"
 #include "CUDADataFormats/Common/interface/HostProduct.h"
+
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
+#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 
 /**
  * This class creates "leagcy"  reco::Track
@@ -40,8 +44,8 @@
  */
 template <typename TrackerTraits>
 class PixelTrackProducerFromSoAT : public edm::global::EDProducer<> {
-  using PixelTrackHeterogeneous = PixelTrackHeterogeneousT<TrackerTraits>;
-
+  using TrackSoAHost = TrackSoAHeterogeneousHost<TrackerTraits>;
+  using tracksHelpers = tracksUtilities<TrackerTraits>;
 public:
   using IndToEdm = std::vector<uint32_t>;
 
@@ -58,7 +62,7 @@ private:
 
   // Event Data tokens
   const edm::EDGetTokenT<reco::BeamSpot> tBeamSpot_;
-  const edm::EDGetTokenT<PixelTrackHeterogeneous> tokenTrack_;
+  const edm::EDGetTokenT<TrackSoAHost> tokenTrack_;
   const edm::EDGetTokenT<SiPixelRecHitCollectionNew> cpuHits_;
   const edm::EDGetTokenT<HMSstorage> hmsToken_;
   // Event Setup tokens
@@ -66,7 +70,7 @@ private:
   const edm::ESGetToken<TrackerTopology, TrackerTopologyRcd> ttTopoToken_;
 
   int32_t const minNumberOfHits_;
-  pixelTrack::Quality const minQuality_;
+  pixelTrackSoA::Quality const minQuality_;
 };
 
 template <typename TrackerTraits>
@@ -78,12 +82,12 @@ PixelTrackProducerFromSoAT<TrackerTraits>::PixelTrackProducerFromSoAT(const edm:
       idealMagneticFieldToken_(esConsumes()),
       ttTopoToken_(esConsumes()),
       minNumberOfHits_(iConfig.getParameter<int>("minNumberOfHits")),
-      minQuality_(pixelTrack::qualityByName(iConfig.getParameter<std::string>("minQuality"))) {
-  if (minQuality_ == pixelTrack::Quality::notQuality) {
+      minQuality_(pixelTrackSoA::qualityByName(iConfig.getParameter<std::string>("minQuality"))) {
+  if (minQuality_ == pixelTrackSoA::Quality::notQuality) {
     throw cms::Exception("PixelTrackConfiguration")
-        << iConfig.getParameter<std::string>("minQuality") + " is not a pixelTrack::Quality";
+        << iConfig.getParameter<std::string>("minQuality") + " is not a pixelTrackSoA::Quality";
   }
-  if (minQuality_ < pixelTrack::Quality::dup) {
+  if (minQuality_ < pixelTrackSoA::Quality::dup) {
     throw cms::Exception("PixelTrackConfiguration")
         << iConfig.getParameter<std::string>("minQuality") + " not supported";
   }
@@ -119,7 +123,7 @@ void PixelTrackProducerFromSoAT<TrackerTraits>::produce(edm::StreamID streamID,
                                                  reco::TrackBase::tight,
                                                  reco::TrackBase::tight,
                                                  reco::TrackBase::highPurity};
-  assert(reco::TrackBase::highPurity == recoQuality[int(pixelTrack::Quality::highPurity)]);
+  assert(reco::TrackBase::highPurity == recoQuality[int(pixelTrackSoA::Quality::highPurity)]);
 
   // std::cout << "Converting gpu helix in reco tracks" << std::endl;
 
@@ -139,6 +143,7 @@ void PixelTrackProducerFromSoAT<TrackerTraits>::produce(edm::StreamID streamID,
   std::vector<TrackingRecHit const *> hitmap;
   auto const &rcs = rechits.data();
   auto nhits = rcs.size();
+  std::cout << "nhits : " << nhits << std::endl;
   hitmap.resize(nhits, nullptr);
 
   auto const *hitsModuleStart = iEvent.get(hmsToken_).get();
@@ -152,6 +157,7 @@ void PixelTrackProducerFromSoAT<TrackerTraits>::produce(edm::StreamID streamID,
     auto i = fc[detI] + clus.pixelCluster().originalId();
     if (i >= hitmap.size())
       hitmap.resize(i + 256, nullptr);  // only in case of hit overflow in one module
+    std::cout << "hitmap "<< i << " detI " << detI << "fc[detI]" << fc[detI] << std::endl;
     assert(nullptr == hitmap[i]);
     hitmap[i] = &h;
   }
@@ -159,12 +165,10 @@ void PixelTrackProducerFromSoAT<TrackerTraits>::produce(edm::StreamID streamID,
   std::vector<const TrackingRecHit *> hits;
   hits.reserve(5);
 
-  const auto &tsoa = *iEvent.get(tokenTrack_);
-
-  auto const *quality = tsoa.qualityData();
-  auto const &fit = tsoa.stateAtBS;
-  auto const &hitIndices = tsoa.hitIndices;
-  auto nTracks = tsoa.nTracks();
+  auto &tsoa = iEvent.get(tokenTrack_);
+  auto const *quality = tsoa.view().quality();
+  auto const hitIndices = tsoa.view().hitIndices();
+  auto nTracks = tsoa.view().nTracks();
 
   tracks.reserve(nTracks);
 
@@ -173,19 +177,21 @@ void PixelTrackProducerFromSoAT<TrackerTraits>::produce(edm::StreamID streamID,
   //sort index by pt
   std::vector<int32_t> sortIdxs(nTracks);
   std::iota(sortIdxs.begin(), sortIdxs.end(), 0);
-  std::sort(
-      sortIdxs.begin(), sortIdxs.end(), [&](int32_t const i1, int32_t const i2) { return tsoa.pt(i1) > tsoa.pt(i2); });
+  std::sort(sortIdxs.begin(), sortIdxs.end(), [&](int32_t const i1, int32_t const i2) {
+    return tsoa.view()[i1].pt() > tsoa.view()[i2].pt();
+  });
 
   //store the index of the SoA: indToEdm[index_SoAtrack] -> index_edmTrack (if it exists)
   indToEdm.resize(sortIdxs.size(), -1);
   for (const auto &it : sortIdxs) {
-    auto nHits = tsoa.nHits(it);
+    // auto nHits = tsoa.nHits(it);
+    auto nHits = tracksHelpers::nHits(tsoa.view(), it);
     assert(nHits >= 3);
     auto q = quality[it];
 
     if (q < minQuality_)
       continue;
-    if (tsoa.nLayers(it) < minNumberOfHits_)
+    if (nHits < minNumberOfHits_) //move to nLayers?
       continue;
     indToEdm[it] = nt;
     ++nt;
@@ -197,20 +203,27 @@ void PixelTrackProducerFromSoAT<TrackerTraits>::produce(edm::StreamID streamID,
 
     // mind: this values are respect the beamspot!
 
-    float chi2 = tsoa.chi2(it);
-    float phi = tsoa.phi(it);
+    float chi2 = tsoa.view()[it].chi2();
+    float phi = tracksHelpers::phi(tsoa.view(), it);
 
     riemannFit::Vector5d ipar, opar;
     riemannFit::Matrix5d icov, ocov;
-    fit.copyToDense(ipar, icov, it);
+    // fit.copyToDense(ipar, icov, it);
+    tracksHelpers::template copyToDense<riemannFit::Vector5d, riemannFit::Matrix5d>(tsoa.view(), ipar, icov, it);
     riemannFit::transformToPerigeePlane(ipar, icov, opar, ocov);
 
     LocalTrajectoryParameters lpar(opar(0), opar(1), opar(2), opar(3), opar(4), 1.);
     AlgebraicSymMatrix55 m;
     for (int i = 0; i < 5; ++i)
+    {
       for (int j = i; j < 5; ++j)
-        m(i, j) = ocov(i, j);
-
+        {
+          std::cout << ocov(i, j) << " ";
+          m(i, j) = ocov(i, j);
+        }
+        std::cout << std::endl;
+     }
+    std::cout << std::endl;
     float sp = std::sin(phi);
     float cp = std::cos(phi);
     Surface::RotationType rot(sp, -cp, 0, 0, 0, -1.f, cp, sp, 0);

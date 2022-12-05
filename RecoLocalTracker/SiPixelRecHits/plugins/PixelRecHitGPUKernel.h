@@ -8,7 +8,8 @@
 #include "CUDADataFormats/BeamSpot/interface/BeamSpotCUDA.h"
 #include "CUDADataFormats/SiPixelCluster/interface/SiPixelClustersCUDA.h"
 #include "CUDADataFormats/SiPixelDigi/interface/SiPixelDigisCUDA.h"
-#include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHit2DHeterogeneous.h"
+// #include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHit2DHeterogeneous.h"
+#include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHitSoADevice.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 //#define GPU_DEBUG 1
 namespace pixelgpudetails {
@@ -26,7 +27,7 @@ namespace pixelgpudetails {
 
     using ParamsOnGPU = pixelCPEforGPU::ParamsOnGPUT<TrackerTraits>;
 
-    TrackingRecHit2DGPUT<TrackerTraits> makeHitsAsync(SiPixelDigisCUDA const& digis_d,
+    TrackingRecHitSoADevice<TrackerTraits> makeHitsAsync(SiPixelDigisCUDA const& digis_d,
                                                       SiPixelClustersCUDA const& clusters_d,
                                                       BeamSpotCUDA const& bs_d,
                                                       ParamsOnGPU const* cpeParams,

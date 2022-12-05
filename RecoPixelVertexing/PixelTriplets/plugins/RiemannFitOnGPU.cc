@@ -1,9 +1,7 @@
 #include "RiemannFitOnGPU.h"
 
 template <typename TrackerTraits>
-void HelixFitOnGPU<TrackerTraits>::launchRiemannKernelsOnCPU(HitsView const *hv,
-                                                             uint32_t nhits,
-                                                             uint32_t maxNumberOfTuples) {
+void HelixFitOnGPU<TrackerTraits>::launchRiemannKernelsOnCPU(HitSoAConstView<TrackerTraits> hv, uint32_t nhits, uint32_t maxNumberOfTuples) {
   assert(tuples_);
 
   //  Fit internals

@@ -20,7 +20,8 @@
 #include "DQMServices/Core/interface/MonitorElement.h"
 #include "DQMServices/Core/interface/DQMEDAnalyzer.h"
 #include "DQMServices/Core/interface/DQMStore.h"
-#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
 // for string manipulations
 #include <fmt/printf.h>
 
@@ -64,7 +65,7 @@ namespace {
 
 class SiPixelPhase1CompareTrackSoA : public DQMEDAnalyzer {
 public:
-  using PixelTrackSoAPhase1 = PixelTrackHeterogeneousT<pixelTopology::Phase1>;
+  using TrackSoAPhase1 = TrackSoAHeterogeneousHost<pixelTopology::Phase1>;
 
   explicit SiPixelPhase1CompareTrackSoA(const edm::ParameterSet&);
   ~SiPixelPhase1CompareTrackSoA() override = default;
@@ -73,11 +74,11 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:
-  const edm::EDGetTokenT<PixelTrackSoAPhase1> tokenSoATrackCPU_;
-  const edm::EDGetTokenT<PixelTrackSoAPhase1> tokenSoATrackGPU_;
+  const edm::EDGetTokenT<TrackSoAPhase1> tokenSoATrackCPU_;
+  const edm::EDGetTokenT<TrackSoAPhase1> tokenSoATrackGPU_;
   const std::string topFolderName_;
   const bool useQualityCut_;
-  const pixelTrack::Quality minQuality_;
+  const pixelTrackSoA::Quality minQuality_;
   const float dr2cut_;
   MonitorElement* hnTracks_;
   MonitorElement* hnLooseAndAboveTracks_;
@@ -115,17 +116,18 @@ private:
 //
 
 SiPixelPhase1CompareTrackSoA::SiPixelPhase1CompareTrackSoA(const edm::ParameterSet& iConfig)
-    : tokenSoATrackCPU_(consumes<PixelTrackSoAPhase1>(iConfig.getParameter<edm::InputTag>("pixelTrackSrcCPU"))),
-      tokenSoATrackGPU_(consumes<PixelTrackSoAPhase1>(iConfig.getParameter<edm::InputTag>("pixelTrackSrcGPU"))),
+    : tokenSoATrackCPU_(consumes(iConfig.getParameter<edm::InputTag>("pixelTrackSrcCPU"))),
+      tokenSoATrackGPU_(consumes(iConfig.getParameter<edm::InputTag>("pixelTrackSrcGPU"))),
       topFolderName_(iConfig.getParameter<std::string>("topFolderName")),
       useQualityCut_(iConfig.getParameter<bool>("useQualityCut")),
-      minQuality_(pixelTrack::qualityByName(iConfig.getParameter<std::string>("minQuality"))),
+      minQuality_(pixelTrackSoA::qualityByName(iConfig.getParameter<std::string>("minQuality"))),
       dr2cut_(iConfig.getParameter<double>("deltaR2cut")) {}
 
 //
 // -- Analyze
 //
 void SiPixelPhase1CompareTrackSoA::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  using helper = tracksUtilities<pixelTopology::Phase1>;
   const auto& tsoaHandleCPU = iEvent.getHandle(tokenSoATrackCPU_);
   const auto& tsoaHandleGPU = iEvent.getHandle(tokenSoATrackGPU_);
   if (not tsoaHandleCPU or not tsoaHandleGPU) {
@@ -140,12 +142,12 @@ void SiPixelPhase1CompareTrackSoA::analyze(const edm::Event& iEvent, const edm::
     return;
   }
 
-  auto const& tsoaCPU = *tsoaHandleCPU->get();
-  auto const& tsoaGPU = *tsoaHandleGPU->get();
-  auto maxTracksCPU = tsoaCPU.stride();  //this should be same for both?
-  auto maxTracksGPU = tsoaGPU.stride();  //this should be same for both?
-  auto const* qualityCPU = tsoaCPU.qualityData();
-  auto const* qualityGPU = tsoaGPU.qualityData();
+  auto& tsoaCPU = *tsoaHandleCPU.product();
+  auto& tsoaGPU = *tsoaHandleGPU.product();
+  auto maxTracksCPU = tsoaCPU.view().metadata().size();  //this should be same for both?
+  auto maxTracksGPU = tsoaGPU.view().metadata().size();  //this should be same for both?
+  auto const* qualityCPU = tsoaCPU.view().quality();
+  auto const* qualityGPU = tsoaGPU.view().quality();
   int32_t nTracksCPU = 0;
   int32_t nTracksGPU = 0;
   int32_t nLooseAndAboveTracksCPU = 0;
@@ -155,9 +157,9 @@ void SiPixelPhase1CompareTrackSoA::analyze(const edm::Event& iEvent, const edm::
   //Loop over GPU tracks and store the indices of the loose tracks. Whats happens if useQualityCut_ is false?
   std::vector<int32_t> looseTrkidxGPU;
   for (int32_t jt = 0; jt < maxTracksGPU; ++jt) {
-    if (tsoaGPU.nHits(jt) == 0)
+    if (helper::nHits(tsoaGPU.view(), jt) == 0)
       break;  // this is a guard
-    if (!(tsoaGPU.pt(jt) > 0.))
+    if (!(tsoaGPU.view()[jt].pt() > 0.))
       continue;
     nTracksGPU++;
     if (useQualityCut_ && qualityGPU[jt] < minQuality_)
@@ -168,9 +170,21 @@ void SiPixelPhase1CompareTrackSoA::analyze(const edm::Event& iEvent, const edm::
 
   //Now loop over CPU tracks//nested loop for loose gPU tracks
   for (int32_t it = 0; it < maxTracksCPU; ++it) {
-    if (tsoaCPU.nHits(it) == 0)
+
+    float chi2CPU = tsoaCPU.view()[it].chi2();
+    int nHitsCPU = helper::nHits(tsoaCPU.view(), it);
+
+    if (nHitsCPU == 0)
       break;  // this is a guard
-    if (!(tsoaCPU.pt(it) > 0.))
+
+    int8_t nLayersCPU = tsoaCPU.view()[it].nLayers();
+    float ptCPU = tsoaCPU.view()[it].pt();
+    float etaCPU = tsoaCPU.view()[it].eta();
+    float phiCPU = helper::phi(tsoaCPU.view(), it);
+    float zipCPU = helper::zip(tsoaCPU.view(), it);
+    float tipCPU = helper::tip(tsoaCPU.view(), it);
+
+    if (!(ptCPU > 0.))
       continue;
     nTracksCPU++;
     if (useQualityCut_ && qualityCPU[it] < minQuality_)
@@ -180,12 +194,11 @@ void SiPixelPhase1CompareTrackSoA::analyze(const edm::Event& iEvent, const edm::
     const int32_t notFound = -1;
     int32_t closestTkidx = notFound;
     float mindr2 = dr2cut_;
-    float etacpu = tsoaCPU.eta(it);
-    float phicpu = tsoaCPU.phi(it);
+
     for (auto gid : looseTrkidxGPU) {
-      float etagpu = tsoaGPU.eta(gid);
-      float phigpu = tsoaGPU.phi(gid);
-      float dr2 = reco::deltaR2(etacpu, phicpu, etagpu, phigpu);
+      float etaGPU = tsoaGPU.view()[gid].eta();
+      float phiGPU = helper::phi(tsoaGPU.view(), gid);
+      float dr2 = reco::deltaR2(etaCPU, phiCPU, etaGPU, phiGPU);
       if (dr2 > dr2cut_)
         continue;  // this is arbitrary
       if (mindr2 > dr2) {
@@ -194,27 +207,36 @@ void SiPixelPhase1CompareTrackSoA::analyze(const edm::Event& iEvent, const edm::
       }
     }
 
-    hpt_eta_tkAllCPU_->Fill(etacpu, tsoaCPU.pt(it));  //all CPU tk
-    hphi_z_tkAllCPU_->Fill(phicpu, tsoaCPU.zip(it));
+    hpt_eta_tkAllCPU_->Fill(etaCPU, ptCPU);  //all CPU tk
+    hphi_z_tkAllCPU_->Fill(phiCPU, zipCPU);
     if (closestTkidx == notFound)
       continue;
     nLooseAndAboveTracksCPU_matchedGPU++;
 
-    hchi2_->Fill(tsoaCPU.chi2(it), tsoaGPU.chi2(closestTkidx));
-    hnHits_->Fill(tsoaCPU.nHits(it), tsoaGPU.nHits(closestTkidx));
-    hnLayers_->Fill(tsoaCPU.nLayers(it), tsoaGPU.nLayers(closestTkidx));
-    hpt_->Fill(tsoaCPU.pt(it), tsoaGPU.pt(closestTkidx));
-    hptLogLog_->Fill(tsoaCPU.pt(it), tsoaGPU.pt(closestTkidx));
-    heta_->Fill(etacpu, tsoaGPU.eta(closestTkidx));
-    hphi_->Fill(phicpu, tsoaGPU.phi(closestTkidx));
-    hz_->Fill(tsoaCPU.zip(it), tsoaGPU.zip(closestTkidx));
-    htip_->Fill(tsoaCPU.tip(it), tsoaGPU.tip(closestTkidx));
-    hptdiffMatched_->Fill(tsoaCPU.pt(it) - tsoaGPU.pt(closestTkidx));
-    hetadiffMatched_->Fill(etacpu - tsoaGPU.eta(closestTkidx));
-    hphidiffMatched_->Fill(reco::deltaPhi(phicpu, tsoaGPU.phi(closestTkidx)));
-    hzdiffMatched_->Fill(tsoaCPU.zip(it) - tsoaGPU.zip(closestTkidx));
-    hpt_eta_tkAllCPUMatched_->Fill(etacpu, tsoaCPU.pt(it));  //matched to gpu
-    hphi_z_tkAllCPUMatched_->Fill(phicpu, tsoaCPU.zip(it));
+    float chi2GPU = tsoaGPU.view()[closestTkidx].chi2();
+    int nHitsGPU = helper::nHits(tsoaGPU.view(), closestTkidx);
+    int8_t nLayersGPU = tsoaGPU.view()[closestTkidx].nLayers();
+    float ptGPU = tsoaGPU.view()[closestTkidx].pt();
+    float etaGPU = tsoaGPU.view()[closestTkidx].eta();
+    float phiGPU = helper::phi(tsoaGPU.view(), closestTkidx);
+    float zipGPU = helper::zip(tsoaGPU.view(), closestTkidx);
+    float tipGPU = helper::tip(tsoaGPU.view(), closestTkidx);
+
+    hchi2_->Fill(chi2CPU, chi2GPU);
+    hnHits_->Fill(nHitsCPU, nHitsGPU);
+    hnLayers_->Fill(nLayersCPU, nLayersGPU);
+    hpt_->Fill(ptCPU, ptCPU);
+    hptLogLog_->Fill(ptCPU, ptGPU);
+    heta_->Fill(etaCPU, etaGPU);
+    hphi_->Fill(phiCPU, phiGPU);
+    hz_->Fill(zipCPU, zipGPU);
+    htip_->Fill(tipCPU, tipGPU);
+    hptdiffMatched_->Fill(ptCPU - ptGPU);
+    hetadiffMatched_->Fill(etaCPU - etaGPU);
+    hphidiffMatched_->Fill(reco::deltaPhi(phiCPU, phiGPU));
+    hzdiffMatched_->Fill(zipCPU - zipGPU);
+    hpt_eta_tkAllCPUMatched_->Fill(etaCPU, ptCPU);  //matched to gpu
+    hphi_z_tkAllCPUMatched_->Fill(phiCPU, zipCPU);
   }
   hnTracks_->Fill(nTracksCPU, nTracksGPU);
   hnLooseAndAboveTracks_->Fill(nLooseAndAboveTracksCPU, nLooseAndAboveTracksGPU);

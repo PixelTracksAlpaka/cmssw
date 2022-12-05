@@ -308,9 +308,9 @@ namespace pixelTopology {
     static constexpr uint32_t getDoubletsFromHistoMaxBlockSize = 64;  // for both x and y
     static constexpr uint32_t getDoubletsFromHistoMinBlocksPerMP = 16;
 
-    static constexpr uint32_t last_bpix1_detIndex = 108;
-    static constexpr uint32_t last_bpix2_detIndex = 324;
-    static constexpr uint32_t last_barrel_detIndex = 504;
+    static constexpr int16_t last_bpix1_detIndex = 108;
+    static constexpr int16_t last_bpix2_detIndex = 324;
+    static constexpr int16_t last_barrel_detIndex = 504;
 
     static constexpr uint32_t maxPixInModule = 6000;
 
@@ -399,9 +399,9 @@ namespace pixelTopology {
     static constexpr uint32_t getDoubletsFromHistoMaxBlockSize = 64;  // for both x and y
     static constexpr uint32_t getDoubletsFromHistoMinBlocksPerMP = 16;
 
-    static constexpr uint32_t last_bpix1_detIndex = 96;
-    static constexpr uint32_t last_bpix2_detIndex = 320;
-    static constexpr uint32_t last_barrel_detIndex = 1184;
+    static constexpr int16_t last_bpix1_detIndex = 96;
+    static constexpr int16_t last_bpix2_detIndex = 320;
+    static constexpr int16_t last_barrel_detIndex = 1184;
 
     static constexpr uint32_t maxPixInModule = 6000;
 

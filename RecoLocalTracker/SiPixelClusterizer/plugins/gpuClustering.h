@@ -10,7 +10,7 @@
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCompat.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cuda_assert.h"
 
-//#define GPU_DEBUG
+#define GPU_DEBUG
 
 namespace gpuClustering {
 
@@ -396,7 +396,7 @@ namespace gpuClustering {
         }
 #endif
 #ifdef GPU_DEBUG
-        if (thisModuleId % 100 == 1)
+        if (true and thisModuleId % 100 == 1)
           printf("%d clusters in module %d\n", foundClusters, thisModuleId);
 #endif
       }

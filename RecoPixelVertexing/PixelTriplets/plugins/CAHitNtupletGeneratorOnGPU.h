@@ -2,8 +2,14 @@
 #define RecoPixelVertexing_PixelTriplets_plugins_CAHitNtupletGeneratorOnGPU_h
 
 #include <cuda_runtime.h>
-#include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHit2DHeterogeneous.h"
-#include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
+// #include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHit2DHeterogeneous.h"
+// #include "CUDADataFormats/Track/interface/PixelTrackHeterogeneous.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
+
+#include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHitsUtilities.h"
+#include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHitSoAHost.h"
+#include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHitSoADevice.h"
 
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -24,28 +30,30 @@ namespace edm {
 template <typename TrackerTraits>
 class CAHitNtupletGeneratorOnGPU {
 public:
-  using PixelTrackHeterogeneous = PixelTrackHeterogeneousT<TrackerTraits>;
 
-  using HitsView = TrackingRecHit2DSOAViewT<TrackerTraits>;
-  using HitsOnGPU = TrackingRecHit2DGPUT<TrackerTraits>;
-  using HitsOnCPU = TrackingRecHit2DCPUT<TrackerTraits>;
-  using hindex_type = typename HitsView::hindex_type;
+  using HitsView = HitSoAView<TrackerTraits>;
+  using HitsConstView = HitSoAConstView<TrackerTraits>;
+  using HitsOnGPU = TrackingRecHitSoADevice<TrackerTraits>; //TODO move to OnDevice
+  using HitsOnCPU = TrackingRecHitSoAHost<TrackerTraits>; //TODO move to OnHost
+  using hindex_type = typename trackingRecHitSoA<TrackerTraits>::hindex_type;
 
   using HitToTuple = caStructures::HitToTupleT<TrackerTraits>;
   using TupleMultiplicity = caStructures::TupleMultiplicityT<TrackerTraits>;
   using OuterHitOfCell = caStructures::OuterHitOfCellT<TrackerTraits>;
 
   using GPUCACell = GPUCACellT<TrackerTraits>;
-  using OutputSoA = pixelTrack::TrackSoAT<TrackerTraits>;
-  using HitContainer = typename OutputSoA::HitContainer;
+  // using OutputSoA = pixelTrack::TrackSoAT<TrackerTraits>;
+  using TrackSoAHost = TrackSoAHeterogeneousHost<TrackerTraits>;
+  using TrackSoADevice = TrackSoAHeterogeneousDevice<TrackerTraits>;
+  using HitContainer = typename trackSoA<TrackerTraits>::HitContainer;
   using Tuple = HitContainer;
 
   using CellNeighborsVector = caStructures::CellNeighborsVectorT<TrackerTraits>;
   using CellTracksVector = caStructures::CellTracksVectorT<TrackerTraits>;
 
-  using Quality = pixelTrack::Quality;
+  using Quality = pixelTrackSoA::Quality;
 
-  using QualityCuts = pixelTrack::QualityCutsT<TrackerTraits>;
+  using QualityCuts = pixelTrackSoA::QualityCutsT<TrackerTraits>;
   using Params = caHitNtupletGenerator::ParamsT<TrackerTraits>;
   using Counters = caHitNtupletGenerator::Counters;
 
@@ -61,16 +69,16 @@ public:
   void beginJob();
   void endJob();
 
-  PixelTrackHeterogeneous makeTuplesAsync(HitsOnGPU const& hits_d, float bfield, cudaStream_t stream) const;
+  TrackSoADevice makeTuplesAsync(HitsOnGPU const& hits_d, float bfield, cudaStream_t stream) const;
 
-  PixelTrackHeterogeneous makeTuples(HitsOnCPU const& hits_d, float bfield) const;
+  TrackSoAHost makeTuples(HitsOnCPU  const& hits_d, float bfield) const;
 
 private:
-  void buildDoublets(HitsOnGPU const& hh, cudaStream_t stream) const;
+  void buildDoublets(HitsConstView hh, cudaStream_t stream) const;
 
-  void hitNtuplets(HitsOnGPU const& hh, const edm::EventSetup& es, bool useRiemannFit, cudaStream_t cudaStream);
+  void hitNtuplets(HitsConstView hh, const edm::EventSetup& es, bool useRiemannFit, cudaStream_t cudaStream);
 
-  void launchKernels(HitsOnGPU const& hh, bool useRiemannFit, cudaStream_t cudaStream) const;
+  void launchKernels(HitsConstView hh, bool useRiemannFit, cudaStream_t cudaStream) const;
 
   Params m_params;
 
