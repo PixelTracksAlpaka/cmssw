@@ -143,6 +143,7 @@ void PixelTrackProducerFromSoAT<TrackerTraits>::produce(edm::StreamID streamID,
   std::vector<TrackingRecHit const *> hitmap;
   auto const &rcs = rechits.data();
   auto nhits = rcs.size();
+  std::cout << "nhits : " << nhits << std::endl;
   hitmap.resize(nhits, nullptr);
 
   auto const *hitsModuleStart = iEvent.get(hmsToken_).get();
@@ -156,6 +157,7 @@ void PixelTrackProducerFromSoAT<TrackerTraits>::produce(edm::StreamID streamID,
     auto i = fc[detI] + clus.pixelCluster().originalId();
     if (i >= hitmap.size())
       hitmap.resize(i + 256, nullptr);  // only in case of hit overflow in one module
+    std::cout << "hitmap "<< i << " detI " << detI << "fc[detI]" << fc[detI] << std::endl;
     assert(nullptr == hitmap[i]);
     hitmap[i] = &h;
   }
@@ -213,9 +215,15 @@ void PixelTrackProducerFromSoAT<TrackerTraits>::produce(edm::StreamID streamID,
     LocalTrajectoryParameters lpar(opar(0), opar(1), opar(2), opar(3), opar(4), 1.);
     AlgebraicSymMatrix55 m;
     for (int i = 0; i < 5; ++i)
+    {
       for (int j = i; j < 5; ++j)
-        m(i, j) = ocov(i, j);
-
+        {
+          std::cout << ocov(i, j) << " ";
+          m(i, j) = ocov(i, j);
+        }
+        std::cout << std::endl;
+     }
+    std::cout << std::endl;
     float sp = std::sin(phi);
     float cp = std::cos(phi);
     Surface::RotationType rot(sp, -cp, 0, 0, 0, -1.f, cp, sp, 0);

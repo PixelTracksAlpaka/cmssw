@@ -81,8 +81,8 @@ private:
 SiPixelPhase1CompareRecHitsSoA::SiPixelPhase1CompareRecHitsSoA(const edm::ParameterSet& iConfig)
     : geomToken_(esConsumes<TrackerGeometry, TrackerDigiGeometryRecord, edm::Transition::BeginRun>()),
       topoToken_(esConsumes<TrackerTopology, TrackerTopologyRcd, edm::Transition::BeginRun>()),
-      tokenSoAHitsHost_(consumes(iConfig.getParameter<edm::InputTag>("pixelHitsSrcHost"))),
-      tokenSoAHitsDevice_(consumes(iConfig.getParameter<edm::InputTag>("pixelHitsSrcDevice"))),
+      tokenSoAHitsHost_(consumes(iConfig.getParameter<edm::InputTag>("pixelHitsSrcCPU"))),
+      tokenSoAHitsDevice_(consumes(iConfig.getParameter<edm::InputTag>("pixelHitsSrcGPU"))),
       topFolderName_(iConfig.getParameter<std::string>("topFolderName")),
       mind2cut_(iConfig.getParameter<double>("minD2cut")) {}
 //
@@ -232,8 +232,8 @@ void SiPixelPhase1CompareRecHitsSoA::bookHistograms(DQMStore::IBooker& iBook,
 void SiPixelPhase1CompareRecHitsSoA::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   // monitorpixelRecHitsSoA
   edm::ParameterSetDescription desc;
-  desc.add<edm::InputTag>("pixelHitsSrcHost", edm::InputTag("siPixelRecHitsPreSplittingSoA@Host"));
-  desc.add<edm::InputTag>("pixelHitsSrcDevice", edm::InputTag("siPixelRecHitsPreSplittingSoA@cuda"));
+  desc.add<edm::InputTag>("pixelHitsSrcCPU", edm::InputTag("siPixelRecHitsPreSplittingSoA@Host"));
+  desc.add<edm::InputTag>("pixelHitsSrcGPU", edm::InputTag("siPixelRecHitsPreSplittingSoA@cuda"));
   desc.add<std::string>("topFolderName", "SiPixelHeterogeneous/PixelRecHitsCompareDevicevsHost");
   desc.add<double>("minD2cut", 0.0001);
   descriptions.addWithDefaultLabel(desc);

@@ -223,7 +223,7 @@ def customizeHLTfor38761(process):
      if 'hltSiPixelRecHitsSoA' in process.__dict__:
          process.hltSiPixelRecHitsSoA.cpu =  cms.EDAlias(hltSiPixelRecHitsFromLegacy = cms.VPSet(
             cms.PSet(
-                type = cms.string('pixelTopologyPhase1TrackingRecHit2DCPUT')
+                type = cms.string('pixelTopologyPhase1TrackingRecHitSoAHost')
             ),
             cms.PSet(
                 type = cms.string('uintAsHostProduct')

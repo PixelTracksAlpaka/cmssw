@@ -37,7 +37,7 @@ public:
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
-  using HitModuleStart = std::array<uint32_t, gpuClustering::maxNumModules + 1>;
+  using HitModuleStart = std::array<uint32_t, TrackerTraits::numberOfModules + 1>;
   using HMSstorage = HostProduct<uint32_t[]>;
   using HitsOnHost = TrackingRecHitSoAHost<TrackerTraits>;
 
@@ -105,24 +105,24 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
   constexpr int nModules = TrackerTraits::numberOfModules;
   constexpr int startBPIX2 = pixelTopology::layerStart<TrackerTraits>(1);
 
-  // allocate a buffer for the indices of the clusters
-  auto hmsp = std::make_unique<uint32_t[]>(nModules + 1);
-  // hitsModuleStart is a non-owning pointer to the buffer
-  // auto hitsModuleStart = hmsp.get();
-  // wrap the buffer in a HostProduct
-  auto hms = std::make_unique<HMSstorage>(std::move(hmsp));
-  // move the HostProduct to the Event, without reallocating the buffer or affecting hitsModuleStart
-  iEvent.put(tokenModuleStart_, std::move(hms));
+  // // allocate a buffer for the indices of the clusters
+  // auto hmsp = std::make_unique<uint32_t[]>(nModules + 1);
+  // // hitsModuleStart is a non-owning pointer to the buffer
+  // // auto hitsModuleStart = hmsp.get();
+  // // wrap the buffer in a HostProduct
+  // auto hms = std::make_unique<HMSstorage>(std::move(hmsp));
+  // // move the HostProduct to the Event, without reallocating the buffer or affecting hitsModuleStart
+  // iEvent.put(tokenModuleStart_, std::move(hms));
 
   // legacy output
   auto legacyOutput = std::make_unique<SiPixelRecHitCollectionNew>();
 
   // storage
-  std::vector<uint16_t> xx;
-  std::vector<uint16_t> yy;
-  std::vector<uint16_t> adc;
-  std::vector<uint16_t> moduleInd;
-  std::vector<int32_t> clus;
+  // std::vector<uint16_t> xx;
+  // std::vector<uint16_t> yy;
+  // std::vector<uint16_t> adc;
+  // std::vector<uint16_t> moduleInd;
+  // std::vector<int32_t> clus;
 
   std::vector<edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster>> clusterRef;
 
@@ -137,12 +137,14 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
   // uint32_t moduleId_;
   // moduleStart_[1] = 0;  // we run sequentially....
 
-  cms::cuda::PortableHostCollection<SiPixelClustersCUDALayout<>> clusters_h(gpuClustering::maxNumModules + 1, nullptr);
+  cms::cuda::PortableHostCollection<SiPixelClustersCUDALayout<>> clusters_h(nModules + 1, nullptr);
 
-  memset(clusters_h.view().clusInModule(), 0, sizeof(HitModuleStart));  // needed??
-  memset(clusters_h.view().moduleStart(), 0, sizeof(HitModuleStart));
+  memset(clusters_h.view().clusInModule(), 0, (nModules + 1) * sizeof(uint32_t));  // needed??
+  memset(clusters_h.view().moduleStart(), 0, (nModules + 1) * sizeof(uint32_t));
+  memset(clusters_h.view().moduleId(), 0, (nModules + 1) * sizeof(uint32_t));
+  memset(clusters_h.view().clusModuleStart(), 0, (nModules + 1) * sizeof(uint32_t));
 
-  assert(0 == clusters_h.view()[gpuClustering::maxNumModules].clusInModule());
+  assert(0 == clusters_h.view()[nModules].clusInModule());
   clusters_h.view()[1].moduleStart() = 0;
 
   // SiPixelClustersCUDA::SiPixelClustersCUDASOAView clusterView{
@@ -166,7 +168,7 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
 
   // for (int i = 1, n = nModules + 1; i < n; ++i)
   //   hitsModuleStart[i] = hitsModuleStart[i - 1] + clusInModule_[i - 1];
-  for (int i = 1, n = nModules + 1; i < n; ++i) {
+  for (int i = 1; i  < nModules + 1; ++i) {
     clusters_h.view()[i].clusModuleStart() = clusters_h.view()[i - 1].clusModuleStart() + clusters_h.view()[i - 1].clusInModule();
   }
 
@@ -240,6 +242,7 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
     // moduleInd.clear();
     // clus.clear();
     clusterRef.clear();
+    clusters_h.view()[0].moduleId() = gind;
     // moduleId_ = gind;
     uint32_t ic = 0;
     ndigi = 0;
@@ -266,7 +269,7 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
       ic++;
     }
     assert(nclus == ic);
-    assert(clus.size() == ndigi);
+    // assert(clus.size() == ndigi);
     numberOfHits += nclus;
     // filled creates view
     // SiPixelDigisCUDASOAView digiView;
@@ -341,6 +344,15 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
                                          << numberOfDetUnits << " Dets"
                                          << "\n";
   // iEvent.put(std::move(output));
+
+  // allocate a buffer for the indices of the clusters
+  auto hmsp = std::make_unique<uint32_t[]>(nModules + 1);
+  // copy pointer to data (SoA view) to allocated buffer
+  memcpy(hmsp.get(),clusters_h.view().clusModuleStart(),nModules * sizeof(uint32_t));
+  // wrap the buffer in a HostProduct
+  auto hms = std::make_unique<HMSstorage>(std::move(hmsp));
+  // move the HostProduct to the Event, without reallocating the buffer or affecting hitsModuleStart
+  iEvent.put(tokenModuleStart_, std::move(hms));
   iEvent.emplace(tokenHit_, std::move(output));
   if (convert2Legacy_)
     iEvent.put(std::move(legacyOutput));
