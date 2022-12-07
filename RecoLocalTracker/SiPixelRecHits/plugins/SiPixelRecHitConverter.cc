@@ -243,6 +243,10 @@ namespace cms {
         // Make a RecHit and add it to the DetSet
         // old : recHitsOnDetUnit.push_back( new SiPixelRecHit( lp, le, detIdObject, &*clustIt) );
         SiPixelRecHit hit(lp, le, rqw, *genericDet, cluster);
+        std::cout << "ERRORS;"<< lp.x() << ";";
+        std::cout << lp.y() << ";";
+        std::cout << le.xx() << ";";
+        std::cout << le.yy() << std::endl;
         //
         // Now save it =================
         recHitsOnDetUnit.push_back(hit);

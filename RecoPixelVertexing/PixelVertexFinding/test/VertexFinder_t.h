@@ -129,7 +129,7 @@ int main() {
   stream = nullptr;
 
   zVertex::ZVertexSoAHost onGPU_d(stream);
-  gpuVertexFinder::workSpace::WorkSpaceSoAHost ws_d(stream);
+  gpuVertexFinder::workSpace::WorkSpaceSoAHost ws_d;
 #endif
 
   Event ev;

@@ -30,8 +30,27 @@ public:
 
   // This SoA Host is used basically only for DQM
   // so we  just need a slim constructor
+  explicit TrackingRecHitSoAHost(uint32_t nHits) : PortableHostCollection<TrackingRecHitSoALayout<>>(nHits) {}
+
   explicit TrackingRecHitSoAHost(uint32_t nHits, cudaStream_t stream)
       : cms::cuda::PortableHostCollection<HitLayout<TrackerTraits>>(nHits, stream) {}
+      
+  explicit TrackingRecHitSoAHost(uint32_t nHits,
+                                    bool isPhase2,
+                                    int32_t offsetBPIX2,
+                                    pixelCPEforGPU::ParamsOnGPU const* cpeParams,
+                                    uint32_t const* hitsModuleStart)
+         : PortableHostCollection<TrackingRecHitSoALayout<>>(nHits),
+           nHits_(nHits),
+           cpeParams_(cpeParams),
+           offsetBPIX2_(offsetBPIX2) {
+       nModules_ = isPhase2 ? phase2PixelTopology::numberOfModules : phase1PixelTopology::numberOfModules;
+       view().nHits() = nHits;
+       view().nMaxModules() = nModules_;
+       std::copy(hitsModuleStart, hitsModuleStart + nModules_ + 1, view().hitsModuleStart().begin());
+       memcpy(&(view().cpeParams()), cpeParams, sizeof(pixelCPEforGPU::ParamsOnGPU));
+       view().offsetBPIX2() = offsetBPIX2;
+     }
 
   explicit TrackingRecHitSoAHost(uint32_t nHits,
                                  int32_t offsetBPIX2,

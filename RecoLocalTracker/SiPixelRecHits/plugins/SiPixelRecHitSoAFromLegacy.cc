@@ -137,7 +137,7 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
   // uint32_t moduleId_;
   // moduleStart_[1] = 0;  // we run sequentially....
 
-  cms::cuda::PortableHostCollection<SiPixelClustersCUDALayout<>> clusters_h(nModules + 1, nullptr);
+  cms::cuda::PortableHostCollection<SiPixelClustersCUDALayout<>> clusters_h(nMaxModules + 1);
 
   memset(clusters_h.view().clusInModule(), 0, (nModules + 1) * sizeof(uint32_t));  // needed??
   memset(clusters_h.view().moduleStart(), 0, (nModules + 1) * sizeof(uint32_t));
@@ -179,8 +179,7 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
   HitsOnHost output(numberOfClusters,
                     clusters_h.view()[startBPIX2].clusModuleStart(),
                     &cpeView,
-                    clusters_h.view().clusModuleStart(),
-                    nullptr);
+                    clusters_h.view().clusModuleStart());
 
   // auto output = std::make_unique<TrackingRecHitSoAHost<TrackerTraits>>(
   //     numberOfClusters, hitsModuleStart[startBPIX2], &cpeView, hitsModuleStart, nullptr);
@@ -234,7 +233,7 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
       }
     }
     std::cout << "ndigi=" << ndigi << std::endl;
-    cms::cuda::PortableHostCollection<SiPixelDigisSoALayout<>> digis_h(ndigi, nullptr);
+    cms::cuda::PortableHostCollection<SiPixelDigisSoALayout<>> digis_h(ndigi);
 
     // xx.clear();
     // yy.clear();
@@ -305,6 +304,11 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
         // LocalError le(output->view()->xerrLocal(h), 0, output->view()->yerrLocal(h));
         LocalPoint lp(output.view()[h].xLocal(), output.view()[h].yLocal());
         LocalError le(output.view()[h].xerrLocal(), 0, output.view()[h].yerrLocal());
+        // std::cout << "ERRORSS;"<< output.view()[h].xLocal() << ";";
+        // std::cout << output.view()[h].yLocal() << ";";
+        // std::cout << output.view()[h].xerrLocal() << ";";
+        // std::cout << output.view()[h].yerrLocal() << std::endl;
+
         SiPixelRecHitQuality::QualWordType rqw = 0;
         SiPixelRecHit hit(lp, le, rqw, *genericDet, clusterRef[ih]);
         recHitsOnDetUnit.push_back(hit);

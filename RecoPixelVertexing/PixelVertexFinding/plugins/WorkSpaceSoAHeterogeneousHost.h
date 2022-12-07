@@ -9,7 +9,8 @@ template <int32_t S>
 class WorkSpaceSoAHeterogeneousHost : public cms::cuda::PortableHostCollection<WorkSpaceSoAHeterogeneousLayout<>> {
 public:
   WorkSpaceSoAHeterogeneousHost() = default;
-
+  
+  explicit WorkSpaceSoAHeterogeneousHost() : PortableHostCollection<WorkSpaceSoAHeterogeneousLayout<>>(S) {}
   // Constructor which specifies the SoA size and CUDA stream
   explicit WorkSpaceSoAHeterogeneousHost(cudaStream_t stream)
       : PortableHostCollection<WorkSpaceSoAHeterogeneousLayout<>>(S, stream) {}

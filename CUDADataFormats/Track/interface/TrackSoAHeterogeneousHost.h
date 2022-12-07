@@ -9,7 +9,7 @@
 template <typename TrackerTraits>
 class TrackSoAHeterogeneousHost : public cms::cuda::PortableHostCollection<TrackLayout<TrackerTraits>> {
 public:
-  TrackSoAHeterogeneousHost() = default;
+  explicit TrackSoAHeterogeneousHost() : PortableHostCollection<TrackSoAHeterogeneousLayout<>>(S) {}
 
   using cms::cuda::PortableHostCollection<TrackLayout<TrackerTraits>>::view;
   using cms::cuda::PortableHostCollection<TrackLayout<TrackerTraits>>::const_view;

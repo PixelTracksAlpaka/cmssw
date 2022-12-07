@@ -325,7 +325,7 @@ TrackSoAHeterogeneousHost<TrackerTraits> CAHitNtupletGeneratorOnGPU<TrackerTrait
   using TrackSoA = TrackSoAHeterogeneousHost<TrackerTraits>;
   using CPUKernels = CAHitNtupletGeneratorKernelsCPU<TrackerTraits>;
 
-  TrackSoA tracks(nullptr);
+  TrackSoA tracks;
 
   CPUKernels kernels(m_params);
   kernels.setCounters(m_counters);

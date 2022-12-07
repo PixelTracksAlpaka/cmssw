@@ -3,6 +3,10 @@
 #include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
 
+#include "WorkSpaceUtilities.h"
+#include "WorkSpaceSoAHeterogeneousHost.h"
+#include "WorkSpaceSoAHeterogeneousDevice.h"
+
 #include "gpuClusterTracksByDensity.h"
 #include "gpuClusterTracksDBSCAN.h"
 #include "gpuClusterTracksIterative.h"
@@ -110,7 +114,7 @@ template <typename TrackerTraits>
 #ifdef PIXVERTEX_DEBUG_PRODUCE
     std::cout << "producing Vertices on  CPU" << std::endl;
 #endif  // PIXVERTEX_DEBUG_PRODUCE
-    zVertex::ZVertexSoAHost vertices(nullptr);
+    zVertex::ZVertexSoAHost vertices;
 #endif
     auto soa = vertices.view();
 
@@ -125,7 +129,7 @@ template <typename TrackerTraits>
 #ifdef __CUDACC__
     auto ws_d = gpuVertexFinder::workSpace::WorkSpaceSoADevice(stream);
 #else
-    auto ws_d = gpuVertexFinder::workSpace::WorkSpaceSoAHost(nullptr);
+    auto ws_d = gpuVertexFinder::workSpace::WorkSpaceSoAHost;
 #endif
 
 #ifdef __CUDACC__
