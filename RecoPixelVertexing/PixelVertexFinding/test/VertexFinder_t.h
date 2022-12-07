@@ -130,6 +130,7 @@ int main() {
 
   zVertex::ZVertexSoAHost onGPU_d(stream);
   gpuVertexFinder::workSpace::WorkSpaceSoAHost ws_d;
+
 #endif
 
   Event ev;

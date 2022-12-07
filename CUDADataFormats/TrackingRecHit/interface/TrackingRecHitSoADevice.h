@@ -65,6 +65,7 @@ public:
     size_t rowSize = sizeof(float) * nHits();
     // printf("nModules=%d \n", nModules());
     // printf("nHits=%d \n", nHits());
+
     cudaCheck(cudaMemcpyAsync(ret.get(), view().xLocal(), rowSize * 4, cudaMemcpyDeviceToHost, stream));
     // cudaCheck(cudaMemcpyAsync(ret.get() + rowSize , view().yLocal() , rowSize, cudaMemcpyDeviceToHost, stream));
     // cudaCheck(cudaMemcpyAsync(ret.get() + size_t(rowSize * 2), view().xerrLocal() , rowSize, cudaMemcpyDeviceToHost, stream));

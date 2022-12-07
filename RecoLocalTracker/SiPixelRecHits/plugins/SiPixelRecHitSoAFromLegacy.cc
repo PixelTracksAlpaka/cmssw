@@ -181,6 +181,7 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
                     &cpeView,
                     clusters_h.view().clusModuleStart());
 
+
   // auto output = std::make_unique<TrackingRecHitSoAHost<TrackerTraits>>(
   //     numberOfClusters, hitsModuleStart[startBPIX2], &cpeView, hitsModuleStart, nullptr);
 
@@ -304,10 +305,6 @@ void SiPixelRecHitSoAFromLegacyT<TrackerTraits>::produce(edm::StreamID streamID,
         // LocalError le(output->view()->xerrLocal(h), 0, output->view()->yerrLocal(h));
         LocalPoint lp(output.view()[h].xLocal(), output.view()[h].yLocal());
         LocalError le(output.view()[h].xerrLocal(), 0, output.view()[h].yerrLocal());
-        // std::cout << "ERRORSS;"<< output.view()[h].xLocal() << ";";
-        // std::cout << output.view()[h].yLocal() << ";";
-        // std::cout << output.view()[h].xerrLocal() << ";";
-        // std::cout << output.view()[h].yerrLocal() << std::endl;
 
         SiPixelRecHitQuality::QualWordType rqw = 0;
         SiPixelRecHit hit(lp, le, rqw, *genericDet, clusterRef[ih]);

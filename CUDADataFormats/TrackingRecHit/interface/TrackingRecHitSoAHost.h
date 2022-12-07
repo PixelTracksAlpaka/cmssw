@@ -30,6 +30,7 @@ public:
 
   // This SoA Host is used basically only for DQM
   // so we  just need a slim constructor
+
   explicit TrackingRecHitSoAHost(uint32_t nHits) : PortableHostCollection<TrackingRecHitSoALayout<>>(nHits) {}
 
   explicit TrackingRecHitSoAHost(uint32_t nHits, cudaStream_t stream)
