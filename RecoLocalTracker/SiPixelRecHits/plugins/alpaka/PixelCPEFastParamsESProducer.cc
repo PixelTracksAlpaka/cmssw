@@ -16,19 +16,18 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   template <typename TrackerTraits>
   class PixelCPEFastParamsESProducerT : public ESProducer {
   public:
-    PixelCPEFastParamsESProducerT(const edm::ParameterSet& p);
+    PixelCPEFastParamsESProducerT(edm::ParameterSet const& iConfig);
     std::optional<pixelCPEforDevice::PixelCPEFastParams<Device, TrackerTraits>> produce(device::EventSetup& es);
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
   private:
     const device::ESGetToken<PixelCPEFast<TrackerTraits>, TkPixelCPERecord> cpeToken_;
-
-    edm::ParameterSet pset_;
   };
 
   template <typename TrackerTraits>
-  PixelCPEFastParamsESProducerT<TrackerTraits>::PixelCPEFastParamsESProducerT(const edm::ParameterSet& p) : pset_(p) {
-    auto const& myname = p.getParameter<std::string>("ComponentName");
+  PixelCPEFastParamsESProducerT<TrackerTraits>::PixelCPEFastParamsESProducerT(edm::ParameterSet const& iConfig) : ESProducer(iConfig) {
+    
+    auto const& myname = iConfig.getParameter<std::string>("ComponentName");
   }
 
   template <typename TrackerTraits>

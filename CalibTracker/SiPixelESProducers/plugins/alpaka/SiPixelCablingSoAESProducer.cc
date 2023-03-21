@@ -34,7 +34,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   class SiPixelCablingSoAESProducer : public ESProducer {
   public:
     SiPixelCablingSoAESProducer(edm::ParameterSet const& iConfig)
-        : useQuality_(iConfig.getParameter<bool>("UseQualityInfo")) {
+        : ESProducer(iConfig), useQuality_(iConfig.getParameter<bool>("UseQualityInfo")) {
       auto const& component = iConfig.getParameter<std::string>("ComponentName");
       auto cc = setWhatProduced(this, component);
       cablingMapToken_ = cc.consumes(edm::ESInputTag{"", iConfig.getParameter<std::string>("CablingMapLabel")});
