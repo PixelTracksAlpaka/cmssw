@@ -1,5 +1,5 @@
-#ifndef CalibTracker_Records_SiPixelGainCalibrationForHLTSoARcd_h
-#define CalibTracker_Records_SiPixelGainCalibrationForHLTSoARcd_h
+#ifndef DataFormats_SiPixelGainCalibrationForHLT_SiPixelGainCalibrationForHLTSoARecord_h
+#define DataFormats_SiPixelGainCalibrationForHLT_SiPixelGainCalibrationForHLTSoARecord_h
 
 #include "CondFormats/DataRecord/interface/SiPixelGainCalibrationForHLTRcd.h"
 #include "FWCore/Framework/interface/DependentRecordImplementation.h"
@@ -11,4 +11,8 @@ class SiPixelGainCalibrationForHLTSoARcd
           SiPixelGainCalibrationForHLTSoARcd,
           edm::mpl::Vector<SiPixelGainCalibrationForHLTRcd, TrackerDigiGeometryRecord>> {};
 
-#endif  // CalibTracker_Records_SiPixelGainCalibrationForHLTSoARcd_h
+
+// class SiPixelGainCalibrationForHLTSoARcd : public edm::eventsetup::EventSetupRecordImplementation<SiPixelGainCalibrationForHLTSoARcd> {};
+
+
+#endif  // DataFormats_SiPixelGainCalibrationForHLT_SiPixelGainCalibrationForHLTSoARecord_h

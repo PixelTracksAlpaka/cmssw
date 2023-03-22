@@ -1,5 +1,5 @@
-#ifndef DataFormats_SiPixelGainCalibrationForHLTSoA_interface_SiPixelClustersDevice_h
-#define DataFormats_SiPixelGainCalibrationForHLTSoA_interface_SiPixelClustersDevice_h
+#ifndef DataFormats_SiPixelGainCalibrationForHLTSoA_interface_SiPixelGainCalibrationForHLTDevice_h
+#define DataFormats_SiPixelGainCalibrationForHLTSoA_interface_SiPixelGainCalibrationForHLTDevice_h
 
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
@@ -9,6 +9,7 @@
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   using SiPixelGainCalibrationForHLTDevice = PortableCollection<SiPixelGainCalibrationForHLTLayout<>>;
+  using SiPixelGainCalibrationForHLTHost = PortableHostCollection<SiPixelGainCalibrationForHLTLayout<>>;
   // class SiPixelGainCalibrationForHLTDevice : public PortableCollection<SiPixelGainCalibrationForHLTLayout<>> {
   // public:
   //   SiPixelGainCalibrationForHLTDevice() = default;

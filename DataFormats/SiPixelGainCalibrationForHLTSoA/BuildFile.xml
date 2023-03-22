@@ -9,5 +9,5 @@
 <use name="HeterogeneousCore/AlpakaInterface"/>
 <flags ALPAKA_BACKENDS="1"/>
 <export>
-    <lib name="1"/>
+  <lib name="1"/>
 </export>

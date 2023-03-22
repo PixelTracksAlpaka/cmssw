@@ -675,12 +675,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         const auto blocks = cms::alpakatools::divide_up_by(std::max<int>(wordCounter, numberOfModules),
                                                            threadsPerBlockOrElementsPerThread);
         const auto workDiv = cms::alpakatools::make_workdiv<Acc1D>(blocks, threadsPerBlockOrElementsPerThread);
-/*
-        alpaka::enqueue(
-            queue,
-            alpaka::createTaskKernel<Acc1D>(
-                workDiv, gpuCalibPixel::calibDigis(), isRun2, digis_d->view(), clusters_d->view(), gains, wordCounter));
-*/
+
+        alpaka::exec<Acc1D>(queue,
+                        workDiv,
+                        gpuCalibPixel::calibDigis{}, isRun2);
+                        // ,
+                        // digis_d->view(), clusters_d->view(), gains, wordCounter);
+
         // clusters_d->view().moduleStart(),
         // clusters_d->clusInModule(),
         // clusters_d->clusModuleStart()));
@@ -786,10 +787,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           cms::alpakatools::divide_up_by(std::max<int>(numDigis, numberOfModules), threadsPerBlockOrElementsPerThread);
       const auto workDiv = cms::alpakatools::make_workdiv<Acc1D>(blocks, threadsPerBlockOrElementsPerThread);
 
-  /*    alpaka::enqueue(queue,
-                      alpaka::createTaskKernel<Acc1D>(
-                          workDiv, gpuCalibPixel::calibDigisPhase2(), digis_view, clusters_d->view(), numDigis));
-*/
+      // alpaka::enqueue(queue,
+      //                 alpaka::createTaskKernel<Acc1D>(
+      //                     workDiv, gpuCalibPixel::calibDigisPhase2{}, digis_view, clusters_d->view(), numDigis));
+
 #ifdef GPU_DEBUG
       alpaka::wait(queue);
       std::cout << "CUDA countModules kernel launch with " << blocks << " blocks of "

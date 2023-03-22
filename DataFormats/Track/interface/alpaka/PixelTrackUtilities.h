@@ -15,28 +15,28 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     // State at the Beam spot
     // phi,tip,1/pt,cotan(theta),zip
-    static ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE float charge(const TrackSoAConstView &tracks, int32_t i) {
+    ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE static float charge(const TrackSoAConstView &tracks, int32_t i) {
       return std::copysign(1.f, tracks[i].state()(2));
     }
 
-    static constexpr ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE float phi(const TrackSoAConstView &tracks, int32_t i) {
+    constexpr ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE static float phi(const TrackSoAConstView &tracks, int32_t i) {
       return tracks[i].state()(0);
     }
 
-    static constexpr ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE float tip(const TrackSoAConstView &tracks, int32_t i) {
+    constexpr ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE static float tip(const TrackSoAConstView &tracks, int32_t i) {
       return tracks[i].state()(1);
     }
 
-    static constexpr ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE float zip(const TrackSoAConstView &tracks, int32_t i) {
+    constexpr ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE static float zip(const TrackSoAConstView &tracks, int32_t i) {
       return tracks[i].state()(4);
     }
 
-    static constexpr ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE bool isTriplet(const TrackSoAConstView &tracks, int i) {
+    constexpr ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE static bool isTriplet(const TrackSoAConstView &tracks, int i) {
       return tracks[i].nLayers() == 3;
     }
 
     template <typename V3, typename M3, typename V2, typename M2>
-    static constexpr ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE void copyFromCircle(
+    constexpr ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE static void copyFromCircle(
         TrackSoAView &tracks, V3 const &cp, M3 const &ccov, V2 const &lp, M2 const &lcov, float b, int32_t i) {
       tracks[i].state() << cp.template cast<float>(), lp.template cast<float>();
 
@@ -57,7 +57,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }
 
     template <typename V5, typename M5>
-    static constexpr ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE void copyFromDense(TrackSoAView &tracks,
+    constexpr ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE static void copyFromDense(TrackSoAView &tracks,
                                                                             V5 const &v,
                                                                             M5 const &cov,
                                                                             int32_t i) {
@@ -68,7 +68,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }
 
     template <typename V5, typename M5>
-    static constexpr ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE void copyToDense(const TrackSoAConstView &tracks,
+    constexpr ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE static void copyToDense(const TrackSoAConstView &tracks,
                                                                           V5 &v,
                                                                           M5 &cov,
                                                                           int32_t i) {
@@ -80,7 +80,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
     }
 
-    static constexpr ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE int computeNumberOfLayers(const TrackSoAConstView &tracks,
+    constexpr ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE static int computeNumberOfLayers(const TrackSoAConstView &tracks,
                                                                                    int32_t i) {
       auto pdet = tracks.detIndices().begin(i);
       int nl = 1;
@@ -94,7 +94,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       return nl;
     }
 
-    static constexpr ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE int nHits(const TrackSoAConstView &tracks, int i) {
+    constexpr ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE static int nHits(const TrackSoAConstView &tracks, int i) {
       return tracks.detIndices().size(i);
     }
   };

@@ -1,5 +1,4 @@
 <library file="*.cc" name="CalibTrackerSiPixelESProducersPlugins">
-  <use name="cuda"/>
   <use name="CalibTracker/Records"/>
   <use name="CalibTracker/SiPixelESProducers"/>
   <use name="CalibTracker/StandaloneTrackerTopology"/>

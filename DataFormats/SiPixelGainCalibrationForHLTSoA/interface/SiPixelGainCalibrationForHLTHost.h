@@ -1,14 +1,14 @@
-#ifndef DataFormats_SiPixelGainCalibrationForHLTSoA_interface_SiPixelClustersDevice_h
-#define DataFormats_SiPixelGainCalibrationForHLTSoA_interface_SiPixelClustersDevice_h
+#ifndef DataFormats_SiPixelGainCalibrationForHLTSoA_interface_SiPixelGainCalibrationForHLTHost_h
+#define DataFormats_SiPixelGainCalibrationForHLTSoA_interface_SiPixelGainCalibrationForHLTHost_h
 
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
 #include "DataFormats/Portable/interface/PortableHostCollection.h"
 #include "SiPixelGainCalibrationForHLTLayout.h"
 
-namespace siPixelGains {
+// namespace siPixelGains {
   using SiPixelGainCalibrationForHLTHost = PortableHostCollection<SiPixelGainCalibrationForHLTLayout<>>;
-}
+// }
 // class SiPixelFedCablingMap;
 
 // class SiPixelGainCalibrationForHLTHost : public PortableHostCollection<SiPixelGainCalibrationForHLTLayout<>> {
