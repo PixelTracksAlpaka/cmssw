@@ -23,7 +23,7 @@
 #include "DataFormats/Vertex/interface/alpaka/ZVertexSoADevice.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/MakerMacros.h"
 
-#include "gpuVertexFinder.h"
+#include "vertexFinder.h"
 
 #undef PIXVERTEX_DEBUG_PRODUCE
 
@@ -32,13 +32,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   using namespace cms::alpakatools;
 
   template <typename TrackerTraits>
-  class PixelVertexProducerCUDAT : public global::EDProducer<> {
+  class PixelVertexProducerAlpaka : public global::EDProducer<> {
     using TkSoADevice = TrackSoADevice<TrackerTraits>;
-    using GPUAlgo = gpuVertexFinder::Producer<TrackerTraits>;
+    using GPUAlgo = vertexFinder::Producer<TrackerTraits>;
 
   public:
-    explicit PixelVertexProducerCUDAT(const edm::ParameterSet& iConfig);
-    ~PixelVertexProducerCUDAT() override = default;
+    explicit PixelVertexProducerAlpaka(const edm::ParameterSet& iConfig);
+    ~PixelVertexProducerAlpaka() override = default;
 
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
@@ -61,7 +61,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   };
 
   template <typename TrackerTraits>
-  PixelVertexProducerCUDAT<TrackerTraits>::PixelVertexProducerCUDAT(const edm::ParameterSet& conf)
+  PixelVertexProducerAlpaka<TrackerTraits>::PixelVertexProducerAlpaka(const edm::ParameterSet& conf)
       : onGPU_(conf.getParameter<bool>("onGPU")),
         gpuAlgo_(conf.getParameter<bool>("oneKernel"),
                  conf.getParameter<bool>("useDensity"),
@@ -79,7 +79,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   template <typename TrackerTraits>
-  void PixelVertexProducerCUDAT<TrackerTraits>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+  void PixelVertexProducerAlpaka<TrackerTraits>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     edm::ParameterSetDescription desc;
 
     // Only one of these three algos can be used at once.
@@ -103,7 +103,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   template <typename TrackerTraits>
-  void PixelVertexProducerCUDAT<TrackerTraits>::produceOnGPU(edm::StreamID streamID,
+  void PixelVertexProducerAlpaka<TrackerTraits>::produceOnGPU(edm::StreamID streamID,
                                                              device::Event& iEvent,
                                                              const device::EventSetup& iSetup) const {
     using TracksSoA = TrackSoADevice<TrackerTraits>;
@@ -113,18 +113,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   template <typename TrackerTraits>
-  void PixelVertexProducerCUDAT<TrackerTraits>::produce(edm::StreamID streamID,
+  void PixelVertexProducerAlpaka<TrackerTraits>::produce(edm::StreamID streamID,
                                                         device::Event& iEvent,
                                                         const device::EventSetup& iSetup) const {
     produceOnGPU(streamID, iEvent, iSetup);
   }
 
-  using PixelVertexProducerCUDA = PixelVertexProducerCUDAT<pixelTopology::Phase1>;
-  using PixelVertexProducerCUDAPhase1 = PixelVertexProducerCUDAT<pixelTopology::Phase1>;
-  using PixelVertexProducerCUDAPhase2 = PixelVertexProducerCUDAT<pixelTopology::Phase2>;
+  using PixelVertexProducerAlpakaPhase1 = PixelVertexProducerAlpaka<pixelTopology::Phase1>;
+  using PixelVertexProducerAlpakaPhase2 = PixelVertexProducerAlpaka<pixelTopology::Phase2>;
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
-DEFINE_FWK_ALPAKA_MODULE(PixelVertexProducerCUDA);
-DEFINE_FWK_ALPAKA_MODULE(PixelVertexProducerCUDAPhase1);
-DEFINE_FWK_ALPAKA_MODULE(PixelVertexProducerCUDAPhase2);
+DEFINE_FWK_ALPAKA_MODULE(PixelVertexProducerAlpakaPhase1);
+DEFINE_FWK_ALPAKA_MODULE(PixelVertexProducerAlpakaPhase2);

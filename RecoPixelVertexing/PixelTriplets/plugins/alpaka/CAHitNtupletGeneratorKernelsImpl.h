@@ -17,11 +17,11 @@
 #include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 
-#include "../CAStructures.h"
+#include "CAStructures.h"
 #include "CAHitNtupletGeneratorKernels.h"
-#include "GPUCACell.h"
-#include "gpuFishbone.h"
-#include "gpuPixelDoublets.h"
+#include "CACell.h"
+#include "CAFishbone.h"
+#include "CAPixelDoublets.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace caHitNtupletGeneratorKernels {
@@ -56,7 +56,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using HitContainer = typename TrackSoA<TrackerTraits>::HitContainer;
 
     template <typename TrackerTraits>
-    using HitsConstView = typename GPUCACellT<TrackerTraits>::HitsConstView;
+    using HitsConstView = typename CACellT<TrackerTraits>::HitsConstView;
 
     template <typename TrackerTraits>
     using QualityCuts = pixelTrack::QualityCutsT<TrackerTraits>;
@@ -75,7 +75,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     TupleMultiplicity<TrackerTraits> const *tupleMultiplicity,
                                     HitToTuple<TrackerTraits> const *hitToTuple,
                                     cms::alpakatools::AtomicPairCounter *apc,
-                                    GPUCACellT<TrackerTraits> const *__restrict__ cells,
+                                    CACellT<TrackerTraits> const *__restrict__ cells,
                                     uint32_t const *__restrict__ nCells,
                                     CellNeighborsVector<TrackerTraits> const *cellNeighbors,
                                     CellTracksVector<TrackerTraits> const *cellTracks,
@@ -182,7 +182,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
-                                    GPUCACellT<TrackerTraits> const *cells,
+                                    CACellT<TrackerTraits> const *cells,
                                     uint32_t const *__restrict__ nCells,
                                     TkSoAView<TrackerTraits> tracks_view) const {
         constexpr auto reject = Quality::dup;
@@ -205,7 +205,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
-                                    GPUCACellT<TrackerTraits> const *cells,
+                                    CACellT<TrackerTraits> const *cells,
                                     uint32_t const *__restrict__ nCells,
                                     TkSoAView<TrackerTraits> tracks_view,
                                     bool dupPassThrough) const {
@@ -246,7 +246,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
-                                    GPUCACellT<TrackerTraits> const *__restrict__ cells,
+                                    CACellT<TrackerTraits> const *__restrict__ cells,
                                     uint32_t const *__restrict__ nCells,
                                     TkSoAView<TrackerTraits> tracks_view,
                                     bool dupPassThrough) const {
@@ -339,12 +339,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     cms::alpakatools::AtomicPairCounter *apc1,
                                     cms::alpakatools::AtomicPairCounter *apc2,  // just to zero them
                                     HitsConstView<TrackerTraits> hh,
-                                    GPUCACellT<TrackerTraits> *cells,
+                                    CACellT<TrackerTraits> *cells,
                                     uint32_t *nCells,
                                     CellNeighborsVector<TrackerTraits> *cellNeighbors,
                                     OuterHitOfCell<TrackerTraits> const isOuterHitOfCell,
                                     CAParams<TrackerTraits> params) const {
-        using Cell = GPUCACellT<TrackerTraits>;
+        using Cell = CACellT<TrackerTraits>;
 
         const uint32_t dimIndexY = 0u;
         const uint32_t dimIndexX = 1u;
@@ -423,14 +423,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
                                     HitsConstView<TrackerTraits> hh,
                                     TkSoAView<TrackerTraits> tracks_view,
-                                    GPUCACellT<TrackerTraits> *__restrict__ cells,
+                                    CACellT<TrackerTraits> *__restrict__ cells,
                                     uint32_t const *nCells,
                                     CellTracksVector<TrackerTraits> *cellTracks,
                                     cms::alpakatools::AtomicPairCounter *apc,
                                     CAParams<TrackerTraits> params) const {
         // recursive: not obvious to widen
 
-        using Cell = GPUCACellT<TrackerTraits>;
+        using Cell = CACellT<TrackerTraits>;
 
 #ifdef GPU_DEBUG
         const uint32_t threadIdx(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
@@ -479,9 +479,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
-                                    GPUCACellT<TrackerTraits> *__restrict__ cells,
+                                    CACellT<TrackerTraits> *__restrict__ cells,
                                     uint32_t const *nCells) const {
-        using Cell = GPUCACellT<TrackerTraits>;
+        using Cell = CACellT<TrackerTraits>;
         for (auto idx : cms::alpakatools::elements_with_stride(acc, (*nCells))) {
           auto &thisCell = cells[idx];
           if (!thisCell.tracks().empty())

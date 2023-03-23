@@ -1,5 +1,5 @@
-#ifndef DataFormats_SiPixelDigi_interface_SiPixelDigiErrorsAlpaka_h
-#define DataFormats_SiPixelDigi_interface_SiPixelDigiErrorsAlpaka_h
+#ifndef DataFormats_SiPixelDigi_SiPixelDigiErrorsAlpaka_h
+#define DataFormats_SiPixelDigi_SiPixelDigiErrorsAlpaka_h
 
 #include <utility>
 

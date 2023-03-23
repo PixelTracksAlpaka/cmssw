@@ -1,7 +1,6 @@
-#ifndef RecoPixelVertexing_PixelVertexFinding_plugins_alpaka_PixelVertexWorkSpaceLayout_h
-#define RecoPixelVertexing_PixelVertexFinding_plugins_alpaka_PixelVertexWorkSpaceLayout_h
+#ifndef RecoPixelVertexing_PixelVertexFinding_PixelVertexWorkSpaceLayout_h
+#define RecoPixelVertexing_PixelVertexFinding_PixelVertexWorkSpaceLayout_h
 
-#include <alpaka/alpaka.hpp>
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 
 // Intermediate data used in the vertex reco algos
@@ -16,7 +15,7 @@ GENERATE_SOA_LAYOUT(PixelVertexWSSoALayout,
                     SOA_SCALAR(uint32_t, ntrks),           // number of "selected tracks"
                     SOA_SCALAR(uint32_t, nvIntermediate))  // the number of vertices after splitting pruning etc.
 
-namespace gpuVertexFinder {
+namespace vertexFinder {
   namespace workSpace {
     using PixelVertexWorkSpaceSoALayout = PixelVertexWSSoALayout<>;
     using PixelVertexWorkSpaceSoAView = PixelVertexWSSoALayout<>::View;

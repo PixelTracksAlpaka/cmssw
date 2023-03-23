@@ -1,5 +1,5 @@
-#ifndef DataFormats_SiPixelClusterSoA_Alpaka_Classes_rocm_h
-#define DataFormats_SiPixelClusterSoA_Alpaka_Classes_rocm_h
+#ifndef DataFormats_SiPixelClusterSoA_alpaka_Classes_rocm_h
+#define DataFormats_SiPixelClusterSoA_alpaka_Classes_rocm_h
 
 #include "DataFormats/Common/interface/Wrapper.h"
 #include "DataFormats/Portable/interface/Product.h"

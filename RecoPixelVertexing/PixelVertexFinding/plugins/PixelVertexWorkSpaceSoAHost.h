@@ -1,27 +1,22 @@
 #ifndef RecoPixelVertexing_PixelVertexFinding_PixelVertexWorkSpaceSoAHost_h
 #define RecoPixelVertexing_PixelVertexFinding_PixelVertexWorkSpaceSoAHost_h
-#include <alpaka/alpaka.hpp>
-#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
-#include "DataFormats/Portable/interface/PortableHostCollection.h"
-#include "DataFormats/Vertex/interface/ZVertexDefinitions.h"
-#include "PixelVertexWorkSpaceLayout.h"
+
+#include "CUDADataFormats/Common/interface/PortableHostCollection.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/PixelVertexWorkSpaceUtilities.h"
 
 template <int32_t S>
-class PixelVertexWorkSpaceSoAHost : public PortableHostCollection<PixelVertexWSSoALayout<>> {
+class PixelVertexWorkSpaceSoAHost : public cms::cuda::PortableHostCollection<PixelVertexWSSoALayout<>> {
 public:
-  //explicit PixelVertexWorkSpaceSoAHost() : PortableHostCollection<PixelVertexWSSoALayout<>>(S) {}
-
+  explicit PixelVertexWorkSpaceSoAHost() : PortableHostCollection<PixelVertexWSSoALayout<>>(S) {}
   // Constructor which specifies the SoA size and CUDA stream
-  template <typename TQueue>
-  explicit PixelVertexWorkSpaceSoAHost(TQueue queue) : PortableHostCollection<PixelVertexWSSoALayout<>>(S, queue) {}
-
-  explicit PixelVertexWorkSpaceSoAHost(alpaka_common::DevHost const& host)
-      : PortableHostCollection<PixelVertexWSSoALayout<>>(S, host) {}
+  explicit PixelVertexWorkSpaceSoAHost(cudaStream_t stream)
+      : PortableHostCollection<PixelVertexWSSoALayout<>>(S, stream) {}
 };
 
 namespace gpuVertexFinder {
   namespace workSpace {
-    using PixelVertexWorkSpaceSoAHost = PixelVertexWorkSpaceSoAHost<zVertex::MAXTRACKS>;
+    using PixelVertexWorkSpaceSoAHost = PixelVertexWorkSpaceSoAHost<zVertex::utilities::MAXTRACKS>;
   }
 }  // namespace gpuVertexFinder
 #endif

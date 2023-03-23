@@ -5,7 +5,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/CopyToDevice.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
-#include "DataFormats/SiPixelClusterSoA/interface/gpuClusteringConstants.h"
+#include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "DataFormats/GeometrySurface/interface/SOARotation.h"
 #include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
 #include "DataFormats/TrackingRecHitSoA/interface/SiPixelHitStatus.h"
