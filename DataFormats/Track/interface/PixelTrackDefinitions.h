@@ -1,5 +1,5 @@
-#ifndef DataFormats_Track_interface_PixelTrackDefinitions_h
-#define DataFormats_Track_interface_PixelTrackDefinitions_h
+#ifndef DataFormats_Track_PixelTrackDefinitions_h
+#define DataFormats_Track_PixelTrackDefinitions_h
 #include <string>
 #include <algorithm>
 

@@ -1,5 +1,5 @@
-#ifndef DataFormats_SiPixelDigi_interface_SiPixelDigisErrorLayout_h
-#define DataFormats_SiPixelDigi_interface_SiPixelDigisErrorLayout_h
+#ifndef DataFormats_SiPixelDigi_SiPixelDigisErrorLayout_h
+#define DataFormats_SiPixelDigi_SiPixelDigisErrorLayout_h
 
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 #include "DataFormats/SiPixelRawData/interface/SiPixelErrorCompact.h"
@@ -10,4 +10,4 @@ using SiPixelDigisErrorLayoutSoA = SiPixelDigisErrorLayout<>;
 using SiPixelDigisErrorLayoutSoAView = SiPixelDigisErrorLayout<>::View;
 using SiPixelDigisErrorLayoutSoAConstView = SiPixelDigisErrorLayout<>::ConstView;
 
-#endif  // DataFormats_SiPixelDigi_interface_SiPixelDigisErrorLayout_h
+#endif  // DataFormats_SiPixelDigi_SiPixelDigisErrorLayout_h

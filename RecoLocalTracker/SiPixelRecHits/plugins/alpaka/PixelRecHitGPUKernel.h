@@ -1,5 +1,5 @@
-#ifndef RecoLocalTracker_SiPixelRecHits_plugins_alpaka_PixelRecHitGPUKernel_h
-#define RecoLocalTracker_SiPixelRecHits_plugins_alpaka_PixelRecHitGPUKernel_h
+#ifndef RecoLocalTracker_SiPixelRecHits_PixelRecHitGPUKernel_h
+#define RecoLocalTracker_SiPixelRecHits_PixelRecHitGPUKernel_h
 
 #include <cstdint>
 
@@ -39,4 +39,4 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }  // namespace pixelgpudetails
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
-#endif  // RecoLocalTracker_SiPixelRecHits_plugins_alpaka_PixelRecHitGPUKernel_h
+#endif  // RecoLocalTracker_SiPixelRecHits_PixelRecHitGPUKernel_h

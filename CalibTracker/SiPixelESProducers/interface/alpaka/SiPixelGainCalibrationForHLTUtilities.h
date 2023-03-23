@@ -1,11 +1,11 @@
 
-#ifndef CalibTracker_SiPixelESProducers_interface_alpaka_SiPixelGainUtilities_h
-#define CalibTracker_SiPixelESProducers_interface_alpaka_SiPixelGainUtilities_h
+#ifndef CalibTracker_SiPixelESProducers_SiPixelGainUtilities_h
+#define CalibTracker_SiPixelESProducers_SiPixelGainUtilities_h
 
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
 #include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
-#include "DataFormats/SiPixelGainCalibrationForHLTSoA/interface/SiPixelGainCalibrationForHLTLayout.h"
+#include "CalibTracker/SiPixelESProducers/interface/SiPixelGainCalibrationForHLTLayout.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
@@ -45,4 +45,4 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   };
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
-#endif //CalibTracker_SiPixelESProducers_interface_alpaka_SiPixelGainUtilities_h
+#endif //CalibTracker_SiPixelESProducers_alpaka_SiPixelGainUtilities_h

@@ -6,4 +6,4 @@
 
 class SiPixelMappingSoAESRecord : public edm::eventsetup::EventSetupRecordImplementation<SiPixelMappingSoAESRecord> {};
 
-#endif
+#endif //CalibTracker_SiPixelESProducers_SiPixelMappingSoAESRecord_h

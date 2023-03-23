@@ -1,5 +1,5 @@
-#ifndef CalibTracker_SiPixelESProducers_interface_SiPixelMappingLayout_h
-#define CalibTracker_SiPixelESProducers_interface_SiPixelMappingLayout_h
+#ifndef CalibTracker_SiPixelESProducers_SiPixelMappingLayout_h
+#define CalibTracker_SiPixelESProducers_SiPixelMappingLayout_h
 
 #include <array>
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
@@ -21,4 +21,4 @@ using SiPixelMappingLayoutSoA = SiPixelMappingLayout<>;
 using SiPixelMappingLayoutSoAView = SiPixelMappingLayout<>::View;
 using SiPixelMappingLayoutSoAConstView = SiPixelMappingLayout<>::ConstView;
 
-#endif  // CalibTracker_SiPixelESProducers_interface_SiPixelMappingLayout_h
+#endif  // CalibTracker_SiPixelESProducers_SiPixelMappingLayout_h

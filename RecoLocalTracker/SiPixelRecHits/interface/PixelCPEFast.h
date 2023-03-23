@@ -5,11 +5,10 @@
 
 #include "CondFormats/SiPixelTransient/interface/SiPixelGenError.h"
 #include "CondFormats/SiPixelTransient/interface/SiPixelTemplate.h"
-#include "DataFormats/PixelCPEFastParams/interface/PixelCPEFastParams.h"
+#include "HeterogeneousCore/CUDACore/interface/ESProduct.h"
+#include "HeterogeneousCore/CUDAUtilities/interface/HostAllocator.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEGenericBase.h"
-// #include "RecoLocalTracker/SiPixelRecHits/interface/alpaka/pixelCPEforGPU.h"
-// #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
-#include "DataFormats/PixelCPEFastParams/interface/PixelCPEFastParams.h"
+#include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforGPU.h"
 #include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
 
 class MagneticField;
@@ -30,11 +29,13 @@ public:
 
   // The return value can only be used safely in kernels launched on
   // the same cudaStream, or after cudaStreamSynchronize.
-  using ParamsOnDevice = pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>;
-  using LayerGeometry = pixelCPEforDevice::LayerGeometryT<TrackerTraits>;
+  using ParamsOnGPU = pixelCPEforGPU::ParamsOnGPUT<TrackerTraits>;
+  using LayerGeometry = pixelCPEforGPU::LayerGeometryT<TrackerTraits>;
   using AverageGeometry = pixelTopology::AverageGeometryT<TrackerTraits>;
 
-  ParamsOnDevice const &getCPEFastParams() const { return cpeParams_; }
+  const ParamsOnGPU *getGPUProductAsync(cudaStream_t cudaStream) const;
+
+  ParamsOnGPU const &getCPUProduct() const { return cpuData_; }
 
 private:
   LocalPoint localPosition(DetParam const &theDetParam, ClusterParam &theClusterParam) const override;
@@ -44,9 +45,23 @@ private:
 
   //--- DB Error Parametrization object, new light templates
   std::vector<SiPixelGenErrorStore> thePixelGenError_;
-  ParamsOnDevice cpeParams_;
 
-  void initializeParams();
+  // allocate this with posix malloc to be compatible with the cpu workflow
+  std::vector<pixelCPEforGPU::DetParams> detParamsGPU_;
+  pixelCPEforGPU::CommonParams commonParamsGPU_;
+  LayerGeometry layerGeometry_;
+  AverageGeometry averageGeometry_;
+  ParamsOnGPU cpuData_;
+
+  struct GPUData {
+    ~GPUData();
+    // not needed if not used on CPU...
+    ParamsOnGPU paramsOnGPU_h;
+    ParamsOnGPU *paramsOnGPU_d = nullptr;  // copy of the above on the Device
+  };
+  cms::cuda::ESProduct<GPUData> gpuData_;
+
+  void fillParamsForGpu();
 };
 
 #endif  // RecoLocalTracker_SiPixelRecHits_PixelCPEFast_h
