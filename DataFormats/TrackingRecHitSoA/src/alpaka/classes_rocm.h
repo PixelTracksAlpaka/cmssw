@@ -1,5 +1,5 @@
-#ifndef DataFormats_TrackingRecHitSoA_Alpaka_Classes_CUDA_h
-#define DataFormats_TrackingRecHitSoA_Alpaka_Classes_CUDA_h
+#ifndef DataFormats_TrackingRecHitSoA_alpaka_Classes_CUDA_h
+#define DataFormats_TrackingRecHitSoA_alpaka_Classes_CUDA_h
 
 #include "DataFormats/Common/interface/Wrapper.h"
 #include "DataFormats/Portable/interface/Product.h"

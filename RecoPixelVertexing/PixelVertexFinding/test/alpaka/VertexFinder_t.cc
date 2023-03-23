@@ -10,8 +10,8 @@
 #include "DataFormats/Vertex/interface/alpaka/ZVertexSoADevice.h"
 
 #include "RecoPixelVertexing/PixelVertexFinding/plugins/PixelVertexWorkSpaceLayout.h"
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/PixelVertexWorkSpaceSoAHost.h"
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/PixelVertexWorkSpaceSoADevice.h"
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/PixelVertexWorkSpaceSoAHostAlpaka.h"
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/PixelVertexWorkSpaceSoADeviceAlpaka.h"
 
 using namespace std;
 using namespace ALPAKA_ACCELERATOR_NAMESPACE;

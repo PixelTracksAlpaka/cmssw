@@ -3,7 +3,7 @@
 #include "CondFormats/SiPixelObjects/interface/SiPixelFedCablingMap.h"
 #include "CondFormats/SiPixelObjects/interface/SiPixelFedCablingTree.h"
 #include "CondFormats/SiPixelObjects/interface/SiPixelQuality.h"
-#include "DataFormats/SiPixelClusterSoA/interface/gpuClusteringConstants.h"
+#include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "CalibTracker/SiPixelESProducers/interface/SiPixelMappingHost.h"
 #include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelMappingDevice.h"
 #include "FWCore/Framework/interface/ESTransientHandle.h"
@@ -98,8 +98,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               else
                 mapView[index].badRocs() = false;
             } else {  // store some dummy number
-              mapView[index].rawId() = gpuClustering::invalidModuleId;
-              mapView[index].rocInDet() = gpuClustering::invalidModuleId;
+              mapView[index].rawId() = pixelClustering::invalidModuleId;
+              mapView[index].rocInDet() = pixelClustering::invalidModuleId;
               mapView[index].badRocs() = true;
               mapView[index].modToUnpDefault() = true;
             }
@@ -119,8 +119,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       auto trackerGeom = iRecord.getTransientHandle(geometryToken_);
 
       for (int i = 1; i < index; i++) {
-        if (mapView[i].rawId() == gpuClustering::invalidModuleId) {
-          mapView[i].moduleId() = gpuClustering::invalidModuleId;
+        if (mapView[i].rawId() == pixelClustering::invalidModuleId) {
+          mapView[i].moduleId() = pixelClustering::invalidModuleId;
         } else {
           /*
           std::cout << mapView[i].rawId()[i] << std::endl;

@@ -1,4 +1,4 @@
-#include "DataFormats/SiPixelClusterSoA/interface/gpuClusteringConstants.h"
+#include "CUDADataFormats/SiPixelCluster/interface/gpuClusteringConstants.h"
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/DetId/interface/DetId.h"

@@ -18,7 +18,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   void CAHitNtupletGeneratorKernels<TrackerTraits>::launchKernels(const HitsConstView &hh,
                                                                   TkSoAView &tracks_view,
                                                                   Queue &queue) {
-    using namespace gpuPixelDoublets;
+    using namespace caPixelDoublets;
     using namespace caHitNtupletGeneratorKernels;
 
     // zero tuples
@@ -72,7 +72,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       const auto fishboneWorkDiv = cms::alpakatools::make_workdiv<Acc2D>(blks, thrs);
       alpaka::exec<Acc2D>(queue,
                           fishboneWorkDiv,
-                          fishbone<TrackerTraits>{},
+                          CAFishbone<TrackerTraits>{},
                           hh,
                           this->device_theCells_.data(),
                           this->device_nCells_.data(),
@@ -179,7 +179,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       alpaka::exec<Acc2D>(queue,
                           workDiv2D,
-                          fishbone<TrackerTraits>{},
+                          CAFishbone<TrackerTraits>{},
                           hh,
                           this->device_theCells_.data(),
                           this->device_nCells_.data(),
@@ -199,13 +199,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                                                   Queue &queue) {
     int32_t nhits = hh.metadata().size();
 
-    using namespace gpuPixelDoublets;
+    using namespace caPixelDoublets;
 
-    using GPUCACell = GPUCACellT<TrackerTraits>;
-    using OuterHitOfCell = typename GPUCACell::OuterHitOfCell;
-    using CellNeighbors = typename GPUCACell::CellNeighbors;
-    using CellTracks = typename GPUCACell::CellTracks;
-    using OuterHitOfCellContainer = typename GPUCACell::OuterHitOfCellContainer;
+    using CACell = CACellT<TrackerTraits>;
+    using OuterHitOfCell = typename CACell::OuterHitOfCell;
+    using CellNeighbors = typename CACell::CellNeighbors;
+    using CellTracks = typename CACell::CellTracks;
+    using OuterHitOfCellContainer = typename CACell::OuterHitOfCellContainer;
 
     // this->isOuterHitOfCell_ = OuterHitOfCell{this->device_isOuterHitOfCell_.get(), offsetBPIX2};
 
