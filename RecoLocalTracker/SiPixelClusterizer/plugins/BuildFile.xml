@@ -1,9 +1,6 @@
 <use name="boost_serialization"/>
 <use name="DataFormats/SiPixelClusterSoA"/>
 <use name="DataFormats/SiPixelDigiSoA"/>
-<use name="DataFormats/SiPixelMappingSoA"/>
-<une name="DataFormats/SiPixelGainCalibrationForHLTSoA"/>
-<use name="CalibTracker/SiPixelESProducers"/>
 <use name="DataFormats/Common"/>
 <use name="DataFormats/SiPixelCluster"/>
 <use name="EventFilter/SiPixelRawToDigi"/>
@@ -15,14 +12,15 @@
 
 <library file="alpaka/*.cc" name="RecoLocalTrackerSiPixelClusterizerPlugins">
   <use name="alpaka"/>
+  <use name="CalibTracker/Records"/>
+  <use name="CalibTracker/SiPixelESProducers"/>
+  <use name="HeterogeneousCore/AlpakaTest"/>
   <use name="DataFormats/Portable"/>
   <use name="FWCore/Framework"/>
   <use name="FWCore/ParameterSet"/>
   <use name="FWCore/Utilities"/>
   <use name="HeterogeneousCore/AlpakaCore"/>
   <use name="HeterogeneousCore/AlpakaInterface"/>
-  <use name="DataFormats/SiPixelMappingSoA"/>
-  <une name="DataFormats/SiPixelGainCalibrationForHLTSoA"/>
   <flags ALPAKA_BACKENDS="1"/>
   <flags EDM_PLUGIN="1"/>
 </library>

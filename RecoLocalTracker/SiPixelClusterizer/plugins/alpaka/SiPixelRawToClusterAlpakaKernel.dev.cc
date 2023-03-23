@@ -27,8 +27,8 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 
-#include "DataFormats/SiPixelGainCalibrationForHLTSoA/interface/SiPixelGainCalibrationForHLTLayout.h"
-#include "DataFormats/SiPixelMappingSoA/interface/SiPixelMappingLayout.h"
+#include "CalibTracker/SiPixelESProducers/interface/SiPixelGainCalibrationForHLTLayout.h"
+#include "CalibTracker/SiPixelESProducers/interface/SiPixelMappingLayout.h"
 #include "DataFormats/SiPixelDigi/interface/SiPixelDigiConstants.h"
 
 // local includes

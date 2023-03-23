@@ -17,8 +17,6 @@
 <library file="alpaka/*.cc" name="CalibTrackerSiPixelESProducersPluginsPortable">
   <use name="alpaka"/>
   <use name="CalibTracker/Records"/>
-  <use name="DataFormats/SiPixelMappingSoA"/>
-  <use name="DataFormats/SiPixelGainCalibrationForHLTSoA"/>
   <use name="FWCore/Utilities"/>
   <use name="HeterogeneousCore/AlpakaCore"/>
   <use name="HeterogeneousCore/AlpakaInterface"/>

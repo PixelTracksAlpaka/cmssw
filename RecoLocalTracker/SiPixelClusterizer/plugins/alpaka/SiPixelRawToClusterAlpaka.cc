@@ -8,19 +8,16 @@
 #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsDevice.h"
 #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisDevice.h"
 
-#include "DataFormats/SiPixelMappingSoA/interface/alpaka/SiPixelMappingDevice.h"
-#include "DataFormats/SiPixelMappingSoA/interface/alpaka/SiPixelMappingUtilities.h"
-#include "DataFormats/SiPixelMappingSoA/interface/SiPixelMappingSoARecord.h"
+#include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelMappingDevice.h"
+#include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelMappingUtilities.h"
+#include "CalibTracker/Records/interface/SiPixelMappingSoARecord.h"
 
-#include "DataFormats/SiPixelGainCalibrationForHLTSoA/interface/SiPixelGainCalibrationForHLTSoARcd.h"
-#include "DataFormats/SiPixelGainCalibrationForHLTSoA/interface/alpaka/SiPixelGainCalibrationForHLTDevice.h"
-
-// #include "CalibTracker/Records/interface/SiPixelGainCalibrationForHLTGPURcd.h"
-// #include "CalibTracker/SiPixelESProducers/interface/SiPixelROCsStatusAndMappingWrapper.h"
-// #include "CalibTracker/SiPixelESProducers/interface/SiPixelGainCalibrationForHLTGPU.h"
+#include "CalibTracker/Records/interface/SiPixelGainCalibrationForHLTSoARcd.h"
+#include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelGainCalibrationForHLTDevice.h"
 #include "CondFormats/DataRecord/interface/SiPixelFedCablingMapRcd.h"
 #include "CondFormats/SiPixelObjects/interface/SiPixelFedCablingMap.h"
 #include "CondFormats/SiPixelObjects/interface/SiPixelFedCablingTree.h"
+
 #include "DataFormats/FEDRawData/interface/FEDNumbering.h"
 #include "DataFormats/FEDRawData/interface/FEDRawData.h"
 #include "DataFormats/FEDRawData/interface/FEDRawDataCollection.h"
@@ -80,7 +77,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     edm::ESWatcher<SiPixelFedCablingMapRcd> recordWatcher_;
     const device::ESGetToken<SiPixelMappingDevice, SiPixelMappingSoARecord> gpuMapToken_;
-    // const device::ESGetToken<SiPixelGainCalibrationForHLTDevice, SiPixelGainCalibrationForHLTSoARcd> gainsToken_;
+    const device::ESGetToken<SiPixelGainCalibrationForHLTDevice, SiPixelGainCalibrationForHLTSoARcd> gainsToken_;
     const edm::ESGetToken<SiPixelFedCablingMap, SiPixelFedCablingMapRcd> cablingMapToken_;
 
     std::unique_ptr<SiPixelFedCablingTree> cabling_;
@@ -103,7 +100,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         digiPutToken_(produces()),
         clusterPutToken_(produces()),
         gpuMapToken_(esConsumes()),
-        // gainsToken_(esConsumes()),
+        gainsToken_(esConsumes()),
         cablingMapToken_(esConsumes<SiPixelFedCablingMap, SiPixelFedCablingMapRcd>(
             edm::ESInputTag("", iConfig.getParameter<std::string>("CablingMapLabel")))),
         isRun2_(iConfig.getParameter<bool>("isRun2")),

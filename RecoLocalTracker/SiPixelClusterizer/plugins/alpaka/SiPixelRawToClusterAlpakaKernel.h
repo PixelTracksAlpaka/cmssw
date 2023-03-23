@@ -13,8 +13,8 @@
 #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsDevice.h"
 #include "DataFormats/SiPixelClusterSoA/interface/gpuClusteringConstants.h"
 
-#include "DataFormats/SiPixelGainCalibrationForHLTSoA/interface/alpaka/SiPixelGainCalibrationForHLTDevice.h"
-#include "DataFormats/SiPixelMappingSoA/interface/alpaka/SiPixelMappingDevice.h"
+#include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelGainCalibrationForHLTDevice.h"
+#include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelMappingDevice.h"
 
 #include "DataFormats/SiPixelRawData/interface/SiPixelErrorCompact.h"
 #include "DataFormats/SiPixelRawData/interface/SiPixelFormatterErrors.h"

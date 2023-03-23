@@ -15,7 +15,7 @@
 #include "DataFormats/SiPixelGainCalibrationForHLTSoA/interface/alpaka/SiPixelGainCalibrationForHLTDevice.h"
 #include "DataFormats/SiPixelGainCalibrationForHLTSoA/interface/alpaka/SiPixelGainCalibrationForHLTUtilities.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisErrorLayout.h"
-#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
+#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace gpuCalibPixel {
