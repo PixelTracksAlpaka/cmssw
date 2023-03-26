@@ -1,5 +1,5 @@
-#ifndef DataFormats_Track_src_alpaka_classes_serial_h
-#define DataFormats_Track_src_alpaka_classes_serial_h
+#ifndef DataFormats_Track_src_Alpaka_classes_serial_h
+#define DataFormats_Track_src_Alpaka_classes_serial_h
 
 #include "DataFormats/Common/interface/Wrapper.h"
 #include "DataFormats/Portable/interface/Product.h"
@@ -8,4 +8,4 @@
 
 using namespace pixelTopology;
 
-#endif  // DataFormats_Track_src_alpaka_classes_serial_h
+#endif  // DataFormats_Track_src_Alpaka_classes_serial_h

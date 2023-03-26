@@ -1,5 +1,5 @@
-#ifndef RecoLocalTracker_SiPixelRecHits_plugins_alpaka_gpuPixelRecHits_h
-#define RecoLocalTracker_SiPixelRecHits_plugins_alpaka_gpuPixelRecHits_h
+#ifndef RecoLocalTracker_SiPixelRecHits_plugins_Alpaka_gpuPixelRecHits_h
+#define RecoLocalTracker_SiPixelRecHits_plugins_Alpaka_gpuPixelRecHits_h
 
 #include <algorithm>
 #include <cstdint>

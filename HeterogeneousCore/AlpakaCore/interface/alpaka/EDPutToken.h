@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaCore_interface_alpaka_EDPutToken_h
-#define HeterogeneousCore_AlpakaCore_interface_alpaka_EDPutToken_h
+#ifndef HeterogeneousCore_AlpakaCore_interface_Alpaka_EDPutToken_h
+#define HeterogeneousCore_AlpakaCore_interface_Alpaka_EDPutToken_h
 
 #include "DataFormats/Common/interface/DeviceProduct.h"
 #include "FWCore/Utilities/interface/EDPutToken.h"

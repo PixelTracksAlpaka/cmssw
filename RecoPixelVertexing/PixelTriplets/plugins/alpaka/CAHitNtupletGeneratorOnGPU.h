@@ -1,5 +1,5 @@
-#ifndef RecoPixelVertexing_PixelTriplets_plugins_alpaka_CAHitNtupletGeneratorOnGPU_h
-#define RecoPixelVertexing_PixelTriplets_plugins_alpaka_CAHitNtupletGeneratorOnGPU_h
+#ifndef RecoPixelVertexing_PixelTriplets_plugins_Alpaka_CAHitNtupletGeneratorOnGPU_h
+#define RecoPixelVertexing_PixelTriplets_plugins_Alpaka_CAHitNtupletGeneratorOnGPU_h
 
 #include <alpaka/alpaka.hpp>
 
@@ -50,7 +50,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     using Quality = ::pixelTrack::Quality;
 
-    using QualityCuts = pixelTrack::QualityCutsT<TrackerTraits>;
+    using QualityCuts = ::pixelTrack::QualityCutsT<TrackerTraits>;
     using Params = caHitNtupletGenerator::ParamsT<TrackerTraits>;
     using Counters = caHitNtupletGenerator::Counters;
 

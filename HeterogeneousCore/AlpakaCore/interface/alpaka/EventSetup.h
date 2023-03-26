@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaCore_interface_alpaka_EventSetup_h
-#define HeterogeneousCore_AlpakaCore_interface_alpaka_EventSetup_h
+#ifndef HeterogeneousCore_AlpakaCore_interface_Alpaka_EventSetup_h
+#define HeterogeneousCore_AlpakaCore_interface_Alpaka_EventSetup_h
 
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Utilities/interface/ESGetToken.h"

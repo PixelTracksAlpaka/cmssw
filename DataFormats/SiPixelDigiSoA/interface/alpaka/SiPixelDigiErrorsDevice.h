@@ -1,5 +1,5 @@
-#ifndef AlpakaDataFormats_alpaka_SiPixelDigiErrorsAlpaka_h
-#define AlpakaDataFormats_alpaka_SiPixelDigiErrorsAlpaka_h
+#ifndef AlpakaDataFormats_Alpaka_SiPixelDigiErrorsAlpaka_h
+#define AlpakaDataFormats_Alpaka_SiPixelDigiErrorsAlpaka_h
 
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
@@ -106,4 +106,4 @@ namespace cms::alpakatools {
 
 // }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
-#endif  // DeviceDataFormats_alpaka_SiPixelDigiErrorsDevice_h
+#endif  // DeviceDataFormats_Alpaka_SiPixelDigiErrorsDevice_h

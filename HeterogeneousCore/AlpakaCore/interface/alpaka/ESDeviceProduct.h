@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaCore_interface_alpaka_ESDeviceProduct_h
-#define HeterogeneousCore_AlpakaCore_interface_alpaka_ESDeviceProduct_h
+#ifndef HeterogeneousCore_AlpakaCore_interface_Alpaka_ESDeviceProduct_h
+#define HeterogeneousCore_AlpakaCore_interface_Alpaka_ESDeviceProduct_h
 
 #include <memory>
 #include <optional>

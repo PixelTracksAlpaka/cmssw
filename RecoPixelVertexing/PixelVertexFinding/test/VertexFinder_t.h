@@ -15,9 +15,9 @@
 #include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousHost.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousDevice.h"
 
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/PixelVertexWorkSpaceUtilities.h"
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/PixelVertexWorkSpaceSoAHost.h"
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/PixelVertexWorkSpaceSoADevice.h"
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/PixelVertexWorkSpaceCUDAUtilities.h"
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/PixelVertexWorkSpaceCUDAHost.h"
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/PixelVertexWorkSpaceCUDADevice.h"
 #ifdef USE_DBSCAN
 #include "RecoPixelVertexing/PixelVertexFinding/plugins/gpuClusterTracksDBSCAN.h"
 #define CLUSTERIZE gpuVertexFinder::clusterTracksDBSCAN

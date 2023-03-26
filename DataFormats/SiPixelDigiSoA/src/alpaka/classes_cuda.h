@@ -6,4 +6,4 @@
 #include "DataFormats/SiPixelDigisoA/interface/SiPixelDigisLayout.h"
 #include "DataFormats/Track/interface/alpaka/SiPixelDigisDevice.h"
 
-#endif  // DataFormats_Track_src_alpaka_classes_cuda_h
+#endif  // DataFormats_Track_src_Alpaka_classes_cuda_h

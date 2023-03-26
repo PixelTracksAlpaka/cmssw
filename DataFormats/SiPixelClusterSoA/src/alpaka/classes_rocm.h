@@ -6,4 +6,4 @@
 #include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersLayout.h"
 #include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersDevice.h"
 
-#endif  // DataFormats_Track_src_alpaka_classes_rocm_h
+#endif  // DataFormats_Track_src_Alpaka_classes_rocm_h

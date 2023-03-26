@@ -1,5 +1,5 @@
-#ifndef plugin_SiPixelClusterizer_alpaka_gpuClustering_h
-#define plugin_SiPixelClusterizer_alpaka_gpuClustering_h
+#ifndef plugin_SiPixelClusterizer_Alpaka_gpuClustering_h
+#define plugin_SiPixelClusterizer_Alpaka_gpuClustering_h
 
 #include <cmath>
 #include <cstdint>
@@ -468,4 +468,4 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   }  // namespace gpuClustering
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
-#endif  // plugin_SiPixelClusterizer_alpaka_gpuClustering_h
+#endif  // plugin_SiPixelClusterizer_Alpaka_gpuClustering_h

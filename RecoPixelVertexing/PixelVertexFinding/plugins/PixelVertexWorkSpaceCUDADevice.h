@@ -1,9 +1,9 @@
-#ifndef RecoPixelVertexing_PixelVertexFinding_PixelVertexWorkSpaceSoADevice_h
-#define RecoPixelVertexing_PixelVertexFinding_PixelVertexWorkSpaceSoADevice_h
+#ifndef RecoPixelVertexing_PixelVertexFinding_PixelVertexWorkSpaceCUDADevice_h
+#define RecoPixelVertexing_PixelVertexFinding_PixelVertexWorkSpaceCUDADevice_h
 
 #include "CUDADataFormats/Common/interface/PortableDeviceCollection.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/PixelVertexWorkSpaceUtilities.h"
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/PixelVertexWorkSpaceCUDAUtilities.h"
 
 template <int32_t S>
 class PixelVertexWorkSpaceSoADevice : public cms::cuda::PortableDeviceCollection<PixelVertexWSSoALayout<>> {

@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaTest_plugins_alpaka_TestHelperClass_h
-#define HeterogeneousCore_AlpakaTest_plugins_alpaka_TestHelperClass_h
+#ifndef HeterogeneousCore_AlpakaTest_plugins_Alpaka_TestHelperClass_h
+#define HeterogeneousCore_AlpakaTest_plugins_Alpaka_TestHelperClass_h
 
 #include "DataFormats/PortableTestObjects/interface/TestHostCollection.h"
 #include "DataFormats/PortableTestObjects/interface/alpaka/TestDeviceCollection.h"

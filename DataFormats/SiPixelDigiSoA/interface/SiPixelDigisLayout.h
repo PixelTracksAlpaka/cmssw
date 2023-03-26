@@ -1,5 +1,5 @@
-#ifndef DataFormats_SiPixelDigi_interface_SiPixelDigisLayout_h
-#define DataFormats_SiPixelDigi_interface_SiPixelDigisLayout_h
+#ifndef DataFormats_SiPixelDigi_SiPixelDigisLayout_h
+#define DataFormats_SiPixelDigi_SiPixelDigisLayout_h
 
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 
@@ -16,4 +16,4 @@ using SiPixelDigisLayoutSoA = SiPixelDigisLayout<>;
 using SiPixelDigisLayoutSoAView = SiPixelDigisLayout<>::View;
 using SiPixelDigisLayoutSoAConstView = SiPixelDigisLayout<>::ConstView;
 
-#endif  // DataFormats_SiPixelDigi_interface_SiPixelDigisLayout_h
+#endif  // DataFormats_SiPixelDigi_SiPixelDigisLayout_h

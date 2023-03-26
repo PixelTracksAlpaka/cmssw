@@ -1,5 +1,5 @@
-#ifndef DataFormats_Portable_interface_alpaka_PortableDeviceCollection_h
-#define DataFormats_Portable_interface_alpaka_PortableDeviceCollection_h
+#ifndef DataFormats_Portable_interface_Alpaka_PortableDeviceCollection_h
+#define DataFormats_Portable_interface_Alpaka_PortableDeviceCollection_h
 
 #include <optional>
 
@@ -64,4 +64,4 @@ namespace cms::alpakatools {
   };
 }  // namespace cms::alpakatools
 
-#endif  // DataFormats_Portable_interface_alpaka_PortableDeviceCollection_h
+#endif  // DataFormats_Portable_interface_Alpaka_PortableDeviceCollection_h

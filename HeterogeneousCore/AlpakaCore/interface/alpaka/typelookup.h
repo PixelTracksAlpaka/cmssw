@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaCore_interface_alpaka_typelookup_h
-#define HeterogeneousCore_AlpakaCore_interface_alpaka_typelookup_h
+#ifndef HeterogeneousCore_AlpakaCore_interface_Alpaka_typelookup_h
+#define HeterogeneousCore_AlpakaCore_interface_Alpaka_typelookup_h
 
 #include "FWCore/Utilities/interface/typelookup.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/ESDeviceProduct.h"

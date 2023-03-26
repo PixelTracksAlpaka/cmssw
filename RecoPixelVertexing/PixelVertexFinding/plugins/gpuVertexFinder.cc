@@ -3,9 +3,9 @@
 #include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
 
-#include "PixelVertexWorkSpaceUtilities.h"
-#include "PixelVertexWorkSpaceSoAHost.h"
-#include "PixelVertexWorkSpaceSoADevice.h"
+#include "PixelVertexWorkSpaceCUDAUtilities.h"
+#include "PixelVertexWorkSpaceCUDAHost.h"
+#include "PixelVertexWorkSpaceCUDADevice.h"
 
 #include "gpuClusterTracksByDensity.h"
 #include "gpuClusterTracksDBSCAN.h"

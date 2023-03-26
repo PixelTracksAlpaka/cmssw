@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaCore_interface_alpaka_EDMetadata_h
-#define HeterogeneousCore_AlpakaCore_interface_alpaka_EDMetadata_h
+#ifndef HeterogeneousCore_AlpakaCore_interface_Alpaka_EDMetadata_h
+#define HeterogeneousCore_AlpakaCore_interface_Alpaka_EDMetadata_h
 
 #include <atomic>
 #include <memory>

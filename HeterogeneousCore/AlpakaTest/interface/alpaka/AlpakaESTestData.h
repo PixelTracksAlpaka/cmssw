@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaTest_interface_alpaka_AlpakaESTestData_h
-#define HeterogeneousCore_AlpakaTest_interface_alpaka_AlpakaESTestData_h
+#ifndef HeterogeneousCore_AlpakaTest_interface_Alpaka_AlpakaESTestData_h
+#define HeterogeneousCore_AlpakaTest_interface_Alpaka_AlpakaESTestData_h
 
 #include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"

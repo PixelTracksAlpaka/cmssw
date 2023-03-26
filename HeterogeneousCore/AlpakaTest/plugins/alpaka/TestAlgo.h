@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaTest_plugins_alpaka_TestAlgo_h
-#define HeterogeneousCore_AlpakaTest_plugins_alpaka_TestAlgo_h
+#ifndef HeterogeneousCore_AlpakaTest_plugins_Alpaka_TestAlgo_h
+#define HeterogeneousCore_AlpakaTest_plugins_Alpaka_TestAlgo_h
 
 #include "DataFormats/PortableTestObjects/interface/alpaka/TestDeviceCollection.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
@@ -13,4 +13,4 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
-#endif  // HeterogeneousCore_AlpakaTest_plugins_alpaka_TestAlgo_h
+#endif  // HeterogeneousCore_AlpakaTest_plugins_Alpaka_TestAlgo_h

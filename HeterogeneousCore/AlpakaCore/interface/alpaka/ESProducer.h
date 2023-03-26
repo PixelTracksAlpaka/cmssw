@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaCore_interface_alpaka_ESProducer_h
-#define HeterogeneousCore_AlpakaCore_interface_alpaka_ESProducer_h
+#ifndef HeterogeneousCore_AlpakaCore_interface_Alpaka_ESProducer_h
+#define HeterogeneousCore_AlpakaCore_interface_Alpaka_ESProducer_h
 
 #include "FWCore/Framework/interface/ESProducer.h"
 #include "FWCore/Framework/interface/produce_helpers.h"

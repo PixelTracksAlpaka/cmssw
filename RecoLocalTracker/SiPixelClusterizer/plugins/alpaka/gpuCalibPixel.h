@@ -1,5 +1,5 @@
-#ifndef plugin_SiPixelClusterizer_alpaka_gpuCalibPixel_h
-#define plugin_SiPixelClusterizer_alpaka_gpuCalibPixel_h
+#ifndef CalibTracker_SiPixelESProducer_Alpaka_gpuCalibPixel_h
+#define CalibTracker_SiPixelESProducer_Alpaka_gpuCalibPixel_h
 
 #include <algorithm>
 #include <cstdint>
@@ -11,8 +11,9 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
 #include "DataFormats/SiPixelClusterSoA/interface/gpuClusteringConstants.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisErrorLayout.h"
-#include "DataFormats/SiPixelGainCalibrationForHLTSoA/interface/SiPixelGainCalibrationForHLTLayout.h"
-#include "DataFormats/SiPixelGainCalibrationForHLTSoA/interface/alpaka/SiPixelGainCalibrationForHLTDevice.h"
+#include "CalibTracker/SiPixelESProducers/interface/SiPixelGainCalibrationForHLTLayout.h"
+#include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelGainCalibrationForHLTDevice.h"
+#include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelGainCalibrationForHLTUtilities.h"
 #include "DataFormats/SiPixelGainCalibrationForHLTSoA/interface/alpaka/SiPixelGainCalibrationForHLTUtilities.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisErrorLayout.h"
 #include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
@@ -149,4 +150,4 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }  // namespace gpuCalibPixel
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
-#endif  // plugin_SiPixelClusterizer_alpaka_gpuCalibPixel_h
+#endif  // plugin_SiPixelClusterizer_Alpaka_gpuCalibPixel_h

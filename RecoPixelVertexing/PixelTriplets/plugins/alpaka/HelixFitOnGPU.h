@@ -1,14 +1,14 @@
-#ifndef RecoPixelVertexing_PixelTriplets_plugins_alpaka_HelixFitOnGPU_h
-#define RecoPixelVertexing_PixelTriplets_plugins_alpaka_HelixFitOnGPU_h
+#ifndef RecoPixelVertexing_PixelTriplets_plugins_Alpaka_HelixFitOnGPU_h
+#define RecoPixelVertexing_PixelTriplets_plugins_Alpaka_HelixFitOnGPU_h
 
 #include <alpaka/alpaka.hpp>
-#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
+#include "DataFormats/Track/interface/PixelTrackUtilities.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
-#include "RecoPixelVertexing/PixelTrackFitting/interface/FitResult.h"
+#include "RecoPixelVertexing/PixelTrackFitting/interface/alpaka/FitResult.h"
 #include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
-#include "../CAStructures.h"
+#include "CAStructures.h"
 namespace riemannFit {
   // TODO: Can this be taken from TrackerTraits or somewhere else?
   // in case of memory issue can be made smaller

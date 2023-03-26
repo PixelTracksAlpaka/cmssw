@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaCore_interface_alpaka_EDMetadataAcquireSentry_h
-#define HeterogeneousCore_AlpakaCore_interface_alpaka_EDMetadataAcquireSentry_h
+#ifndef HeterogeneousCore_AlpakaCore_interface_Alpaka_EDMetadataAcquireSentry_h
+#define HeterogeneousCore_AlpakaCore_interface_Alpaka_EDMetadataAcquireSentry_h
 
 #include "FWCore/Concurrency/interface/WaitingTaskWithArenaHolder.h"
 #include "FWCore/Utilities/interface/StreamID.h"

@@ -8,9 +8,9 @@
 #include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousHost.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousDevice.h"
 #include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
-#include "PixelVertexWorkSpaceUtilities.h"
-#include "PixelVertexWorkSpaceSoAHost.h"
-#include "PixelVertexWorkSpaceSoADevice.h"
+#include "PixelVertexWorkSpaceCUDAUtilities.h"
+#include "PixelVertexWorkSpaceCUDAHost.h"
+#include "PixelVertexWorkSpaceCUDADevice.h"
 
 namespace gpuVertexFinder {
 

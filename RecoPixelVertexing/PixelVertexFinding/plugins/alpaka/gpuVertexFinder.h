@@ -1,10 +1,10 @@
-#ifndef RecoPixelVertexing_PixelVertexFinding_plugins_alpaka_gpuVertexFinder_h
-#define RecoPixelVertexing_PixelVertexFinding_plugins_alpaka_gpuVertexFinder_h
+#ifndef RecoPixelVertexing_PixelVertexFinding_plugins_Alpaka_gpuVertexFinder_h
+#define RecoPixelVertexing_PixelVertexFinding_plugins_Alpaka_gpuVertexFinder_h
 
 #include <cstddef>
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
-#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
+#include "DataFormats/Track/interface/PixelTrackUtilities.h"
 #include "DataFormats/Vertex/interface/ZVertexSoAHost.h"
 #include "DataFormats/Vertex/interface/ZVertexLayout.h"
 #include "DataFormats/Vertex/interface/alpaka/ZVertexSoADevice.h"

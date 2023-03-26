@@ -1,6 +1,6 @@
 
-#ifndef CalibTracker_SiPixelESProducers_interface_alpaka_SiPixelGainUtilities_h
-#define CalibTracker_SiPixelESProducers_interface_alpaka_SiPixelGainUtilities_h
+#ifndef CalibTracker_SiPixelESProducers_SiPixelGainUtilities_h
+#define CalibTracker_SiPixelESProducers_SiPixelGainUtilities_h
 
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
@@ -45,4 +45,4 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   };
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
-#endif //CalibTracker_SiPixelESProducers_interface_alpaka_SiPixelGainUtilities_h
+#endif //CalibTracker_SiPixelESProducers_Alpaka_SiPixelGainUtilities_h

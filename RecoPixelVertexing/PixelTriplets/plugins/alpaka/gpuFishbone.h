@@ -1,5 +1,5 @@
-#ifndef RecoPixelVertexing_PixelTriplets_plugins_alpaka_gpuFishbone_h
-#define RecoPixelVertexing_PixelTriplets_plugins_alpaka_gpuFishbone_h
+#ifndef RecoPixelVertexing_PixelTriplets_plugins_Alpaka_gpuFishbone_h
+#define RecoPixelVertexing_PixelTriplets_plugins_Alpaka_gpuFishbone_h
 
 #include <algorithm>
 #include <cmath>
@@ -14,7 +14,7 @@
 #include "DataFormats/Math/interface/approx_atan2.h"
 
 #include "GPUCACell.h"
-#include "../CAStructures.h"
+#include "CAStructures.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace gpuPixelDoublets {
@@ -156,4 +156,4 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
   }  // namespace gpuPixelDoublets
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
-#endif  // RecoPixelVertexing_PixelTriplets_plugins_alpaka_gpuFishbone_h
+#endif  // RecoPixelVertexing_PixelTriplets_plugins_Alpaka_gpuFishbone_h

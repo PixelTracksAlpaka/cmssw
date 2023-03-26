@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaCore_interface_alpaka_Record_h
-#define HeterogeneousCore_AlpakaCore_interface_alpaka_Record_h
+#ifndef HeterogeneousCore_AlpakaCore_interface_Alpaka_Record_h
+#define HeterogeneousCore_AlpakaCore_interface_Alpaka_Record_h
 
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/ESTransientHandle.h"

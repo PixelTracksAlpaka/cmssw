@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaCore_interface_alpaka_ModuleFactory_h
-#define HeterogeneousCore_AlpakaCore_interface_alpaka_ModuleFactory_h
+#ifndef HeterogeneousCore_AlpakaCore_interface_Alpaka_ModuleFactory_h
+#define HeterogeneousCore_AlpakaCore_interface_Alpaka_ModuleFactory_h
 
 #include "FWCore/Framework/interface/ModuleFactory.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"

@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaCore_interface_alpaka_EDGetToken_h
-#define HeterogeneousCore_AlpakaCore_interface_alpaka_EDGetToken_h
+#ifndef HeterogeneousCore_AlpakaCore_interface_Alpaka_EDGetToken_h
+#define HeterogeneousCore_AlpakaCore_interface_Alpaka_EDGetToken_h
 
 #include "DataFormats/Common/interface/DeviceProduct.h"
 #include "FWCore/Utilities/interface/EDGetToken.h"

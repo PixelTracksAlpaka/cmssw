@@ -1,5 +1,5 @@
-#ifndef RecoPixelVertexing_PixelVertexFinding_plugins_alpaka_gpuClusterTracksDBSCAN_h
-#define RecoPixelVertexing_PixelVertexFinding_plugins_alpaka_gpuClusterTracksDBSCAN_h
+#ifndef RecoPixelVertexing_PixelVertexFinding_plugins_Alpaka_gpuClusterTracksDBSCAN_h
+#define RecoPixelVertexing_PixelVertexFinding_plugins_Alpaka_gpuClusterTracksDBSCAN_h
 
 #include <algorithm>
 #include <cmath>

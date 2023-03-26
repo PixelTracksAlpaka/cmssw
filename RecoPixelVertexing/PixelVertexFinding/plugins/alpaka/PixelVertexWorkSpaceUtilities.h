@@ -1,5 +1,5 @@
-#ifndef RecoPixelVertexing_PixelVertexFinding_plugins_alpaka_PixelVertexWorkSpaceUtilities_h
-#define RecoPixelVertexing_PixelVertexFinding_plugins_alpaka_PixelVertexWorkSpaceUtilities_h
+#ifndef RecoPixelVertexing_PixelVertexFinding_plugins_Alpaka_PixelVertexWorkSpaceUtilities_h
+#define RecoPixelVertexing_PixelVertexFinding_plugins_Alpaka_PixelVertexWorkSpaceUtilities_h
 
 #include <alpaka/alpaka.hpp>
 #include "../PixelVertexWorkSpaceLayout.h"

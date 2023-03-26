@@ -1,5 +1,5 @@
-#ifndef RecoPixelVertexing_PixelTriplets_plugins_alpaka_GPUCACellT_h
-#define RecoPixelVertexing_PixelTriplets_plugins_alpaka_GPUCACellT_h
+#ifndef RecoPixelVertexing_PixelTriplets_plugins_Alpaka_GPUCACellT_h
+#define RecoPixelVertexing_PixelTriplets_plugins_Alpaka_GPUCACellT_h
 
 //
 // Author: Felice Pantaleo, CERN
@@ -16,7 +16,7 @@
 #include "DataFormats/Track/interface/PixelTrackDefinitions.h"
 #include "DataFormats/Track/interface/PixelTrackLayout.h"
 #include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
-#include "../CAStructures.h"
+#include "CAStructures.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   template <typename TrackerTraits>

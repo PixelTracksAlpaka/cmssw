@@ -1,5 +1,5 @@
-#ifndef RecoPixelVertexing_PixelTriplets_plugins_alpaka_gpuPixelDoubletsAlgos_h
-#define RecoPixelVertexing_PixelTriplets_plugins_alpaka_gpuPixelDoubletsAlgos_h
+#ifndef RecoPixelVertexing_PixelTriplets_plugins_Alpaka_gpuPixelDoubletsAlgos_h
+#define RecoPixelVertexing_PixelTriplets_plugins_Alpaka_gpuPixelDoubletsAlgos_h
 
 #include <algorithm>
 #include <cmath>
@@ -13,7 +13,7 @@
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "DataFormats/Math/interface/approx_atan2.h"
 #include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
-#include "../CAStructures.h"
+#include "CAStructures.h"
 #include "GPUCACell.h"
 
 //#define GPU_DEBUG
@@ -312,4 +312,4 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }    // namespace gpuPixelDoublets
   }      // namespace gpuPixelDoublets
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
-#endif  // RecoPixelVertexing_PixelTriplets_plugins_alpaka_gpuPixelDoubletsAlgos_h
+#endif  // RecoPixelVertexing_PixelTriplets_plugins_Alpaka_gpuPixelDoubletsAlgos_h

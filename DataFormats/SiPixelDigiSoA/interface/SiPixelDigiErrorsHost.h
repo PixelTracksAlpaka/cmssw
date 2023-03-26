@@ -1,5 +1,5 @@
-#ifndef DataFormats_SiPixelDigi_interface_SiPixelDigiErrorsAlpaka_h
-#define DataFormats_SiPixelDigi_interface_SiPixelDigiErrorsAlpaka_h
+#ifndef DataFormats_SiPixelDigi_SiPixelDigiErrorsAlpaka_h
+#define DataFormats_SiPixelDigi_SiPixelDigiErrorsAlpaka_h
 
 #include <utility>
 
@@ -51,4 +51,4 @@ private:
   std::optional<cms::alpakatools::host_buffer<cms::alpakatools::SimpleVector<SiPixelErrorCompact>>> error_h;
 };
 
-#endif  // AlpakaDataFormats_alpaka_SiPixelDigiErrorsAlpaka_h
+#endif  // AlpakaDataFormats_Alpaka_SiPixelDigiErrorsAlpaka_h

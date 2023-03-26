@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaCore_interface_alpaka_EDMetadataSentry_h
-#define HeterogeneousCore_AlpakaCore_interface_alpaka_EDMetadataSentry_h
+#ifndef HeterogeneousCore_AlpakaCore_interface_Alpaka_EDMetadataSentry_h
+#define HeterogeneousCore_AlpakaCore_interface_Alpaka_EDMetadataSentry_h
 
 #include "FWCore/Utilities/interface/StreamID.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/EDMetadata.h"

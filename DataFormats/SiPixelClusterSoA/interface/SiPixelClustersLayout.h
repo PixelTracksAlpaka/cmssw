@@ -1,5 +1,5 @@
-#ifndef DataFormats_SiPixelClusterSoA_interface_SiPixelClustersLayout_h
-#define DataFormats_SiPixelClusterSoA_interface_SiPixelClustersLayout_h
+#ifndef DataFormats_SiPixelClusterSoA_SiPixelClustersLayout_h
+#define DataFormats_SiPixelClusterSoA_SiPixelClustersLayout_h
 
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 
@@ -13,4 +13,4 @@ using SiPixelClustersLayoutSoA = SiPixelClustersLayout<>;
 using SiPixelClustersLayoutSoAView = SiPixelClustersLayout<>::View;
 using SiPixelClustersLayoutSoAConstView = SiPixelClustersLayout<>::ConstView;
 
-#endif  // DataFormats_SiPixelClusterSoA_interface_SiPixelClustersLayout_h
+#endif  // DataFormats_SiPixelClusterSoA_SiPixelClustersLayout_h

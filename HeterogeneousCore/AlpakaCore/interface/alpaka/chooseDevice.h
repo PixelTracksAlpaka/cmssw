@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaCore_interface_alpaka_chooseDevice_h
-#define HeterogeneousCore_AlpakaCore_interface_alpaka_chooseDevice_h
+#ifndef HeterogeneousCore_AlpakaCore_interface_Alpaka_chooseDevice_h
+#define HeterogeneousCore_AlpakaCore_interface_Alpaka_chooseDevice_h
 
 #include "FWCore/Utilities/interface/StreamID.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"

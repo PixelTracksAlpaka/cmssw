@@ -38,7 +38,7 @@
 #include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
 #include "DataFormats/HLTReco/interface/TriggerFilterObjectWithRefs.h"
 #include "TrackingTools/TrajectoryParametrization/interface/CurvilinearTrajectoryError.h"
-#include "RecoPixelVertexing/PixelTrackFitting/interface/alpaka/FitUtils.h"
+#include "RecoPixelVertexing/PixelTrackFitting/interface/FitUtils.h"
 #include "TrackingTools/TrajectoryParametrization/interface/GlobalTrajectoryParameters.h"
 #include "DataFormats/TrackReco/interface/HitPattern.h"
 #include "TrackingTools/AnalyticalJacobians/interface/JacobianLocalToCurvilinear.h"
@@ -48,10 +48,10 @@
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "DataFormats/SiPixelClusterSoA/interface/gpuClusteringConstants.h"
 
-#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
-#include "DataFormats/Track/interface/TrackSoAHost.h"
-#include "DataFormats/Vertex/interface/alpaka/ZVertexUtilities.h"
-#include "DataFormats/Vertex/interface/ZVertexSoAHost.h"
+#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHost.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexUtilities.h"
+#include "CUDADataFormats/Vertex/interface/ZVertexSoAHost.h"
 
 namespace L2TauTagNNv1 {
   constexpr int nCellEta = 5;
@@ -576,7 +576,7 @@ void L2TauNNProducer::selectGoodTracksAndVertices(const ZVertexHost& patavtx_soa
                                                   const TrackSoAHost& patatracks_tsoa,
                                                   std::vector<int>& trkGood,
                                                   std::vector<int>& vtxGood) {
-  using patatrackHelpers = ALPAKA_ACCELERATOR_NAMESPACE::TracksUtilities<pixelTopology::Phase1>;
+  using patatrackHelpers = TracksUtilities<pixelTopology::Phase1>;
   const auto maxTracks = patatracks_tsoa.view().metadata().size();
   const int nv = patavtx_soa.view().nvFinal();
   trkGood.clear();
@@ -628,7 +628,7 @@ std::pair<float, float> L2TauNNProducer::impactParameter(int it,
   /* dxy and dz */
   riemannFit::Vector5d ipar, opar;
   riemannFit::Matrix5d icov, ocov;
-  ALPAKA_ACCELERATOR_NAMESPACE::TracksUtilities<pixelTopology::Phase1>::copyToDense(
+  TracksUtilities<pixelTopology::Phase1>::copyToDense(
       patatracks_tsoa.view(), ipar, icov, it);
   riemannFit::transformToPerigeePlane(ipar, icov, opar, ocov);
   LocalTrajectoryParameters lpar(opar(0), opar(1), opar(2), opar(3), opar(4), 1.);

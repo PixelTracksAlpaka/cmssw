@@ -3,7 +3,7 @@
 
 #include <Eigen/Dense>
 #include <Eigen/Core>
-#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
+#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/HistoContainer.h"
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 

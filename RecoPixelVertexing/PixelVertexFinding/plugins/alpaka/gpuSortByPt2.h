@@ -1,5 +1,5 @@
-#ifndef RecoPixelVertexing_PixelVertexFinding_plugins_alpaka_gpuSortByPt2_h
-#define RecoPixelVertexing_PixelVertexFinding_plugins_alpaka_gpuSortByPt2_h
+#ifndef RecoPixelVertexing_PixelVertexFinding_plugins_Alpaka_gpuSortByPt2_h
+#define RecoPixelVertexing_PixelVertexFinding_plugins_Alpaka_gpuSortByPt2_h
 
 #include <algorithm>
 #include <array>

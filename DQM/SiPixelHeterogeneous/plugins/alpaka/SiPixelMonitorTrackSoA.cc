@@ -23,7 +23,7 @@
 #include "DQMServices/Core/interface/MonitorElement.h"
 #include "DQMServices/Core/interface/DQMEDAnalyzer.h"
 #include "DQMServices/Core/interface/DQMStore.h"
-#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
+#include "DataFormats/Track/interface/PixelTrackUtilities.h"
 #include "DataFormats/Track/interface/TrackSoAHost.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {

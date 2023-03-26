@@ -1,7 +1,6 @@
-#ifndef RecoPixelVertexing_PixelVertexFinding_plugins_alpaka_PixelVertexWorkSpaceLayout_h
-#define RecoPixelVertexing_PixelVertexFinding_plugins_alpaka_PixelVertexWorkSpaceLayout_h
+#ifndef RecoPixelVertexing_PixelVertexFinding_PixelVertexWorkSpaceLayout_h
+#define RecoPixelVertexing_PixelVertexFinding_PixelVertexWorkSpaceLayout_h
 
-#include <alpaka/alpaka.hpp>
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 
 // Intermediate data used in the vertex reco algos

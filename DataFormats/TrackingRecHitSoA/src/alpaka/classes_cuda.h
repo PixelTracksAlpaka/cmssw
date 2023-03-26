@@ -6,4 +6,4 @@
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoADevice.h"
 
-#endif  // DataFormats_Track_src_alpaka_classes_cuda_h
+#endif  // DataFormats_Track_src_Alpaka_classes_cuda_h

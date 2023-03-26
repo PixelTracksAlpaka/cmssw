@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaCore_interface_alpaka_ESDeviceProductType_h
-#define HeterogeneousCore_AlpakaCore_interface_alpaka_ESDeviceProductType_h
+#ifndef HeterogeneousCore_AlpakaCore_interface_Alpaka_ESDeviceProductType_h
+#define HeterogeneousCore_AlpakaCore_interface_Alpaka_ESDeviceProductType_h
 
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/ESDeviceProduct.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"

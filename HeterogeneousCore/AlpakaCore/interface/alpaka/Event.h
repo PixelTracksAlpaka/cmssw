@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaCore_interface_alpaka_Event_h
-#define HeterogeneousCore_AlpakaCore_interface_alpaka_Event_h
+#ifndef HeterogeneousCore_AlpakaCore_interface_Alpaka_Event_h
+#define HeterogeneousCore_AlpakaCore_interface_Alpaka_Event_h
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/Event.h"

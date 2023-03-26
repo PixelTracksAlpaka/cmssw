@@ -8,11 +8,11 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
-#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
+#include "DataFormats/Track/interface/PixelTrackUtilities.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
 #include "RecoPixelVertexing/PixelTrackFitting/interface/alpaka/RiemannFit.h"
 #include "HelixFitOnGPU.h"
-#include "../CAStructures.h"
+#include "CAStructures.h"
 
 template <typename TrackerTraits>
 using Tuples = typename TrackSoA<TrackerTraits>::HitContainer;

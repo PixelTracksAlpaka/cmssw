@@ -1,5 +1,5 @@
-#ifndef HeterogeneousCore_AlpakaCore_interface_alpaka_ESGetToken_h
-#define HeterogeneousCore_AlpakaCore_interface_alpaka_ESGetToken_h
+#ifndef HeterogeneousCore_AlpakaCore_interface_Alpaka_ESGetToken_h
+#define HeterogeneousCore_AlpakaCore_interface_Alpaka_ESGetToken_h
 
 #include "FWCore/Utilities/interface/ESGetToken.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/ESDeviceProductType.h"

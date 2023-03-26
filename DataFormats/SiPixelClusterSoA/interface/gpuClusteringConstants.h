@@ -1,5 +1,5 @@
-#ifndef DataFormats_SiPixelClusterSoA_interface_gpuClusteringConstants_h
-#define DataFormats_SiPixelClusterSoA_interface_gpuClusteringConstants_h
+#ifndef DataFormats_SiPixelClusterSoA_gpuClusteringConstants_h
+#define DataFormats_SiPixelClusterSoA_gpuClusteringConstants_h
 
 #include <cstdint>
 #include <limits>
@@ -25,4 +25,4 @@ namespace gpuClustering {
 
 }  // namespace gpuClustering
 
-#endif  // DataFormats_SiPixelClusterSoA_interface_gpuClusteringConstants_h
+#endif  // DataFormats_SiPixelClusterSoA_gpuClusteringConstants_h

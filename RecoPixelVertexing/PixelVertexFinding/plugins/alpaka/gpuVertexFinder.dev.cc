@@ -1,5 +1,5 @@
 #include <alpaka/alpaka.hpp>
-#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
+#include "DataFormats/Track/interface/PixelTrackUtilities.h"
 #include "DataFormats/Vertex/interface/alpaka/ZVertexUtilities.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"

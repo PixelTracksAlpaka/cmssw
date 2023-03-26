@@ -33,17 +33,18 @@
 #include "storeTracks.h"
 
 #include "DataFormats/Track/interface/TrackSoAHost.h"
-#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
+#include "DataFormats/Track/interface/PixelTrackUtilities.h"
 #include <alpaka/alpaka.hpp>
 
 /**
  * This class creates "legacy" reco::Track
  * objects from the output of SoA CA.
  */
+
 template <typename TrackerTraits>
 class PixelTrackProducerFromSoAT : public edm::global::EDProducer<> {
   using TkSoAHost = TrackSoAHost<TrackerTraits>;
-  using tracksHelpers = ALPAKA_ACCELERATOR_NAMESPACE::TracksUtilities<TrackerTraits>;
+  using tracksHelpers = TracksUtilities<TrackerTraits>;
 
 public:
   using IndToEdm = std::vector<uint32_t>;
