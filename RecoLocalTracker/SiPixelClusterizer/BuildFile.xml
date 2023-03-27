@@ -3,9 +3,9 @@
 <use name="HeterogeneousCore/AlpakaInterface"/>
 <use name="HeterogeneousCore/AlpakaTest"/>
 <use name="CalibTracker/Records"/>
-  <use name="CalibTracker/SiPixelESProducers"/>
+<use name="CalibTracker/SiPixelESProducers"/>
 <use name="DataFormats/SiPixelMappingSoA"/>
-<une name="DataFormats/SiPixelGainCalibrationForHLTSoA"/>
+<use name="DataFormats/SiPixelGainCalibrationForHLTSoA"/>
 <flags ALPAKA_BACKENDS="1"/>
 <export>
   <lib name="1"/>

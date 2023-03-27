@@ -576,7 +576,7 @@ void L2TauNNProducer::selectGoodTracksAndVertices(const ZVertexHost& patavtx_soa
                                                   const TrackSoAHost& patatracks_tsoa,
                                                   std::vector<int>& trkGood,
                                                   std::vector<int>& vtxGood) {
-  using patatrackHelpers = ALPAKA_ACCELERATOR_NAMESPACE::TracksUtilities<pixelTopology::Phase1>;
+  using patatrackHelpers = TracksUtilities<pixelTopology::Phase1>;
   const auto maxTracks = patatracks_tsoa.view().metadata().size();
   const int nv = patavtx_soa.view().nvFinal();
   trkGood.clear();
@@ -628,8 +628,7 @@ std::pair<float, float> L2TauNNProducer::impactParameter(int it,
   /* dxy and dz */
   riemannFit::Vector5d ipar, opar;
   riemannFit::Matrix5d icov, ocov;
-  ALPAKA_ACCELERATOR_NAMESPACE::TracksUtilities<pixelTopology::Phase1>::copyToDense(
-      patatracks_tsoa.view(), ipar, icov, it);
+  TracksUtilities<pixelTopology::Phase1>::copyToDense(patatracks_tsoa.view(), ipar, icov, it);
   riemannFit::transformToPerigeePlane(ipar, icov, opar, ocov);
   LocalTrajectoryParameters lpar(opar(0), opar(1), opar(2), opar(3), opar(4), 1.);
   float sp = std::sin(patatrackPhi);
@@ -659,7 +658,7 @@ void L2TauNNProducer::fillPatatracks(tensorflow::Tensor& cellGridMatrix,
                                      const reco::BeamSpot& beamspot,
                                      const MagneticField* magfi) {
   using NNInputs = L2TauTagNNv1::NNInputs;
-  using patatrackHelpers = ALPAKA_ACCELERATOR_NAMESPACE::TracksUtilities<pixelTopology::Phase1>;
+  using patatrackHelpers = TracksUtilities<pixelTopology::Phase1>;
   float deta, dphi;
   int eta_idx = 0;
   int phi_idx = 0;

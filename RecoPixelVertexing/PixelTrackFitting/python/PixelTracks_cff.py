@@ -146,16 +146,16 @@ run3_common.toModify(pixelTracksCUDA,
 )
 
 # SwitchProducer providing the pixel tracks in SoA format on the CPU
-from RecoPixelVertexing.PixelTrackFitting.pixelTrackSoAFromCUDAPhase1_cfi import pixelTrackSoAFromCUDAPhase1 as _pixelTracksSoA
-from RecoPixelVertexing.PixelTrackFitting.pixelTrackSoAFromCUDAPhase2_cfi import pixelTrackSoAFromCUDAPhase2 as _pixelTracksSoAPhase2
+# from RecoPixelVertexing.PixelTrackFitting.pixelTrackSoAFromCUDAPhase1_cfi import pixelTrackSoAFromCUDAPhase1 as _pixelTracksSoA
+# from RecoPixelVertexing.PixelTrackFitting.pixelTrackSoAFromCUDAPhase2_cfi import pixelTrackSoAFromCUDAPhase2 as _pixelTracksSoAPhase2
 
-gpu.toModify(pixelTracksSoA,
-    # transfer the pixel tracks in SoA format to the host
-    cuda = _pixelTracksSoA.clone()
-)
+# gpu.toModify(pixelTracksSoA,
+#     # transfer the pixel tracks in SoA format to the host
+#     cuda = _pixelTracksSoA.clone()
+# )
 
-(gpu & phase2_tracker).toModify(pixelTracksSoA,cuda = _pixelTracksSoAPhase2.clone(
-))
+# (gpu & phase2_tracker).toModify(pixelTracksSoA,cuda = _pixelTracksSoAPhase2.clone(
+# ))
 
 phase2_tracker.toModify(pixelTracksSoA,cpu = _pixelTracksCUDAPhase2.clone(
     pixelRecHitSrc = "siPixelRecHitsPreSplittingSoA",

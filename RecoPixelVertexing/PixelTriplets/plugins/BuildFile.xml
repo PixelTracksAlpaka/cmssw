@@ -10,11 +10,13 @@
 <use name="RecoTracker/TkTrackingRegions"/>
 <use name="RecoTracker/TkSeedingLayers"/>
 
-<library file="alpaka/*.cc" name="RecoPixelVertexingPixelTripletsPlugins">
+<library file="*.cc" name="RecoPixelVertexingPixelTripletsPlugins">
+  <flags EDM_PLUGIN="1"/>
+</library>
+
+<library file="alpaka/*.cc" name="RecoPixelVertexingPixelTripletsPluginsPortable">
  <use name="alpaka"/>
   <use name="DataFormats/Portable"/>
-  <use name="FWCore/Framework"/>
-  <use name="FWCore/ParameterSet"/>
   <use name="FWCore/Utilities"/>
   <use name="HeterogeneousCore/AlpakaCore"/>
   <use name="HeterogeneousCore/AlpakaInterface"/>

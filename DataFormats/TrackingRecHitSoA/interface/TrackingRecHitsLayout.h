@@ -64,8 +64,4 @@ template <typename TrackerTraits>
 using TrackingRecHitAlpakaSoAConstView =
     typename TrackingRecHitAlpakaSoA<TrackerTraits>::template TrackingRecHitAlpakaSoALayout<>::ConstView;
 
-using TrackingRecHitAlpakaLayoutPhase1 = TrackingRecHitAlpakaLayout<pixelTopology::Phase1>;
-using TrackingRecHitAlpakaSoAViewPhase1 = TrackingRecHitAlpakaSoAView<pixelTopology::Phase1>;
-using TrackingRecHitAlpakaSoAConstViewPhase1 = TrackingRecHitAlpakaSoAConstView<pixelTopology::Phase1>;
-
 #endif

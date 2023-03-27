@@ -17,15 +17,15 @@ public:
   explicit HostProduct(cms::alpakatools::host_buffer<T>&& p) : hm_ptr(std::move(p)) {}
   explicit HostProduct(std::unique_ptr<T>&& p) : std_ptr(std::move(p)) {}
 
-  auto const* get() const { return std_ptr ? std_ptr.get() : hm_ptr.data(); }
+  auto const* get() const { return std_ptr ? std_ptr.get() : hm_ptr->data(); }
 
   auto const& operator*() const { return *get(); }
 
   auto const* operator->() const { return get(); }
 
 private:
-  cms::alpakatools::host_buffer<T> hm_ptr;  //!
-  std::unique_ptr<T> std_ptr;               //!
+  std::optional<cms::alpakatools::host_buffer<T>> hm_ptr;  //!
+  std::unique_ptr<T> std_ptr;                              //!
 };
 
 #endif

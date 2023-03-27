@@ -5,7 +5,6 @@
 #include "DataFormats/Track/interface/PixelTrackDefinitions.h"
 #include "DataFormats/Track/interface/PixelTrackLayout.h"
 
-namespace ALPAKA_ACCELERATOR_NAMESPACE {
   // Methods that operate on View and ConstView of the TrackSoA, and cannot be class methods.
   template <typename TrackerTraits>
   struct TracksUtilities {
@@ -193,7 +192,5 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   // TODO: Should those be placed in the ALPAKA_ACCELERATOR_NAMESPACE
   template struct TracksUtilities<pixelTopology::Phase1>;
   template struct TracksUtilities<pixelTopology::Phase2>;
-
-}  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 #endif

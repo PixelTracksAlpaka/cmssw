@@ -3,25 +3,30 @@
 <use name="DataFormats/SiPixelDigiSoA"/>
 <use name="DataFormats/Common"/>
 <use name="DataFormats/SiPixelCluster"/>
+<use name="DataFormats/SiPixelGainCalibrationForHLTSoA"/>
+<use name="DataFormats/SiPixelMappingSoA"/>
 <use name="EventFilter/SiPixelRawToDigi"/>
 <use name="FWCore/ParameterSet"/>
 <use name="FWCore/Utilities"/>
-<use name="HeterogeneousCore/AlpakaCore"/>
-<use name="HeterogeneousCore/AlpakaUtilities"/>
+<use name="FWCore/Framework"/>
+
 <use name="RecoTracker/Record"/>
 
-<library file="alpaka/*.cc" name="RecoLocalTrackerSiPixelClusterizerPlugins">
+<library file="alpaka/*.cc" name="RecoLocalTrackerSiPixelClusterizerPluginsPortable">
   <use name="alpaka"/>
   <use name="CalibTracker/Records"/>
   <use name="CalibTracker/SiPixelESProducers"/>
+  <use name="HeterogeneousCore/AlpakaCore"/>
+  <use name="HeterogeneousCore/AlpakaUtilities"/>
   <use name="HeterogeneousCore/AlpakaTest"/>
   <use name="DataFormats/Portable"/>
-  <use name="FWCore/Framework"/>
-  <use name="FWCore/ParameterSet"/>
-  <use name="FWCore/Utilities"/>
-  <use name="HeterogeneousCore/AlpakaCore"/>
   <use name="HeterogeneousCore/AlpakaInterface"/>
   <flags ALPAKA_BACKENDS="1"/>
+  <flags EDM_PLUGIN="1"/>
+</library>
+
+<library file="*.cc" name="RecoLocalTrackerSiPixelClusterizerPlugins">
+  <use name="CalibTracker/SiPixelESProducers"/>
   <flags EDM_PLUGIN="1"/>
 </library>
 

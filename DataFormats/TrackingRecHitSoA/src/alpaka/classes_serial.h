@@ -6,4 +6,6 @@
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoAHost.h"
 
+using namespace pixelTopology;
+
 #endif  // DataFormats_TrackingRecHitSoA_Alpaka_src_Classes_serial_h

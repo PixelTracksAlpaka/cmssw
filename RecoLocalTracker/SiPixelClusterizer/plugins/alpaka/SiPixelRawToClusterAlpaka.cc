@@ -161,7 +161,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     // auto const& gpuGains = iSetup.getData(gainsToken_);
 
-    auto gpuGains = SiPixelGainCalibrationForHLTDevice(1,iEvent.queue());
+    auto gpuGains = SiPixelGainCalibrationForHLTDevice(1, iEvent.queue());
     auto modulesToUnpackRegional =
         cms::alpakatools::make_device_buffer<unsigned char[]>(iEvent.queue(), ::pixelgpudetails::MAX_SIZE);
     const unsigned char* gpuModulesToUnpack;

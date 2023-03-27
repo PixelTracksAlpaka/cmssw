@@ -6,7 +6,6 @@
 #include "Geometry/CommonDetUnit/interface/PixelGeomDetUnit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/RectangularPixelTopology.h"
 #include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
-#include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEFast.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"

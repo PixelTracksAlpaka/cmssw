@@ -96,9 +96,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     template <typename TrackerTraits>
     struct ParamsT<TrackerTraits, pixelTopology::isPhase1Topology<TrackerTraits>> : public AlgoParams {
       using TT = TrackerTraits;
-      using QualityCuts = pixelTrack::QualityCutsT<TT>;  //track quality cuts
-      using CellCuts = gpuPixelDoublets::CellCutsT<TT>;  //cell building cuts
-      using CAParams = CAParamsT<TT>;                    //params to be used on device
+      using QualityCuts = ::pixelTrack::QualityCutsT<TT>;  //track quality cuts
+      using CellCuts = gpuPixelDoublets::CellCutsT<TT>;    //cell building cuts
+      using CAParams = CAParamsT<TT>;                      //params to be used on device
 
       ParamsT(AlgoParams const& commonCuts,
               CellCuts const& cellCuts,
@@ -147,7 +147,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     template <typename TrackerTraits>
     struct ParamsT<TrackerTraits, pixelTopology::isPhase2Topology<TrackerTraits>> : public AlgoParams {
       using TT = TrackerTraits;
-      using QualityCuts = pixelTrack::QualityCutsT<TT>;
+      using QualityCuts = ::pixelTrack::QualityCutsT<TT>;
       using CellCuts = gpuPixelDoublets::CellCutsT<TT>;
       using CAParams = CAParamsT<TT>;
 
@@ -204,7 +204,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   class CAHitNtupletGeneratorKernels {
   public:
     using TrackerTraits = TTTraits;
-    using QualityCuts = pixelTrack::QualityCutsT<TrackerTraits>;
+    using QualityCuts = ::pixelTrack::QualityCutsT<TrackerTraits>;
     using Params = caHitNtupletGenerator::ParamsT<TrackerTraits>;
     using CAParams = caHitNtupletGenerator::CAParamsT<TrackerTraits>;
     using Counters = caHitNtupletGenerator::Counters;

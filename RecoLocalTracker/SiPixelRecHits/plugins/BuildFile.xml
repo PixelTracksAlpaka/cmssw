@@ -8,7 +8,12 @@
 <use name="HeterogeneousCore/AlpakaUtilities"/>
 <use name="RecoLocalTracker/ClusterParameterEstimator"/>
 <use name="RecoLocalTracker/Records"/>
-<library file="alpaka/*.cc" name="RecoLocalTrackerSiPixelRecHitsPlugins">
+
+<library file="*.cc" name="RecoLocalTrackerSiPixelRecHitsPlugins">
+  <flags EDM_PLUGIN="1"/>
+</library>
+
+<library file="alpaka/*.cc" name="RecoLocalTrackerSiPixelRecHitsPluginsAlpaka">
   <use name="alpaka"/>
   <use name="DataFormats/Portable"/>
   <flags ALPAKA_BACKENDS="1"/>
