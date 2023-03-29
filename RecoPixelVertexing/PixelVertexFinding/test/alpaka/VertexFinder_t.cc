@@ -6,7 +6,7 @@
 
 #include "DataFormats/Vertex/interface/ZVertexDefinitions.h"
 #include "DataFormats/Vertex/interface/ZVertexSoAHost.h"
-#include "DataFormats/Vertex/interface/alpaka/ZVertexUtilities.h"
+#include "DataFormats/Vertex/interface/ZVertexUtilities.h"
 #include "DataFormats/Vertex/interface/alpaka/ZVertexSoADevice.h"
 
 #include "RecoPixelVertexing/PixelVertexFinding/plugins/PixelVertexWorkSpaceLayout.h"
