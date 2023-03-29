@@ -6,7 +6,7 @@
 #include <alpaka/alpaka.hpp>
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "DataFormats/Vertex/interface/ZVertexLayout.h"
-#include "DataFormats/Vertex/interface/ZVertexDefinitions.h"
+#include "DataFormats/Vertex/interface/ZVertexUtilities.h"
 #include "DataFormats/Portable/interface/PortableHostCollection.h"
 
 template <int32_t S>

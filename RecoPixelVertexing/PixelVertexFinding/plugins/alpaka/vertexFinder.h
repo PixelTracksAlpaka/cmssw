@@ -4,11 +4,11 @@
 #include <cstddef>
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
-#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
+#include "DataFormats/Track/interface/PixelTrackUtilities.h"
 #include "DataFormats/Vertex/interface/ZVertexSoAHost.h"
 #include "DataFormats/Vertex/interface/ZVertexLayout.h"
 #include "DataFormats/Vertex/interface/alpaka/ZVertexSoADevice.h"
-#include "DataFormats/Vertex/interface/alpaka/ZVertexUtilities.h"
+#include "DataFormats/Vertex/interface/ZVertexUtilities.h"
 #include "../PixelVertexWorkSpaceLayout.h"
 #include "PixelVertexWorkSpaceUtilitiesAlpaka.h"
 #include "PixelVertexWorkSpaceSoADeviceAlpaka.h"
