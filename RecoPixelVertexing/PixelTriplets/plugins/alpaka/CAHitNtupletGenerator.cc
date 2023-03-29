@@ -74,12 +74,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                          (float)cfg.getParameter<double>("dcaCutOuterTriplet")}};
       };
 
-      static constexpr pixelTrack::QualityCutsT<TrackerTraits> makeQualityCuts(edm::ParameterSet const& pset) {
+      static constexpr ::pixelTrack::QualityCutsT<TrackerTraits> makeQualityCuts(edm::ParameterSet const& pset) {
         auto coeff = pset.getParameter<std::array<double, 2>>("chi2Coeff");
         auto ptMax = pset.getParameter<double>("chi2MaxPt");
 
         coeff[1] = (coeff[1] - coeff[0]) / log2(ptMax);
-        return pixelTrack::QualityCutsT<TrackerTraits>{// polynomial coefficients for the pT-dependent chi2 cut
+        return ::pixelTrack::QualityCutsT<TrackerTraits>{// polynomial coefficients for the pT-dependent chi2 cut
                                                        {(float)coeff[0], (float)coeff[1], 0.f, 0.f},
                                                        // max pT used to determine the chi2 cut
                                                        (float)ptMax,
@@ -109,8 +109,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                         {(bool)cfg.getParameter<bool>("includeFarForwards")}};
       }
 
-      static constexpr pixelTrack::QualityCutsT<TrackerTraits> makeQualityCuts(edm::ParameterSet const& pset) {
-        return pixelTrack::QualityCutsT<TrackerTraits>{
+      static constexpr ::pixelTrack::QualityCutsT<TrackerTraits> makeQualityCuts(edm::ParameterSet const& pset) {
+        return ::pixelTrack::QualityCutsT<TrackerTraits>{
             (float)pset.getParameter<double>("maxChi2"),
             (float)pset.getParameter<double>("minPt"),
             (float)pset.getParameter<double>("maxTip"),

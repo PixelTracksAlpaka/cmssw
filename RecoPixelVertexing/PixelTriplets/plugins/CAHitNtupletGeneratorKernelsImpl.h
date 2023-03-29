@@ -59,7 +59,7 @@ namespace caHitNtupletGeneratorKernels {
   using HitsConstView = typename GPUCACellT<TrackerTraits>::HitsConstView;
 
   template <typename TrackerTraits>
-  using QualityCuts = pixelTrack::QualityCutsT<TrackerTraits>;
+  using QualityCuts = ::pixelTrack::QualityCutsT<TrackerTraits>;
 
   template <typename TrackerTraits>
   using CAParams = caHitNtupletGenerator::CAParamsT<TrackerTraits>;
