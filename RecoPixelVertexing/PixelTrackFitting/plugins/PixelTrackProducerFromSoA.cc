@@ -28,7 +28,7 @@
 
 #include "CUDADataFormats/Common/interface/HostProduct.h"
 #include "CUDADataFormats/SiPixelCluster/interface/gpuClusteringConstants.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 
 #include "storeTracks.h"
 

@@ -4,7 +4,7 @@
 #include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 #include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHitsUtilities.h"
 #include "RecoPixelVertexing/PixelTrackFitting/interface/FitResult.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 
 #include "CAStructures.h"
 

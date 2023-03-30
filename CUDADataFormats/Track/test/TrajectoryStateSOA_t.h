@@ -1,4 +1,4 @@
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
 #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"

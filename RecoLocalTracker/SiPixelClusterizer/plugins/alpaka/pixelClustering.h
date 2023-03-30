@@ -10,7 +10,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaUtilities/interface/HistoContainer.h"
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaUtilities/interface/SimpleVector.h"
 
 // #include "pixelClusteringUtilities.h"

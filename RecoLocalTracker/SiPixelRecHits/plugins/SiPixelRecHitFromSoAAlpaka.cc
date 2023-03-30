@@ -6,7 +6,7 @@
 #include "DataFormats/Portable/interface/Product.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoAHost.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"

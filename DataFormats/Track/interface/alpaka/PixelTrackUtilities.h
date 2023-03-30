@@ -1,7 +1,7 @@
 #ifndef DataFormats_Track_PixelTrackUtilities_h
 #define DataFormats_Track_PixelTrackUtilities_h
 
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "DataFormats/Track/interface/PixelTrackDefinitions.h"
 #include "DataFormats/Track/interface/PixelTrackLayout.h"
 

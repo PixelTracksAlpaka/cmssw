@@ -6,7 +6,7 @@
 #include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
 #include "CUDADataFormats/Common/interface/PortableDeviceCollection.h"
 
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 
 // TODO: The class is created via inheritance of the PortableDeviceCollection.
 // This is generally discouraged, and should be done via composition.

@@ -1,7 +1,7 @@
 #include <alpaka/alpaka.hpp>
 
 #include "DataFormats/Portable/interface/Product.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/ESHandle.h"

@@ -4,7 +4,7 @@
 #include <Eigen/Dense>
 
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "DataFormats/TrackingRecHitSoA/interface/SiPixelHitStatus.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/HistoContainer.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/host_unique_ptr.h"

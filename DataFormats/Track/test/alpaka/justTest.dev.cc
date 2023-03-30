@@ -1,5 +1,5 @@
 #include <alpaka/alpaka.hpp>
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaUtilities/interface/HistoContainer.h"
 #include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoADevice.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"

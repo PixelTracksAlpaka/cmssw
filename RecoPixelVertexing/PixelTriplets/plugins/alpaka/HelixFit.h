@@ -5,7 +5,7 @@
 #include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "RecoPixelVertexing/PixelTrackFitting/interface/alpaka/FitResult.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
 #include "CAStructures.h"

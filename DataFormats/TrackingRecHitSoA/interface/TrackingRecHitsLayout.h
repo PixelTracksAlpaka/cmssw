@@ -2,7 +2,7 @@
 #define DataFormats_RecHits_TrackingRecHitsLayout_h
 
 #include <Eigen/Dense>
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaUtilities/interface/HistoContainer.h"
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 #include "DataFormats/PixelCPEFastParams/interface/PixelCPEFastParams.h"

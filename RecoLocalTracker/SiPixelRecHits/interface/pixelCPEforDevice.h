@@ -7,7 +7,7 @@
 #include <iterator>
 
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "DataFormats/PixelCPEFastParams/interface/PixelCPEFastParams.h"
 
 namespace pixelCPEforDevice {

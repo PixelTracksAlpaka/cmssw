@@ -20,7 +20,7 @@
 #include "RecoLocalTracker/Records/interface/TkPixelCPERecord.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEBase.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEFast.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 
 #include "PixelRecHitGPUKernel.h"
 

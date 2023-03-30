@@ -1,6 +1,6 @@
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/typelookup.h"
 #include "DataFormats/PixelCPEFastParams/interface/PixelCPEFastParams.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 
 template <typename TDev>
 using PixelCPEFastParamsPhase1 = pixelCPEforDevice::PixelCPEFastParams<TDev, pixelTopology::Phase1>;

@@ -9,7 +9,7 @@
 #include "HeterogeneousCore/CUDAUtilities/interface/HostAllocator.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEGenericBase.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforGPU.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 
 class MagneticField;
 template <typename TrackerTraits>

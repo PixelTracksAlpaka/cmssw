@@ -15,7 +15,7 @@
 #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisDevice.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "DataFormats/PixelCPEFastParams/interface/PixelCPEFastParams.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
 
 //#define GPU_DEBUG 1

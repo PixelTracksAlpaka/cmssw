@@ -9,7 +9,7 @@
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEGenericBase.h"
 // #include "RecoLocalTracker/SiPixelRecHits/interface/alpaka/pixelCPEforGPU.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 
 class MagneticField;
 template <typename TrackerTraits>

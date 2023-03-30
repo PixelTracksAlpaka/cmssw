@@ -28,7 +28,7 @@
 
 #include "DataFormats/Portable/interface/HostProductAlpaka.h"
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 
 #include "storeTracks.h"
 

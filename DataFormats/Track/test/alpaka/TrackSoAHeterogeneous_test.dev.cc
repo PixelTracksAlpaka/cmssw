@@ -1,4 +1,4 @@
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "DataFormats/Track/interface/PixelTrackDefinitions.h"
 #include "DataFormats/Track/interface/alpaka/TrackSoADevice.h"
 #include "DataFormats/Track/interface/TrackSoAHost.h"

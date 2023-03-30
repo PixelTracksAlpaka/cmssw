@@ -15,7 +15,7 @@
 #include "HeterogeneousCore/CUDAUtilities/interface/cuda_assert.h"
 #include "RecoPixelVertexing/PixelTriplets/interface/CircleEq.h"
 #include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "CAStructures.h"
 
 template <typename TrackerTraits>

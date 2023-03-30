@@ -15,7 +15,7 @@
 #include "RecoPixelVertexing/PixelTriplets/interface/CircleEq.h"
 #include "DataFormats/Track/interface/PixelTrackDefinitions.h"
 #include "DataFormats/Track/interface/PixelTrackLayout.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "CAStructures.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {

@@ -4,7 +4,7 @@
 #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisDevice.h"
 #include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoADevice.h"
 #include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "DataFormats/PixelCPEFastParams/interface/PixelCPEFastParams.h"
 
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/Event.h"

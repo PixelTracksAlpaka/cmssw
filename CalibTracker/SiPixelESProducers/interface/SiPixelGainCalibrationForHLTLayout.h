@@ -3,7 +3,7 @@
 
 #include <array>
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 
 namespace siPixelGainsSoA {
   struct DecodingStructure {

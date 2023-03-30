@@ -9,7 +9,7 @@
 #include "CUDADataFormats/SiPixelCluster/interface/SiPixelClustersCUDA.h"
 #include "CUDADataFormats/SiPixelDigi/interface/SiPixelDigisCUDA.h"
 #include "CUDADataFormats/TrackingRecHit/interface/TrackingRecHitSoADevice.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 //#define GPU_DEBUG
 namespace pixelgpudetails {
 

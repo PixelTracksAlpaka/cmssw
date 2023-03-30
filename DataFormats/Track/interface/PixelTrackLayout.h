@@ -3,7 +3,7 @@
 
 #include <Eigen/Core>
 #include "HeterogeneousCore/AlpakaUtilities/interface/HistoContainer.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 #include "DataFormats/Track/interface/PixelTrackDefinitions.h"
 

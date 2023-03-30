@@ -8,7 +8,7 @@
 
 #include "CUDADataFormats/SiPixelCluster/interface/gpuClusteringConstants.h"
 #include "DataFormats/GeometrySurface/interface/SOARotation.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "DataFormats/TrackingRecHitSoA/interface/SiPixelHitStatus.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCompat.h"
 

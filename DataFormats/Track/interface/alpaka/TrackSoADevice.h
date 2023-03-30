@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
-// #include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+// #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "DataFormats/Track/interface/PixelTrackLayout.h"
 #include "DataFormats/Track/interface/PixelTrackDefinitions.h"

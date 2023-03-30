@@ -12,7 +12,7 @@
 #include "HeterogeneousCore/AlpakaUtilities/interface/VecArray.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "DataFormats/Math/interface/approx_atan2.h"
-#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "CAStructures.h"
 #include "CACell.h"
 
