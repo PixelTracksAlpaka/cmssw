@@ -4,7 +4,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
-#include "DataFormats/Vertex/interface/ZVertexDefinitions.h"
+#include "DataFormats/Vertex/interface/alpaka/ZVertexUtilities.h"
 #include "DataFormats/Vertex/interface/ZVertexSoAHost.h"
 #include "DataFormats/Vertex/interface/alpaka/ZVertexUtilities.h"
 #include "DataFormats/Vertex/interface/alpaka/ZVertexSoADevice.h"

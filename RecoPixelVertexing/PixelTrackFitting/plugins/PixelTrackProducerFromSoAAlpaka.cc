@@ -44,7 +44,7 @@
 template <typename TrackerTraits>
 class PixelTrackProducerFromSoAAlpaka : public edm::global::EDProducer<> {
   using TkSoAHost = TrackSoAHost<TrackerTraits>;
-  using tracksHelpers = TracksUtilitiesHost<TrackerTraits>;
+  using tracksHelpers = TracksUtilities<TrackerTraits>;
 
 public:
   using IndToEdm = std::vector<uint32_t>;
