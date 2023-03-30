@@ -19,7 +19,7 @@
 #include "HeterogeneousCore/CUDAUtilities/interface/requireDevices.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCheck.h"
 
-#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
+#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
 
 namespace testTrackSoA {
 

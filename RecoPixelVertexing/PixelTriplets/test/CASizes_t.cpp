@@ -1,5 +1,5 @@
 #include "RecoPixelVertexing/PixelTriplets/plugins/GPUCACell.h"
-#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
+#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
 #include <typeinfo>
 #include <iostream>
 
