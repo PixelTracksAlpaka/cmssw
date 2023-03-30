@@ -22,8 +22,8 @@
 #include "DQMServices/Core/interface/MonitorElement.h"
 #include "DQMServices/Core/interface/DQMEDAnalyzer.h"
 #include "DQMServices/Core/interface/DQMStore.h"
-#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
-#include "DataFormats/Track/interface/TrackSoAHost.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
 
 namespace {
   // same logic used for the MTV:
@@ -62,10 +62,11 @@ namespace {
     return ibook.book2I(name, h.release());
   }
 }  // namespace
+
 template <typename T>
 class SiPixelCompareTrackSoA : public DQMEDAnalyzer {
 public:
-  using PixelTrackSoA = TrackSoAHost<T>;
+  using PixelTrackSoA = TrackSoAHeterogeneousHost<T>;
 
   explicit SiPixelCompareTrackSoA(const edm::ParameterSet&);
   ~SiPixelCompareTrackSoA() override = default;
@@ -309,5 +310,5 @@ void SiPixelCompareTrackSoA<T>::fillDescriptions(edm::ConfigurationDescriptions&
 using SiPixelPhase1CompareTrackSoA = SiPixelCompareTrackSoA<pixelTopology::Phase1>;
 using SiPixelPhase2CompareTrackSoA = SiPixelCompareTrackSoA<pixelTopology::Phase2>;
 
-DEFINE_FWK_MODULE(SiPixelPhase2CompareTrackSoA);
 DEFINE_FWK_MODULE(SiPixelPhase1CompareTrackSoA);
+DEFINE_FWK_MODULE(SiPixelPhase2CompareTrackSoA);

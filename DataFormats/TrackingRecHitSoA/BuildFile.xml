@@ -7,11 +7,7 @@
 <use name="DataFormats/SoATemplate" source_only="1"/>
 <use name="HeterogeneousCore/AlpakaUtilities"/>
 <use name="HeterogeneousCore/AlpakaInterface"/>
-<<<<<<< HEAD
 <flags ALPAKA_BACKENDS="1"/>
-=======
-<!-- <flags ALPAKA_BACKENDS="1"/> -->
->>>>>>> common/alpaka_port_13_1_dev
 <export>
     <lib name="1"/>
 </export>

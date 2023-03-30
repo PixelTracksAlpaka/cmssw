@@ -7,9 +7,6 @@
 //
 // Author: Suvankar Roy Chowdhury
 //
-
-// for string manipulations
-#include <fmt/printf.h>
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -23,13 +20,15 @@
 #include "DQMServices/Core/interface/MonitorElement.h"
 #include "DQMServices/Core/interface/DQMEDAnalyzer.h"
 #include "DQMServices/Core/interface/DQMStore.h"
-#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
-#include "DataFormats/Track/interface/TrackSoAHost.h"
+#include "CUDADataFormats/Track/interface/PixelTrackUtilities.h"
+#include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
+// for string manipulations
+#include <fmt/printf.h>
 
 template <typename T>
 class SiPixelMonitorTrackSoA : public DQMEDAnalyzer {
 public:
-  using PixelTrackHeterogeneous = TrackSoAHost<T>;
+  using PixelTrackHeterogeneous = TrackSoAHeterogeneousHost<T>;
   explicit SiPixelMonitorTrackSoA(const edm::ParameterSet&);
   ~SiPixelMonitorTrackSoA() override = default;
   void bookHistograms(DQMStore::IBooker& ibooker, edm::Run const& iRun, edm::EventSetup const& iSetup) override;

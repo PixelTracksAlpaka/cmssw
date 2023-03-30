@@ -10,18 +10,17 @@
 <use name="SimDataFormats/Track"/>
 <use name="TrackingTools/TransientTrack"/>
 
-<bin file="alpaka/VertexFinder_t.cc alpaka/VertexFinder_t.dev.cc" name="gpuVertexFinderOneKernel_t">
-  <use name="alpaka"/>
-  <use name="HeterogeneousCore/AlpakaInterface"/>
-  <flags ALPAKA_BACKENDS="1"/>  
-  <flags CXXFLAGS="-g -DGPU_DEBUG -DONE_KERNEL"/>
+<iftool name="cuda-gcc-support">
+<bin file="gpuVertexFinder_t.cu" name="gpuVertexFinderOneKernel_t">
+  <use name="cuda"/>
+  <flags CUDA_FLAGS="-g -DGPU_DEBUG -DONE_KERNEL"/>
+  <flags CXXFLAGS="-g"/>
 </bin>
 
-<bin file="alpaka/VertexFinder_t.cc alpaka/VertexFinder_t.dev.cc" name="gpuVertexFinderByDensity_t">
-  <use name="alpaka"/>
-  <use name="HeterogeneousCore/AlpakaInterface"/>
-  <flags ALPAKA_BACKENDS="1"/>  
-  <flags CXX_FLAGS="-g -DGPU_DEBUG"/>
+<bin file="gpuVertexFinder_t.cu" name="gpuVertexFinderByDensity_t">
+  <use name="cuda"/>
+  <flags CUDA_FLAGS="-g -DGPU_DEBUG"/>
+  <flags CXXFLAGS="-g"/>
 </bin>
  
 <bin file="gpuVertexFinder_t.cu" name="gpuVertexFinderDBSCAN_t">

@@ -91,8 +91,8 @@ namespace caHitNtupletGenerator {
   struct ParamsT<TrackerTraits, pixelTopology::isPhase1Topology<TrackerTraits>> : public AlgoParams {
     using TT = TrackerTraits;
     using QualityCuts = ::pixelTrack::QualityCutsT<TT>;  //track quality cuts
-    using CellCuts = gpuPixelDoublets::CellCutsT<TT>;  //cell building cuts
-    using CAParams = CAParamsT<TT>;                    //params to be used on device
+    using CellCuts = gpuPixelDoublets::CellCutsT<TT>;    //cell building cuts
+    using CAParams = CAParamsT<TT>;                      //params to be used on device
 
     ParamsT(AlgoParams const& commonCuts,
             CellCuts const& cellCuts,

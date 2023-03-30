@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 <lcgdict>
-=======
-2<lcgdict>
->>>>>>> common/alpaka_port_13_1_dev
   <class name="alpaka_cuda_async::TrackingRecHitAlpakaDevicePhase1" persistent="false"/>
   <class name="edm::Wrapper<alpaka_cuda_async::TrackingRecHitAlpakaDevicePhase1>" persistent="false"/>
   <class name="cms::alpakatools::Product<alpaka_cuda_async::Queue,alpaka_cuda_async::TrackingRecHitAlpakaDevicePhase1>" persistent="false"/>

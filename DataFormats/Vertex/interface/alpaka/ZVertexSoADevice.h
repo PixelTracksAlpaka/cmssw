@@ -5,10 +5,7 @@
 
 #include <alpaka/alpaka.hpp>
 #include "DataFormats/Vertex/interface/ZVertexLayout.h"
-<<<<<<< HEAD
 #include "DataFormats/Vertex/interface/ZVertexDefinitions.h"
-=======
->>>>>>> common/alpaka_port_13_1_dev
 #include "DataFormats/Vertex/interface/alpaka/ZVertexUtilities.h"
 #include "DataFormats/Vertex/interface/ZVertexSoAHost.h"
 #include "DataFormats/Portable/interface/alpaka/PortableCollection.h"

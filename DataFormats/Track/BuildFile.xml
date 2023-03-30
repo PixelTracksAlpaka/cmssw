@@ -4,10 +4,7 @@
 <use name="DataFormats/Common"/>
 <use name="DataFormats/Portable"/>
 <use name="DataFormats/SoATemplate" source_only="1"/>
-<<<<<<< HEAD
 <use name="DataFormats/TrackerCommon" source_only="1"/>
-=======
->>>>>>> common/alpaka_port_13_1_dev
 <use name="HeterogeneousCore/AlpakaInterface"/>
 <flags ALPAKA_BACKENDS="1"/>
 <export>
