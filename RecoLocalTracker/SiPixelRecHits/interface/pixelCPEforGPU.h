@@ -9,8 +9,8 @@
 #include "CUDADataFormats/SiPixelCluster/interface/gpuClusteringConstants.h"
 #include "DataFormats/GeometrySurface/interface/SOARotation.h"
 #include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "DataFormats/TrackingRecHitSoA/interface/SiPixelHitStatus.h"
 #include "HeterogeneousCore/CUDAUtilities/interface/cudaCompat.h"
-#include "CUDADataFormats/TrackingRecHit/interface/SiPixelHitStatus.h"
 
 namespace CPEFastParametrisation {
   // From https://cmssdt.cern.ch/dxr/CMSSW/source/CondFormats/SiPixelTransient/src/SiPixelGenError.cc#485-486

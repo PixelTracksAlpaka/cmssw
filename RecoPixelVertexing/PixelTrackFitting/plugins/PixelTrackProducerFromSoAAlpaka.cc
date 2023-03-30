@@ -33,7 +33,7 @@
 #include "storeTracks.h"
 
 #include "DataFormats/Track/interface/TrackSoAHost.h"
-#include "DataFormats/Track/interface/PixelTrackUtilities.h"
+#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
 #include <alpaka/alpaka.hpp>
 
 /**
