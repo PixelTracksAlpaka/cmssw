@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
 #include "DataFormats/Vertex/interface/alpaka/ZVertexUtilities.h"
+#include "DataFormats/Vertex/interface/ZVertexDefinitions.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "HeterogeneousCore/AlpakaUtilities/interface/HistoContainer.h"
 #include "RecoPixelVertexing/PixelVertexFinding/plugins/PixelVertexWorkSpaceLayout.h"

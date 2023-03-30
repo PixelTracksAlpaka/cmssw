@@ -1,9 +1,9 @@
-#ifndef DataFormats_SiPixelDigisPortable_alpaka_src_Classes_serial_h
-#define DataFormats_SiPixelDigisPortable_alpaka_src_Classes_serial_h
+#ifndef DataFormats_SiPixelDigiSoA_alpaka_alasses_serial_h
+#define DataFormats_SiPixelDigiSoA_alpaka_alasses_serial_h
 
 #include "DataFormats/Common/interface/Wrapper.h"
-#include "DataFormats/Portable/interface/Product.h"
-#include "DataFormats/SiPixelDigisoA/interface/SiPixelDigisLayout.h"
-#include "DataFormats/SiPixelCluster/interface/SiPixelDigisHost.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisLayout.h"
+#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisDevice.h"
+#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsDevice.h"
 
-#endif  // DataFormats_SiPixelDigisPortable_alpaka_src_Classes_serial_h
+#endif  // DataFormats_SiPixelDigiSoA_alpaka_classes_serial_h

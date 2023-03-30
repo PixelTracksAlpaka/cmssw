@@ -7,6 +7,8 @@
 //
 // Author: Suvankar Roy Chowdhury
 //
+// for string manipulations
+#include <fmt/printf.h>
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
@@ -22,8 +24,6 @@
 #include "DQMServices/Core/interface/DQMStore.h"
 #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousHost.h"
 #include "CUDADataFormats/Track/interface/TrackSoAHeterogeneousDevice.h"
-// for string manipulations
-#include <fmt/printf.h>
 
 namespace {
   // same logic used for the MTV:

@@ -1,9 +1,9 @@
-#ifndef DataFormats_SiPixelDigisoA_alpaka_Classes_CUDA_h
-#define DataFormats_SiPixelDigisoA_alpaka_Classes_CUDA_h
+#ifndef DataFormats_SiPixelDigiSoA_alpaka_classes_cuda_h
+#define DataFormats_SiPixelDigiSoA_alpaka_classes_cuda_h
 
 #include "DataFormats/Common/interface/Wrapper.h"
 #include "DataFormats/Portable/interface/Product.h"
-#include "DataFormats/SiPixelDigisoA/interface/SiPixelDigisLayout.h"
-#include "DataFormats/Track/interface/alpaka/SiPixelDigisDevice.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisLayout.h"
+#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisDevice.h"
 
-#endif  // DataFormats_Track_src_alpaka_classes_cuda_h
+#endif  // DataFormats_SiPixelDigiSoA_src_alpaka_classes_cuda_h

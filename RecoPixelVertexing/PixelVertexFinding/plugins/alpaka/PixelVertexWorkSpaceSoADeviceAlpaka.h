@@ -4,6 +4,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
 #include "DataFormats/Vertex/interface/alpaka/ZVertexUtilities.h"
+#include "DataFormats/Vertex/interface/ZVertexDefinitions.h"
 #include "../PixelVertexWorkSpaceLayout.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {

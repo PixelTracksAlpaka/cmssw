@@ -207,7 +207,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                       << *mx.second << std::endl;
           }
 
-//          auto workDivSplitter = make_workdiv<Acc1D>(1024, 64);
+          //          auto workDivSplitter = make_workdiv<Acc1D>(1024, 64);
 
           // one vertex per block!!!
           // alpaka::exec<Acc1D>(

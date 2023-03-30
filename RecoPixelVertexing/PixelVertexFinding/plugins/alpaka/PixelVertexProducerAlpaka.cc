@@ -104,8 +104,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template <typename TrackerTraits>
   void PixelVertexProducerAlpaka<TrackerTraits>::produceOnGPU(edm::StreamID streamID,
-                                                             device::Event& iEvent,
-                                                             const device::EventSetup& iSetup) const {
+                                                              device::Event& iEvent,
+                                                              const device::EventSetup& iSetup) const {
     using TracksSoA = TrackSoADevice<TrackerTraits>;
     auto const& hTracks = iEvent.get(tokenGPUTrack_);
 
@@ -114,8 +114,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template <typename TrackerTraits>
   void PixelVertexProducerAlpaka<TrackerTraits>::produce(edm::StreamID streamID,
-                                                        device::Event& iEvent,
-                                                        const device::EventSetup& iSetup) const {
+                                                         device::Event& iEvent,
+                                                         const device::EventSetup& iSetup) const {
     produceOnGPU(streamID, iEvent, iSetup);
   }
 

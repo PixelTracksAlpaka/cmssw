@@ -82,7 +82,7 @@ struct TracksUtilities {
   }
 
   ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE static constexpr int computeNumberOfLayers(const TrackSoAConstView &tracks,
-                                                                                  int32_t i) {
+                                                                                 int32_t i) {
     auto pdet = tracks.detIndices().begin(i);
     int nl = 1;
     auto ol = pixelTopology::getLayer<TrackerTraits>(*pdet);
@@ -132,7 +132,7 @@ namespace pixelTrack {
       // (see CAHitNtupletGeneratorGPU.cc)
       auto const &region = (nHits > 3) ? quadruplet : triplet;
       return (std::abs(tracksHelper::tip(tracks, it)) < region.maxTip) and (tracks.pt(it) > region.minPt) and
-              (std::abs(tracksHelper::zip(tracks, it)) < region.maxZip);
+             (std::abs(tracksHelper::zip(tracks, it)) < region.maxZip);
     }
 
     ALPAKA_FN_ACC ALPAKA_FN_INLINE bool strictCut(const TrackSoAConstView &tracks, int it) const {
@@ -182,7 +182,7 @@ namespace pixelTrack {
 
     ALPAKA_FN_ACC ALPAKA_FN_INLINE bool isHP(const TrackSoAConstView &tracks, int nHits, int it) const {
       return (std::abs(tracksHelper::tip(tracks, it)) < maxTip) and (tracks.pt(it) > minPt) and
-              (std::abs(tracksHelper::zip(tracks, it)) < maxZip);
+             (std::abs(tracksHelper::zip(tracks, it)) < maxZip);
     }
     ALPAKA_FN_ACC ALPAKA_FN_INLINE bool strictCut(const TrackSoAConstView &tracks, int it) const {
       return tracks.chi2(it) >= maxChi2;
@@ -194,6 +194,5 @@ namespace pixelTrack {
 // TODO: Should those be placed in the ALPAKA_ACCELERATOR_NAMESPACE
 template struct TracksUtilities<pixelTopology::Phase1>;
 template struct TracksUtilities<pixelTopology::Phase2>;
-
 
 #endif

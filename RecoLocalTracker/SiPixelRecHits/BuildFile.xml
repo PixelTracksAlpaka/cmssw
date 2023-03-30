@@ -7,7 +7,10 @@
 <use name="CondFormats/SiPixelTransient"/>
 <use name="DataFormats/TrackerCommon"/>
 <use name="DataFormats/TrackerRecHit2D"/>
+<use name="DataFormats/TrackingRecHitSoA"/>
 <use name="DataFormats/BeamSpotAlpaka"/>
+<use name="CUDADataFormats/TrackingRecHit"/>
+<use name="CUDADataFormats/BeamSpot"/>
 <use name="FWCore/ParameterSet"/>
 <use name="HeterogeneousCore/AlpakaCore"/>
 <use name="HeterogeneousCore/AlpakaUtilities"/>

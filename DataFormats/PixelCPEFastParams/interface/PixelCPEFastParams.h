@@ -147,7 +147,6 @@ namespace pixelCPEforDevice {
     Buffer buffer_;
   };
 
-
 }  // namespace pixelCPEforDevice
 
 namespace cms::alpakatools {

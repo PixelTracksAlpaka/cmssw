@@ -21,6 +21,7 @@
 #include "RecoLocalTracker/Records/interface/TkPixelCPERecord.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEBase.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEFastAlpaka.h"
+#include "DataFormats/PixelCPEFastParams/interface/PixelCPEFastParams.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
 
 #include "PixelRecHitGPUKernel.h"
@@ -71,8 +72,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template <typename TrackerTraits>
   void SiPixelRecHitAlpaka<TrackerTraits>::produce(edm::StreamID streamID,
-                                                    device::Event& iEvent,
-                                                    const device::EventSetup& es) const {
+                                                   device::Event& iEvent,
+                                                   const device::EventSetup& es) const {
     auto& fcpe = es.getData(cpeToken_);
     if (not fcpe.data()) {
       throw cms::Exception("Configuration") << "SiPixelRecHitAlpaka can only use a CPE of type PixelCPEFast";

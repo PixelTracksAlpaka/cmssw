@@ -21,6 +21,6 @@ namespace vertexFinder {
     using PixelVertexWorkSpaceSoAView = PixelVertexWSSoALayout<>::View;
     using PixelVertexWorkSpaceSoAConstView = PixelVertexWSSoALayout<>::ConstView;
   }  // namespace workSpace
-}  // namespace gpuVertexFinder
+}  // namespace vertexFinder
 
 #endif

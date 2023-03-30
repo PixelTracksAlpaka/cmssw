@@ -1,13 +1,8 @@
 <use name="ofast-flag"/>
-<use name="DataFormats/Track"/>
-<use name="DataFormats/TrackingRecHitSoA"/>
 <use name="CommonTools/RecoAlgos"/>
-<use name="CUDADataFormats/Track"/>
-<use name="CUDADataFormats/TrackingRecHit"/>
 <use name="FWCore/Framework"/>
 <use name="FWCore/ParameterSet"/>
 <use name="FWCore/PluginManager"/>
-<use name="HeterogeneousCore/CUDACore"/>
 <use name="RecoPixelVertexing/PixelTriplets"/>
 <use name="RecoTracker/Record"/>
 <use name="RecoTracker/TkTrackingRegions"/>
@@ -16,6 +11,9 @@
 <iftool name="cuda-gcc-support">
   <use name="cuda"/>
   <set name="cuda_src" value="*.cu"/>
+  <use name="HeterogeneousCore/CUDACore"/>
+  <use name="CUDADataFormats/Track"/>
+  <use name="CUDADataFormats/TrackingRecHit"/>
 <else/>
   <set name="cuda_src" value=""/>
 </iftool>
@@ -26,8 +24,8 @@
 <library file="alpaka/*.cc" name="RecoPixelVertexingPixelTripletsPluginsPortable">
  <use name="alpaka"/>
   <use name="DataFormats/Portable"/>
-  <use name="FWCore/Framework"/>
-  <use name="FWCore/ParameterSet"/>
+  <use name="DataFormats/Track"/>
+  <use name="DataFormats/TrackingRecHitSoA"/>
   <use name="FWCore/Utilities"/>
   <use name="HeterogeneousCore/AlpakaCore"/>
   <use name="HeterogeneousCore/AlpakaInterface"/>

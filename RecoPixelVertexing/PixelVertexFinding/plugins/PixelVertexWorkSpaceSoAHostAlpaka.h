@@ -23,5 +23,5 @@ namespace vertexFinder {
   namespace workSpace {
     using PixelVertexWorkSpaceSoAHost = PixelVertexWorkSpaceSoAHost<zVertex::MAXTRACKS>;
   }
-}  // namespace gpuVertexFinder
+}  // namespace vertexFinder
 #endif

@@ -24,7 +24,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(const TAcc &acc, VtxSoAView pdata, WsSoAView pws) const {
-        pdata.nvFinal() = 0;// initialization
+        pdata.nvFinal() = 0;  // initialization
         vertexFinder::workSpace::utilities::init(pws);
       }
     };
