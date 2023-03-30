@@ -90,7 +90,7 @@ namespace caHitNtupletGenerator {
   template <typename TrackerTraits>
   struct ParamsT<TrackerTraits, pixelTopology::isPhase1Topology<TrackerTraits>> : public AlgoParams {
     using TT = TrackerTraits;
-    using QualityCuts = ::pixelTrack::QualityCutsT<TT>;  //track quality cuts
+    using QualityCuts = pixelTrack::QualityCutsT<TT>;  //track quality cuts
     using CellCuts = gpuPixelDoublets::CellCutsT<TT>;  //cell building cuts
     using CAParams = CAParamsT<TT>;                    //params to be used on device
 
@@ -141,7 +141,7 @@ namespace caHitNtupletGenerator {
   template <typename TrackerTraits>
   struct ParamsT<TrackerTraits, pixelTopology::isPhase2Topology<TrackerTraits>> : public AlgoParams {
     using TT = TrackerTraits;
-    using QualityCuts = ::pixelTrack::QualityCutsT<TT>;
+    using QualityCuts = pixelTrack::QualityCutsT<TT>;
     using CellCuts = gpuPixelDoublets::CellCutsT<TT>;
     using CAParams = CAParamsT<TT>;
 
@@ -199,7 +199,7 @@ class CAHitNtupletGeneratorKernels {
 public:
   using Traits = TTraits;
   using TrackerTraits = TTTraits;
-  using QualityCuts = ::pixelTrack::QualityCutsT<TrackerTraits>;
+  using QualityCuts = pixelTrack::QualityCutsT<TrackerTraits>;
   using Params = caHitNtupletGenerator::ParamsT<TrackerTraits>;
   using CAParams = caHitNtupletGenerator::CAParamsT<TrackerTraits>;
   using Counters = caHitNtupletGenerator::Counters;

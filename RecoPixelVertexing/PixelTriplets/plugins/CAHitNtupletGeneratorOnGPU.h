@@ -48,7 +48,7 @@ public:
 
   using Quality = pixelTrack::Quality;
 
-  using QualityCuts = ::pixelTrack::QualityCutsT<TrackerTraits>;
+  using QualityCuts = pixelTrack::QualityCutsT<TrackerTraits>;
   using Params = caHitNtupletGenerator::ParamsT<TrackerTraits>;
   using Counters = caHitNtupletGenerator::Counters;
 
