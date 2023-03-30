@@ -1,5 +1,5 @@
-#ifndef DataFormats_SiPixelClusterSoA_Alpaka_Classes_serial_h
-#define DataFormats_SiPixelClusterSoA_Alpaka_Classes_serial_h
+#ifndef DataFormats_SiPixelClusterSoA_alpaka_classes_serial_h
+#define DataFormats_SiPixelClusterSoA_alpaka_classes_serial_h
 
 #include "DataFormats/Common/interface/Wrapper.h"
 #include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersLayout.h"

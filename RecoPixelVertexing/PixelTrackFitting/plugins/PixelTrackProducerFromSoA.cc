@@ -26,8 +26,8 @@
 #include "TrackingTools/TrajectoryParametrization/interface/CurvilinearTrajectoryError.h"
 #include "RecoPixelVertexing/PixelTrackFitting/interface/alpaka/FitUtils.h"
 
-#include "DataFormats/Portable/interface/HostProduct.h"
-#include "DataFormats/SiPixelClusterSoA/interface/gpuClusteringConstants.h"
+#include "CUDADataFormats/Common/interface/HostProduct.h"
+#include "CUDADataFormats/SiPixelCluster/interface/gpuClusteringConstants.h"
 #include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
 
 #include "storeTracks.h"

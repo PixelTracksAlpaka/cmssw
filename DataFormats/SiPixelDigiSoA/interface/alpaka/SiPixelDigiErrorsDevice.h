@@ -1,5 +1,5 @@
-#ifndef DataFormats_alpaka_SiPixelDigiErrorsAlpaka_h
-#define DataFormats_alpaka_SiPixelDigiErrorsAlpaka_h
+#ifndef DataFormats_SiPixelDigiSoA_alpaka_SiPixelDigiErrorsAlpaka_h
+#define DataFormats_SiPixelDigiSoA_alpaka_SiPixelDigiErrorsAlpaka_h
 
 #include <cstdint>
 #include <alpaka/alpaka.hpp>

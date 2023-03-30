@@ -20,17 +20,17 @@
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "RecoLocalTracker/Records/interface/TkPixelCPERecord.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEBase.h"
-#include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEFast.h"
+#include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEFastAlpaka.h"
 #include "DataFormats/PixelCPEFastParams/interface/PixelCPEFastParams.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
 
 #include "PixelRecHitGPUKernel.h"
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   template <typename TrackerTraits>
-  class SiPixelRecHitAlpakaT : public global::EDProducer<> {
+  class SiPixelRecHitAlpaka : public global::EDProducer<> {
   public:
-    explicit SiPixelRecHitAlpakaT(const edm::ParameterSet& iConfig);
-    ~SiPixelRecHitAlpakaT() override = default;
+    explicit SiPixelRecHitAlpaka(const edm::ParameterSet& iConfig);
+    ~SiPixelRecHitAlpaka() override = default;
 
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
@@ -49,7 +49,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   };
 
   template <typename TrackerTraits>
-  SiPixelRecHitAlpakaT<TrackerTraits>::SiPixelRecHitAlpakaT(const edm::ParameterSet& iConfig)
+  SiPixelRecHitAlpaka<TrackerTraits>::SiPixelRecHitAlpaka(const edm::ParameterSet& iConfig)
       : cpeToken_(esConsumes(edm::ESInputTag("", iConfig.getParameter<std::string>("CPE")))),
         tBeamSpot(consumes(iConfig.getParameter<edm::InputTag>("beamSpot"))),
         tokenClusters_(consumes(iConfig.getParameter<edm::InputTag>("src"))),
@@ -57,7 +57,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         tokenHit_(produces()) {}
 
   template <typename TrackerTraits>
-  void SiPixelRecHitAlpakaT<TrackerTraits>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+  void SiPixelRecHitAlpaka<TrackerTraits>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     edm::ParameterSetDescription desc;
 
     desc.add<edm::InputTag>("beamSpot", edm::InputTag("offlineBeamSpotAlpaka"));
@@ -71,9 +71,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   template <typename TrackerTraits>
-  void SiPixelRecHitAlpakaT<TrackerTraits>::produce(edm::StreamID streamID,
-                                                    device::Event& iEvent,
-                                                    const device::EventSetup& es) const {
+  void SiPixelRecHitAlpaka<TrackerTraits>::produce(edm::StreamID streamID,
+                                                   device::Event& iEvent,
+                                                   const device::EventSetup& es) const {
     auto& fcpe = es.getData(cpeToken_);
     if (not fcpe.data()) {
       throw cms::Exception("Configuration") << "SiPixelRecHitAlpaka can only use a CPE of type PixelCPEFast";
@@ -87,8 +87,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     iEvent.emplace(tokenHit_, gpuAlgo_.makeHitsAsync(digis, clusters, bs, fcpe.data(), iEvent.queue()));
   }
-  using SiPixelRecHitAlpakaPhase1 = SiPixelRecHitAlpakaT<pixelTopology::Phase1>;
-  using SiPixelRecHitAlpakaPhase2 = SiPixelRecHitAlpakaT<pixelTopology::Phase2>;
+  using SiPixelRecHitAlpakaPhase1 = SiPixelRecHitAlpaka<pixelTopology::Phase1>;
+  using SiPixelRecHitAlpakaPhase2 = SiPixelRecHitAlpaka<pixelTopology::Phase2>;
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/MakerMacros.h"

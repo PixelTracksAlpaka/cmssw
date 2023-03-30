@@ -8,9 +8,13 @@
 <use name="DataFormats/TrackerRecHit2D"/>
 <use name="DataFormats/TrackingRecHitSoA"/>
 <use name="DataFormats/BeamSpotAlpaka"/>
+<use name="CUDADataFormats/TrackingRecHit"/>
+<use name="CUDADataFormats/BeamSpot"/>
 <use name="FWCore/ParameterSet"/>
 <use name="HeterogeneousCore/AlpakaCore"/>
 <use name="HeterogeneousCore/AlpakaUtilities"/>
+<use name="HeterogeneousCore/CUDACore"/>
+<use name="HeterogeneousCore/CUDAUtilities"/>
 <use name="RecoLocalTracker/ClusterParameterEstimator"/>
 <export>
   <lib name="1"/>

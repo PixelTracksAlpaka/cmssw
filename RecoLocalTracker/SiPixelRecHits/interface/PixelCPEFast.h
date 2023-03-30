@@ -7,9 +7,7 @@
 #include "CondFormats/SiPixelTransient/interface/SiPixelTemplate.h"
 #include "DataFormats/PixelCPEFastParams/interface/PixelCPEFastParams.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEGenericBase.h"
-// #include "RecoLocalTracker/SiPixelRecHits/interface/alpaka/pixelCPEforGPU.h"
-// #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
-#include "DataFormats/PixelCPEFastParams/interface/PixelCPEFastParams.h"
+#include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforGPU.h"
 #include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
 
 class MagneticField;

@@ -6,12 +6,12 @@
 //#include <alpaka/alpaka.hpp>
 
 // CMSSW headers
-#include "DataFormats/SiPixelClusterSoA/interface/gpuClusteringConstants.h"
+#include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaUtilities/interface/HistoContainer.h"
 
 #include "PixelRecHitGPUKernel.h"
-#include "gpuPixelRecHits.h"
+#include "pixelRecHits.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   using namespace cms::alpakatools;

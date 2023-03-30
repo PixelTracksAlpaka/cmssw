@@ -1,5 +1,5 @@
-#ifndef RecoPixelVertexing_PixelTriplets_plugins_alpaka_CAStructures_h
-#define RecoPixelVertexing_PixelTriplets_plugins_alpaka_CAStructures_h
+#ifndef RecoPixelVertexing_PixelTriplets_CAStructures_h
+#define RecoPixelVertexing_PixelTriplets_CAStructures_h
 
 #include "HeterogeneousCore/AlpakaUtilities/interface/SimpleVector.h"
 #include "HeterogeneousCore/AlpakaUtilities/interface/VecArray.h"

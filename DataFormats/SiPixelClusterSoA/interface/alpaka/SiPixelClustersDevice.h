@@ -1,5 +1,5 @@
-#ifndef DataFormats_SiPixelClusterSoA_interface_SiPixelClustersDevice_h
-#define DataFormats_SiPixelClusterSoA_interface_SiPixelClustersDevice_h
+#ifndef DataFormats_SiPixelClusterSoA_SiPixelClustersDevice_h
+#define DataFormats_SiPixelClusterSoA_SiPixelClustersDevice_h
 
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
@@ -52,4 +52,4 @@ namespace cms::alpakatools {
   };
 }  // namespace cms::alpakatools
 
-#endif  // DataFormats_SiPixelClusterSoA_interface_SiPixelClustersDevice_h
+#endif  // DataFormats_SiPixelClusterSoA_SiPixelClustersDevice_h

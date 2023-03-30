@@ -1,14 +1,14 @@
-#ifndef RecoPixelVertexing_PixelTriplets_plugins_alpaka_CAHitNtupletGeneratorKernels_h
-#define RecoPixelVertexing_PixelTriplets_plugins_alpaka_CAHitNtupletGeneratorKernels_h
+#ifndef RecoPixelVertexing_PixelTriplets_CAHitNtupletGeneratorKernels_h
+#define RecoPixelVertexing_PixelTriplets_CAHitNtupletGeneratorKernels_h
 
 // #define GPU_DEBUG
 #include <alpaka/alpaka.hpp>
 #include <cstdint>
-#include "GPUCACell.h"
-#include "gpuPixelDoublets.h"
-#include "../CAStructures.h"
+#include "CACell.h"
+#include "CAPixelDoublets.h"
+#include "CAStructures.h"
 
-#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
+#include "DataFormats/Track/interface/PixelTrackUtilities.h"
 #include "DataFormats/Track/interface/PixelTrackDefinitions.h"
 #include "DataFormats/Track/interface/TrackSoAHost.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
@@ -97,7 +97,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     struct ParamsT<TrackerTraits, pixelTopology::isPhase1Topology<TrackerTraits>> : public AlgoParams {
       using TT = TrackerTraits;
       using QualityCuts = ::pixelTrack::QualityCutsT<TT>;  //track quality cuts
-      using CellCuts = gpuPixelDoublets::CellCutsT<TT>;    //cell building cuts
+      using CellCuts = caPixelDoublets::CellCutsT<TT>;     //cell building cuts
       using CAParams = CAParamsT<TT>;                      //params to be used on device
 
       ParamsT(AlgoParams const& commonCuts,
@@ -148,7 +148,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     struct ParamsT<TrackerTraits, pixelTopology::isPhase2Topology<TrackerTraits>> : public AlgoParams {
       using TT = TrackerTraits;
       using QualityCuts = ::pixelTrack::QualityCutsT<TT>;
-      using CellCuts = gpuPixelDoublets::CellCutsT<TT>;
+      using CellCuts = caPixelDoublets::CellCutsT<TT>;
       using CAParams = CAParamsT<TT>;
 
       ParamsT(AlgoParams const& commonCuts,
@@ -225,7 +225,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using OuterHitOfCellContainer = caStructures::OuterHitOfCellContainerT<TrackerTraits>;
     using OuterHitOfCell = caStructures::OuterHitOfCellT<TrackerTraits>;
 
-    using CACell = GPUCACellT<TrackerTraits>;
+    using CACell = CACellT<TrackerTraits>;
 
     using Quality = ::pixelTrack::Quality;
     using HitContainer = typename TrackSoA<TrackerTraits>::HitContainer;

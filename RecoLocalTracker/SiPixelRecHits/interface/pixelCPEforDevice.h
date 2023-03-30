@@ -6,13 +6,14 @@
 #include <cstdint>
 #include <iterator>
 
-#include "DataFormats/SiPixelClusterSoA/interface/gpuClusteringConstants.h"
+#include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
 #include "DataFormats/PixelCPEFastParams/interface/PixelCPEFastParams.h"
 
 namespace pixelCPEforDevice {
 
   constexpr int32_t MaxHitsInIter = gpuClustering::maxHitsInIter();
+
   using ClusParams = ClusParamsT<MaxHitsInIter>;
 
   constexpr inline void computeAnglesFromDet(

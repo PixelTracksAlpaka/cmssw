@@ -1,4 +1,3 @@
-
 #ifndef DataFormats_Track_src_alpaka_classes_serial_h
 #define DataFormats_Track_src_alpaka_classes_serial_h
 

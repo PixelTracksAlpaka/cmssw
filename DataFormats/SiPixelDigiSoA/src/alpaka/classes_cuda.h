@@ -1,5 +1,5 @@
-#ifndef DataFormats_SiPixelDigisoA_Alpaka_Classes_cuda_h
-#define DataFormats_SiPixelDigisoA_Alpaka_Classes_cuda_h
+#ifndef DataFormats_SiPixelDigiSoA_alpaka_classes_cuda_h
+#define DataFormats_SiPixelDigiSoA_alpaka_classes_cuda_h
 
 #include "DataFormats/Common/interface/Wrapper.h"
 #include "DataFormats/Portable/interface/Product.h"

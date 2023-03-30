@@ -7,32 +7,31 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 // PixelTrackUtilities only included in order to compile SoALayout with Eigen columns
-#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
+#include "DataFormats/Track/interface/PixelTrackUtilities.h"
 #ifdef USE_DBSCAN
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/gpuClusterTracksDBSCAN.h"
-#define CLUSTERIZE ALPAKA_ACCELERATOR_NAMESPACE::gpuVertexFinder::clusterTracksDBSCAN
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/clusterTracksDBSCAN.h"
+#define CLUSTERIZE ALPAKA_ACCELERATOR_NAMESPACE::vertexFinder::clusterTracksDBSCAN
 #elif USE_ITERATIVE
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/gpuClusterTracksIterative.h"
-#define CLUSTERIZE ALPAKA_ACCELERATOR_NAMESPACE::gpuVertexFinder::clusterTracksIterative
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/clusterTracksIterativeAlpaka.h"
+#define CLUSTERIZE ALPAKA_ACCELERATOR_NAMESPACE::vertexFinder::clusterTracksIterative
 #else
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/gpuClusterTracksByDensity.h"
-#define CLUSTERIZE ALPAKA_ACCELERATOR_NAMESPACE::gpuVertexFinder::clusterTracksByDensityKernel
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/clusterTracksByDensity.h"
+#define CLUSTERIZE ALPAKA_ACCELERATOR_NAMESPACE::vertexFinder::clusterTracksByDensityKernel
 #endif
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/PixelVertexWorkSpaceUtilities.h"
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/PixelVertexWorkSpaceUtilitiesAlpaka.h"
 #include "RecoPixelVertexing/PixelVertexFinding/plugins/PixelVertexWorkSpaceLayout.h"
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/PixelVertexWorkSpaceSoAHost.h"
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/PixelVertexWorkSpaceSoADevice.h"
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/PixelVertexWorkSpaceSoAHostAlpaka.h"
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/PixelVertexWorkSpaceSoADeviceAlpaka.h"
 
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/gpuFitVertices.h"
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/gpuSortByPt2.h"
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/gpuSplitVertices.h"
-
-#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/gpuVertexFinder.h"
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/fitVertices.h"
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/sortByPt2.h"
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/splitVertices.h"
+#include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/vertexFinder.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   using namespace cms::alpakatools;
 
-  using WSSoAHost = ::gpuVertexFinder::workSpace::PixelVertexWorkSpaceSoAHost;
+  using WSSoAHost = ::vertexFinder::workSpace::PixelVertexWorkSpaceSoAHost;
 
   struct ClusterGenerator {
     explicit ClusterGenerator(float nvert, float ntrack)
@@ -86,22 +85,22 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     public:
       template <typename TAcc>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
-                                    gpuVertexFinder::VtxSoAView pdata,
-                                    gpuVertexFinder::WsSoAView pws,
+                                    vertexFinder::VtxSoAView pdata,
+                                    vertexFinder::WsSoAView pws,
                                     int minT,      // min number of neighbours to be "seed"
                                     float eps,     // max absolute distance to cluster
                                     float errmax,  // max error to be "seed"
                                     float chi2max  // max normalized distance to cluster,
       ) const {
-        gpuVertexFinder::clusterTracksByDensity(acc, pdata, pws, minT, eps, errmax, chi2max);
+        vertexFinder::clusterTracksByDensity(acc, pdata, pws, minT, eps, errmax, chi2max);
         alpaka::syncBlockThreads(acc);
-        gpuVertexFinder::fitVertices(acc, pdata, pws, 50.);
+        vertexFinder::fitVertices(acc, pdata, pws, 50.);
         alpaka::syncBlockThreads(acc);
-        gpuVertexFinder::splitVertices(acc, pdata, pws, 9.f);
+        vertexFinder::splitVertices(acc, pdata, pws, 9.f);
         alpaka::syncBlockThreads(acc);
-        gpuVertexFinder::fitVertices(acc, pdata, pws, 5000.);
+        vertexFinder::fitVertices(acc, pdata, pws, 5000.);
         alpaka::syncBlockThreads(acc);
-        gpuVertexFinder::sortByPt2(acc, pdata, pws);
+        vertexFinder::sortByPt2(acc, pdata, pws);
         alpaka::syncBlockThreads(acc);
       }
     };
@@ -111,15 +110,15 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     public:
       template <typename TAcc>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
-                                    gpuVertexFinder::VtxSoAView pdata,
-                                    gpuVertexFinder::WsSoAView pws) const {
+                                    vertexFinder::VtxSoAView pdata,
+                                    vertexFinder::WsSoAView pws) const {
         printf("nt,nv %d %d,%d\n", pws.ntrks(), pdata.nvFinal(), pws.nvIntermediate());
       }
     };
 
     void runKernels(Queue& queue) {
-      gpuVertexFinder::workSpace::PixelVertexWorkSpaceSoADevice ws_d(queue);
-      ::gpuVertexFinder::workSpace::PixelVertexWorkSpaceSoAHost ws_h(queue);
+      vertexFinder::workSpace::PixelVertexWorkSpaceSoADevice ws_d(queue);
+      ::vertexFinder::workSpace::PixelVertexWorkSpaceSoAHost ws_h(queue);
       ZVertexHost vertices_h(queue);
       ZVertexDevice vertices_d(queue);
 
@@ -133,7 +132,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
           gen(ws_h, vertices_h);
           auto workDiv1D = make_workdiv<Acc1D>(1, 1);
-          alpaka::exec<Acc1D>(queue, workDiv1D, gpuVertexFinder::init{}, vertices_d.view(), ws_d.view());
+          alpaka::exec<Acc1D>(queue, workDiv1D, vertexFinder::init{}, vertices_d.view(), ws_d.view());
           // std::cout << "v,t size " << ws_h.view().zt()[0] << ' ' << vertices_h.view().zv()[0] << std::endl;
           alpaka::memcpy(queue, ws_d.buffer(), ws_h.buffer());
           alpaka::wait(queue);
@@ -173,7 +172,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           auto workDivFitter = make_workdiv<Acc1D>(1, 1024 - 256);
 
           alpaka::exec<Acc1D>(
-              queue, workDivFitter, gpuVertexFinder::fitVerticesKernel{}, vertices_d.view(), ws_d.view(), 50.f);
+              queue, workDivFitter, vertexFinder::fitVerticesKernel{}, vertices_d.view(), ws_d.view(), 50.f);
 
           alpaka::memcpy(queue, vertices_h.buffer(), vertices_d.buffer());
           alpaka::wait(queue);
@@ -194,7 +193,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           }
 
           alpaka::exec<Acc1D>(
-              queue, workDivFitter, gpuVertexFinder::fitVerticesKernel{}, vertices_d.view(), ws_d.view(), 50.f);
+              queue, workDivFitter, vertexFinder::fitVerticesKernel{}, vertices_d.view(), ws_d.view(), 50.f);
           alpaka::memcpy(queue, vertices_h.buffer(), vertices_d.buffer());
           alpaka::wait(queue);
 
@@ -208,20 +207,20 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                       << *mx.second << std::endl;
           }
 
-          auto workDivSplitter = make_workdiv<Acc1D>(1024, 64);
+          //          auto workDivSplitter = make_workdiv<Acc1D>(1024, 64);
 
           // one vertex per block!!!
-          alpaka::exec<Acc1D>(
-              queue, workDivSplitter, gpuVertexFinder::splitVerticesKernel{}, vertices_d.view(), ws_d.view(), 9.f);
+          // alpaka::exec<Acc1D>(
+          //     queue, workDivSplitter, vertexFinder::splitVerticesKernel{}, vertices_d.view(), ws_d.view(), 9.f);
           alpaka::memcpy(queue, ws_h.buffer(), ws_d.buffer());
           alpaka::wait(queue);
           std::cout << "after split " << ws_h.view().nvIntermediate() << std::endl;
 
           alpaka::exec<Acc1D>(
-              queue, workDivFitter, gpuVertexFinder::fitVerticesKernel{}, vertices_d.view(), ws_d.view(), 5000.f);
+              queue, workDivFitter, vertexFinder::fitVerticesKernel{}, vertices_d.view(), ws_d.view(), 5000.f);
 
           auto workDivSorter = make_workdiv<Acc1D>(1, 256);
-          alpaka::exec<Acc1D>(queue, workDivSorter, gpuVertexFinder::sortByPt2Kernel{}, vertices_d.view(), ws_d.view());
+          alpaka::exec<Acc1D>(queue, workDivSorter, vertexFinder::sortByPt2Kernel{}, vertices_d.view(), ws_d.view());
           alpaka::memcpy(queue, vertices_h.buffer(), vertices_d.buffer());
           alpaka::wait(queue);
 

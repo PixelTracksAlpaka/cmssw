@@ -1,10 +1,10 @@
-#ifndef DataFormats_SiPixelClusterSoA_interface_gpuClusteringConstants_h
-#define DataFormats_SiPixelClusterSoA_interface_gpuClusteringConstants_h
+#ifndef DataFormats_SiPixelClusterSoA_ClusteringConstants_h
+#define DataFormats_SiPixelClusterSoA_ClusteringConstants_h
 
 #include <cstdint>
 #include <limits>
-
-namespace gpuClustering {
+//TODO: move this to TrackerTraits!
+namespace pixelClustering {
 #ifdef GPU_SMALL_EVENTS
   // kept for testing and debugging
   constexpr uint32_t maxHitsInIter() { return 64; }
@@ -23,6 +23,6 @@ namespace gpuClustering {
   constexpr int invalidClusterId = -9999;
   static_assert(invalidModuleId > maxNumModules);  // invalidModuleId must be > maxNumModules
 
-}  // namespace gpuClustering
+}  // namespace pixelClustering
 
-#endif  // DataFormats_SiPixelClusterSoA_interface_gpuClusteringConstants_h
+#endif  // DataFormats_SiPixelClusterSoA_ClusteringConstants_h
