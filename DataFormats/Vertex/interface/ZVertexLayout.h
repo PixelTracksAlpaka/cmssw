@@ -1,6 +1,10 @@
 #ifndef DataFormats_Vertex_ZVertexLayout_h
 #define DataFormats_Vertex_ZVertexLayout_h
 
+<<<<<<< HEAD
+=======
+#include <Eigen/Core>
+>>>>>>> common/alpaka_port_13_1_dev
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 
 GENERATE_SOA_LAYOUT(ZVertexSoAHeterogeneousLayout,

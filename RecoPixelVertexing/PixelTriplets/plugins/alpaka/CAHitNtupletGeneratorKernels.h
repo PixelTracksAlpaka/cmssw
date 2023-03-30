@@ -8,7 +8,7 @@
 #include "CAPixelDoublets.h"
 #include "CAStructures.h"
 
-#include "DataFormats/Track/interface/PixelTrackUtilities.h"
+#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
 #include "DataFormats/Track/interface/PixelTrackDefinitions.h"
 #include "DataFormats/Track/interface/TrackSoAHost.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"

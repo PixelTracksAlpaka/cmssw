@@ -8,7 +8,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
-#include "DataFormats/Track/interface/PixelTrackUtilities.h"
+#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
 #include "RecoPixelVertexing/PixelTrackFitting/interface/alpaka/RiemannFit.h"
 #include "HelixFit.h"
@@ -62,7 +62,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         // get it from the ntuple container (one to one to helix)
         auto tkid = *(tupleMultiplicity->begin(nHits) + tuple_idx);
-//        ALPAKA_ASSERT_OFFLOAD(int(tkid) < foundNtuplets->nOnes());
+        //        ALPAKA_ASSERT_OFFLOAD(int(tkid) < foundNtuplets->nOnes());
 
         ALPAKA_ASSERT_OFFLOAD(foundNtuplets->size(tkid) == nHits);
 
@@ -211,9 +211,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template <typename TrackerTraits>
   void HelixFit<TrackerTraits>::launchRiemannKernels(const TrackingRecHitAlpakaSoAConstView<TrackerTraits> &hv,
-                                                          uint32_t nhits,
-                                                          uint32_t maxNumberOfTuples,
-                                                          Queue &queue) {
+                                                     uint32_t nhits,
+                                                     uint32_t maxNumberOfTuples,
+                                                     Queue &queue) {
     assert(tuples_);
 
     auto blockSize = 64;
@@ -230,7 +230,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         queue, maxNumberOfConcurrentFits_ * sizeof(riemannFit::Vector4d) / sizeof(double));
     auto circle_fit_resultsDevice_holder =
         cms::alpakatools::make_device_buffer<char[]>(queue, maxNumberOfConcurrentFits_ * sizeof(riemannFit::CircleFit));
-    riemannFit::CircleFit *circle_fit_resultsDevice_ = (riemannFit::CircleFit *)(circle_fit_resultsDevice_holder.data());
+    riemannFit::CircleFit *circle_fit_resultsDevice_ =
+        (riemannFit::CircleFit *)(circle_fit_resultsDevice_holder.data());
 
     for (uint32_t offset = 0; offset < maxNumberOfTuples; offset += maxNumberOfConcurrentFits_) {
       // triplets

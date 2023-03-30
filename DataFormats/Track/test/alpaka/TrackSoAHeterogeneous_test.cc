@@ -27,6 +27,7 @@
 using namespace std;
 using namespace ALPAKA_ACCELERATOR_NAMESPACE;
 using namespace ALPAKA_ACCELERATOR_NAMESPACE::pixelTrack;
+#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace testTrackSoA {

@@ -25,7 +25,6 @@
 // #include <memory>
 
 // namespace ALPAKA_ACCELERATOR_NAMESPACE {
-
 //   class SiPixelGainCalibrationForHLTSoAESProducer : public ESProducer {
 //   public:
 //     explicit SiPixelGainCalibrationForHLTSoAESProducer(const edm::ParameterSet& iConfig);

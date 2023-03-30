@@ -12,8 +12,7 @@
 
 namespace pixelCPEforDevice {
 
-  constexpr int32_t MaxHitsInIter = gpuClustering::maxHitsInIter();
-
+  constexpr int32_t MaxHitsInIter = pixelClustering::maxHitsInIter();
   using ClusParams = ClusParamsT<MaxHitsInIter>;
 
   constexpr inline void computeAnglesFromDet(

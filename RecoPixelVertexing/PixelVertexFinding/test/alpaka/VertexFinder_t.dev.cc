@@ -7,7 +7,11 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 // PixelTrackUtilities only included in order to compile SoALayout with Eigen columns
+<<<<<<< HEAD
 #include "DataFormats/Track/interface/PixelTrackUtilities.h"
+=======
+#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
+>>>>>>> common/alpaka_port_13_1_dev
 #ifdef USE_DBSCAN
 #include "RecoPixelVertexing/PixelVertexFinding/plugins/alpaka/clusterTracksDBSCAN.h"
 #define CLUSTERIZE ALPAKA_ACCELERATOR_NAMESPACE::vertexFinder::clusterTracksDBSCAN
@@ -207,7 +211,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                       << *mx.second << std::endl;
           }
 
+<<<<<<< HEAD
           //          auto workDivSplitter = make_workdiv<Acc1D>(1024, 64);
+=======
+//          auto workDivSplitter = make_workdiv<Acc1D>(1024, 64);
+>>>>>>> common/alpaka_port_13_1_dev
 
           // one vertex per block!!!
           // alpaka::exec<Acc1D>(

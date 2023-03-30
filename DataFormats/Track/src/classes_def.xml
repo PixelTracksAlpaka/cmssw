@@ -8,6 +8,7 @@
   <class name="TrackLayout<pixelTopology::Phase2>"/>
   <class name="TrackSoAView<pixelTopology::Phase2>"/>
 
+<<<<<<< HEAD
     <class name="PortableHostCollection<TrackLayout<pixelTopology::Phase1>>"/>
   <read
     sourceClass="PortableHostCollection<TrackLayout<pixelTopology::Phase1>>"
@@ -38,4 +39,6 @@
   <class name="TrackSoAHostPhase2"/>
   <class name="edm::Wrapper<TrackSoAHostPhase2>" splitLevel="0"/>
 
+=======
+>>>>>>> common/alpaka_port_13_1_dev
 </lcgdict>

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #ifndef DataFormats_SiPixelDigiSoA_src_classes_h
 #define DataFormats_SiPixelDigiSoA_src_classes_h
 
@@ -7,3 +8,11 @@
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsHost.h"
 
 #endif  // DataFormats_SiPixelDigiSoA_src_classes_h
+=======
+#ifndef DataFormats_SiPixelDigisSoA_src_classes_h
+#define DataFormats_SiPixelDigisSoA_src_classes_h
+
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisLayout.h"
+
+#endif  // DataFormats_SiPixelClusterSoA_src_classes_h
+>>>>>>> common/alpaka_port_13_1_dev

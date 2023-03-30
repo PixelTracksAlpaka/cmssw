@@ -2,11 +2,27 @@
 #define DataFormats_RecHits_TrackingRecHitsLayout_h
 
 #include <Eigen/Dense>
+<<<<<<< HEAD
+<<<<<<<< HEAD:DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h
+=======
+>>>>>>> common/alpaka_port_13_1_dev
 #include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaUtilities/interface/HistoContainer.h"
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 #include "DataFormats/PixelCPEFastParams/interface/PixelCPEFastParams.h"
 #include "SiPixelHitStatus.h"
+<<<<<<< HEAD
+========
+
+#include "DataFormats/SoATemplate/interface/SoALayout.h"
+#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
+#include "DataFormats/TrackingRecHitSoA/interface/SiPixelHitStatus.h"
+#include "HeterogeneousCore/CUDAUtilities/interface/HistoContainer.h"
+#include "HeterogeneousCore/CUDAUtilities/interface/host_unique_ptr.h"
+#include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforGPU.h"
+>>>>>>>> common/alpaka_port_13_1_dev:CUDADataFormats/TrackingRecHit/interface/TrackingRecHitsUtilities.h
+=======
+>>>>>>> common/alpaka_port_13_1_dev
 
 template <typename TrackerTraits>
 struct TrackingRecHitAlpakaSoA {
@@ -64,4 +80,11 @@ template <typename TrackerTraits>
 using TrackingRecHitAlpakaSoAConstView =
     typename TrackingRecHitAlpakaSoA<TrackerTraits>::template TrackingRecHitAlpakaSoALayout<>::ConstView;
 
+<<<<<<< HEAD
+=======
+using TrackingRecHitAlpakaLayoutPhase1 = TrackingRecHitAlpakaLayout<pixelTopology::Phase1>;
+using TrackingRecHitAlpakaSoAViewPhase1 = TrackingRecHitAlpakaSoAView<pixelTopology::Phase1>;
+using TrackingRecHitAlpakaSoAConstViewPhase1 = TrackingRecHitAlpakaSoAConstView<pixelTopology::Phase1>;
+
+>>>>>>> common/alpaka_port_13_1_dev
 #endif

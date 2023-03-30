@@ -3,7 +3,7 @@
 #include <alpaka/alpaka.hpp>
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "DataFormats/Portable/interface/PortableHostCollection.h"
-#include "DataFormats/Vertex/interface/ZVertexUtilities.h"
+#include "DataFormats/Vertex/interface/alpaka/ZVertexUtilities.h"
 #include "PixelVertexWorkSpaceLayout.h"
 
 template <int32_t S>
@@ -23,5 +23,5 @@ namespace vertexFinder {
   namespace workSpace {
     using PixelVertexWorkSpaceSoAHost = PixelVertexWorkSpaceSoAHost<zVertex::MAXTRACKS>;
   }
-}  // namespace gpuVertexFinder
+}  // namespace vertexFinder
 #endif
