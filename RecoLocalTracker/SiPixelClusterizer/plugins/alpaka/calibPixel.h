@@ -1,5 +1,5 @@
-#ifndef CalibTracker_SiPixelESProducer_alpaka_calibPixel_h
-#define CalibTracker_SiPixelESProducer_alpaka_calibPixel_h
+#ifndef RecoLocalTracker_SiPixelClusterizer_alpaka_calibPixel_h
+#define RecoLocalTracker_SiPixelClusterizer_alpaka_calibPixel_h
 
 #include <algorithm>
 #include <cstdint>
@@ -11,9 +11,9 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisErrorLayout.h"
-#include "CalibTracker/SiPixelESProducers/interface/SiPixelGainCalibrationForHLTLayout.h"
-#include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelGainCalibrationForHLTDevice.h"
-#include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelGainCalibrationForHLTUtilities.h"
+#include "CondFormats/SiPixelObjects/interface/SiPixelGainCalibrationForHLTLayout.h"
+#include "CondFormats/SiPixelObjects/interface/alpaka/SiPixelGainCalibrationForHLTDevice.h"
+#include "CondFormats/SiPixelObjects/interface/alpaka/SiPixelGainCalibrationForHLTUtilities.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisErrorLayout.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 
@@ -35,23 +35,21 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     constexpr uint8_t Phase2KinkADC = 8;
 
     class calibDigis {
-      public:
-        template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
-        ALPAKA_FN_ACC void operator()(const TAcc& acc,
-                                      bool isRun2
-                                      // SiPixelDigisLayoutSoAView& view,
-                                      // SiPixelClustersLayoutSoAView& clus_view,
-                                      // // uint16_t* id,
-                                      // // uint16_t const* __restrict__ x,
-                                      // // uint16_t const* __restrict__ y,
-                                      // // uint16_t* adc,
-                                      // const SiPixelGainCalibrationForHLTSoAConstView& gains,
-                                      // int numElements
-                                      // // uint32_t* __restrict__ moduleStart,        // just to zero first
-                                      // // uint32_t* __restrict__ nClustersInModule,  // just to zero them
-                                      // // uint32_t* __restrict__ clusModuleStart     // just to zero first
-        ) const {
-
+    public:
+      template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
+      ALPAKA_FN_ACC void operator()(const TAcc& acc, bool isRun2
+                                    // SiPixelDigisLayoutSoAView& view,
+                                    // SiPixelClustersLayoutSoAView& clus_view,
+                                    // // uint16_t* id,
+                                    // // uint16_t const* __restrict__ x,
+                                    // // uint16_t const* __restrict__ y,
+                                    // // uint16_t* adc,
+                                    // const SiPixelGainCalibrationForHLTSoAConstView& gains,
+                                    // int numElements
+                                    // // uint32_t* __restrict__ moduleStart,        // just to zero first
+                                    // // uint32_t* __restrict__ nClustersInModule,  // just to zero them
+                                    // // uint32_t* __restrict__ clusModuleStart     // just to zero first
+      ) const {
         //   const uint32_t threadIdxGlobal(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
 
         //   // zero for next kernels...
@@ -91,62 +89,62 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         //     }
         //   });
         // }
-    }
+      }
     };
 
     class calibDigisPhase2 {
-      public:
-        template <typename TAcc>
-        ALPAKA_FN_ACC void operator()(const TAcc& acc,
-                                      SiPixelDigisLayoutSoAView& view,
-                                      SiPixelClustersLayoutSoAView& clus_view,
-                                      //  uint16_t* id,
-                                      //  uint16_t* adc,
-                                      int numElements
-                                      //  uint32_t* __restrict__ moduleStart,        // just to zero first
-                                      //  uint32_t* __restrict__ nClustersInModule,  // just to zero them
-                                      //  uint32_t* __restrict__ clusModuleStart     // just to zero first
-        ) const {
-          const uint32_t threadIdxGlobal(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
-          // zero for next kernels...
+    public:
+      template <typename TAcc>
+      ALPAKA_FN_ACC void operator()(const TAcc& acc,
+                                    SiPixelDigisLayoutSoAView& view,
+                                    SiPixelClustersLayoutSoAView& clus_view,
+                                    //  uint16_t* id,
+                                    //  uint16_t* adc,
+                                    int numElements
+                                    //  uint32_t* __restrict__ moduleStart,        // just to zero first
+                                    //  uint32_t* __restrict__ nClustersInModule,  // just to zero them
+                                    //  uint32_t* __restrict__ clusModuleStart     // just to zero first
+      ) const {
+        const uint32_t threadIdxGlobal(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
+        // zero for next kernels...
 
-          if (0 == threadIdxGlobal)
-            clus_view[0].clusModuleStart() = clus_view[0].moduleStart();
-          cms::alpakatools::for_each_element_in_grid_strided(
-              acc, phase2PixelTopology::numberOfModules, [&](uint32_t i) { clus_view[i].clusInModule() = 0; });
+        if (0 == threadIdxGlobal)
+          clus_view[0].clusModuleStart() = clus_view[0].moduleStart();
+        cms::alpakatools::for_each_element_in_grid_strided(
+            acc, phase2PixelTopology::numberOfModules, [&](uint32_t i) { clus_view[i].clusInModule() = 0; });
 
-          cms::alpakatools::for_each_element_in_grid_strided(acc, numElements, [&](uint32_t i) {
-            auto dvgi = view[i];
-            if (pixelClustering::invalidModuleId != dvgi.moduleId()) {
-              constexpr int mode = (Phase2ReadoutMode < -1 ? -1 : Phase2ReadoutMode);
+        cms::alpakatools::for_each_element_in_grid_strided(acc, numElements, [&](uint32_t i) {
+          auto dvgi = view[i];
+          if (pixelClustering::invalidModuleId != dvgi.moduleId()) {
+            constexpr int mode = (Phase2ReadoutMode < -1 ? -1 : Phase2ReadoutMode);
 
-              int adc_int = dvgi.adc();
+            int adc_int = dvgi.adc();
 
-              if constexpr (mode < 0)
-                adc_int = int(adc_int * ElectronPerADCGain);
+            if constexpr (mode < 0)
+              adc_int = int(adc_int * ElectronPerADCGain);
+            else {
+              if (adc_int < Phase2KinkADC)
+                adc_int = int((adc_int + 0.5) * ElectronPerADCGain);
               else {
-                if (adc_int < Phase2KinkADC)
-                  adc_int = int((adc_int + 0.5) * ElectronPerADCGain);
-                else {
-                  constexpr int8_t dspp = (Phase2ReadoutMode < 10 ? Phase2ReadoutMode : 10);
-                  constexpr int8_t ds = int8_t(dspp <= 1 ? 1 : (dspp - 1) * (dspp - 1));
+                constexpr int8_t dspp = (Phase2ReadoutMode < 10 ? Phase2ReadoutMode : 10);
+                constexpr int8_t ds = int8_t(dspp <= 1 ? 1 : (dspp - 1) * (dspp - 1));
 
-                  adc_int -= Phase2KinkADC;
-                  adc_int *= ds;
-                  adc_int += Phase2KinkADC;
+                adc_int -= Phase2KinkADC;
+                adc_int *= ds;
+                adc_int += Phase2KinkADC;
 
-                  adc_int = ((adc_int + 0.5 * ds) * ElectronPerADCGain);
-                }
-
-                adc_int += int(Phase2DigiBaseline);
+                adc_int = ((adc_int + 0.5 * ds) * ElectronPerADCGain);
               }
-              dvgi.adc() = std::min(adc_int, int(std::numeric_limits<uint16_t>::max()));
-            }
-          });
-        }
-      };
 
-    }  // namespace calibPixel
+              adc_int += int(Phase2DigiBaseline);
+            }
+            dvgi.adc() = std::min(adc_int, int(std::numeric_limits<uint16_t>::max()));
+          }
+        });
+      }
+    };
+
+  }  // namespace calibPixel
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
-#endif  // plugin_SiPixelClusterizer_alpaka_calibPixel_h
+#endif  // RecoLocalTracker_SiPixelClusterizer_alpaka_calibPixel_h

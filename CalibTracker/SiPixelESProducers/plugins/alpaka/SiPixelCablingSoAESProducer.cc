@@ -22,10 +22,10 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 
 #include "RecoTracker/Record/interface/CkfComponentsRecord.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/CopyToDevice.h"
-#include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
+// #include "HeterogeneousCore/AlpakaInterface/interface/CopyToDevice.h"
+// #include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
 
-template struct cms::alpakatools::CopyToDevice<SiPixelMappingHost>;  //needed for the method to not be incomplete
+// template struct cms::alpakatools::CopyToDevice<SiPixelMappingHost>;  //needed for the method to not be incomplete
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 

@@ -3,9 +3,6 @@
 <use name="Geometry/Records"/>
 <use name="MagneticField/Records"/>
 <use name="boost"/>
-<use name="HeterogeneousCore/AlpakaCore"/>
-<use name="HeterogeneousCore/AlpakaInterface"/>
-<flags ALPAKA_BACKENDS="1"/>
 <export>
   <lib name="1"/>
 </export>

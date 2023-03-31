@@ -3,7 +3,6 @@
 <use name="DataFormats/SiPixelDigiSoA"/>
 <use name="DataFormats/Common"/>
 <use name="DataFormats/SiPixelCluster"/>
-<use name="DataFormats/SiPixelMappingSoA"/>
 <use name="EventFilter/SiPixelRawToDigi"/>
 <use name="FWCore/ParameterSet"/>
 <use name="FWCore/Utilities"/>

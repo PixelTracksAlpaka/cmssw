@@ -13,7 +13,8 @@
 #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsDevice.h"
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 
-#include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelGainCalibrationForHLTDevice.h"
+#include "CondFormats/SiPixelObjects/interface/SiPixelGainCalibrationForHLTLayout.h"
+#include "CondFormats/SiPixelObjects/interface/alpaka/SiPixelGainCalibrationForHLTDevice.h"
 #include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelMappingDevice.h"
 
 #include "DataFormats/SiPixelRawData/interface/SiPixelErrorCompact.h"
@@ -26,7 +27,7 @@ namespace pixelDetails {
 
   constexpr auto MAX_LINK = pixelgpudetails::MAX_LINK;
   constexpr auto MAX_SIZE = pixelgpudetails::MAX_SIZE;
-  constexpr auto MAX_ROC  = pixelgpudetails::MAX_ROC;
+  constexpr auto MAX_ROC = pixelgpudetails::MAX_ROC;
   // Phase 1 geometry constants
   const uint32_t layerStartBit = 20;
   const uint32_t ladderStartBit = 12;
@@ -136,8 +137,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         cms::alpakatools::host_buffer<unsigned char[]> fedId_;
       };
 
-      SiPixelRawToClusterKernel()
-          : nModules_Clusters_h{cms::alpakatools::make_host_buffer<uint32_t[], Platform>(3u)} {}
+      SiPixelRawToClusterKernel() : nModules_Clusters_h{cms::alpakatools::make_host_buffer<uint32_t[], Platform>(3u)} {}
 
       ~SiPixelRawToClusterKernel() = default;
 

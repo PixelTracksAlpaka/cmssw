@@ -27,7 +27,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 
-#include "CalibTracker/SiPixelESProducers/interface/SiPixelGainCalibrationForHLTLayout.h"
+#include "CondFormats/SiPixelObjects/interface/SiPixelGainCalibrationForHLTLayout.h"
 #include "CalibTracker/SiPixelESProducers/interface/SiPixelMappingLayout.h"
 #include "DataFormats/SiPixelDigi/interface/SiPixelDigiConstants.h"
 
@@ -45,9 +45,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           fedId_{cms::alpakatools::make_host_buffer<unsigned char[], Platform>(words)} {}
 
     void SiPixelRawToClusterKernel::WordFedAppender::initializeWordFed(int fedId,
-                                                                          unsigned int wordCounterGPU,
-                                                                          const uint32_t *src,
-                                                                          unsigned int length) {
+                                                                       unsigned int wordCounterGPU,
+                                                                       const uint32_t *src,
+                                                                       unsigned int length) {
       std::memcpy(word_.data() + wordCounterGPU, src, sizeof(uint32_t) * length);
       std::memset(fedId_.data() + wordCounterGPU / 2, fedId - 1200, length / 2);
     }
@@ -69,9 +69,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     ALPAKA_FN_ACC bool isBarrel(uint32_t rawId) { return (1 == ((rawId >> 25) & 0x7)); }
 
     ALPAKA_FN_ACC ::pixelDetails::DetIdGPU getRawId(const SiPixelMappingLayoutSoAConstView &cablingMap,
-                                                       uint8_t fed,
-                                                       uint32_t link,
-                                                       uint32_t roc) {
+                                                    uint8_t fed,
+                                                    uint32_t link,
+                                                    uint32_t roc) {
       using namespace ::pixelDetails;
       uint32_t index = fed * MAX_LINK * MAX_ROC + (link - 1) * MAX_ROC + roc;
       ::pixelDetails::DetIdGPU detId = {
@@ -211,8 +211,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       switch (errorType) {
         case (25): {
           errorFound = true;
-          uint32_t index = fedId * ::pixelDetails::MAX_LINK * ::pixelDetails::MAX_ROC +
-                           (link - 1) * ::pixelDetails::MAX_ROC + 1;
+          uint32_t index =
+              fedId * ::pixelDetails::MAX_LINK * ::pixelDetails::MAX_ROC + (link - 1) * ::pixelDetails::MAX_ROC + 1;
           if (index > 1 && index <= cablingMap.size()) {
             if (!(link == cablingMap.link()[index] && 1 == cablingMap.roc()[index]))
               errorFound = false;
@@ -413,8 +413,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           uint32_t rocIdInDetUnit = detId.rocInDet;
           bool barrel = isBarrel(rawId);
 
-          uint32_t index = fedId * ::pixelDetails::MAX_LINK * ::pixelDetails::MAX_ROC +
-                           (link - 1) * ::pixelDetails::MAX_ROC + roc;
+          uint32_t index =
+              fedId * ::pixelDetails::MAX_LINK * ::pixelDetails::MAX_ROC + (link - 1) * ::pixelDetails::MAX_ROC + roc;
           if (useQualityInfo) {
             skipROC = cablingMap.badRocs()[index];
             if (skipROC)
@@ -580,20 +580,20 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     // Interface to outside
     void SiPixelRawToClusterKernel::makeClustersAsync(bool isRun2,
-                                                         const SiPixelClusterThresholds clusterThresholds,
-                                                         //  const SiPixelFedCablingMapGPU *cablingMap,
-                                                         const SiPixelMappingLayoutSoAConstView &cablingMap,
-                                                         const unsigned char *modToUnp,
-                                                         //  const SiPixelGainForHLTonGPU *gains,
-                                                         const SiPixelGainCalibrationForHLTSoAConstView &gains,
-                                                         const WordFedAppender &wordFed,
-                                                         SiPixelFormatterErrors &&errors,
-                                                         const uint32_t wordCounter,
-                                                         const uint32_t fedCounter,
-                                                         bool useQualityInfo,
-                                                         bool includeErrors,
-                                                         bool debug,
-                                                         Queue &queue) {
+                                                      const SiPixelClusterThresholds clusterThresholds,
+                                                      //  const SiPixelFedCablingMapGPU *cablingMap,
+                                                      const SiPixelMappingLayoutSoAConstView &cablingMap,
+                                                      const unsigned char *modToUnp,
+                                                      //  const SiPixelGainForHLTonGPU *gains,
+                                                      const SiPixelGainCalibrationForHLTSoAConstView &gains,
+                                                      const WordFedAppender &wordFed,
+                                                      SiPixelFormatterErrors &&errors,
+                                                      const uint32_t wordCounter,
+                                                      const uint32_t fedCounter,
+                                                      bool useQualityInfo,
+                                                      bool includeErrors,
+                                                      bool debug,
+                                                      Queue &queue) {
       nDigis = wordCounter;
 
 #ifdef GPU_DEBUG
@@ -676,11 +676,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                                            threadsPerBlockOrElementsPerThread);
         const auto workDiv = cms::alpakatools::make_workdiv<Acc1D>(blocks, threadsPerBlockOrElementsPerThread);
 
-        alpaka::exec<Acc1D>(queue,
-                        workDiv,
-                        calibPixel::calibDigis{}, isRun2);
-                        // ,
-                        // digis_d->view(), clusters_d->view(), gains, wordCounter);
+        alpaka::exec<Acc1D>(queue, workDiv, calibPixel::calibDigis{}, isRun2);
+        // ,
+        // digis_d->view(), clusters_d->view(), gains, wordCounter);
 
         // clusters_d->view().moduleStart(),
         // clusters_d->clusInModule(),
@@ -767,9 +765,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }
 
     void SiPixelRawToClusterKernel::makePhase2ClustersAsync(const SiPixelClusterThresholds clusterThresholds,
-                                                               SiPixelDigisLayoutSoAView &digis_view,
-                                                               const uint32_t numDigis,
-                                                               Queue &queue) {
+                                                            SiPixelDigisLayoutSoAView &digis_view,
+                                                            const uint32_t numDigis,
+                                                            Queue &queue) {
       using namespace pixelClustering;
       using pixelTopology::Phase2;
       nDigis = numDigis;

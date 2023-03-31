@@ -13,7 +13,8 @@
 #include "CalibTracker/Records/interface/SiPixelMappingSoARecord.h"
 
 #include "CalibTracker/Records/interface/SiPixelGainCalibrationForHLTSoARcd.h"
-#include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelGainCalibrationForHLTDevice.h"
+#include "CondFormats/SiPixelObjects/interface/SiPixelGainCalibrationForHLTLayout.h"
+#include "CondFormats/SiPixelObjects/interface/alpaka/SiPixelGainCalibrationForHLTDevice.h"
 #include "CondFormats/DataRecord/interface/SiPixelFedCablingMapRcd.h"
 #include "CondFormats/SiPixelObjects/interface/SiPixelFedCablingMap.h"
 #include "CondFormats/SiPixelObjects/interface/SiPixelFedCablingTree.h"
@@ -116,7 +117,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     if (!iConfig.getParameter<edm::ParameterSet>("Regions").getParameterNames().empty()) {
       regions_ = std::make_unique<PixelUnpackingRegions>(iConfig, consumesCollector());
     }
-
   }
 
   void SiPixelRawToCluster::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
@@ -159,7 +159,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     auto const& dGains = iSetup.getData(gainsToken_);
 
-    auto Gains = SiPixelGainCalibrationForHLTDevice(1,iEvent.queue());
+    auto Gains = SiPixelGainCalibrationForHLTDevice(1, iEvent.queue());
     auto modulesToUnpackRegional =
         cms::alpakatools::make_device_buffer<unsigned char[]>(iEvent.queue(), ::pixelgpudetails::MAX_SIZE);
     const unsigned char* modulesToUnpack;
@@ -179,10 +179,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       LogDebug("SiPixelRawToCluster") << "region2unpack #feds: " << regions_->nFEDs();
       LogDebug("SiPixelRawToCluster") << "region2unpack #modules (BPIX,EPIX,total): " << regions_->nBarrelModules()
                                       << " " << regions_->nForwardModules() << " " << regions_->nModules();
-      modulesToUnpackRegional = SiPixelMappingUtilities::getModToUnpRegionalAsync(*(regions_->modulesToUnpack()), cablingMap_, iEvent.queue());
+      modulesToUnpackRegional = SiPixelMappingUtilities::getModToUnpRegionalAsync(
+          *(regions_->modulesToUnpack()), cablingMap_, iEvent.queue());
       modulesToUnpack = modulesToUnpackRegional.data();
     } else {
-      modulesToUnpack = hMap->modToUnpDefault();  
+      modulesToUnpack = hMap->modToUnpDefault();
     }
 
     const auto& buffers = iEvent.get(rawGetToken_);
@@ -268,18 +269,18 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }
 
     Algo_.makeClustersAsync(isRun2_,
-                               clusterThresholds_,
-                               hMap.const_view(),
-                               modulesToUnpack,
-                               dGains.const_view(),
-                               wordFedAppender,
-                               std::move(errors_),
-                               wordCounter,
-                               fedCounter,
-                               useQuality_,
-                               includeErrors_,
-                               edm::MessageDrop::instance()->debugEnabled,
-                               iEvent.queue());
+                            clusterThresholds_,
+                            hMap.const_view(),
+                            modulesToUnpack,
+                            dGains.const_view(),
+                            wordFedAppender,
+                            std::move(errors_),
+                            wordCounter,
+                            fedCounter,
+                            useQuality_,
+                            includeErrors_,
+                            edm::MessageDrop::instance()->debugEnabled,
+                            iEvent.queue());
   }
 
   void SiPixelRawToCluster::produce(device::Event& iEvent, device::EventSetup const& iSetup) {

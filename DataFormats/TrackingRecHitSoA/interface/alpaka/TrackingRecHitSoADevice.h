@@ -39,7 +39,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       phiBinner_ = &(view().phiBinner());
 
       const auto host = cms::alpakatools::host();
-      const auto device = cms::alpakatools::devices<Platform>()[0];
+      const auto device = alpaka::getDev(queue);
 
       auto cpe_h = alpaka::createView(host, cpeParams, 1);
       auto cpe_d = alpaka::createView(device, &(view().cpeParams()), 1);
@@ -47,7 +47,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       auto start_h = alpaka::createView(host, hitsModuleStart, TrackerTraits::numberOfModules + 1);
       auto start_d = alpaka::createView(device, view().hitsModuleStart().data(), TrackerTraits::numberOfModules + 1);
-      alpaka::memcpy(queue, start_d, start_h);//, TrackerTraits::numberOfModules + 1);
+      alpaka::memcpy(queue, start_d, start_h);
 
       // auto nHits_d = alpaka::createView(device, &(view().nHits()), 1);
       // alpaka::memset(queue, nHits_d, nHits);
