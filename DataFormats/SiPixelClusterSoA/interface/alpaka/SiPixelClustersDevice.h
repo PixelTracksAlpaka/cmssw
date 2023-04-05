@@ -13,14 +13,17 @@
 // This is generally discouraged, and should be done via composition.
 // See: https://github.com/cms-sw/cmssw/pull/40465#discussion_r1067364306
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
-  class SiPixelClustersDevice : public PortableCollection<SiPixelClustersLayout<>> {
+#ifdef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
+  using SiPixelClustersDevice = SiPixelClustersHost;
+#else
+  class SiPixelClustersDevice : public PortableCollection<SiPixelClustersLayout<> > {
   public:
     SiPixelClustersDevice() = default;
     ~SiPixelClustersDevice() = default;
 
     template <typename TQueue>
     explicit SiPixelClustersDevice(size_t maxModules, TQueue queue)
-        : PortableCollection<SiPixelClustersLayout<>>(maxModules + 1, queue) {}
+        : PortableCollection<SiPixelClustersLayout<> >(maxModules + 1, queue) {}
 
     SiPixelClustersDevice(SiPixelClustersDevice &&) = default;
     SiPixelClustersDevice &operator=(SiPixelClustersDevice &&) = default;
@@ -37,6 +40,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     uint32_t nClusters_h = 0;
     int32_t offsetBPIX2_h = 0;
   };
+#endif
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 namespace cms::alpakatools {

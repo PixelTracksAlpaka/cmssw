@@ -13,22 +13,24 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/CopyToHost.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
-
+#ifdef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
+  using ZVertexDevice = ZVertexHost;
+#else
   template <int32_t S>
-  class ZVertexSoADevice : public PortableCollection<ZVertexSoAHeterogeneousLayout<>> {
+  class ZVertexSoADevice : public PortableCollection<ZVertexSoAHeterogeneousLayout<> > {
   public:
     ZVertexSoADevice() = default;  // cms::alpakatools::Product needs this
 
     // Constructor which specifies the SoA size
-    explicit ZVertexSoADevice(Queue queue) : PortableCollection<ZVertexSoAHeterogeneousLayout<>>(S, queue) {}
+    explicit ZVertexSoADevice(Queue queue) : PortableCollection<ZVertexSoAHeterogeneousLayout<> >(S, queue) {}
 
     // Constructor which specifies the SoA size
-    explicit ZVertexSoADevice(Device const& device) : PortableCollection<ZVertexSoAHeterogeneousLayout<>>(S, device) {}
+    explicit ZVertexSoADevice(Device const& device) : PortableCollection<ZVertexSoAHeterogeneousLayout<> >(S, device) {}
   };
 
   using namespace ::zVertex;
   using ZVertexDevice = ZVertexSoADevice<MAXTRACKS>;
-
+#endif
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 namespace cms::alpakatools {

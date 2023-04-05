@@ -1,10 +1,12 @@
 <lcgdict>
 
   <class name="TrackSoA<pixelTopology::Phase1>"/>
+  <class name="TrackSoA<pixelTopology::Phase1>::TrackSoAHeterogeneousLayout<>"/>
   <class name="TrackLayout<pixelTopology::Phase1>"/>
   <class name="TrackSoAView<pixelTopology::Phase1>"/>
 
   <class name="TrackSoA<pixelTopology::Phase2>"/>
+  <class name="TrackSoA<pixelTopology::Phase2>::TrackSoAHeterogeneousLayout<>"/>
   <class name="TrackLayout<pixelTopology::Phase2>"/>
   <class name="TrackSoAView<pixelTopology::Phase2>"/>
 
@@ -22,6 +24,8 @@
   </read>
   <class name="TrackSoAHostPhase1"/>
   <class name="edm::Wrapper<TrackSoAHostPhase1>" splitLevel="0"/>
+  <!-- <class name="TrackSoAHost<pixelTopology::Phase1>"/>
+  <class name="edm::Wrapper<TrackSoAHost<pixelTopology::Phase1>>" splitLevel="0"/> -->
 
   <class name="PortableHostCollection<TrackLayout<pixelTopology::Phase2>>"/>
   <read
@@ -37,5 +41,7 @@
   </read>
   <class name="TrackSoAHostPhase2"/>
   <class name="edm::Wrapper<TrackSoAHostPhase2>" splitLevel="0"/>
+  <!-- <class name="TrackSoAHost<pixelTopology::Phase2>"/>
+  <class name="edm::Wrapper<TrackSoAHost<pixelTopology::Phase2>>" splitLevel="0"/> -->
 
 </lcgdict>

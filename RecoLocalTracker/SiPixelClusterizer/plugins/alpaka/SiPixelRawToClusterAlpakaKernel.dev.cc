@@ -603,7 +603,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       constexpr int numberOfModules = pixelTopology::Phase1::numberOfModules;
       digis_d = SiPixelDigisDevice(MAX_FED_WORDS, queue);
       if (includeErrors) {
+#ifdef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
+        digiErrors_d = SiPixelDigiErrorsDevice(MAX_FED_WORDS, std::move(errors));
+#else
         digiErrors_d = SiPixelDigiErrorsDevice(MAX_FED_WORDS, std::move(errors), queue);
+#endif
       }
       clusters_d = SiPixelClustersDevice(numberOfModules, queue);
 
@@ -676,11 +680,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                                            threadsPerBlockOrElementsPerThread);
         const auto workDiv = cms::alpakatools::make_workdiv<Acc1D>(blocks, threadsPerBlockOrElementsPerThread);
 
-        alpaka::exec<Acc1D>(queue,
-                        workDiv,
-                        gpuCalibPixel::calibDigis{}, isRun2);
-                        // ,
-                        // digis_d->view(), clusters_d->view(), gains, wordCounter);
+        alpaka::exec<Acc1D>(queue, workDiv, gpuCalibPixel::calibDigis{}, isRun2);
+        // ,
+        // digis_d->view(), clusters_d->view(), gains, wordCounter);
 
         // clusters_d->view().moduleStart(),
         // clusters_d->clusInModule(),

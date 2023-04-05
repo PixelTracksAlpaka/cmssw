@@ -13,13 +13,15 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/CopyToHost.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
-
+#ifdef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
+  using SiPixelDigiErrorsDevice = SiPixelDigiErrorsHost;
+#else
   class SiPixelDigiErrorsDevice {
   public:
     explicit SiPixelDigiErrorsDevice(size_t maxFedWords, SiPixelFormatterErrors errors, Queue& queue)
         : maxFedWords_(maxFedWords), formatterErrors_h{std::move(errors)} {
       data_d = cms::alpakatools::make_device_buffer<SiPixelErrorCompact[]>(queue, maxFedWords);
-      error_d = cms::alpakatools::make_device_buffer<cms::alpakatools::SimpleVector<SiPixelErrorCompact>>(queue);
+      error_d = cms::alpakatools::make_device_buffer<cms::alpakatools::SimpleVector<SiPixelErrorCompact> >(queue);
       (*error_d).data()->construct(maxFedWords, data_d->data());
       ALPAKA_ASSERT_OFFLOAD((*error_d).data()->empty());
       ALPAKA_ASSERT_OFFLOAD((*error_d).data()->capacity() == static_cast<int>(maxFedWords));
@@ -45,10 +47,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   private:
     int maxFedWords_;
     SiPixelFormatterErrors formatterErrors_h;
-    std::optional<cms::alpakatools::device_buffer<Device, SiPixelErrorCompact[]>> data_d;
-    std::optional<cms::alpakatools::device_buffer<Device, cms::alpakatools::SimpleVector<SiPixelErrorCompact>>> error_d;
+    std::optional<cms::alpakatools::device_buffer<Device, SiPixelErrorCompact[]> > data_d;
+    std::optional<cms::alpakatools::device_buffer<Device, cms::alpakatools::SimpleVector<SiPixelErrorCompact> > >
+        error_d;
   };
-
+#endif
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 namespace cms::alpakatools {

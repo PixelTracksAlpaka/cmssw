@@ -15,31 +15,36 @@
 // This is generally discouraged, and should be done via composition.
 // See: https://github.com/cms-sw/cmssw/pull/40465#discussion_r1067364306
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
+#ifdef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
+template <typename TrackerTraits>
+  using TrackSoADevice = TrackSoAHost<TrackerTraits>;
+#else
   template <typename TrackerTraits>
-  class TrackSoADevice : public PortableCollection<TrackLayout<TrackerTraits>> {
+  class TrackSoADevice : public PortableCollection<TrackLayout<TrackerTraits> > {
   public:
     static constexpr int32_t S = TrackerTraits::maxNumberOfTuples;  //TODO: this could be made configurable at runtime
     //explicit TrackSoADevice() : PortableCollection<TrackLayout<TrackerTraits>>(S) {} //TODO: check if this is needed somewhere
     TrackSoADevice() = default;  // cms::alpakatools::Product needs this
 
-    using PortableCollection<TrackLayout<TrackerTraits>>::view;
-    using PortableCollection<TrackLayout<TrackerTraits>>::const_view;
-    using PortableCollection<TrackLayout<TrackerTraits>>::buffer;
+    using PortableCollection<TrackLayout<TrackerTraits> >::view;
+    using PortableCollection<TrackLayout<TrackerTraits> >::const_view;
+    using PortableCollection<TrackLayout<TrackerTraits> >::buffer;
 
     // Constructor which specifies the SoA size
     template <typename TQueue>
-    explicit TrackSoADevice<TrackerTraits>(TQueue queue) : PortableCollection<TrackLayout<TrackerTraits>>(S, queue) {}
+    explicit TrackSoADevice<TrackerTraits>(TQueue queue) : PortableCollection<TrackLayout<TrackerTraits> >(S, queue) {}
 
     // Constructor which specifies the SoA size
-    explicit TrackSoADevice(Device const& device) : PortableCollection<TrackLayout<TrackerTraits>>(S, device) {}
+    explicit TrackSoADevice(Device const& device) : PortableCollection<TrackLayout<TrackerTraits> >(S, device) {}
   };
-
+  #endif
   namespace pixelTrack {
 
     using TrackSoADevicePhase1 = TrackSoADevice<pixelTopology::Phase1>;
     using TrackSoADevicePhase2 = TrackSoADevice<pixelTopology::Phase2>;
 
   }  // namespace pixelTrack
+
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 

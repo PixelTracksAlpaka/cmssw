@@ -1,4 +1,23 @@
 <lcgdict>
+  <!-- <class name="alpaka_serial_sync::SiPixelClustersDevice" persistent="false"/>
+  <class name="edm::Wrapper<alpaka_serial_sync::SiPixelClustersDevice>" persistent="false"/> -->
+  <!-- <class name="SiPixelClustersLayoutSoA"/>
+  <class name="SiPixelClustersLayoutSoA::View"/> -->
+  <!-- <class name="PortableDeviceCollection<SiPixelClustersLayoutSoA>"/>
+  <read
+    sourceClass="PortableDeviceCollection<SiPixelClustersLayoutSoA>"
+    targetClass="PortableDeviceCollection<SiPixelClustersLayoutSoA>"
+    version="[1-]"
+    source="SiPixelClustersLayoutSoA layout_;"
+    target="buffer_"
+    embed="false">
+  <![CDATA[
+    PortableDeviceCollection<SiPixelClustersLayoutSoA>::ROOTReadStreamer(newObj, onfile.layout_);
+  ]]>
+  </read>
+
+  <class name="SiPixelClustersDevice"/>
+  <class name="edm::Wrapper<SiPixelClustersDevice>" splitLevel="0"/>
   <class name="alpaka_serial_sync::SiPixelClustersDevice" persistent="false"/>
-  <class name="edm::Wrapper<alpaka_serial_sync::SiPixelClustersDevice>" persistent="false"/>
+  <class name="edm::Wrapper<alpaka_serial_sync::SiPixelClustersDevice>" persistent="false"/> -->
 </lcgdict>

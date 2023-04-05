@@ -11,12 +11,15 @@
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
-  class SiPixelDigisDevice : public PortableCollection<SiPixelDigisLayout<>> {
+#ifdef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
+  using SiPixelDigisDevice = SiPixelDigisHost;
+#else
+  class SiPixelDigisDevice : public PortableCollection<SiPixelDigisLayout<> > {
   public:
     SiPixelDigisDevice() = default;
     template <typename TQueue>
     explicit SiPixelDigisDevice(size_t maxFedWords, TQueue queue)
-        : PortableCollection<SiPixelDigisLayout<>>(maxFedWords + 1, queue) {}
+        : PortableCollection<SiPixelDigisLayout<> >(maxFedWords + 1, queue) {}
     ~SiPixelDigisDevice() = default;
 
     SiPixelDigisDevice(SiPixelDigisDevice &&) = default;
@@ -34,6 +37,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     uint32_t nModules_h = 0;
     uint32_t nDigis_h = 0;
   };
+#endif
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 namespace cms::alpakatools {

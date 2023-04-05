@@ -1,5 +1,5 @@
 <lcgdict>
-  <class name="alpaka_cuda_async::pixelTrack::TrackSoADevicePhase1" persistent="false"/>
+  <!-- <class name="alpaka_cuda_async::pixelTrack::TrackSoADevicePhase1" persistent="false"/>
   <class name="edm::Wrapper<alpaka_cuda_async::pixelTrack::TrackSoADevicePhase1>" persistent="false"/>
   <class name="cms::alpakatools::Product<alpaka_cuda_async::Queue,alpaka_cuda_async::pixelTrack::TrackSoADevicePhase1>" persistent="false"/>
   <class name="edm::Wrapper<cms::alpakatools::Product<alpaka_cuda_async::Queue,alpaka_cuda_async::pixelTrack::TrackSoADevicePhase1>>" persistent="false"/>
@@ -7,5 +7,15 @@
   <class name="alpaka_cuda_async::pixelTrack::TrackSoADevicePhase2" persistent="false"/>
   <class name="edm::Wrapper<alpaka_cuda_async::pixelTrack::TrackSoADevicePhase2>" persistent="false"/>
   <class name="cms::alpakatools::Product<alpaka_cuda_async::Queue,alpaka_cuda_async::pixelTrack::TrackSoADevicePhase2>" persistent="false"/>
-  <class name="edm::Wrapper<cms::alpakatools::Product<alpaka_cuda_async::Queue,alpaka_cuda_async::pixelTrack::TrackSoADevicePhase2>>" persistent="false"/>
+  <class name="edm::Wrapper<cms::alpakatools::Product<alpaka_cuda_async::Queue,alpaka_cuda_async::pixelTrack::TrackSoADevicePhase2>>" persistent="false"/> -->
+
+  <class name="alpaka_cuda_async::TrackSoADevice<pixelTopology::Phase1>" persistent="false"/>
+  <class name="edm::Wrapper<alpaka_cuda_async::TrackSoADevice<pixelTopology::Phase1>>" persistent="false"/>
+  <class name="cms::alpakatools::Product<alpaka_cuda_async::Queue,alpaka_cuda_async::TrackSoADevice<pixelTopology::Phase1>>" persistent="false"/>
+  <class name="edm::Wrapper<cms::alpakatools::Product<alpaka_cuda_async::Queue,alpaka_cuda_async::TrackSoADevice<pixelTopology::Phase1>>>" persistent="false"/>
+
+  <class name="alpaka_cuda_async::TrackSoADevice<pixelTopology::Phase2>" persistent="false"/>
+  <class name="edm::Wrapper<alpaka_cuda_async::TrackSoADevice<pixelTopology::Phase2>>" persistent="false"/>
+  <class name="cms::alpakatools::Product<alpaka_cuda_async::Queue,alpaka_cuda_async::TrackSoADevice<pixelTopology::Phase2>>" persistent="false"/>
+  <class name="edm::Wrapper<cms::alpakatools::Product<alpaka_cuda_async::Queue,alpaka_cuda_async::TrackSoADevice<pixelTopology::Phase2>>>" persistent="false"/>
 </lcgdict>
