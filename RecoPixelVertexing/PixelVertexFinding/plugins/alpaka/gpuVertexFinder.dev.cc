@@ -120,14 +120,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #endif
 
     template <typename TrackerTraits>
-    ZVertexDevice Producer<TrackerTraits>::makeAsync(Queue& queue,
-                                                     const TrackSoAConstView<TrackerTraits>& tracks_view,
-                                                     float ptMin,
-                                                     float ptMax) const {
+    ZVertexSoA Producer<TrackerTraits>::makeAsync(Queue& queue,
+                                                  const TrackSoAConstView<TrackerTraits>& tracks_view,
+                                                  float ptMin,
+                                                  float ptMax) const {
 #ifdef PIXVERTEX_DEBUG_PRODUCE
       std::cout << "producing Vertices on GPU" << std::endl;
 #endif  // PIXVERTEX_DEBUG_PRODUCE
-      ZVertexDevice vertices(queue);
+      ZVertexSoA vertices(queue);
 
       auto soa = vertices.view();
 

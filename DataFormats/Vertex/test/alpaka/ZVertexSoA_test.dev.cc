@@ -1,4 +1,5 @@
-#include "DataFormats/Vertex/interface/alpaka/ZVertexSoADevice.h"
+#include "DataFormats/Vertex/interface/alpaka/ZVertexSoACollection.h"
+#include "DataFormats/Vertex/interface/ZVertexSoADevice.h"
 #include "DataFormats/Vertex/interface/ZVertexSoAHost.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"  // Check if this is really needed; code doesn't compile without it
 

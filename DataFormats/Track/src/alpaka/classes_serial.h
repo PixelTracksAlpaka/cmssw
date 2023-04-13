@@ -5,7 +5,9 @@
 #include "DataFormats/Common/interface/Wrapper.h"
 #include "DataFormats/Portable/interface/Product.h"
 #include "DataFormats/Track/interface/PixelTrackLayout.h"
-#include "DataFormats/Track/interface/alpaka/TrackSoADevice.h"
+#include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
+#include "DataFormats/Track/interface/TrackSoAHost.h"
+#include "DataFormats/Track/interface/TrackSoADevice.h"
 
 using namespace pixelTopology;
 using namespace pixelTrack;

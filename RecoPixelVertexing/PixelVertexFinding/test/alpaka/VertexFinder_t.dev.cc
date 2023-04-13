@@ -121,7 +121,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       gpuVertexFinder::workSpace::PixelVertexWorkSpaceSoADevice ws_d(queue);
       ::gpuVertexFinder::workSpace::PixelVertexWorkSpaceSoAHost ws_h(queue);
       ZVertexHost vertices_h(queue);
-      ZVertexDevice vertices_d(queue);
+      ZVertexSoA vertices_d(queue);
 
       float eps = 0.1f;
       std::array<float, 3> par{{eps, 0.01f, 9.0f}};

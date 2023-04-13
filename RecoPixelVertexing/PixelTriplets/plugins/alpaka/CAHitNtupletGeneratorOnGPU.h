@@ -3,10 +3,11 @@
 
 #include <alpaka/alpaka.hpp>
 
-#include "DataFormats/Track/interface/alpaka/TrackSoADevice.h"
+#include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
 #include "DataFormats/Track/interface/TrackSoAHost.h"
 #include "DataFormats/Track/interface/PixelTrackDefinitions.h"
-#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoADevice.h"
+#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoACollection.h"
+#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoADevice.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoAHost.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
@@ -31,7 +32,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   public:
     using HitsView = TrackingRecHitAlpakaSoAView<TrackerTraits>;
     using HitsConstView = TrackingRecHitAlpakaSoAConstView<TrackerTraits>;
-    using HitsOnDevice = TrackingRecHitAlpakaDevice<TrackerTraits>;
+    using HitsOnDevice = TrackingRecHitAlpakaCollection<TrackerTraits>;
     using HitsOnHost = TrackingRecHitAlpakaHost<TrackerTraits>;
     using hindex_type = typename TrackingRecHitAlpakaSoA<TrackerTraits>::hindex_type;
 
@@ -41,7 +42,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     using GPUCACell = GPUCACellT<TrackerTraits>;
     using TkSoAHost = TrackSoAHost<TrackerTraits>;
-    using TkSoADevice = TrackSoADevice<TrackerTraits>;
+    using TkSoADevice = TrackSoACollection<TrackerTraits>;
     using HitContainer = typename TrackSoA<TrackerTraits>::HitContainer;
     using Tuple = HitContainer;
 

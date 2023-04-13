@@ -1,6 +1,6 @@
 #include <alpaka/alpaka.hpp>
 #include "DataFormats/Portable/interface/Product.h"
-#include "DataFormats/Track/interface/alpaka/TrackSoADevice.h"
+#include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
 #include "DataFormats/Track/interface/TrackSoAHost.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
@@ -31,11 +31,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   template <typename TrackerTraits>
   class CAHitNtupletCUDAT : public stream::EDProducer<> {
     using HitsConstView = TrackingRecHitAlpakaSoAConstView<TrackerTraits>;
-    using HitsOnDevice = TrackingRecHitAlpakaDevice<TrackerTraits>;
+    using HitsOnDevice = TrackingRecHitAlpakaCollection<TrackerTraits>;
     using HitsOnHost = TrackingRecHitAlpakaHost<TrackerTraits>;
 
     using TkSoAHost = TrackSoAHost<TrackerTraits>;
-    using TkSoADevice = TrackSoADevice<TrackerTraits>;
+    using TkSoADevice = TrackSoACollection<TrackerTraits>;
 
     using GPUAlgo = CAHitNtupletGeneratorOnGPU<TrackerTraits>;
 

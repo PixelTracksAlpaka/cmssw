@@ -19,8 +19,8 @@
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/EventSetup.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/global/EDProducer.h"
 
-#include "DataFormats/Track/interface/alpaka/TrackSoADevice.h"
-#include "DataFormats/Vertex/interface/alpaka/ZVertexSoADevice.h"
+#include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
+#include "DataFormats/Vertex/interface/alpaka/ZVertexSoACollection.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/MakerMacros.h"
 
 #include "gpuVertexFinder.h"
@@ -33,7 +33,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template <typename TrackerTraits>
   class PixelVertexProducerCUDAT : public global::EDProducer<> {
-    using TkSoADevice = TrackSoADevice<TrackerTraits>;
+    using TkSoADevice = TrackSoACollection<TrackerTraits>;
     using GPUAlgo = gpuVertexFinder::Producer<TrackerTraits>;
 
   public:
@@ -51,7 +51,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     bool onGPU_;
 
     device::EDGetToken<TkSoADevice> tokenGPUTrack_;
-    device::EDPutToken<ZVertexDevice> tokenGPUVertex_;
+    device::EDPutToken<ZVertexSoA> tokenGPUVertex_;
 
     const GPUAlgo gpuAlgo_;
 
@@ -106,7 +106,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   void PixelVertexProducerCUDAT<TrackerTraits>::produceOnGPU(edm::StreamID streamID,
                                                              device::Event& iEvent,
                                                              const device::EventSetup& iSetup) const {
-    using TracksSoA = TrackSoADevice<TrackerTraits>;
+    using TracksSoA = TrackSoACollection<TrackerTraits>;
     auto const& hTracks = iEvent.get(tokenGPUTrack_);
 
     iEvent.emplace(tokenGPUVertex_, gpuAlgo_.makeAsync(iEvent.queue(), hTracks.view(), ptMin_, ptMax_));

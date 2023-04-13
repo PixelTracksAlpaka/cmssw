@@ -1,5 +1,6 @@
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoAHost.h"
-#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoADevice.h"
+#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoACollection.h"
+#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoADevice.h"
 
 #include "HeterogeneousCore/AlpakaInterface/interface/devices.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/host.h"
@@ -25,26 +26,28 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 int main() {
-/*  const auto host = cms::alpakatools::host();
+  const auto host = cms::alpakatools::host();
   const auto device = cms::alpakatools::devices<Platform>()[0];
   Queue queue(device);
 
-  using ParamsOnDevice = TrackingRecHitAlpakaDevice<pixelTopology::Phase1>::ParamsOnDevice;
+  using ParamsOnDevice = TrackingRecHitAlpakaCollection<pixelTopology::Phase1>::ParamsOnDevice;
   // inner scope to deallocate memory before destroying the queue
   {
     uint32_t nHits = 2000;
     int32_t offset = 100;
-    uint32_t moduleStart[1856];
+    // uint32_t moduleStart[1856];
+    uint32_t moduleStart[7424];
 
-    for (size_t i = 0; i < 1856; i++) {
+    // for (size_t i = 0; i < 1856; i++) {
+    for (size_t i = 0; i < 7424; i++) {
       moduleStart[i] = i * 2;
     }
     auto cpeParams = std::make_unique<ParamsOnDevice>();
-    TrackingRecHitAlpakaDevice<pixelTopology::Phase1> tkhit(nHits, offset, cpeParams.get(), &moduleStart[0], queue);
+    TrackingRecHitAlpakaCollection<pixelTopology::Phase1> tkhit(nHits, offset, cpeParams.get(), &moduleStart[0], queue);
 
     testTrackingRecHitSoA::runKernels<pixelTopology::Phase1>(tkhit.view(), queue);
     alpaka::wait(queue);
   }
-*/
+
   return 0;
 }

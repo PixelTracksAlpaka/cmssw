@@ -10,9 +10,10 @@
 #include <functional>
 #include <vector>
 
-#include "DataFormats/Track/interface/alpaka/TrackSoADevice.h"
+#include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
 #include "DataFormats/Track/interface/TrackSoAHost.h"
-#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoADevice.h"
+#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoACollection.h"
+#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoADevice.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoAHost.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
@@ -248,11 +249,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   template <typename TrackerTraits>
-  TrackSoADevice<TrackerTraits> CAHitNtupletGeneratorOnGPU<TrackerTraits>::makeTuplesAsync(HitsOnDevice const& hits_d,
-                                                                                           float bfield,
-                                                                                           Queue& queue) const {
+  TrackSoACollection<TrackerTraits> CAHitNtupletGeneratorOnGPU<TrackerTraits>::makeTuplesAsync(
+      HitsOnDevice const& hits_d, float bfield, Queue& queue) const {
     using HelixFitOnGPU = HelixFitOnGPU<TrackerTraits>;
-    using TrackSoA = TrackSoADevice<TrackerTraits>;
+    using TrackSoA = TrackSoACollection<TrackerTraits>;
     using GPUKernels = CAHitNtupletGeneratorKernels<TrackerTraits>;
 
     TrackSoA tracks(queue);

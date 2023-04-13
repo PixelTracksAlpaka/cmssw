@@ -1,7 +1,8 @@
 #include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
 #include "DataFormats/Track/interface/PixelTrackDefinitions.h"
-#include "DataFormats/Track/interface/alpaka/TrackSoADevice.h"
+#include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
 #include "DataFormats/Track/interface/TrackSoAHost.h"
+#include "DataFormats/Track/interface/TrackSoADevice.h"
 
 using Quality = pixelTrack::Quality;
 namespace ALPAKA_ACCELERATOR_NAMESPACE {

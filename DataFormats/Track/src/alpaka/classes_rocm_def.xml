@@ -1,5 +1,5 @@
 <lcgdict>
-  <class name="alpaka_rocm_async::pixelTrack::TrackSoADevicePhase1" persistent="false"/>
+  <!-- <class name="alpaka_rocm_async::pixelTrack::TrackSoADevicePhase1" persistent="false"/>
   <class name="edm::Wrapper<alpaka_rocm_async::pixelTrack::TrackSoADevicePhase1>" persistent="false"/>
   <class name="cms::alpakatools::Product<alpaka_rocm_async::Queue,alpaka_rocm_async::pixelTrack::TrackSoADevicePhase1>" persistent="false"/>
   <class name="edm::Wrapper<cms::alpakatools::Product<alpaka_rocm_async::Queue,alpaka_rocm_async::pixelTrack::TrackSoADevicePhase1>>" persistent="false"/>
@@ -7,5 +7,11 @@
   <class name="alpaka_rocm_async::pixelTrack::TrackSoADevicePhase2" persistent="false"/>
   <class name="edm::Wrapper<alpaka_rocm_async::pixelTrack::TrackSoADevicePhase2>" persistent="false"/>
   <class name="cms::alpakatools::Product<alpaka_rocm_async::Queue,alpaka_rocm_async::pixelTrack::TrackSoADevicePhase2>" persistent="false"/>
-  <class name="edm::Wrapper<cms::alpakatools::Product<alpaka_rocm_async::Queue,alpaka_rocm_async::pixelTrack::TrackSoADevicePhase2>>" persistent="false"/>
+  <class name="edm::Wrapper<cms::alpakatools::Product<alpaka_rocm_async::Queue,alpaka_rocm_async::pixelTrack::TrackSoADevicePhase2>>" persistent="false"/> -->
+
+  <class name="alpaka_rocm_async::pixelTrack::TrackSoAPhase1" persistent="false"/>
+  <class name="cms::alpakatools::Product<alpaka_rocm_async::Queue,alpaka_rocm_async::pixelTrack::TrackSoAPhase1>" persistent="false"/>
+
+  <class name="alpaka_rocm_async::pixelTrack::TrackSoAPhase2" persistent="false"/>
+  <class name="cms::alpakatools::Product<alpaka_rocm_async::Queue,alpaka_rocm_async::pixelTrack::TrackSoAPhase2>" persistent="false"/>
 </lcgdict>

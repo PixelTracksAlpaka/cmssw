@@ -6,9 +6,12 @@
 #include <alpaka/alpaka.hpp>
 
 #include "DataFormats/BeamSpotAlpaka/interface/alpaka/BeamSpotAlpaka.h"
-#include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersDevice.h"
-#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisDevice.h"
-#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoADevice.h"
+#include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersCollection.h"
+#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersDevice.h"
+#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisCollection.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
+#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoACollection.h"
+#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoADevice.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
 #include "DataFormats/PixelCPEFastParams/interface/PixelCPEFastParams.h"
@@ -30,11 +33,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       using ParamsOnGPU = pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>;
 
-      TrackingRecHitAlpakaDevice<TrackerTraits> makeHitsAsync(SiPixelDigisDevice const& digis_d,
-                                                              SiPixelClustersDevice const& clusters_d,
-                                                              BeamSpotAlpaka const& bs_d,
-                                                              ParamsOnGPU const* cpeParams,
-                                                              Queue queue) const;
+      TrackingRecHitAlpakaCollection<TrackerTraits> makeHitsAsync(SiPixelDigisSoA const& digis_d,
+                                                                  SiPixelClustersSoA const& clusters_d,
+                                                                  BeamSpotAlpaka const& bs_d,
+                                                                  ParamsOnGPU const* cpeParams,
+                                                                  Queue queue) const;
     };
   }  // namespace pixelgpudetails
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

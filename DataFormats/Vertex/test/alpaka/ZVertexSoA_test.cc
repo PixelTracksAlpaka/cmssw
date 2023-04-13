@@ -15,7 +15,8 @@
 
 #include <alpaka/alpaka.hpp>
 #include <unistd.h>
-#include "DataFormats/Vertex/interface/alpaka/ZVertexSoADevice.h"
+#include "DataFormats/Vertex/interface/alpaka/ZVertexSoACollection.h"
+#include "DataFormats/Vertex/interface/ZVertexSoADevice.h"
 #include "DataFormats/Vertex/interface/ZVertexSoAHost.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/devices.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/host.h"
@@ -41,7 +42,7 @@ int main() {
   {
     // Instantiate vertices on device. PortableCollection allocates
     // SoA on device automatically.
-    ZVertexDevice zvertex_d(queue);
+    ZVertexSoA zvertex_d(queue);
     testZVertexSoAT::runKernels(zvertex_d.view(), queue);
 
     // Instantate vertices on host. This is where the data will be

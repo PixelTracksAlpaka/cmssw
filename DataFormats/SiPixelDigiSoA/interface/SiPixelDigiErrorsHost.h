@@ -1,5 +1,5 @@
-#ifndef DataFormats_SiPixelDigi_interface_SiPixelDigiErrorsAlpaka_h
-#define DataFormats_SiPixelDigi_interface_SiPixelDigiErrorsAlpaka_h
+#ifndef DataFormats_SiPixelDigiSoA_interface_SiPixelDigiErrorsHost_h
+#define DataFormats_SiPixelDigiSoA_interface_SiPixelDigiErrorsHost_h
 
 #include <utility>
 
@@ -45,32 +45,4 @@ private:
   std::optional<cms::alpakatools::host_buffer<cms::alpakatools::SimpleVector<SiPixelErrorCompact>>> error_h;
 };
 
-// class SiPixelDigiErrorsHostDev {
-// public:
-//   SiPixelDigiErrorsHostDev() = default;
-//   ~SiPixelDigiErrorsHostDev() = default;
-//   explicit SiPixelDigiErrorsHostDev(int nErrorWords, SiPixelFormatterErrors errors)
-//       : nErrorWords_(nErrorWords), formatterErrors_h{std::move(errors)} {
-//     data_h = cms::alpakatools::make_host_buffer<SiPixelErrorCompact[]>(nErrorWords);
-//     error_h = cms::alpakatools::make_host_buffer<cms::alpakatools::SimpleVector<SiPixelErrorCompact>>();
-//     (*error_h).data()->set_data((*data_h).data());
-//   }
-
-//   int nErrorWords() const { return nErrorWords_; }
-
-//   cms::alpakatools::SimpleVector<SiPixelErrorCompact>* error() { return (*error_h).data(); }
-//   cms::alpakatools::SimpleVector<SiPixelErrorCompact> const* error() const { return (*error_h).data(); }
-//   auto& error_data() { return (*data_h); }
-//   auto const& error_data() const { return (*data_h); }
-//   auto& error_vector() const { return (*error_h); }
-
-//   const SiPixelFormatterErrors& formatterErrors() const { return formatterErrors_h; }
-
-// private:
-//   int nErrorWords_ = 0;
-//   SiPixelFormatterErrors formatterErrors_h;
-//   std::optional<cms::alpakatools::host_buffer<SiPixelErrorCompact[]>> data_h;
-//   std::optional<cms::alpakatools::host_buffer<cms::alpakatools::SimpleVector<SiPixelErrorCompact>>> error_h;
-// };
-
-#endif  // AlpakaDataFormats_alpaka_SiPixelDigiErrorsAlpaka_h
+#endif  // DataFormats_SiPixelDigiSoA_interface_SiPixelDigiErrorsHost_h
