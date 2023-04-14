@@ -23,7 +23,7 @@ public:
       : PortableDeviceCollection<ZVertexSoAHeterogeneousLayout<>, TDev>(S, device) {}
 };
 
-using namespace ::zVertex;
+using namespace zVertex;
 template <typename TDev>
 using ZVertexDevice = ZVertexSoADevice<MAXTRACKS, TDev>;
 

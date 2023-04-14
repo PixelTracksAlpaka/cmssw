@@ -2,11 +2,12 @@
 #define DataFormats_Track_TrackSoADevice_H
 
 #include <cstdint>
-
+#include <alpaka/alpaka.hpp>
 #include "DataFormats/Portable/interface/PortableDeviceCollection.h"
+#include "DataFormats/TrackerCommon/interface/SimplePixelTopology.h"
 #include "DataFormats/Track/interface/PixelTrackDefinitions.h"
 #include "DataFormats/Track/interface/PixelTrackLayout.h"
-#include "DataFormats/Track/interface/TrackSoAHost.h"
+// #include "DataFormats/Track/interface/TrackSoAHost.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
 // TODO: The class is created via inheritance of the PortableDeviceCollection.

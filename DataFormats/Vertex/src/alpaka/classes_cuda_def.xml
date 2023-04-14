@@ -1,5 +1,8 @@
 <lcgdict>
-  <class name="alpaka_cuda_async::ZVertexSoA" persistent="false"/>
-  <class name="edm::DeviceProduct<alpaka_cuda_async::ZVertexSoA>" persistent="false"/>
-  <class name="edm::Wrapper<edm::DeviceProduct<alpaka_cuda_async::ZVertexSoA>>" persistent="false"/>
+
+  <class name="PortableDeviceCollection<ZVertexSoAHeterogeneousLayout<>, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>" persistent="false"/>
+  <class name="ZVertexDevice<alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>" persistent="false"/>
+  <class name="edm::DeviceProduct<ZVertexDevice<alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>>" persistent="false"/>
+  <class name="edm::Wrapper<edm::DeviceProduct<ZVertexDevice<alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>>>" persistent="false"/>
+
 </lcgdict>

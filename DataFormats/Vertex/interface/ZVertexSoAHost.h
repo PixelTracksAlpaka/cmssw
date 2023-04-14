@@ -23,7 +23,7 @@ public:
       : PortableHostCollection<ZVertexSoAHeterogeneousLayout<>>(S, host) {}
 };
 
-using namespace ::zVertex;
+using namespace zVertex;
 using ZVertexHost = ZVertexSoAHost<MAXTRACKS>;
 
 #endif  // DataFormats_Vertex_ZVertexSoAHost_H
