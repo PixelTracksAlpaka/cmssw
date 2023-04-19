@@ -125,8 +125,8 @@ struct fillBulk {
 struct verifyBulk {
   template <typename TAcc, typename Assoc>
   ALPAKA_FN_ACC void operator()(const TAcc& acc, Assoc const* __restrict__ assoc, AtomicPairCounter const* apc) const {
-    if (apc->get().m >= Assoc::nbins()) {
-      printf("Overflow %d %d\n", apc->get().m, Assoc::nbins());
+    if (apc->get().first >= Assoc::nbins()) {
+      printf("Overflow %d %d\n", apc->get().first, Assoc::nbins());
     }
     assert(assoc->size() < Assoc::capacity());
   }
@@ -262,7 +262,7 @@ int main() {
     alpaka::enqueue(queue,
                     alpaka::createTaskKernel<Acc1D>(WorkDiv1D{1u, 1u, 1u}, verifyBulk(), sa_d.data(), dc_d.data()));
 
-    std::cout << "final counter value " << dc->get().n << ' ' << dc->get().m << std::endl;
+    std::cout << "final counter value " << dc->get().second << ' ' << dc->get().first << std::endl;
 
     std::cout << la->size() << std::endl;
     imax = 0;

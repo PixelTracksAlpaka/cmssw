@@ -21,10 +21,10 @@ struct update {
     for_each_element_in_grid_strided(acc, n, [&](uint32_t i) {
       auto m = i % 11;
       m = m % 6 + 1;  // max 6, no 0
-      auto c = dc->add(acc, m);
-      assert(c.m < n);
-      ind[c.m] = c.n;
-      for (uint32_t j = c.n; j < c.n + m; ++j)
+      auto c = dc->inc_add(acc, m);
+      assert(c.first < n);
+      ind[c.first] = c.second;
+      for (uint32_t j = c.second; j < c.second + m; ++j)
         cont[j] = i;
     });
   }
@@ -34,8 +34,8 @@ struct finalize {
   template <typename TAcc>
   ALPAKA_FN_ACC void operator()(
       const TAcc &acc, AtomicPairCounter const *dc, uint32_t *ind, uint32_t *cont, uint32_t n) const {
-    assert(dc->get().m == n);
-    ind[n] = dc->get().n;
+    assert(dc->get().first == n);
+    ind[n] = dc->get().second;
   }
 };
 
@@ -92,8 +92,8 @@ TEST_CASE("Standard checks of " ALPAKA_TYPE_ALIAS_NAME(alpakaTestAtomicPair), s_
       // wait for all the operations to complete
       alpaka::wait(queue);
 
-      REQUIRE(c_h.data()->get().m == NUM_VALUES);
-      REQUIRE(n_h[NUM_VALUES] == c_h.data()->get().n);
+      REQUIRE(c_h.data()->get().first == NUM_VALUES);
+      REQUIRE(n_h[NUM_VALUES] == c_h.data()->get().second);
       REQUIRE(n_h[0] == 0);
 
       for (size_t i = 0; i < NUM_VALUES; ++i) {
