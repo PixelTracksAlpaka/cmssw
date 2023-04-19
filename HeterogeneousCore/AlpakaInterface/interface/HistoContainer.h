@@ -209,24 +209,24 @@ namespace cms {
       template <typename TAcc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE int32_t
       bulkFill(const TAcc &acc, AtomicPairCounter &apc, index_type const *v, uint32_t n) {
-        auto c = apc.add(acc, n);
-        if (c.m >= nbins())
-          return -int32_t(c.m);
-        off[c.m] = c.n;
+        auto c = apc.inc_add(acc, n);
+        if (c.first >= nbins())
+          return -int32_t(c.first);
+        off[c.first] = c.second;
         for (uint32_t j = 0; j < n; ++j)
-          bins[c.n + j] = v[j];
-        return c.m;
+          bins[c.second + j] = v[j];
+        return c.first;
       }
 
       template <typename TAcc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void bulkFinalize(const TAcc &acc, AtomicPairCounter const &apc) {
-        off[apc.get().m] = apc.get().n;
+        off[apc.get().first] = apc.get().second;
       }
 
       template <typename TAcc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void bulkFinalizeFill(const TAcc &acc, AtomicPairCounter const &apc) {
-        auto m = apc.get().m;
-        auto n = apc.get().n;
+        auto m = apc.get().first;
+        auto n = apc.get().second;
 
         if (m >= nbins()) {  // overflow!
           off[nbins()] = uint32_t(off[nbins() - 1]);
