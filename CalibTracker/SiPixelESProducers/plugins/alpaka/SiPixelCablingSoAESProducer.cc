@@ -5,6 +5,8 @@
 #include "CondFormats/SiPixelObjects/interface/SiPixelQuality.h"
 #include "DataFormats/SiPixelClusterSoA/interface/gpuClusteringConstants.h"
 #include "CalibTracker/SiPixelESProducers/interface/SiPixelMappingHost.h"
+// #include "CalibTracker/SiPixelESProducers/interface/SiPixelMappingDevice.h"
+// #include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelMappingCollection.h"
 #include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelMappingDevice.h"
 #include "FWCore/Framework/interface/ESTransientHandle.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -21,9 +23,10 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 
+#include "CalibTracker/SiPixelESProducers/interface/SiPixelMappingSoARecord.h"
 #include "RecoTracker/Record/interface/CkfComponentsRecord.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/CopyToDevice.h"
-#include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
+// #include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
 
 template struct cms::alpakatools::CopyToDevice<SiPixelMappingHost>;  //needed for the method to not be incomplete
 
@@ -52,7 +55,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       descriptions.addWithDefaultLabel(desc);
     }
 
-    std::unique_ptr<SiPixelMappingHost> produce(const CkfComponentsRecord& iRecord) {
+    std::unique_ptr<SiPixelMappingHost> produce(const SiPixelMappingSoARecord& iRecord) {
+      std::cout << std::endl;
+      std::cout << __LINE__ << std::endl;
       auto cablingMap = iRecord.getTransientHandle(cablingMapToken_);
 
       const SiPixelQuality* quality = nullptr;
@@ -60,6 +65,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         auto qualityInfo = iRecord.getTransientHandle(qualityToken_);
         quality = qualityInfo.product();
       }
+      std::cout << __LINE__ << std::endl;
 
       bool hasQuality = quality != nullptr;
       auto geom = iRecord.getTransientHandle(geometryToken_);
@@ -67,12 +73,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           pixelgpudetails::MAX_SIZE,
           cms::alpakatools::
               host());  //(pixelgpudetails::MAX_SIZE, *(cablingMap.product()), hasQuality, cms::alpakatools::host());
+      std::cout << __LINE__ << std::endl;
 
       std::vector<unsigned int> const& fedIds = cablingMap->fedIds();
       std::unique_ptr<SiPixelFedCablingTree> const& cabling = cablingMap->cablingTree();
 
       unsigned int startFed = *(fedIds.begin());
       unsigned int endFed = *(fedIds.end() - 1);
+      std::cout << __LINE__ << std::endl;
 
       sipixelobjects::CablingPathToDetUnit path;
       int index = 1;
@@ -80,10 +88,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       auto mapView = product->view();
 
       mapView.hasQuality() = hasQuality;
+      std::cout << __LINE__ << std::endl;
 
       for (unsigned int fed = startFed; fed <= endFed; fed++) {
+        // std::cout << __LINE__ << std::endl;
         for (unsigned int link = 1; link <= pixelgpudetails::MAX_LINK; link++) {
+          // std::cout << __LINE__ << std::endl;
           for (unsigned int roc = 1; roc <= pixelgpudetails::MAX_ROC; roc++) {
+            // std::cout << __LINE__ << std::endl;
             path = {fed, link, roc};
             const sipixelobjects::PixelROC* pixelRoc = cabling->findItem(path);
             mapView[index].fed() = fed;
@@ -107,6 +119,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           }
         }
       }  // end of FED loop
+      std::cout << __LINE__ << std::endl;
 
       // Given FedId, Link and idinLnk; use the following formula
       // to get the rawId and idinDU
@@ -117,8 +130,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       // idinLnk varies between 1 to 8
 
       auto trackerGeom = iRecord.getTransientHandle(geometryToken_);
+      std::cout << __LINE__ << std::endl;
 
       for (int i = 1; i < index; i++) {
+        // std::cout << __LINE__ << std::endl;
         if (mapView[i].rawId() == gpuClustering::invalidModuleId) {
           mapView[i].moduleId() = gpuClustering::invalidModuleId;
         } else {
@@ -144,6 +159,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         LogDebug("SiPixelCablingSoAESProducer")
             << "----------------------------------------------------------------------------" << std::endl;
       }
+
+      std::cout << __LINE__ << std::endl;
 
       mapView.size() = index - 1;
 

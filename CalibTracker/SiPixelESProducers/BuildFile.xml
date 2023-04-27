@@ -3,7 +3,6 @@
 <use name="CondFormats/SiPixelObjects"/>
 <use name="DataFormats/Common"/>
 <use name="DataFormats/SiPixelDigi"/>
-<use name="DataFormats/SiPixelMappingSoA"/>
 <use name="DataFormats/SiPixelGainCalibrationForHLTSoA"/>
 <use name="FWCore/Framework"/>
 <use name="FWCore/MessageLogger"/>

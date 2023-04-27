@@ -12,8 +12,11 @@
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
 
 #include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelMappingDevice.h"
+#include "CalibTracker/SiPixelESProducers/interface/SiPixelMappingHost.h"
+// #include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelMappingCollection.h"
 #include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelMappingUtilities.h"
-#include "CalibTracker/Records/interface/SiPixelMappingSoARecord.h"
+// #include "CalibTracker/Records/interface/SiPixelMappingSoARecord.h"
+#include "CalibTracker/SiPixelESProducers/interface/SiPixelMappingSoARecord.h"
 
 #include "CalibTracker/Records/interface/SiPixelGainCalibrationForHLTSoARcd.h"
 #include "CalibTracker/SiPixelESProducers/interface/alpaka/SiPixelGainCalibrationForHLTDevice.h"
@@ -76,6 +79,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     edm::EDGetTokenT<FEDRawDataCollection> rawGetToken_;
     device::EDPutToken<SiPixelDigisSoA> digiPutToken_;
     device::EDPutToken<SiPixelDigiErrorsSoA> digiErrorPutToken_;
+    // edm::EDPutToken<SiPixelFormatterErrors> formatterErrorsToken_;
     device::EDPutToken<SiPixelClustersSoA> clusterPutToken_;
 
     edm::ESWatcher<SiPixelFedCablingMapRcd> recordWatcher_;
@@ -151,13 +155,24 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   void SiPixelRawToCluster::acquire(device::Event const& iEvent, device::EventSetup const& iSetup) {
     // cms::alpakatools::ScopedContextAcquire<Queue> ctx{iEvent.streamID(), std::move(waitingTaskHolder), ctxState_};
+    std::cout << __LINE__ << std::endl;
 
+    std::cout << std::endl;
+    std::cout << __LINE__ << std::endl;
     auto const& hgpuMap = iSetup.getData(gpuMapToken_);
+    std::cout << __LINE__ << " " << hgpuMap.const_view().size() << std::endl;
+    std::cout << __LINE__ << std::endl;
+    std::cout << __LINE__ << " " << hgpuMap.const_view().size() << std::endl;
+
+    // auto const& hgpuMap = iSetup.getData(gpuMapToken_);
+    std::cout << __LINE__ << " " << hgpuMap.const_view().size() << std::endl;
     if (SiPixelMappingUtilities::hasQuality(hgpuMap.const_view()) != useQuality_) {
+      std::cout << __LINE__ << std::endl;
       throw cms::Exception("LogicError")
           << "UseQuality of the module (" << useQuality_
           << ") differs the one from SiPixelROCsStatusAndMappingWrapper. Please fix your configuration.";
     }
+    std::cout << __LINE__ << std::endl;
     // get the GPU product already here so that the async transfer can begin
     // const auto* gpuMap = hgpuMap.getGPUProductAsync(iEvent.queue());
     // const unsigned char* gpuModulesToUnpack = hgpuMap.getModToUnpAllAsync(iEvent.queue());
@@ -168,6 +183,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     auto modulesToUnpackRegional =
         cms::alpakatools::make_device_buffer<unsigned char[]>(iEvent.queue(), ::pixelgpudetails::MAX_SIZE);
     const unsigned char* gpuModulesToUnpack;
+    std::cout << __LINE__ << std::endl;
 
     // initialize cabling map or update if necessary
     if (recordWatcher_.check(iSetup) or regions_) {
@@ -178,6 +194,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       cabling_ = cablingMap_->cablingTree();
       LogDebug("map version:") << cablingMap_->version();
     }
+    std::cout << __LINE__ << std::endl;
 
     if (regions_) {
       regions_->run(iEvent, iSetup);
@@ -191,29 +208,32 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     } else {
       gpuModulesToUnpack = hgpuMap->modToUnpDefault();  //getModToUnpAllAsync(iEvent.queue());
     }
+    std::cout << __LINE__ << std::endl;
 
     // auto const& hgains = iSetup.get<SiPixelGainCalibrationForHLTGPU>();
     // const auto* gpuGains = hgains.getGPUProductAsync(iEvent.queue());
     // auto const& fedIds_ = iSetup.get<SiPixelFedIds>().fedIds();
     const auto& buffers = iEvent.get(rawGetToken_);
-
+    std::cout << __LINE__ << std::endl;
     errors_.clear();
-
+    std::cout << __LINE__ << std::endl;
     // GPU specific: Data extraction for RawToDigi GPU
     unsigned int wordCounter = 0;
     unsigned int fedCounter = 0;
     bool errorsInEvent = false;
-
+    std::cout << __LINE__ << std::endl;
     std::vector<unsigned int> index(fedIds_.size(), 0);
     std::vector<cms_uint32_t const*> start(fedIds_.size(), nullptr);
     std::vector<ptrdiff_t> words(fedIds_.size(), 0);
-
+    std::cout << __LINE__ << std::endl;
     // In CPU algorithm this loop is part of PixelDataFormatter::interpretRawData()
     ErrorChecker errorcheck;
     for (uint32_t i = 0; i < fedIds_.size(); ++i) {
+      std::cout << __LINE__ << std::endl;
       const int fedId = fedIds_[i];
       if (regions_ && !regions_->mayUnpackFED(fedId))
         continue;
+      std::cout << __LINE__ << std::endl;
 
       // for GPU
       // first 150 index stores the fedId and next 150 will store the
@@ -229,12 +249,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       if (nWords == 0) {
         continue;
       }
+      std::cout << __LINE__ << std::endl;
 
       // check CRC bit
       const cms_uint64_t* trailer = reinterpret_cast<const cms_uint64_t*>(rawData.data()) + (nWords - 1);
       if (not errorcheck.checkCRC(errorsInEvent, fedId, trailer, errors_)) {
         continue;
       }
+      std::cout << __LINE__ << std::endl;
 
       // check headers
       const cms_uint64_t* header = reinterpret_cast<const cms_uint64_t*>(rawData.data());
@@ -245,6 +267,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         bool headerStatus = errorcheck.checkHeader(errorsInEvent, fedId, header, errors_);
         moreHeaders = headerStatus;
       }
+      std::cout << __LINE__ << std::endl;
 
       // check trailers
       bool moreTrailers = true;
@@ -254,6 +277,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         bool trailerStatus = errorcheck.checkTrailer(errorsInEvent, fedId, nWords, trailer, errors_);
         moreTrailers = trailerStatus;
       }
+      std::cout << __LINE__ << std::endl;
 
       const cms_uint32_t* bw = (const cms_uint32_t*)(header + 1);
       const cms_uint32_t* ew = (const cms_uint32_t*)(trailer);
@@ -263,20 +287,21 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       start[i] = bw;
       words[i] = (ew - bw);
       wordCounter += (ew - bw);
+      std::cout << __LINE__ << std::endl;
 
     }  // end of for loop
-
+    std::cout << __LINE__ << std::endl;
     nDigis_ = wordCounter;
 
     if (nDigis_ == 0)
       return;
-
+    std::cout << __LINE__ << std::endl;
     // copy the FED data to a single cpu buffer
     pixelgpudetails::SiPixelRawToClusterGPUKernel::WordFedAppender wordFedAppender(nDigis_);
     for (uint32_t i = 0; i < fedIds_.size(); ++i) {
       wordFedAppender.initializeWordFed(fedIds_[i], index[i], start[i], words[i]);
     }
-
+    std::cout << __LINE__ << std::endl;
     gpuAlgo_.makeClustersAsync(isRun2_,
                                clusterThresholds_,
                                hgpuMap.const_view(),

@@ -1,29 +1,24 @@
-#ifndef DataFormats_SiPixelMappingSoA_interface_SiPixelClustersDevice_h
-#define DataFormats_SiPixelMappingSoA_interface_SiPixelClustersDevice_h
+#ifndef CalibTracker_SiPixelESProducers_interface_SiPixelMappingDevice_h
+#define CalibTracker_SiPixelESProducers_interface_SiPixelMappingDevice_h
 
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
-#include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
-#include "DataFormats/SiPixelMappingSoA/interface/SiPixelMappingLayout.h"
-#include "HeterogeneousCore/AlpakaCore/interface/alpaka/ESProducer.h"
-#include "DataFormats/Portable/interface/PortableHostCollection.h"
+#include "DataFormats/Portable/interface/PortableDeviceCollection.h"
+#include "CalibTracker/SiPixelESProducers/interface/SiPixelMappingLayout.h"
 
-namespace ALPAKA_ACCELERATOR_NAMESPACE {
+template <typename TDev>
+using SiPixelMappingDevice = PortableDeviceCollection<SiPixelMappingLayout<>, TDev>;
 
-  using SiPixelMappingDevice = PortableCollection<SiPixelMappingLayout<>>;
-  using SiPixelMappingHost = PortableHostCollection<SiPixelMappingLayout<>>;
+//   template <>
+// struct CopyToDevice<ExampleHostProduct> {
+//    template <typename TQueue>
+//    static auto copyAsync(TQueue& queue, ExampleHostProduct const& hostData) {
+//      // construct ExampleDeviceProduct corresponding the device of the TQueue
+//      // asynchronous copy hostData to the ExampleDeviceProduct object
+//      // return ExampleDeviceProduct object by value
+//    }
+// };
 
-  //   template <>
-  // struct CopyToDevice<ExampleHostProduct> {
-  //    template <typename TQueue>
-  //    static auto copyAsync(TQueue& queue, ExampleHostProduct const& hostData) {
-  //      // construct ExampleDeviceProduct corresponding the device of the TQueue
-  //      // asynchronous copy hostData to the ExampleDeviceProduct object
-  //      // return ExampleDeviceProduct object by value
-  //    }
-  // };
-
-}  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 // class SiPixelMappingDevice : public PortableCollection<SiPixelMappingLayout<>> {
 // public:
 //   SiPixelMappingDevice() = default;
@@ -93,4 +88,4 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 // }
 
 // }
-#endif  // DataFormats_SiPixelMappingSoA_interface_SiPixelClustersDevice_h
+#endif  // CalibTracker_SiPixelESProducers_interface_SiPixelMappingDevice_h
