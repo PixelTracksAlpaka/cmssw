@@ -1,0 +1,5 @@
+<lcgdict>
+  <class name="TrackingRecHitAlpakaDevice<pixelTopology::Phase1,alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt> >" persistent="false"/>
+  <class name="alpaka_cuda_async::TrackingRecHitAlpakaCollection<pixelTopology::Phase1>" persistent="false"/>
+  <class name="edm::Wrapper<alpaka_cuda_async::TrackingRecHitAlpakaCollection<pixelTopology::Phase1>>" persistent="false"/>
+</lcgdict>
