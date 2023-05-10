@@ -12,8 +12,8 @@ fragment.load("RecoLocalCalo/HcalRecAlgos/hcalRecAlgoESProd_cfi")
 fragment.load("RecoLocalCalo/HcalRecAlgos/hcalChannelPropertiesESProd_cfi")
 fragment.load("RecoLocalTracker/Phase2TrackerRecHits/Phase2StripCPEESProducer_cfi")
 fragment.load("RecoLocalTracker/SiPixelRecHits/PixelCPEGeneric_cfi")
-fragment.load("RecoPixelVertexing.PixelTrackFitting.pixelTrackCleanerBySharedHits_cfi")
-fragment.load("RecoPixelVertexing/PixelLowPtUtilities/ClusterShapeHitFilterESProducer_cfi")
+fragment.load("RecoTracker/PixelTrackFitting/pixelTrackCleanerBySharedHits_cfi")
+fragment.load("RecoTracker/PixelLowPtUtilities/ClusterShapeHitFilterESProducer_cfi")
 fragment.load("RecoTracker/FinalTrackSelectors/trackAlgoPriorityOrder_cfi")
 fragment.load("RecoTracker/MeasurementDet/MeasurementTrackerESProducer_cfi")
 fragment.load("RecoTracker/TkNavigation/NavigationSchoolESProducer_cfi")
@@ -55,6 +55,7 @@ fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/highPtTripletStepTra
 fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/muonSeededTrajectoryCleanerBySharedHits_cfi")
 
 ### Mostly comes from HLT-like configuration, not RECO-like configuration
+fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/hltOnlineBeamSpotESProducer_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/hltESPBwdElectronPropagator_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/hltESPChi2ChargeMeasurementEstimator2000_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/hltESPChi2ChargeMeasurementEstimator30_cfi")
@@ -138,13 +139,7 @@ fragment.load("HLTrigger/Configuration/HLT_75e33/paths/L1T_TripleTkMuon_5_3_3_cf
 fragment.load("HLTrigger/Configuration/HLT_75e33/paths/MC_BTV_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/paths/MC_Ele5_Open_L1Seeded_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/paths/MC_Ele5_Open_Unseeded_cfi")
-fragment.load("HLTrigger/Configuration/HLT_75e33/paths/MC_Ele5_WP70_Open_L1Seeded_cfi")
-fragment.load("HLTrigger/Configuration/HLT_75e33/paths/MC_Ele5_WP70_Open_Unseeded_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/paths/MC_JME_cfi")
-fragment.load("HLTrigger/Configuration/HLT_75e33/paths/MC_Photon100EB_TightID_TightIso_Open_L1Seeded_cfi")
-fragment.load("HLTrigger/Configuration/HLT_75e33/paths/MC_Photon100EB_TightID_TightIso_Open_Unseeded_cfi")
-fragment.load("HLTrigger/Configuration/HLT_75e33/paths/MC_Photon100_Open_L1Seeded_cfi")
-fragment.load("HLTrigger/Configuration/HLT_75e33/paths/MC_Photon100_Open_Unseeded_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/psets/CkfBaseTrajectoryFilter_block_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/psets/ckfBaseTrajectoryFilterP5_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/psets/CkfTrajectoryBuilder_cfi")
@@ -295,13 +290,7 @@ fragment.schedule = cms.Schedule(*[
     fragment.MC_JME,
     fragment.MC_BTV,
     fragment.MC_Ele5_Open_Unseeded,
-    fragment.MC_Ele5_WP70_Open_Unseeded,
     fragment.MC_Ele5_Open_L1Seeded,
-    fragment.MC_Ele5_WP70_Open_L1Seeded,
-    fragment.MC_Photon100_Open_Unseeded,
-    fragment.MC_Photon100EB_TightID_TightIso_Open_Unseeded,
-    fragment.MC_Photon100_Open_L1Seeded,
-    fragment.MC_Photon100EB_TightID_TightIso_Open_L1Seeded,
 
     fragment.HLTriggerFinalPath,
     fragment.HLTAnalyzerEndpath,

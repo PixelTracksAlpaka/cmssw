@@ -156,6 +156,7 @@ public:
   double sensorSizeOffset_;
   double guardRingOffset_;
   double mouseBite_;
+  int useOffset_;
   int waferUVMax_;
   std::vector<int> waferUVMaxLayer_;
   bool defineFull_;
@@ -195,6 +196,12 @@ public:
   int nphiCassette_;
   int phiOffset_;
   std::vector<double> cassetteShift_;
+  double calibCellRHD_;
+  std::vector<int> calibCellFullHD_;
+  std::vector<int> calibCellPartHD_;
+  double calibCellRLD_;
+  std::vector<int> calibCellFullLD_;
+  std::vector<int> calibCellPartLD_;
 
   COND_SERIALIZABLE;
 
