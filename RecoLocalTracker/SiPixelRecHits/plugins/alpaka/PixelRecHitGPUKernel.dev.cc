@@ -13,8 +13,10 @@
 #include "PixelRecHitGPUKernel.h"
 #include "pixelRecHits.h"
 
+
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   using namespace cms::alpakatools;
+
   template <typename TrackerTraits>
   class setHitsLayerStart {
   public:

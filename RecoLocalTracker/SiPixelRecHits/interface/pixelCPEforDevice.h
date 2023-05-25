@@ -12,6 +12,13 @@
 
 namespace pixelCPEforDevice {
 
+  /**
+   * \namespace pixelCPEforDevice
+   *
+   * \brief Contains functions which are used to estimate the position of a given RecHit (cluster)
+   *
+   */ 
+
   constexpr int32_t MaxHitsInIter = pixelClustering::maxHitsInIter();
   using ClusParams = ClusParamsT<MaxHitsInIter>;
 
