@@ -17,6 +17,15 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace pixelgpudetails {
     using namespace cms::alpakatools;
 
+   /**
+    * \class PixelRecHitGPUKernel
+    *
+    * \brief Sets up work division to build SoA TrackingRecHit collection from
+    *        SiPixelClusters and SiPixelDigis SoAs on the device.
+    *
+    * The main method is makeHitsAsync() which sends a block of 128 threads for each module with digis. Each thread processes its own digi and cluster into rechit. The SoA of RecHits is created using the fillManyFromVector() method
+    */
+
     template <typename TrackerTraits>
     class PixelRecHitGPUKernel {
     public:
