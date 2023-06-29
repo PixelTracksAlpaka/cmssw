@@ -1,24 +1,25 @@
-#include <alpaka/alpaka.hpp>
 #include <unistd.h>
 
-#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
-#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisCollection.h"
-#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisHost.h"
-#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisLayout.h"
+#include <alpaka/alpaka.hpp>
 
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisHost.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisSoAv2.h"
+#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisCollection.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/devices.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/host.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 
 using namespace ALPAKA_ACCELERATOR_NAMESPACE;
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace testDigisSoA {
 
-    void runKernels(SiPixelDigisLayoutSoAView digis_view, Queue& queue);
+    void runKernels(SiPixelDigisSoAv2View digis_view, Queue& queue);
+
   }
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
@@ -31,7 +32,7 @@ int main() {
   {
     // Instantiate tracks on device. PortableDeviceCollection allocates
     // SoA on device automatically.
-    SiPixelDigisSoA digis_d(1000, queue);
+    SiPixelDigisCollection digis_d(1000, queue);
     testDigisSoA::runKernels(digis_d.view(), queue);
 
     // Instantate tracks on host. This is where the data will be

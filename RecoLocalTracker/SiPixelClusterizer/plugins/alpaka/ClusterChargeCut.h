@@ -4,12 +4,12 @@
 #include <cstdint>
 #include <cstdio>
 
+#include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
+#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersSoA.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisSoAv2.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/prefixScan.h"
-#include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "RecoLocalTracker/SiPixelClusterizer/plugins/SiPixelClusterThresholds.h"
-#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersSoA.h"
-#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisLayout.h"
 
 // namespace ALPAKA_ACCELERATOR_NAMESPACE {
 namespace pixelClustering {
@@ -19,7 +19,7 @@ namespace pixelClustering {
     template <typename TAcc>
     ALPAKA_FN_ACC void operator()(
         const TAcc& acc,
-        SiPixelDigisLayoutSoAView digi_view,
+        SiPixelDigisSoAv2View digi_view,
         SiPixelClustersSoAView clus_view,
         SiPixelClusterThresholds
             clusterThresholds,  // charge cut on cluster in electrons (for layer 1 and for other layers)

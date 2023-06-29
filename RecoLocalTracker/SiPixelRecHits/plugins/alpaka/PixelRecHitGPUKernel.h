@@ -33,7 +33,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       using ParamsOnGPU = pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>;
 
-      TrackingRecHitAlpakaCollection<TrackerTraits> makeHitsAsync(SiPixelDigisSoA const& digis_d,
+      TrackingRecHitAlpakaCollection<TrackerTraits> makeHitsAsync(SiPixelDigisCollection const& digis_d,
                                                               SiPixelClustersCollection const& clusters_d,
                                                               BeamSpotPOD const* bs_d,
                                                               ParamsOnGPU const* cpeParams,

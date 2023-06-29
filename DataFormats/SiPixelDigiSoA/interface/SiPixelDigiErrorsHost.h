@@ -2,21 +2,23 @@
 #define DataFormats_SiPixelDigiSoA_interface_SiPixelDigiErrorsHost_h
 
 #include <utility>
-#include <alpaka/alpaka.hpp>
-#include "DataFormats/SiPixelRawData/interface/SiPixelErrorCompact.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
-#include "DataFormats/Portable/interface/PortableHostCollection.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/SimpleVector.h"
-#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsLayout.h"
 
-class SiPixelDigiErrorsHost : public PortableHostCollection<SiPixelDigiErrorsLayout<>> {
+#include <alpaka/alpaka.hpp>
+
+#include "DataFormats/Portable/interface/PortableHostCollection.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsSoA.h"
+#include "DataFormats/SiPixelRawData/interface/SiPixelErrorCompact.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/SimpleVector.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
+
+class SiPixelDigiErrorsHost : public PortableHostCollection<SiPixelDigiErrorsSoA> {
 public:
   SiPixelDigiErrorsHost() = default;
   // template <typename TQueue>
   // explicit SiPixelDigiErrorsHost(int maxFedWords,
   //                                cms::alpakatools::host_buffer<SiPixelErrorCompact[]> data,
   //                                TQueue queue)
-  //     : PortableHostCollection<SiPixelDigiErrorsLayout<>>(maxFedWords, queue), maxFedWords_(maxFedWords) {
+  //     : PortableHostCollection<SiPixelDigiErrorsSoA>(maxFedWords, queue), maxFedWords_(maxFedWords) {
   //   printf("SiPixelDigiErrorsHost\n");
   //   // view().pixelErrors() = std::move(data.data());
   //   // error_h = cms::alpakatools::make_host_buffer<cms::alpakatools::SimpleVector<SiPixelErrorCompact>>();
@@ -26,7 +28,7 @@ public:
   // }
   template <typename TQueue>
   explicit SiPixelDigiErrorsHost(int maxFedWords, TQueue queue)
-      : PortableHostCollection<SiPixelDigiErrorsLayout<>>(maxFedWords, queue), maxFedWords_(maxFedWords) {
+      : PortableHostCollection<SiPixelDigiErrorsSoA>(maxFedWords, queue), maxFedWords_(maxFedWords) {
     // printf("SiPixelDigiErrorsHost\n");
     // data_h = cms::alpakatools::make_host_buffer<SiPixelErrorCompact[]>(nErrorWords);
     // error_h = cms::alpakatools::make_host_buffer<cms::alpakatools::SimpleVector<SiPixelErrorCompact>>();

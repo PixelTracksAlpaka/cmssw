@@ -30,7 +30,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
                                     pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const* __restrict__ cpeParams,
                                     BeamSpotPOD const* __restrict__ bs,
-                                    SiPixelDigisLayoutSoAConstView digis,
+                                    SiPixelDigisSoAv2ConstView digis,
                                     uint32_t numElements,
                                     SiPixelClustersSoAConstView clusters,
                                     TrackingRecHitAlpakaSoAView<TrackerTraits> hits) const {

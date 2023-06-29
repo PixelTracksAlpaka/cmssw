@@ -87,7 +87,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     struct countModules {
       template <typename TAcc>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
-                                    SiPixelDigisLayoutSoAView digi_view,
+                                    SiPixelDigisSoAv2View digi_view,
                                     SiPixelClustersSoAView clus_view,
                                     const unsigned int numElements) const {
         [[maybe_unused]] constexpr int nMaxModules = TrackerTraits::numberOfModules;
@@ -114,7 +114,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     struct findClus {
       template <typename TAcc>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
-                                    SiPixelDigisLayoutSoAView digi_view,
+                                    SiPixelDigisSoAv2View digi_view,
                                     SiPixelClustersSoAView clus_view,
                                     const unsigned int numElements) const {
         const uint32_t blockIdx(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);

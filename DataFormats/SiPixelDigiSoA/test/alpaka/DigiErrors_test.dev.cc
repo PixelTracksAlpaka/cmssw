@@ -15,7 +15,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     class TestFillKernel {
     public:
       template <typename TAcc, typename = std::enable_if_t<isAccelerator<TAcc>>>
-      ALPAKA_FN_ACC void operator()(TAcc const& acc, SiPixelDigiErrorsLayoutSoAView digiErrors_view) const {
+      ALPAKA_FN_ACC void operator()(TAcc const& acc, SiPixelDigiErrorsSoAView digiErrors_view) const {
         for (uint32_t j : elements_with_stride(acc, digiErrors_view.metadata().size())) {
           digiErrors_view[j].pixelErrors().rawId = j;
           digiErrors_view[j].pixelErrors().word = j;
@@ -28,7 +28,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     class TestVerifyKernel {
     public:
       template <typename TAcc, typename = std::enable_if_t<isAccelerator<TAcc>>>
-      ALPAKA_FN_ACC void operator()(TAcc const& acc, SiPixelDigiErrorsLayoutSoAConstView digiErrors_view) const {
+      ALPAKA_FN_ACC void operator()(TAcc const& acc, SiPixelDigiErrorsSoAConstView digiErrors_view) const {
         for (uint32_t j : elements_with_stride(acc, digiErrors_view.metadata().size())) {
           assert(digiErrors_view[j].pixelErrors().rawId == j);
           assert(digiErrors_view[j].pixelErrors().word == j);
@@ -38,7 +38,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
     };
 
-    void runKernels(SiPixelDigiErrorsLayoutSoAView digiErrors_view, Queue& queue) {
+    void runKernels(SiPixelDigiErrorsSoAView digiErrors_view, Queue& queue) {
       uint32_t items = 64;
       uint32_t groups = divide_up_by(digiErrors_view.metadata().size(), items);
       auto workDiv = make_workdiv<Acc1D>(groups, items);

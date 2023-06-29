@@ -14,7 +14,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     class TestFillKernel {
     public:
       template <typename TAcc, typename = std::enable_if_t<isAccelerator<TAcc>>>
-      ALPAKA_FN_ACC void operator()(TAcc const& acc, SiPixelDigisLayoutSoAView digi_view) const {
+      ALPAKA_FN_ACC void operator()(TAcc const& acc, SiPixelDigisSoAv2View digi_view) const {
         for (int32_t j : elements_with_stride(acc, digi_view.metadata().size())) {
           digi_view[j].clus() = j;
           digi_view[j].rawIdArr() = j * 2;
@@ -27,7 +27,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     class TestVerifyKernel {
     public:
       template <typename TAcc, typename = std::enable_if_t<isAccelerator<TAcc>>>
-      ALPAKA_FN_ACC void operator()(TAcc const& acc, SiPixelDigisLayoutSoAConstView digi_view) const {
+      ALPAKA_FN_ACC void operator()(TAcc const& acc, SiPixelDigisSoAv2ConstView digi_view) const {
         for (uint32_t j : elements_with_stride(acc, digi_view.metadata().size())) {
           assert(digi_view[j].clus() == int(j));
           assert(digi_view[j].rawIdArr() == j * 2);
@@ -37,7 +37,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
     };
 
-    void runKernels(SiPixelDigisLayoutSoAView digi_view, Queue& queue) {
+    void runKernels(SiPixelDigisSoAv2View digi_view, Queue& queue) {
       uint32_t items = 64;
       uint32_t groups = divide_up_by(digi_view.metadata().size(), items);
       auto workDiv = make_workdiv<Acc1D>(groups, items);

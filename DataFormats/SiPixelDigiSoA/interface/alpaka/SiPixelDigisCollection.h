@@ -1,14 +1,16 @@
-#ifndef DataFormats_SiPixelDigi_interface_alpaka_SiPixelDigisCollection_h
-#define DataFormats_SiPixelDigi_interface_alpaka_SiPixelDigisCollection_h
+#ifndef DataFormats_SiPixelDigiSoA_interface_alpaka_SiPixelDigisCollection_h
+#define DataFormats_SiPixelDigiSoA_interface_alpaka_SiPixelDigisCollection_h
 
 #include <cstdint>
+
 #include <alpaka/alpaka.hpp>
-#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
-#include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
-#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisHost.h"
+
+//#include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
-#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisLayout.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisHost.h"
+//#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisSoAv2.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/CopyToHost.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
@@ -16,16 +18,15 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   using SiPixelDigisCollection = SiPixelDigisHost;
 #else
   using SiPixelDigisCollection = SiPixelDigisDevice<Device>;
-
 #endif
-  using SiPixelDigisSoA = SiPixelDigisCollection;
+
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 namespace cms::alpakatools {
   template <>
-  struct CopyToHost<ALPAKA_ACCELERATOR_NAMESPACE::SiPixelDigisSoA> {
+  struct CopyToHost<ALPAKA_ACCELERATOR_NAMESPACE::SiPixelDigisCollection> {
     template <typename TQueue>
-    static auto copyAsync(TQueue &queue, ALPAKA_ACCELERATOR_NAMESPACE::SiPixelDigisSoA const &srcData) {
+    static auto copyAsync(TQueue &queue, ALPAKA_ACCELERATOR_NAMESPACE::SiPixelDigisCollection const &srcData) {
       SiPixelDigisHost dstData(srcData.view().metadata().size(), queue);
       alpaka::memcpy(queue, dstData.buffer(), srcData.buffer());
       dstData.setNModulesDigis(srcData.nModules(), srcData.nDigis());
@@ -34,5 +35,4 @@ namespace cms::alpakatools {
   };
 }  // namespace cms::alpakatools
 
-// }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
-#endif  // DataFormats_SiPixelDigi_interface_alpaka_SiPixelDigisCollection_h
+#endif  // DataFormats_SiPixelDigiSoA_interface_alpaka_SiPixelDigisCollection_h

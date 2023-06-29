@@ -2,24 +2,25 @@
 #define DataFormats_SiPixelDigiSoA_interface_SiPixelDigisDevice_h
 
 #include <cstdint>
+
 #include <alpaka/alpaka.hpp>
-#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
+
 #include "DataFormats/Portable/interface/PortableDeviceCollection.h"
-#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisHost.h"
-#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisLayout.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisSoAv2.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
 template <typename TDev>
-class SiPixelDigisDevice : public PortableDeviceCollection<SiPixelDigisLayout<>, TDev> {
+class SiPixelDigisDevice : public PortableDeviceCollection<SiPixelDigisSoAv2, TDev> {
 public:
   SiPixelDigisDevice() = default;
   template <typename TQueue>
   explicit SiPixelDigisDevice(size_t maxFedWords, TQueue queue)
-      : PortableDeviceCollection<SiPixelDigisLayout<>, TDev>(maxFedWords + 1, queue) {}
+      : PortableDeviceCollection<SiPixelDigisSoAv2, TDev>(maxFedWords + 1, queue) {}
   ~SiPixelDigisDevice() = default;
 
   // Constructor which specifies the SoA size
   explicit SiPixelDigisDevice(size_t maxFedWords, TDev const &device)
-      : PortableDeviceCollection<SiPixelDigisLayout<>, TDev>(maxFedWords + 1, device) {}
+      : PortableDeviceCollection<SiPixelDigisSoAv2, TDev>(maxFedWords + 1, device) {}
 
   SiPixelDigisDevice(SiPixelDigisDevice &&) = default;
   SiPixelDigisDevice &operator=(SiPixelDigisDevice &&) = default;
