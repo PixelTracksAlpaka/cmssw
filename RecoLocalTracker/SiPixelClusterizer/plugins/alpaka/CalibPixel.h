@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <type_traits>
+
 #include <alpaka/alpaka.hpp>
 
 #include "CondFormats/SiPixelObjects/interface/SiPixelGainCalibrationForHLTLayout.h"
@@ -12,11 +13,11 @@
 #include "CondFormats/SiPixelObjects/interface/alpaka/SiPixelGainCalibrationForHLTUtilities.h"
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersSoA.h"
-#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsLayout.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsSoA.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisLayout.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
-#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "RecoLocalTracker/SiPixelClusterizer/plugins/SiPixelClusterThresholds.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {

@@ -1,4 +1,13 @@
 <lcgdict>
-  <class name="alpaka_rocm_async::SiPixelDigisSoA" persistent="false"/>
-  <class name="edm::Wrapper<alpaka_rocm_async::SiPixelDigisSoA>" persistent="false"/>
+  <class name="PortableDeviceCollection<SiPixelDigisLayoutSoA, alpaka::DevUniformCudaHipRt<alpaka::ApiHipRt>>" persistent="false"/>
+  <class name="SiPixelDigisDevice<alpaka::DevUniformCudaHipRt<alpaka::ApiHipRt>>" persistent="false"/>
+  <class name="edm::DeviceProduct<SiPixelDigisDevice<alpaka::DevUniformCudaHipRt<alpaka::ApiHipRt>>>" persistent="false"/>
+  <class name="edm::Wrapper<edm::DeviceProduct<SiPixelDigisDevice<alpaka::DevUniformCudaHipRt<alpaka::ApiHipRt>>>>" persistent="false"/>
+
+  <!-- SiPixelDigiErrors-related collections -->
+  <class name="alpaka_rocm_async::PortableCollection<SiPixelDigiErrorsSoA>" persistent="false"/>
+  <!-- SiPixelDigiErrorsCollection inherits from PortableCollection<SiPixelDigiErrorsSoA> -->
+  <class name="alpaka_rocm_async::SiPixelDigiErrorsCollection" persistent="false"/>
+  <class name="edm::DeviceProduct<alpaka_rocm_async::SiPixelDigiErrorsCollection>" persistent="false"/>
+  <class name="edm::Wrapper<edm::DeviceProduct<alpaka_rocm_async::SiPixelDigiErrorsCollection>>" persistent="false"/>
 </lcgdict>

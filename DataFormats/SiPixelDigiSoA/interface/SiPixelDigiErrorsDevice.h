@@ -2,22 +2,24 @@
 #define DataFormats_SiPixelDigiSoA_interface_SiPixelDigiErrorsDevice_h
 
 #include <cstdint>
+
 #include <alpaka/alpaka.hpp>
-#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
-// #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
+
 #include "DataFormats/Portable/interface/PortableDeviceCollection.h"
-#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsLayout.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsSoA.h"
 // #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsHost.h"
 #include "DataFormats/SiPixelRawData/interface/SiPixelErrorCompact.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/SimpleVector.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
+// #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 
 template <typename TDev>
-class SiPixelDigiErrorsDevice : public PortableDeviceCollection<SiPixelDigiErrorsLayout<>, TDev> {
+class SiPixelDigiErrorsDevice : public PortableDeviceCollection<SiPixelDigiErrorsSoA, TDev> {
 public:
   SiPixelDigiErrorsDevice() = default;
   template <typename TQueue>
   explicit SiPixelDigiErrorsDevice(size_t maxFedWords, TQueue queue)
-      : PortableDeviceCollection<SiPixelDigiErrorsLayout<>, TDev>(maxFedWords, queue), maxFedWords_(maxFedWords) {
+      : PortableDeviceCollection<SiPixelDigiErrorsSoA, TDev>(maxFedWords, queue), maxFedWords_(maxFedWords) {
     // printf("SiPixelDigiErrorsDevice\n");
     // data_d = cms::alpakatools::make_device_buffer<SiPixelErrorCompact[]>(queue, maxFedWords);
     // error_d = cms::alpakatools::make_device_buffer<cms::alpakatools::SimpleVector<SiPixelErrorCompact>>(queue);
@@ -31,7 +33,7 @@ public:
 
   // Constructor which specifies the SoA size
   explicit SiPixelDigiErrorsDevice(size_t maxFedWords, TDev const& device)
-      : PortableDeviceCollection<SiPixelDigiErrorsLayout<>, TDev>(maxFedWords, device) {}
+      : PortableDeviceCollection<SiPixelDigiErrorsSoA, TDev>(maxFedWords, device) {}
 
   SiPixelDigiErrorsDevice(SiPixelDigiErrorsDevice&&) = default;
   SiPixelDigiErrorsDevice& operator=(SiPixelDigiErrorsDevice&&) = default;

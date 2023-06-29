@@ -74,7 +74,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     edm::EDGetTokenT<FEDRawDataCollection> rawGetToken_;
     edm::EDPutTokenT<SiPixelFormatterErrors> fmtErrorToken_;
     device::EDPutToken<SiPixelDigisSoA> digiPutToken_;
-    device::EDPutToken<SiPixelDigiErrorsSoA> digiErrorPutToken_;
+    device::EDPutToken<SiPixelDigiErrorsCollection> digiErrorPutToken_;
     device::EDPutToken<SiPixelClustersCollection> clusterPutToken_;
 
     edm::ESWatcher<SiPixelFedCablingMapRcd> recordWatcher_;
@@ -287,7 +287,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       iEvent.emplace(digiPutToken_, std::move(digis_d));
       iEvent.emplace(clusterPutToken_, std::move(clusters_d));
       if (includeErrors_) {
-        iEvent.emplace(digiErrorPutToken_, SiPixelDigiErrorsSoA());
+        iEvent.emplace(digiErrorPutToken_, SiPixelDigiErrorsCollection());
         iEvent.emplace(fmtErrorToken_, std::move(errors_));
       }
       return;

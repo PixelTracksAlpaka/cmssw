@@ -184,7 +184,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         return std::move(*clusters_d);
       }
 
-      SiPixelDigiErrorsSoA&& getErrors() { return std::move(*digiErrors_d); }
+      SiPixelDigiErrorsCollection&& getErrors() { return std::move(*digiErrors_d); }
 
     private:
       uint32_t nDigis = 0;
@@ -193,7 +193,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       cms::alpakatools::host_buffer<uint32_t[]> nModules_Clusters_h;
       std::optional<SiPixelDigisSoA> digis_d;
       std::optional<SiPixelClustersCollection> clusters_d;
-      std::optional<SiPixelDigiErrorsSoA> digiErrors_d;
+      std::optional<SiPixelDigiErrorsCollection> digiErrors_d;
     };
 
   }  // namespace pixelDetails

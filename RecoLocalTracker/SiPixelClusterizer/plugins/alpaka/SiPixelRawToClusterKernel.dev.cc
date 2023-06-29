@@ -373,7 +373,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     // uint32_t *rawIdArr,
                                     // uint16_t *moduleId,
                                     // cms::alpakatools::SimpleVector<SiPixelErrorCompact> *err,
-                                    SiPixelDigiErrorsLayoutSoAView err,
+                                    SiPixelDigiErrorsSoAView err,
                                     bool useQualityInfo,
                                     bool includeErrors,
                                     bool debug) const {
@@ -611,8 +611,7 @@ namespace pixelDetails {
             }
           }
         }});
-      
-      
+
 #ifndef NDEBUG
       [[maybe_unused]] const uint32_t blockIdxLocal(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
       ALPAKA_ASSERT_OFFLOAD(0 == blockIdxLocal);
@@ -745,7 +744,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       digis_d = SiPixelDigisSoA(wordCounter, queue);
       if (includeErrors) {
         // std::cout << errors.begin()->first << " - " << (errors.begin()->second).size() << std::endl;
-        digiErrors_d = SiPixelDigiErrorsSoA(wordCounter, queue);  // std::move(errors), queue);
+        digiErrors_d = SiPixelDigiErrorsCollection(wordCounter, queue);  // std::move(errors), queue);
       }
       clusters_d = SiPixelClustersCollection(numberOfModules, queue);
       if (wordCounter)  // protect in case of empty event....
