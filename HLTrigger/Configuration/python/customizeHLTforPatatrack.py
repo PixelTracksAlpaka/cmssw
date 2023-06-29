@@ -29,7 +29,7 @@ def customiseHLTforTestingDQMGPUvsCPUPixelOnlyUpToLocal(process):
     process.hltPixelConsumerCPU.eventProducts = [
         'hltSiPixelClustersCPUSerial',
         'hltSiPixelDigiErrorsCPUSerial',
-        'hltSiPixelRecHitsCPUSerial',
+#        'hltSiPixelRecHitsCPUSerial',
     ]
 
     process.hltPixelConsumerGPU.eventProducts = [
@@ -46,8 +46,8 @@ def customiseHLTforTestingDQMGPUvsCPUPixelOnlyUpToLocal(process):
             'keep *Cluster*_hltSiPixelClustersCPUSerial_*_*',
             'keep *_hltSiPixelDigiErrors_*_*',
             'keep *_hltSiPixelDigiErrorsCPUSerial_*_*',
-            'keep *RecHit*_hltSiPixelRecHits_*_*',
-            'keep *RecHit*_hltSiPixelRecHitsCPUSerial_*_*',
+#            'keep *RecHit*_hltSiPixelRecHits_*_*',
+#            'keep *RecHit*_hltSiPixelRecHitsCPUSerial_*_*',
         ]
 
     # empty HLTRecopixelvertexingSequence until we add tracks and vertices
@@ -189,7 +189,6 @@ def customiseHLTforAlpakaPixelRecoLocal(process):
 #    # produces
 #    #  - TkSoADevice
 #    process.hltPixelTracks = cms.EDProducer("CAHitNtupletAlpakaPhase1@alpaka",
-#        onGPU = cms.bool(True),
 #        pixelRecHitSrc = cms.InputTag('hltSiPixelRecHits'),
 #        ptmin = cms.double(0.89999997615814209),
 #        CAThetaCutBarrel = cms.double(0.0020000000949949026),
