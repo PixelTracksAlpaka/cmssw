@@ -2,15 +2,15 @@
 #define DataFormats_SiPixelDigiSoA_interface_alpaka_SiPixelDigiErrorsCollection_h
 
 #include <cstdint>
+
 #include <alpaka/alpaka.hpp>
+
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsHost.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsDevice.h"
-#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsUtilities.h"
-#include "DataFormats/SiPixelRawData/interface/SiPixelErrorCompact.h"
+//#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsUtilities.h"
+//#include "DataFormats/SiPixelRawData/interface/SiPixelErrorCompact.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
-
-#include "HeterogeneousCore/AlpakaInterface/interface/SimpleVector.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/CopyToHost.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {

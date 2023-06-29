@@ -4,7 +4,7 @@
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 #include "DataFormats/SiPixelDigi/interface/PixelDigi.h"
-#include "DataFormats/SiPixelDigi/interface/SiPixelDigisSoA.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisHost.h"
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -14,9 +14,8 @@
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
-#include "Geometry/Records/interface/TrackerTopologyRcd.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
-#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisHost.h"
+#include "Geometry/Records/interface/TrackerTopologyRcd.h"
 
 // local include(s)
 #include "PixelClusterizerBase.h"
@@ -35,7 +34,6 @@ private:
 
   const edm::ESGetToken<TrackerTopology, TrackerTopologyRcd> topoToken_;
 
-  // edm::EDGetTokenT<SiPixelDigisSoA> digiGetToken_;
   edm::EDGetTokenT<SiPixelDigisHost> digiGetToken_;
 
   edm::EDPutTokenT<edm::DetSetVector<PixelDigi>> digiPutToken_;

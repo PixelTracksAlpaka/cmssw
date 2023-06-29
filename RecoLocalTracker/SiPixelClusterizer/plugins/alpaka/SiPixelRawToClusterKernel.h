@@ -164,17 +164,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                              Queue& queue);
 
       void makePhase2ClustersAsync(const SiPixelClusterThresholds clusterThresholds,
-                                   SiPixelDigisLayoutSoAView& digis_view,
+                                   SiPixelDigisSoAv2View& digis_view,
                                    const uint32_t numDigis,
                                    Queue& queue);
 
-      // std::pair<SiPixelDigisSoA, SiPixelClustersDevice> getResults() {
+      // std::pair<SiPixelDigisCollection, SiPixelClustersDevice> getResults() {
       //   digis_d->setNModulesDigis(nModules_Clusters_h[0], nDigis);
       //   clusters_d->setNClusters(nModules_Clusters_h[1], nModules_Clusters_h[2]);
       //   return std::make_pair(std::move(*digis_d), std::move(*clusters_d));
       // }
 
-      SiPixelDigisSoA&& getDigis() {
+      SiPixelDigisCollection&& getDigis() {
         digis_d->setNModulesDigis(nModules_Clusters_h[0], nDigis);
         return std::move(*digis_d);
       }
@@ -191,7 +191,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       // Data to be put in the event
       cms::alpakatools::host_buffer<uint32_t[]> nModules_Clusters_h;
-      std::optional<SiPixelDigisSoA> digis_d;
+      std::optional<SiPixelDigisCollection> digis_d;
       std::optional<SiPixelClustersCollection> clusters_d;
       std::optional<SiPixelDigiErrorsCollection> digiErrors_d;
     };

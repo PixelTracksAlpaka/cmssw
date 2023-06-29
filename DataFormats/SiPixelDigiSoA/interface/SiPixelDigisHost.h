@@ -1,20 +1,18 @@
 #ifndef DataFormats_SiPixelDigiSoA_interface_SiPixelDigisHost_h
 #define DataFormats_SiPixelDigiSoA_interface_SiPixelDigisHost_h
 
-#include <alpaka/alpaka.hpp>
 #include "DataFormats/Portable/interface/PortableHostCollection.h"
-
-#include "SiPixelDigisLayout.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisSoAv2.h"
 
 // TODO: The class is created via inheritance of the PortableDeviceCollection.
 // This is generally discouraged, and should be done via composition.
 // See: https://github.com/cms-sw/cmssw/pull/40465#discussion_r1067364306
-class SiPixelDigisHost : public PortableHostCollection<SiPixelDigisLayout<>> {
+class SiPixelDigisHost : public PortableHostCollection<SiPixelDigisSoAv2> {
 public:
   SiPixelDigisHost() = default;
   template <typename TQueue>
   explicit SiPixelDigisHost(size_t maxFedWords, TQueue queue)
-      : PortableHostCollection<SiPixelDigisLayout<>>(maxFedWords + 1, queue) {}
+      : PortableHostCollection<SiPixelDigisSoAv2>(maxFedWords + 1, queue) {}
   ~SiPixelDigisHost() = default;
 
   SiPixelDigisHost(SiPixelDigisHost &&) = default;

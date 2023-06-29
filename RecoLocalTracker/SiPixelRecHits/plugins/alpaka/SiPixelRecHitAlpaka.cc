@@ -50,7 +50,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     const device::ESGetToken<PixelCPEFastParams<TrackerTraits>, PixelCPEFastParamsRecord> cpeToken_;
     const device::EDGetToken<BeamSpotDeviceProduct> tBeamSpot;
     const device::EDGetToken<SiPixelClustersCollection> tokenClusters_;
-    const device::EDGetToken<SiPixelDigisSoA> tokenDigi_;
+    const device::EDGetToken<SiPixelDigisCollection> tokenDigi_;
     const device::EDPutToken<TrackingRecHitAlpakaCollection<TrackerTraits>> tokenHit_;
 
     const pixelgpudetails::PixelRecHitGPUKernel<TrackerTraits> gpuAlgo_;
