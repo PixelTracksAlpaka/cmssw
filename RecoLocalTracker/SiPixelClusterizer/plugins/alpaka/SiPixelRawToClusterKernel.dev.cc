@@ -601,7 +601,8 @@ namespace pixelDetails {
       ALPAKA_ASSERT_OFFLOAD(TrackerTraits::numberOfModules < 2048);  // easy to extend at least till 32*1024
 
       constexpr int nMaxModules = TrackerTraits::numberOfModules;
-      
+
+#ifdef DEBUG_MODULESTART
       cms::alpakatools::for_each_element_in_block_strided(acc, nMaxModules, [&](uint32_t i) {
         {
           if(i==0)
@@ -612,6 +613,7 @@ namespace pixelDetails {
             }
           }
         }});
+#endif
 
 #ifndef NDEBUG
       [[maybe_unused]] const uint32_t blockIdxLocal(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
@@ -629,7 +631,8 @@ namespace pixelDetails {
       constexpr auto leftModules = isPhase2 ? 1024 : nMaxModules - 1024;
 
       auto &&ws = alpaka::declareSharedVar<uint32_t[32], __COUNTER__>(acc);
-    
+
+#ifdef DEBUG_MODULESTART
      cms::alpakatools::for_each_element_in_block_strided(acc, nMaxModules, [&](uint32_t i) {
         {
           if(i==0)
@@ -640,10 +643,12 @@ namespace pixelDetails {
             }
           }
         }});
+#endif
 
       cms::alpakatools::blockPrefixScan(
           acc, clus_view.clusModuleStart() + 1, clus_view.clusModuleStart() + 1, 1024, ws);
 
+#ifdef DEBUG_MODULESTART
       cms::alpakatools::for_each_element_in_block_strided(acc, nMaxModules, [&](uint32_t i) {
         {
           if(i==0)
@@ -654,6 +659,7 @@ namespace pixelDetails {
             }
           }
         }});
+#endif
 
       cms::alpakatools::blockPrefixScan(
           acc, clus_view.clusModuleStart() + 1024 + 1, clus_view.clusModuleStart() + 1024 + 1, leftModules, ws);

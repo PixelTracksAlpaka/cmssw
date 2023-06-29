@@ -488,6 +488,7 @@ namespace pixelgpudetails {
       __syncthreads();
     }
 
+#ifdef DEBUG_MODULESTART
     if (threadIdx.x == 0) {
 
       for(int j = 0; j<1000;j++)
@@ -501,6 +502,7 @@ namespace pixelgpudetails {
       // element 96 is the start of BPIX2 (i.e. the number of clusters in BPIX1)
       nModules_Clusters[2] = moduleStart[startBPIX2];
     }
+#endif
 
 #ifdef GPU_DEBUG
     uint16_t maxH = isPhase2 ? 3027 : 1024;
