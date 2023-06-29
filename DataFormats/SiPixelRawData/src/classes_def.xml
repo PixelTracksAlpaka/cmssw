@@ -22,4 +22,6 @@
 
  <class name="SiPixelFormatterErrors" persistent="false"/>
  <class name="edm::Wrapper<SiPixelFormatterErrors>" persistent="false"/>
+
+ <class name="SiPixelErrorCompact"/>
 </lcgdict>
