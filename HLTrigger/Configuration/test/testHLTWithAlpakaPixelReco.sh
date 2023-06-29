@@ -8,13 +8,15 @@ hltGetConfiguration /frozen/2023/2e34/v1.2/HLT \
   --output all \
   --max-events 100 \
   --paths DQM_PixelReco*,*DQMGPUvsCPU* \
-  --input /store/data/Run2023C/EphemeralHLTPhysics0/RAW/v1/000/368/822/00000/6e1268da-f96a-49f6-a5f0-89933142dd89.root \
+  --input file:/cmsnfsgpu_data/gpu_data/store/data/Run2023C/EphemeralHLTPhysics0/RAW/v1/000/368/822/00000/6e1268da-f96a-49f6-a5f0-89933142dd89.root \
   --customise \
 HLTrigger/Configuration/customizeHLTforPatatrack.customiseHLTforAlpakaPixelReco,\
 HLTrigger/Configuration/customizeHLTforPatatrack.customiseHLTforTestingDQMGPUvsCPUPixelOnlyUpToLocal \
   > hlt.py
 
 cat <<EOF >> hlt.py
+process.options.numberOfThreads = 1
+process.options.numberOfStreams = 0
 process.hltOutputDQMGPUvsCPU.fileName = '___JOBNAME___.root'
 EOF
 
