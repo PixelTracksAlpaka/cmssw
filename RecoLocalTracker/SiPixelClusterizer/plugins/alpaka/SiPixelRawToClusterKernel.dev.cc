@@ -36,6 +36,7 @@
 #include "ClusterChargeCut.h"
 #include "PixelClustering.h"
 #include "SiPixelRawToClusterKernel.h"
+
 #define GPU_DEBUG
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace pixelDetails {
@@ -365,7 +366,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     const uint32_t wordCounter,
                                     const uint32_t *word,
                                     const uint8_t *fedIds,
-                                    SiPixelDigisLayoutSoAView digisView,
+                                    SiPixelDigisSoAv2View digisView,
                                     // uint16_t *xx,
                                     // uint16_t *yy,
                                     // uint16_t *adc,
@@ -741,7 +742,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       std::cout << "decoding " << wordCounter << " digis." << std::endl;
 #endif
       constexpr int numberOfModules = pixelTopology::Phase1::numberOfModules;
-      digis_d = SiPixelDigisSoA(wordCounter, queue);
+      digis_d = SiPixelDigisCollection(wordCounter, queue);
       if (includeErrors) {
         // std::cout << errors.begin()->first << " - " << (errors.begin()->second).size() << std::endl;
         digiErrors_d = SiPixelDigiErrorsCollection(wordCounter, queue);  // std::move(errors), queue);
@@ -899,14 +900,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }
 
     void SiPixelRawToClusterKernel::makePhase2ClustersAsync(const SiPixelClusterThresholds clusterThresholds,
-                                                            SiPixelDigisLayoutSoAView &digis_view,
+                                                            SiPixelDigisSoAv2View &digis_view,
                                                             const uint32_t numDigis,
                                                             Queue &queue) {
       using namespace pixelClustering;
       using pixelTopology::Phase2;
       nDigis = numDigis;
       constexpr int numberOfModules = pixelTopology::Phase2::numberOfModules;
-      // digis_d = SiPixelDigisSoA(numDigis, queue);
+      // digis_d = SiPixelDigisCollection(numDigis, queue);
 
       // alpaka::memcpy(queue, digis_d->view(), digis_h_view);
 

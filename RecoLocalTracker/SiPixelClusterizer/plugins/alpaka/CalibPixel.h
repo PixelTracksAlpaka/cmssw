@@ -14,7 +14,7 @@
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersSoA.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsSoA.h"
-#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisLayout.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisSoAv2.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
@@ -42,7 +42,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       template <typename TAcc>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
                                     bool isRun2,
-                                    SiPixelDigisLayoutSoAView view,
+                                    SiPixelDigisSoAv2View view,
                                     SiPixelClustersSoAView clus_view,
                                     const SiPixelGainCalibrationForHLTSoAConstView gains,
                                     int numElements) const {
@@ -93,7 +93,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     // struct calibDigisPhase2 {
     //   template <typename TAcc>
     //   ALPAKA_FN_ACC void operator()(const TAcc& acc,
-    //                                 SiPixelDigisLayoutSoAView& view,
+    //                                 SiPixelDigisSoAv2View& view,
     //                                 SiPixelClustersSoAView& clus_view,
     //                                 int numElements
     //   ) const {

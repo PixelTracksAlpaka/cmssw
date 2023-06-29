@@ -73,7 +73,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     edm::EDGetTokenT<FEDRawDataCollection> rawGetToken_;
     edm::EDPutTokenT<SiPixelFormatterErrors> fmtErrorToken_;
-    device::EDPutToken<SiPixelDigisSoA> digiPutToken_;
+    device::EDPutToken<SiPixelDigisCollection> digiPutToken_;
     device::EDPutToken<SiPixelDigiErrorsCollection> digiErrorPutToken_;
     device::EDPutToken<SiPixelClustersCollection> clusterPutToken_;
 
@@ -282,7 +282,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       // still used downstream to initialize TrackingRecHitSoADevice. If there
       // are no valid pointers to clusters' Collection columns, instantiation
       // of TrackingRecHits fail. Example: workflow 11604.0
-      SiPixelDigisSoA digis_d = SiPixelDigisSoA(nDigis_, iEvent.queue());
+      SiPixelDigisCollection digis_d = SiPixelDigisCollection(nDigis_, iEvent.queue());
       SiPixelClustersCollection clusters_d{pixelTopology::Phase1::numberOfModules, iEvent.queue()};
       iEvent.emplace(digiPutToken_, std::move(digis_d));
       iEvent.emplace(clusterPutToken_, std::move(clusters_d));
