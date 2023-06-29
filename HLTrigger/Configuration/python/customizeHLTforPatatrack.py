@@ -26,37 +26,10 @@ def customiseHLTforTestingDQMGPUvsCPUPixelOnlyUpToLocal(process):
     if not hasattr(process, 'HLTDoLocalPixelTask'):
         return process
 
-#     process.HLTDoLocalPixelTask = cms.ConditionalTask(
-#         process.hltSiPixelClustersCPU,
-#         process.hltSiPixelClustersGPU,
-# 
-# #        process.hltSiPixelDigiErrorsSoA,
-# #        process.hltSiPixelDigiErrorsSoALegacy,
-#         process.hltSiPixelDigisSoA,
-# 
-#         process.hltSiPixelDigisFromSoALegacy,
-#         process.hltSiPixelDigisFromSoA,
-#         process.hltSiPixelClustersFromSoA,
-#         process.hltSiPixelClustersLegacy,
-# 
-# ###        process.hltSiPixelDigisLegacy,
-# ###        process.hltSiPixelDigis,
-# ###        process.hltSiPixelClusters,
-# ###        process.hltSiPixelClustersCache,
-# ###
-# ###        process.hltOnlineBeamSpotToGPU,
-# ###        process.hltSiPixelRecHitsFromLegacy,
-# ###        process.hltSiPixelRecHitsGPU,
-# ###        process.hltSiPixelRecHitsFromGPU,
-# ###        process.hltSiPixelRecHits,
-# ###        process.hltSiPixelRecHitsSoAFromGPU,
-# ###        process.hltSiPixelRecHitsSoA
-#     )
-
     process.hltPixelConsumerCPU.eventProducts = [
         'hltSiPixelClustersCPUSerial',
         'hltSiPixelDigiErrorsCPUSerial',
-#        'hltSiPixelRecHitsCPUSerial', # leads to exception
+#        'hltSiPixelRecHitsCPUSerial',
     ]
 
     process.hltPixelConsumerGPU.eventProducts = [
@@ -68,13 +41,13 @@ def customiseHLTforTestingDQMGPUvsCPUPixelOnlyUpToLocal(process):
     # modify EventContent of DQMGPUvsCPU stream
     if hasattr(process, 'hltOutputDQMGPUvsCPU'):
         process.hltOutputDQMGPUvsCPU.outputCommands = [
-          'drop *',
-          'keep *Cluster*_hltSiPixelClusters_*_*',
-          'keep *Cluster*_hltSiPixelClustersCPUSerial_*_*',
-          'keep *_hltSiPixelDigiErrors_*_*',
-          'keep *_hltSiPixelDigiErrorsCPUSerial_*_*',
-#          'keep *RecHit*_hltSiPixelRecHits_*_*',
-#          'keep *RecHit*_hltSiPixelRecHitsCPUSerial_*_*',
+            'drop *',
+            'keep *Cluster*_hltSiPixelClusters_*_*',
+            'keep *Cluster*_hltSiPixelClustersCPUSerial_*_*',
+            'keep *_hltSiPixelDigiErrors_*_*',
+            'keep *_hltSiPixelDigiErrorsCPUSerial_*_*',
+#            'keep *RecHit*_hltSiPixelRecHits_*_*',
+#            'keep *RecHit*_hltSiPixelRecHitsCPUSerial_*_*',
         ]
 
     # empty HLTRecopixelvertexingSequence until we add tracks and vertices
@@ -115,6 +88,22 @@ def customiseHLTforAlpakaPixelRecoLocal(process):
     )
 
     ###
+
+    # alpaka EDProducer
+    # consumes
+    #  - reco::BeamSpot
+    # produces
+    #  - BeamSpotDeviceProduct
+    process.hltOnlineBeamSpotDevice = cms.EDProducer("BeamSpotDeviceProducer@alpaka",
+        src = cms.InputTag("hltOnlineBeamSpot"),
+        alpaka = cms.untracked.PSet(
+            backend = cms.untracked.string('')
+        )
+    )
+
+    process.hltOnlineBeamSpotDeviceCPUSerial = process.hltOnlineBeamSpotDevice.clone(
+        alpaka = dict( backend = 'serial_sync' )
+    )
 
     # alpaka EDProducer
     # consumes
@@ -173,22 +162,6 @@ def customiseHLTforAlpakaPixelRecoLocal(process):
 
     # alpaka EDProducer
     # consumes
-    #  - reco::BeamSpot
-    # produces
-    #  - BeamSpotDeviceProduct
-    process.hltOnlineBeamSpotDevice = cms.EDProducer("BeamSpotDeviceProducer@alpaka",
-        src = cms.InputTag("hltOnlineBeamSpot"),
-        alpaka = cms.untracked.PSet(
-            backend = cms.untracked.string('')
-        )
-    )
-
-    process.hltOnlineBeamSpotDeviceCPUSerial = process.hltOnlineBeamSpotDevice.clone(
-        alpaka = dict( backend = 'serial_sync' )
-    )
-
-    # alpaka EDProducer
-    # consumes
     #  - BeamSpotDeviceProduct
     #  - SiPixelClustersSoA
     #  - SiPixelDigisSoA
@@ -216,7 +189,6 @@ def customiseHLTforAlpakaPixelRecoLocal(process):
 #    # produces
 #    #  - TkSoADevice
 #    process.hltPixelTracks = cms.EDProducer("CAHitNtupletAlpakaPhase1@alpaka",
-#        onGPU = cms.bool(True),
 #        pixelRecHitSrc = cms.InputTag('hltSiPixelRecHits'),
 #        ptmin = cms.double(0.89999997615814209),
 #        CAThetaCutBarrel = cms.double(0.0020000000949949026),
@@ -282,16 +254,16 @@ def customiseHLTforAlpakaPixelRecoLocal(process):
 #    )
 
     process.HLTDoLocalPixelTask = cms.ConditionalTask(
+        process.hltOnlineBeamSpotDevice,
         process.hltSiPixelClusters,
         process.hltSiPixelDigiErrors,
-        process.hltOnlineBeamSpotDevice,
         process.hltSiPixelRecHits,
     )
 
     process.HLTDoLocalPixelTaskCPUSerial = cms.ConditionalTask(
+        process.hltOnlineBeamSpotDeviceCPUSerial,
         process.hltSiPixelClustersCPUSerial,
         process.hltSiPixelDigiErrorsCPUSerial,
-        process.hltOnlineBeamSpotDeviceCPUSerial,
         process.hltSiPixelRecHitsCPUSerial,
     )
 
