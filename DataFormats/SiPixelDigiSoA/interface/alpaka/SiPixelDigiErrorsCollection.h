@@ -19,14 +19,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #else
   using SiPixelDigiErrorsCollection = SiPixelDigiErrorsDevice<Device>;
 #endif
-  using SiPixelDigiErrorsSoA = SiPixelDigiErrorsCollection;
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 namespace cms::alpakatools {
   template <>
-  struct CopyToHost<ALPAKA_ACCELERATOR_NAMESPACE::SiPixelDigiErrorsSoA> {
+  struct CopyToHost<ALPAKA_ACCELERATOR_NAMESPACE::SiPixelDigiErrorsCollection> {
     template <typename TQueue>
-    static auto copyAsync(TQueue& queue, ALPAKA_ACCELERATOR_NAMESPACE::SiPixelDigiErrorsSoA const& srcData) {
+    static auto copyAsync(TQueue& queue, ALPAKA_ACCELERATOR_NAMESPACE::SiPixelDigiErrorsCollection const& srcData) {
       // auto error_vector_d = srcData.error_vector();
       // auto error_data_h = cms::alpakatools::make_host_buffer<SiPixelErrorCompact[]>(error_vector_d.capacity());
       // auto error_data_d = srcData.error_data();

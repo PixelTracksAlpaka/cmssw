@@ -1,5 +1,5 @@
-#ifndef DataFormats_SiPixelDigi_SiPixelDigiErrorsLayout_h
-#define DataFormats_SiPixelDigi_SiPixelDigiErrorsLayout_h
+#ifndef DataFormats_SiPixelDigiSoA_interface_SiPixelDigiErrorsSoA_h
+#define DataFormats_SiPixelDigiSoA_interface_SiPixelDigiErrorsSoA_h
 
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 #include "DataFormats/SiPixelRawData/interface/SiPixelErrorCompact.h"
@@ -12,8 +12,8 @@ GENERATE_SOA_LAYOUT(SiPixelDigiErrorsLayout,
                     SOA_SCALAR(uint32_t, size))  //,
 // SOA_SCALAR(SiPixelErrorCompactVec, pixelErrorsVec))
 
-using SiPixelDigiErrorsLayoutSoA = SiPixelDigiErrorsLayout<>;
-using SiPixelDigiErrorsLayoutSoAView = SiPixelDigiErrorsLayout<>::View;
-using SiPixelDigiErrorsLayoutSoAConstView = SiPixelDigiErrorsLayout<>::ConstView;
+using SiPixelDigiErrorsSoA = SiPixelDigiErrorsLayout<>;
+using SiPixelDigiErrorsSoAView = SiPixelDigiErrorsSoA::View;
+using SiPixelDigiErrorsSoAConstView = SiPixelDigiErrorsSoA::ConstView;
 
-#endif  // DataFormats_SiPixelDigi_SiPixelDigisErrorLayout_h
+#endif  // DataFormats_SiPixelDigiSoA_interface_SiPixelDigiErrorsSoA_h

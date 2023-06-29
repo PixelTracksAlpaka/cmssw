@@ -1,16 +1,16 @@
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsHost.h"
-#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsLayout.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsSoA.h"
 #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsUtilities.h"
 #include "DataFormats/SiPixelRawData/interface/SiPixelErrorsSoA.h"
-#include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
-#include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
+#include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/SimpleVector.h"
+#include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 
 class SiPixelDigiErrorsSoAFromAlpaka : public edm::stream::EDProducer<> {
 public:

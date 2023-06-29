@@ -2,9 +2,9 @@
 #include <unistd.h>
 
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsDevice.h"
-#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsCollection.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsHost.h"
-#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsLayout.h"
+#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsSoA.h"
+#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsCollection.h"
 
 #include "HeterogeneousCore/AlpakaInterface/interface/devices.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/host.h"
@@ -18,7 +18,7 @@ using namespace ALPAKA_ACCELERATOR_NAMESPACE;
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace testDigisSoA {
 
-    void runKernels(SiPixelDigiErrorsLayoutSoAView digiErrors_view, Queue& queue);
+    void runKernels(SiPixelDigiErrorsSoAView digiErrors_view, Queue& queue);
   }
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
@@ -31,7 +31,7 @@ int main() {
   {
     // Instantiate tracks on device. PortableDeviceCollection allocates
     // SoA on device automatically.
-    SiPixelDigiErrorsSoA digiErrors_d(1000, queue);
+    SiPixelDigiErrorsCollection digiErrors_d(1000, queue);
     testDigisSoA::runKernels(digiErrors_d.view(), queue);
 
     // Instantate tracks on host. This is where the data will be

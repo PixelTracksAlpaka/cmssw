@@ -67,7 +67,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     const edm::EDGetTokenT<edm::DetSetVector<PixelDigi>> pixelDigiToken_;
 
     device::EDPutToken<SiPixelDigisSoA> digiPutToken_;
-    device::EDPutToken<SiPixelDigiErrorsSoA> digiErrorPutToken_;
+    device::EDPutToken<SiPixelDigiErrorsCollection> digiErrorPutToken_;
     device::EDPutToken<SiPixelClustersCollection> clusterPutToken_;
 
     pixelDetails::SiPixelRawToClusterKernel Algo_;
@@ -152,7 +152,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       iEvent.emplace(digiPutToken_, std::move(digis_d));
       iEvent.emplace(clusterPutToken_, std::move(clusters_d));
       if (includeErrors_) {
-        iEvent.emplace(digiErrorPutToken_, SiPixelDigiErrorsSoA());
+        iEvent.emplace(digiErrorPutToken_, SiPixelDigiErrorsCollection());
       }
       return;
     }
