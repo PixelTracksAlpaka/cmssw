@@ -22,20 +22,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
     ALPAKA_FN_ACC void operator()(TAcc const& acc,
                                   uint32_t const* __restrict__ hitsModuleStart,
-                                  pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const* cpeParams,
-                                  uint32_t* hitsLayerStart) const {
-      const int32_t i = alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u];
-      constexpr auto m = TrackerTraits::numberOfLayers;
-
+                                  pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const* __restrict__ cpeParams,
+                                  uint32_t* __restrict__ hitsLayerStart) const {
       assert(0 == hitsModuleStart[0]);
 
-      if (i <= (int32_t)m) {
+      for (int32_t i : cms::alpakatools::elements_with_stride(acc, TrackerTraits::numberOfLayers + 1)) {
         hitsLayerStart[i] = hitsModuleStart[cpeParams->layerGeometry().layerStart[i]];
 #ifdef GPU_DEBUG
         int old = i == 0 ? 0 : hitsModuleStart[cpeParams->layerGeometry().layerStart[i - 1]];
         printf("LayerStart %d/%d at module %d: %d - %d\n",
                i,
-               m,
+               TrackerTraits::numberOfLayers,
                cpeParams->layerGeometry().layerStart[i],
                hitsLayerStart[i],
                hitsLayerStart[i] - old);
