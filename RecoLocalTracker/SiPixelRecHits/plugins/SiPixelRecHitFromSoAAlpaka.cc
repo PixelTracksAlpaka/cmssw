@@ -1,10 +1,10 @@
-#include <alpaka/alpaka.hpp>
+#include <memory>
+#include <vector>
 
 #include <fmt/printf.h>
 
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/Portable/interface/HostProductAlpaka.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoAHost.h"
@@ -30,14 +30,13 @@ template <typename TrackerTraits>
 class SiPixelRecHitFromSoAAlpaka : public edm::global::EDProducer<> {
   using HitModuleStartArray = typename TrackingRecHitAlpakaSoA<TrackerTraits>::HitModuleStartArray;
   using hindex_type = typename TrackerTraits::hindex_type;
+  using HMSstorage = typename std::vector<hindex_type>;
 
 public:
   explicit SiPixelRecHitFromSoAAlpaka(const edm::ParameterSet& iConfig);
   ~SiPixelRecHitFromSoAAlpaka() override = default;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-
-  using HMSstorage = HostProductAlpaka<uint32_t[]>;
 
   // Data has been implicitly copied from Device to Host by the framework
   using HitsOnHost = TrackingRecHitAlpakaHost<TrackerTraits>;
@@ -65,7 +64,6 @@ void SiPixelRecHitFromSoAAlpaka<TrackerTraits>::fillDescriptions(edm::Configurat
   edm::ParameterSetDescription desc;
   desc.add<edm::InputTag>("pixelRecHitSrc", edm::InputTag("siPixelRecHitsPreSplittingAlpaka"));
   desc.add<edm::InputTag>("src", edm::InputTag("siPixelClustersPreSplitting"));
-
   descriptions.addWithDefaultLabel(desc);
 }
 
@@ -73,59 +71,55 @@ template <typename TrackerTraits>
 void SiPixelRecHitFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID streamID,
                                                         edm::Event& iEvent,
                                                         const edm::EventSetup& iSetup) const {
-  auto& hits_h_ = iEvent.get(hitsToken_);
-  auto nHits = hits_h_.view().nHits();
+  auto const& hits = iEvent.get(hitsToken_);
+  auto nHits = hits.view().nHits();
   LogDebug("SiPixelRecHitFromSoAAlpaka") << "converting " << nHits << " Hits";
 
   // allocate a buffer for the indices of the clusters
   constexpr auto nMaxModules = TrackerTraits::numberOfModules;
-  auto hmsp = cms::alpakatools::make_host_buffer<hindex_type[]>(nMaxModules + 1);
 
   SiPixelRecHitCollection output;
   output.reserve(nMaxModules, nHits);
 
+  HMSstorage hmsp{nMaxModules + 1};
+
   if (0 == nHits) {
+    hmsp.clear();
     iEvent.emplace(rechitsPutToken_, std::move(output));
     iEvent.emplace(hostPutToken_, std::move(hmsp));
     return;
   }
-  output.reserve(nMaxModules, nHits);
 
-  // Could not make a view on hitsModuleStart
-  //alpaka::memcpy(iEvent.queue(), hmsp, hitsModuleStartView);
-
-  // std::copy not really working, cannot d
-  //std::copy(hits_h_.view().hitsModuleStart(), &hits_h_.view().hitsModuleStart() + nMaxModules + 1, hmsp.data());
-  std::memcpy((void*)hmsp.data(), (void*)&hits_h_.view().hitsModuleStart(), sizeof(HitModuleStartArray));
-
-  // wrap the buffer in a HostProduct, and move it to the Event, without reallocating the buffer or affecting hitsModuleStart
+  // fill content of HMSstorage product, and put it into the Event
+  for(unsigned int idx = 0; idx < hmsp.size(); ++idx) {
+    hmsp[idx] = hits.view().hitsModuleStart()[idx];
+  }
   iEvent.emplace(hostPutToken_, std::move(hmsp));
 
-  auto xl = hits_h_.view().xLocal();
-  auto yl = hits_h_.view().yLocal();
-  auto xe = hits_h_.view().xerrLocal();
-  auto ye = hits_h_.view().yerrLocal();
+  auto xl = hits.view().xLocal();
+  auto yl = hits.view().yLocal();
+  auto xe = hits.view().xerrLocal();
+  auto ye = hits.view().yerrLocal();
 
-  const TrackerGeometry* geom = &iSetup.getData(geomToken_);
+  TrackerGeometry const& geom = iSetup.getData(geomToken_);
 
-  edm::Handle<SiPixelClusterCollectionNew> hclusters = iEvent.getHandle(clusterToken_);
-  auto const& input = *hclusters;
+  auto const hclusters = iEvent.getHandle(clusterToken_);
 
   constexpr uint32_t maxHitsInModule = pixelClustering::maxHitsInModule();
 
   int numberOfDetUnits = 0;
   int numberOfClusters = 0;
-  for (auto const& dsv : input) {
+  for (auto const& dsv : *hclusters) {
     numberOfDetUnits++;
     unsigned int detid = dsv.detId();
     DetId detIdObject(detid);
-    const GeomDetUnit* genericDet = geom->idToDetUnit(detIdObject);
+    const GeomDetUnit* genericDet = geom.idToDetUnit(detIdObject);
     auto gind = genericDet->index();
     const PixelGeomDetUnit* pixDet = dynamic_cast<const PixelGeomDetUnit*>(genericDet);
     assert(pixDet);
     SiPixelRecHitCollection::FastFiller recHitsOnDetUnit(output, detid);
-    auto fc = hits_h_.view().hitsModuleStart()[gind];
-    auto lc = hits_h_.view().hitsModuleStart()[gind + 1];
+    auto fc = hits.view().hitsModuleStart()[gind];
+    auto lc = hits.view().hitsModuleStart()[gind + 1];
     auto nhits = lc - fc;
 
     assert(lc > fc);
