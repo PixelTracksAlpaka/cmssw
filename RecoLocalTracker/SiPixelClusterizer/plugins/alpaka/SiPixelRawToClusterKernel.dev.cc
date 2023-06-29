@@ -508,7 +508,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 //     template <typename TAcc>
 //     ALPAKA_FN_ACC void operator()(const TAcc &acc,
 //                                   // uint32_t const *__restrict__ cluStart,
-//                                   SiPixelClustersLayoutSoAView clus_view
+//                                   SiPixelClustersSoAView clus_view
 //                                   // uint32_t *__restrict__ moduleStart
 //     ) const {
 //       ALPAKA_ASSERT_OFFLOAD(TrackerTraits::numberOfModules < 2048);  // easy to extend at least till 32*1024
@@ -595,7 +595,7 @@ namespace pixelDetails {
     template <typename TAcc>
     ALPAKA_FN_ACC void operator()(const TAcc &acc,
                                   // uint32_t const *__restrict__ cluStart,
-                                  SiPixelClustersLayoutSoAView clus_view) const {
+                                  SiPixelClustersSoAView clus_view) const {
       // uint32_t *__restrict__ moduleStart) const {
       ALPAKA_ASSERT_OFFLOAD(TrackerTraits::numberOfModules < 2048);  // easy to extend at least till 32*1024
 
@@ -747,7 +747,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         // std::cout << errors.begin()->first << " - " << (errors.begin()->second).size() << std::endl;
         digiErrors_d = SiPixelDigiErrorsSoA(wordCounter, queue);  // std::move(errors), queue);
       }
-      clusters_d = SiPixelClustersSoA(numberOfModules, queue);
+      clusters_d = SiPixelClustersCollection(numberOfModules, queue);
       if (wordCounter)  // protect in case of empty event....
       {
 #if defined(ALPAKA_ACC_GPU_CUDA_ASYNC_BACKEND) || defined(ALPAKA_ACC_GPU_HIP_ASYNC_BACKEND)
@@ -911,7 +911,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       // alpaka::memcpy(queue, digis_d->view(), digis_h_view);
 
-      clusters_d = SiPixelClustersSoA(numberOfModules, queue);
+      clusters_d = SiPixelClustersCollection(numberOfModules, queue);
 
       // nModules_Clusters_h = cms::cuda::make_host_unique<uint32_t[]>(2, stream);
 
