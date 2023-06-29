@@ -80,15 +80,15 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         if (0 == nclus)
           return;
 #ifdef GPU_DEBUG
-        if (threadIdx == 0) {
-          auto k = clusters[1 + blockIdx.x].moduleStart();
+        if (threadIdxLocal == 0) {
+          auto k = clusters[1 + blockIdx].moduleStart();
           while (digis[k].moduleId() == invalidModuleId)
             ++k;
           ALPAKA_ASSERT_OFFLOAD(digis[k].moduleId() == me);
         }
 
         if (me % 100 == 1)
-          if (threadIdx == 0)
+          if (threadIdxLocal == 0)
             printf(
                 "hitbuilder: %d clusters in module %d. will write at %d\n", nclus, me, clusters[me].clusModuleStart());
 #endif
