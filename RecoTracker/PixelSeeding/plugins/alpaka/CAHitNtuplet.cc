@@ -2,7 +2,8 @@
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Track/interface/TrackSoAHost.h"
-#include "DataFormats/Track/interface/alpaka/TrackSoADevice.h"
+#include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
+#include "DataFormats/Track/interface/TrackSoADevice.h"
 #include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoACollection.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -35,7 +36,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using HitsOnHost = TrackingRecHitAlpakaHost<TrackerTraits>;
 
     using TkSoAHost = TrackSoAHost<TrackerTraits>;
-    using TkSoADevice = TrackSoADevice<TrackerTraits>;
+    // using TkSoADevice = TrackSoADevice<TrackerTraits>;
+    using TkSoADevice = TrackSoACollection<TrackerTraits>;
 
     using Algo = CAHitNtupletGenerator<TrackerTraits>;
 
@@ -72,11 +74,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template <typename TrackerTraits>
   void CAHitNtupletAlpaka<TrackerTraits>::produce(device::Event& iEvent, const device::EventSetup& es) {
+    std::cout << "CAHitNtuplet: " << __LINE__ << "########################################3" << std::endl;
     auto bf = 1. / es.getData(tokenField_).inverseBzAtOriginInGeV();
 
     auto const& hits = iEvent.get(tokenHit_);
 
     iEvent.emplace(tokenTrack_, deviceAlgo_.makeTuplesAsync(hits, bf, iEvent.queue()));
+    std::cout << "CAHitNtuplet: " << __LINE__ << "########################################3" << std::endl;
   }
 
   using CAHitNtupletAlpakaPhase1 = CAHitNtupletAlpaka<pixelTopology::Phase1>;

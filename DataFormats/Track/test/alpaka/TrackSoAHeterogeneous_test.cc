@@ -15,7 +15,8 @@
 
 #include <alpaka/alpaka.hpp>
 #include <unistd.h>
-#include "DataFormats/Track/interface/alpaka/TrackSoADevice.h"
+#include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
+#include "DataFormats/Track/interface/TrackSoADevice.h"
 #include "DataFormats/Track/interface/TrackSoAHost.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/devices.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/host.h"
@@ -45,7 +46,8 @@ int main() {
   {
     // Instantiate tracks on device. PortableDeviceCollection allocates
     // SoA on device automatically.
-    TrackSoADevice<pixelTopology::Phase1> tracks_d(queue);
+    // TrackSoADevice<pixelTopology::Phase1> tracks_d(queue);
+    TrackSoACollection<pixelTopology::Phase1> tracks_d(queue);
     testTrackSoA::runKernels<pixelTopology::Phase1>(tracks_d.view(), queue);
 
     // Instantate tracks on host. This is where the data will be
