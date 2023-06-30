@@ -17,11 +17,11 @@
 <else/>
   <set name="cuda_src" value=""/>
 </iftool>
-<library file="*.cc ${cuda_src}" name="RecoPixelVertexingPixelTripletsPlugins">
+<library file="*.cc ${cuda_src}" name="RecoTrackerPixelSeedingPlugins">
  <flags EDM_PLUGIN="1"/>
 </library>
 
-<library file="alpaka/*.cc" name="RecoPixelVertexingPixelTripletsPluginsPortable">
+<library file="alpaka/*.cc" name="RecoTrackerPixelSeedingPortable">
  <use name="alpaka"/>
   <use name="DataFormats/Portable"/>
   <use name="DataFormats/Track"/>
@@ -29,6 +29,8 @@
   <use name="FWCore/Utilities"/>
   <use name="HeterogeneousCore/AlpakaCore"/>
   <use name="HeterogeneousCore/AlpakaInterface"/>
+  <use name="RecoLocalTracker/Records"/>
+  <use name="RecoLocalTracker/SiPixelRecHits"/>
   <flags ALPAKA_BACKENDS="1"/>
   <flags EDM_PLUGIN="1"/>
 </library>
