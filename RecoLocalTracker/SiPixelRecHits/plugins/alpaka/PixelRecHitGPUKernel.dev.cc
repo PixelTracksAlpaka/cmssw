@@ -54,7 +54,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       auto nHits = clusters_d.nClusters();
 
       TrackingRecHitAlpakaCollection<TrackerTraits> hits_d(
-          nHits, clusters_d.offsetBPIX2(), cpeParams, clusters_d->clusModuleStart(), queue);
+          nHits, clusters_d.offsetBPIX2(), clusters_d->clusModuleStart(), queue);
 
       int activeModulesWithDigis = digis_d.nModules();
       // protect from empty events

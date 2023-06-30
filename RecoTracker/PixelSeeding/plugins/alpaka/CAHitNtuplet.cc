@@ -24,6 +24,8 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "RecoTracker/TkMSParametrization/interface/PixelRecoUtilities.h"
+#include "RecoLocalTracker/Records/interface/PixelCPEFastParamsRecord.h"
+#include "RecoLocalTracker/SiPixelRecHits/interface/alpaka/PixelCPEFastParamsCollection.h"
 
 #include "CAHitNtupletGenerator.h"
 
@@ -47,15 +49,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   private:
     edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> tokenField_;
+    const device::ESGetToken<PixelCPEFastParams<TrackerTraits>, PixelCPEFastParamsRecord> cpeToken_;
     device::EDGetToken<HitsOnDevice> tokenHit_;
     device::EDPutToken<TkSoADevice> tokenTrack_;
+    
 
     Algo deviceAlgo_;
   };
 
   template <typename TrackerTraits>
   CAHitNtupletAlpaka<TrackerTraits>::CAHitNtupletAlpaka(const edm::ParameterSet& iConfig)
-      : tokenField_(esConsumes()), deviceAlgo_(iConfig, consumesCollector()) {
+      : tokenField_(esConsumes()), cpeToken_(esConsumes()), deviceAlgo_(iConfig, consumesCollector()) {
     tokenHit_ = consumes(iConfig.getParameter<edm::InputTag>("pixelRecHitSrc"));
     tokenTrack_ = produces();
   }
@@ -72,11 +76,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template <typename TrackerTraits>
   void CAHitNtupletAlpaka<TrackerTraits>::produce(device::Event& iEvent, const device::EventSetup& es) {
+
     auto bf = 1. / es.getData(tokenField_).inverseBzAtOriginInGeV();
+
+    auto& fcpe = es.getData(cpeToken_);
 
     auto const& hits = iEvent.get(tokenHit_);
 
-    iEvent.emplace(tokenTrack_, deviceAlgo_.makeTuplesAsync(hits, bf, iEvent.queue()));
+    iEvent.emplace(tokenTrack_, deviceAlgo_.makeTuplesAsync(hits, fcpe.const_buffer().data(), bf, iEvent.queue()));
   }
 
   using CAHitNtupletAlpakaPhase1 = CAHitNtupletAlpaka<pixelTopology::Phase1>;

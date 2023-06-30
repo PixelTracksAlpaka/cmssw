@@ -34,6 +34,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                   TupleMultiplicity<TrackerTraits> const *__restrict__ tupleMultiplicity,
                                   uint32_t nHits,
                                   TrackingRecHitAlpakaSoAConstView<TrackerTraits> hh,
+                                  pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const* __restrict__ cpeParams,
                                   double *__restrict__ phits,
                                   float *__restrict__ phits_ge,
                                   double *__restrict__ pfast_fit,
@@ -75,8 +76,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         for (unsigned int i = 0; i < hitsInFit; ++i) {
           auto hit = hitId[i];
           float ge[6];
-          hh.cpeParams()
-              .detParams(hh[hit].detectorIndex())
+          cpeParams->detParams(hh[hit].detectorIndex())
               .frame.toGlobal(hh[hit].xerrLocal(), 0, hh[hit].yerrLocal(), ge);
 
           hits.col(i) << hh[hit].xGlobal(), hh[hit].yGlobal(), hh[hit].zGlobal();
@@ -211,6 +211,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template <typename TrackerTraits>
   void HelixFit<TrackerTraits>::launchRiemannKernels(const TrackingRecHitAlpakaSoAConstView<TrackerTraits> &hv,
+                                                     pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const* cpeParams,
                                                      uint32_t nhits,
                                                      uint32_t maxNumberOfTuples,
                                                      Queue &queue) {
@@ -242,6 +243,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                           tupleMultiplicity_,
                           3,
                           hv,
+                          cpeParams,
                           hitsDevice.data(),
                           hits_geDevice.data(),
                           fast_fit_resultsDevice.data(),
@@ -280,6 +282,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                           tupleMultiplicity_,
                           4,
                           hv,
+                          cpeParams,
                           hitsDevice.data(),
                           hits_geDevice.data(),
                           fast_fit_resultsDevice.data(),
@@ -319,6 +322,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                             tupleMultiplicity_,
                             5,
                             hv,
+                            cpeParams,
                             hitsDevice.data(),
                             hits_geDevice.data(),
                             fast_fit_resultsDevice.data(),
@@ -357,6 +361,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                             tupleMultiplicity_,
                             5,
                             hv,
+                            cpeParams,
                             hitsDevice.data(),
                             hits_geDevice.data(),
                             fast_fit_resultsDevice.data(),
