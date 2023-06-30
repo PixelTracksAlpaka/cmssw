@@ -213,8 +213,10 @@ namespace cms {
         if (c.m >= nbins())
           return -int32_t(c.m);
         off[c.m] = c.n;
-        for (uint32_t j = 0; j < n; ++j)
+        for (uint32_t j = 0; j < n; ++j) {
+          printf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa %d %d %d %d %d\n", j, n, v[j], c.n, c.m);
           bins[c.n + j] = v[j];
+        }
         return c.m;
       }
 

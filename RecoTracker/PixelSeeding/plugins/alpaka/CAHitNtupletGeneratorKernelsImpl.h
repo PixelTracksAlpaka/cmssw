@@ -342,7 +342,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     CACellT<TrackerTraits> *cells,
                                     uint32_t *nCells,
                                     CellNeighborsVector<TrackerTraits> *cellNeighbors,
-                                    OuterHitOfCell<TrackerTraits> const isOuterHitOfCell,
+                                    OuterHitOfCell<TrackerTraits> const *isOuterHitOfCell,
                                     CAParams<TrackerTraits> params) const {
         using Cell = CACellT<TrackerTraits>;
 
@@ -369,49 +369,49 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               auto cellIndex = idx;
               auto &thisCell = cells[idx];
               auto innerHitId = thisCell.inner_hit_id();
-              // if (int(innerHitId) < isOuterHitOfCell.offset)
-              //   continue;
-              uint32_t numberOfPossibleNeighbors = isOuterHitOfCell[innerHitId].size();
-              auto vi = isOuterHitOfCell[innerHitId].data();
+              if (int(innerHitId) >= isOuterHitOfCell->offset) {
+                uint32_t numberOfPossibleNeighbors = (*isOuterHitOfCell)[innerHitId].size();
+                auto vi = (*isOuterHitOfCell)[innerHitId].data();
 
-              auto ri = thisCell.inner_r(hh);
-              auto zi = thisCell.inner_z(hh);
+                auto ri = thisCell.inner_r(hh);
+                auto zi = thisCell.inner_z(hh);
 
-              auto ro = thisCell.outer_r(hh);
-              auto zo = thisCell.outer_z(hh);
-              auto isBarrel = thisCell.inner_detIndex(hh) < last_barrel_detIndex;
+                auto ro = thisCell.outer_r(hh);
+                auto zo = thisCell.outer_z(hh);
+                auto isBarrel = thisCell.inner_detIndex(hh) < last_barrel_detIndex;
 
-              cms::alpakatools::for_each_element_in_block_strided(
-                  acc,
-                  numberOfPossibleNeighbors,
-                  0u,
-                  [&](uint32_t j) {
-                    auto otherCell = (vi[j]);
-                    auto &oc = cells[otherCell];
-                    auto r1 = oc.inner_r(hh);
-                    auto z1 = oc.inner_z(hh);
-                    bool aligned =
-                        Cell::areAlignedRZ(r1,
-                                           z1,
-                                           ri,
-                                           zi,
-                                           ro,
-                                           zo,
-                                           params.ptmin_,
-                                           isBarrel ? params.CAThetaCutBarrel_
-                                                    : params.CAThetaCutForward_);  // 2.f*thetaCut); // FIXME tune cuts
-                    if (aligned &&
-                        thisCell.dcaCut(hh,
-                                        oc,
-                                        oc.inner_detIndex(hh) < last_bpix1_detIndex ? params.dcaCutInnerTriplet_
-                                                                                    : params.dcaCutOuterTriplet_,
-                                        params.hardCurvCut_)) {  // FIXME tune cuts
-                      oc.addOuterNeighbor(acc, cellIndex, *cellNeighbors);
-                      thisCell.setStatusBits(Cell::StatusBit::kUsed);
-                      oc.setStatusBits(Cell::StatusBit::kUsed);
-                    }
-                  },
-                  dimIndexX);  // loop on inner cells
+                cms::alpakatools::for_each_element_in_block_strided(
+                    acc,
+                    numberOfPossibleNeighbors,
+                    0u,
+                    [&](uint32_t j) {
+                      auto otherCell = (vi[j]);
+                      auto &oc = cells[otherCell];
+                      auto r1 = oc.inner_r(hh);
+                      auto z1 = oc.inner_z(hh);
+                      bool aligned = Cell::areAlignedRZ(
+                          r1,
+                          z1,
+                          ri,
+                          zi,
+                          ro,
+                          zo,
+                          params.ptmin_,
+                          isBarrel ? params.CAThetaCutBarrel_
+                                   : params.CAThetaCutForward_);  // 2.f*thetaCut); // FIXME tune cuts
+                      if (aligned &&
+                          thisCell.dcaCut(hh,
+                                          oc,
+                                          oc.inner_detIndex(hh) < last_bpix1_detIndex ? params.dcaCutInnerTriplet_
+                                                                                      : params.dcaCutOuterTriplet_,
+                                          params.hardCurvCut_)) {  // FIXME tune cuts
+                        oc.addOuterNeighbor(acc, cellIndex, *cellNeighbors);
+                        thisCell.setStatusBits(Cell::StatusBit::kUsed);
+                        oc.setStatusBits(Cell::StatusBit::kUsed);
+                      }
+                    },
+                    dimIndexX);  // loop on inner cells
+              }
             },
             dimIndexY);  // loop on outer cells
       }

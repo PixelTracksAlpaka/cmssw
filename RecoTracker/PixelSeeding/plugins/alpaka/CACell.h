@@ -314,7 +314,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       } else {
         auto doubletId = this - cells;
         tmpNtuplet.push_back_unsafe(doubletId);
-        ALPAKA_ASSERT_OFFLOAD(tmpNtuplet.size() <= 4);
+        ALPAKA_ASSERT_OFFLOAD(tmpNtuplet.size() <= int(TrackerTraits::maxHitsOnTrack - 3));
 
         bool last = true;
         for (unsigned int otherCell : outerNeighbors()) {
@@ -346,12 +346,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               }
               assert(nh < TrackerTraits::maxHitsOnTrack);
               hits[nh] = theOuterHitId;
+              printf("%d %d\n", nh, int(sizeof(hits) / sizeof(hits[0])));
               auto it = foundNtuplets.bulkFill(acc, apc, hits, nh + 1);
-              if (it >= 0) {  // if negative is overflow....
-                for (auto c : tmpNtuplet)
-                  cells[c].addTrack(acc, it, cellTracks);
-                quality[it] = bad;  // initialize to bad
-              }
+              //               if (it >= 0) {  // if negative is overflow....
+              //                 for (auto c : tmpNtuplet)
+              //                   cells[c].addTrack(acc, it, cellTracks);
+              //                 quality[it] = bad;  // initialize to bad
+              //               }
             }
           }
         }
