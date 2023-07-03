@@ -92,7 +92,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           alpaka::atomicAdd(acc, &c.nHits, static_cast<unsigned long long>(nHits), alpaka::hierarchy::Blocks{});
           alpaka::atomicAdd(acc, &c.nCells, static_cast<unsigned long long>(*nCells), alpaka::hierarchy::Blocks{});
           alpaka::atomicAdd(
-              acc, &c.nTuples, static_cast<unsigned long long>(apc->get().m), alpaka::hierarchy::Blocks{});
+              acc, &c.nTuples, static_cast<unsigned long long>(apc->get().first), alpaka::hierarchy::Blocks{});
           alpaka::atomicAdd(acc,
                             &c.nFitTracks,
                             static_cast<unsigned long long>(tupleMultiplicity->size()),
@@ -103,12 +103,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         if (0 == threadIdx) {
           printf("number of found cells %d \n found tuples %d with total hits %d out of %d\n",
                  *nCells,
-                 apc->get().m,
-                 apc->get().n,
+                 apc->get().first,
+                 apc->get().second,
                  nHits);
-          if (apc->get().m < TrackerTraits::maxNumberOfQuadruplets) {
-            ALPAKA_ASSERT_OFFLOAD(tracks_view.hitIndices().size(apc->get().m) == 0);
-            ALPAKA_ASSERT_OFFLOAD(tracks_view.hitIndices().size() == apc->get().n);
+          if (apc->get().first < TrackerTraits::maxNumberOfQuadruplets) {
+            ALPAKA_ASSERT_OFFLOAD(tracks_view.hitIndices().size(apc->get().first) == 0);
+            ALPAKA_ASSERT_OFFLOAD(tracks_view.hitIndices().size() == apc->get().second);
           }
         }
         const auto ntNbins = foundNtuplets->nbins();
@@ -124,7 +124,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #endif
 
         if (0 == threadIdx) {
-          if (apc->get().m >= TrackerTraits::maxNumberOfQuadruplets)
+          if (apc->get().first >= TrackerTraits::maxNumberOfQuadruplets)
             printf("Tuples overflow\n");
           if (*nCells >= maxNumberOfDoublets)
             printf("Cells overflow\n");
@@ -659,7 +659,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     TkSoAView<TrackerTraits> tracks_view,
                                     cms::alpakatools::AtomicPairCounter *apc) const {
         // clamp the number of tracks to the capacity of the SoA
-        auto ntracks = std::min<int>(apc->get().m, tracks_view.metadata().size() - 1);
+        auto ntracks = std::min<int>(apc->get().first, tracks_view.metadata().size() - 1);
         const uint32_t threadIdx(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
         if (0 == threadIdx)
           tracks_view.nTracks() = ntracks;

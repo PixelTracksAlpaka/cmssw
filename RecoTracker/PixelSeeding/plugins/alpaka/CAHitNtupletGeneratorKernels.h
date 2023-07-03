@@ -261,7 +261,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
           // NB: In legacy, device_storage_ was allocated inside allocateOnGPU
           device_storage_{
-              cms::alpakatools::make_device_buffer<cms::alpakatools::AtomicPairCounter::c_type[]>(queue, 3u)},
+              cms::alpakatools::make_device_buffer<cms::alpakatools::AtomicPairCounter::DoubleWord[]>(queue, 3u)},
           device_hitTuple_apc_{reinterpret_cast<cms::alpakatools::AtomicPairCounter*>(device_storage_.data())},
           device_hitToTuple_apc_{reinterpret_cast<cms::alpakatools::AtomicPairCounter*>(device_storage_.data() + 1)},
           device_nCells_{cms::alpakatools::make_device_view(alpaka::getDev(queue),
@@ -301,7 +301,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     cms::alpakatools::device_buffer<Device, unsigned char[]> cellStorage_;
     CellNeighbors* device_theCellNeighborsContainer_;
     CellTracks* device_theCellTracksContainer_;
-    cms::alpakatools::device_buffer<Device, cms::alpakatools::AtomicPairCounter::c_type[]> device_storage_;
+    cms::alpakatools::device_buffer<Device, cms::alpakatools::AtomicPairCounter::DoubleWord[]> device_storage_;
     cms::alpakatools::AtomicPairCounter* device_hitTuple_apc_;
     cms::alpakatools::AtomicPairCounter* device_hitToTuple_apc_;
     cms::alpakatools::device_view<Device, uint32_t> device_nCells_;

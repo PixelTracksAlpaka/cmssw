@@ -47,6 +47,8 @@ namespace cms::alpakatools {
     union Packer {
       DoubleWord as_doubleword;
       Counters as_counters;
+      constexpr Packer(DoubleWord _as_doubleword) : as_doubleword(_as_doubleword) { ; };
+      constexpr Packer(Counters _as_counters) : as_counters(_as_counters) { ; };
     };
 
     // pack two uint32_t values in a DoubleWord (aka uint64_t)
