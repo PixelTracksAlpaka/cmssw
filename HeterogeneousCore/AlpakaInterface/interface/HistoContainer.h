@@ -156,9 +156,9 @@ namespace cms {
       }
 
       static constexpr uint32_t sizeT() { return S; }
-      static constexpr uint32_t nbins() { return NBINS; }
       static constexpr int32_t nhists() { return NHISTS; }
-      static constexpr uint32_t totbins() { return NHISTS * NBINS + 1; }
+      static constexpr uint32_t nbins() { return NHISTS == 1 ? NBINS - 1 : NBINS; }
+      static constexpr uint32_t totbins() { return NHISTS == 1 ? NBINS : NHISTS * NBINS + 1; }
       static constexpr uint32_t nbits() { return ilog2(NBINS - 1) + 1; }
       static constexpr int32_t capacity() { return SIZE; }
 

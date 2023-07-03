@@ -324,7 +324,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           cells[otherCell].template find_ntuplets<DEPTH - 1>(
               acc, hh, cells, cellTracks, foundNtuplets, apc, quality, tmpNtuplet, minHitsPerNtuplet, startAt0);
         }
-
         if (last) {  // if long enough save...
           if ((unsigned int)(tmpNtuplet.size()) >= minHitsPerNtuplet - 1) {
 #ifdef ONLY_TRIPLETS_IN_HOLE
@@ -346,13 +345,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               }
               assert(nh < TrackerTraits::maxHitsOnTrack);
               hits[nh] = theOuterHitId;
-              printf("%d %d\n", nh, int(sizeof(hits) / sizeof(hits[0])));
               auto it = foundNtuplets.bulkFill(acc, apc, hits, nh + 1);
-              //               if (it >= 0) {  // if negative is overflow....
-              //                 for (auto c : tmpNtuplet)
-              //                   cells[c].addTrack(acc, it, cellTracks);
-              //                 quality[it] = bad;  // initialize to bad
-              //               }
+              if (it >= 0) {  // if negative is overflow....
+                for (auto c : tmpNtuplet)
+                  cells[c].addTrack(acc, it, cellTracks);
+                quality[it] = bad;  // initialize to bad
+              }
             }
           }
         }
