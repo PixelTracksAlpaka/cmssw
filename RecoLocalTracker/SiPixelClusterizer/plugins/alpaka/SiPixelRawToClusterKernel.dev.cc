@@ -37,7 +37,7 @@
 #include "PixelClustering.h"
 #include "SiPixelRawToClusterKernel.h"
 
-#define GPU_DEBUG
+// #define GPU_DEBUG
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace pixelDetails {
 
@@ -892,7 +892,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             const_cast<uint32_t const *>(clusters_d->view().clusModuleStart() + numberOfModules),
             1u);
         constexpr int startBPIX2 = pixelTopology::Phase1::layerStart[1];
-        printf("numberOfModules: %d -- startBPIX2: %d\n", numberOfModules, startBPIX2);
+   
         // element startBPIX2 hold the number of clusters until BPIX2
         const auto bpix2ClusterStart = cms::alpakatools::make_device_view(
             alpaka::getDev(queue), const_cast<uint32_t const *>(clusters_d->view().clusModuleStart() + startBPIX2), 1u);
