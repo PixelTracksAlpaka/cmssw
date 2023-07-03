@@ -1,37 +1,25 @@
-// -*- C++ -*-
-// Package:    SiPixelCompareRecHitsSoAAlpaka
-// Class:      SiPixelCompareRecHitsSoAAlpaka
-//
-/**\class SiPixelCompareRecHitsSoAAlpaka SiPixelCompareRecHitsSoAAlpaka.cc
-*/
-//
-// Author: Suvankar Roy Chowdhury, Alessandro Rossi
-//
-#include "DataFormats/Math/interface/approx_atan2.h"
-#include "DataFormats/Common/interface/Handle.h"
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-// DQM Histograming
 #include "DQMServices/Core/interface/MonitorElement.h"
 #include "DQMServices/Core/interface/DQMEDAnalyzer.h"
 #include "DQMServices/Core/interface/DQMStore.h"
+#include "DataFormats/Math/interface/approx_atan2.h"
+#include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoAHost.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
-// Geometry
-#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
+#include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "Geometry/CommonDetUnit/interface/PixelGeomDetUnit.h"
 #include "Geometry/CommonTopologies/interface/PixelTopology.h"
-#include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
+#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 
 template <typename T>
 class SiPixelCompareRecHitsSoAAlpaka : public DQMEDAnalyzer {
 public:
-  using HitSoA = TrackingRecHitAlpakaSoAView<T>;
   using HitsOnHost = TrackingRecHitAlpakaHost<T>;
 
   explicit SiPixelCompareRecHitsSoAAlpaka(const edm::ParameterSet&);
@@ -75,10 +63,10 @@ private:
   MonitorElement* hBposYDiff_;
   MonitorElement* hFposYDiff_;
 };
+
 //
 // constructors
 //
-
 template <typename T>
 SiPixelCompareRecHitsSoAAlpaka<T>::SiPixelCompareRecHitsSoAAlpaka(const edm::ParameterSet& iConfig)
     : geomToken_(esConsumes<TrackerGeometry, TrackerDigiGeometryRecord, edm::Transition::BeginRun>()),
@@ -87,6 +75,7 @@ SiPixelCompareRecHitsSoAAlpaka<T>::SiPixelCompareRecHitsSoAAlpaka(const edm::Par
       tokenSoAHitsDevice_(consumes(iConfig.getParameter<edm::InputTag>("pixelHitsSrcGPU"))),
       topFolderName_(iConfig.getParameter<std::string>("topFolderName")),
       mind2cut_(iConfig.getParameter<double>("minD2cut")) {}
+
 //
 // Begin Run
 //
@@ -104,7 +93,7 @@ void SiPixelCompareRecHitsSoAAlpaka<T>::analyze(const edm::Event& iEvent, const 
   const auto& rhsoaHandleHost = iEvent.getHandle(tokenSoAHitsHost_);
   const auto& rhsoaHandleDevice = iEvent.getHandle(tokenSoAHitsDevice_);
   if (not rhsoaHandleHost or not rhsoaHandleDevice) {
-    edm::LogWarning out("SiPixelCompareRecHitSoA");
+    edm::LogWarning out("SiPixelCompareRecHitsSoAAlpaka");
     if (not rhsoaHandleHost) {
       out << "reference (Host) rechits not found; ";
     }
@@ -248,5 +237,6 @@ void SiPixelCompareRecHitsSoAAlpaka<T>::fillDescriptions(edm::ConfigurationDescr
 using SiPixelPhase1CompareRecHitsSoAAlpaka = SiPixelCompareRecHitsSoAAlpaka<pixelTopology::Phase1>;
 using SiPixelPhase2CompareRecHitsSoAAlpaka = SiPixelCompareRecHitsSoAAlpaka<pixelTopology::Phase2>;
 
+#include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(SiPixelPhase1CompareRecHitsSoAAlpaka);
 DEFINE_FWK_MODULE(SiPixelPhase2CompareRecHitsSoAAlpaka);

@@ -643,9 +643,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           tracks_view.detIndices().off[idx] = tracks_view.hitIndices().off[idx];
         }
         // fill hit indices
-        auto nhits = hh.nHits();
         for (auto idx : cms::alpakatools::elements_with_stride(acc, tracks_view.hitIndices().size())) {
-          ALPAKA_ASSERT_OFFLOAD(tracks_view.hitIndices().bins[idx] < nhits);
+          ALPAKA_ASSERT_OFFLOAD(tracks_view.hitIndices().bins[idx] < hh.nHits());
           tracks_view.detIndices().bins[idx] = hh[tracks_view.hitIndices().bins[idx]].detectorIndex();
         }
       }
@@ -664,8 +663,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         if (0 == threadIdx)
           tracks_view.nTracks() = ntracks;
         for (auto idx : cms::alpakatools::elements_with_stride(acc, ntracks)) {
-          auto nHits = TracksUtilities<TrackerTraits>::nHits(tracks_view, idx);
-          ALPAKA_ASSERT_OFFLOAD(nHits >= 3);
+          ALPAKA_ASSERT_OFFLOAD(TracksUtilities<TrackerTraits>::nHits(tracks_view, idx) >= 3);
           tracks_view[idx].nLayers() = TracksUtilities<TrackerTraits>::computeNumberOfLayers(tracks_view, idx);
         }
       }
