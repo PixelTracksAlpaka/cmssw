@@ -50,7 +50,6 @@ struct TrackingRecHitAlpakaSoA {
                       SOA_COLUMN(PhiBinnerStorageType, phiBinnerStorage),
                       SOA_SCALAR(HitModuleStartArray, hitsModuleStart),
                       SOA_SCALAR(HitLayerStartArray, hitsLayerStart),
-                      SOA_SCALAR(ParamsOnDevice, cpeParams),
                       SOA_SCALAR(AverageGeometry, averageGeometry),
                       SOA_SCALAR(PhiBinner, phiBinner));
 };
