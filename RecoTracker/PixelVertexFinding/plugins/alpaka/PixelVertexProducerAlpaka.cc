@@ -20,7 +20,8 @@
 
 #include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
 #include "DataFormats/Track/interface/TrackSoADevice.h"
-#include "DataFormats/Vertex/interface/alpaka/ZVertexSoADevice.h"
+#include "DataFormats/Vertex/interface/alpaka/ZVertexSoACollection.h"
+#include "DataFormats/Vertex/interface/ZVertexSoADevice.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/MakerMacros.h"
 
 #include "vertexFinder.h"
@@ -52,7 +53,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     bool onGPU_;
 
     device::EDGetToken<TkSoADevice> tokenGPUTrack_;
-    device::EDPutToken<ZVertexDevice> tokenGPUVertex_;
+    // device::EDPutToken<ZVertexDevice> tokenGPUVertex_;
+    device::EDPutToken<ZVertexCollection> tokenGPUVertex_;
 
     const GPUAlgo gpuAlgo_;
 

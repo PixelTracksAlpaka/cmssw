@@ -20,6 +20,7 @@ def customizeHLTforDQMGPUvsCPUPixel(process):
         'hltSiPixelRecHits',
         'hltSiPixelRecHitsLegacyFormat',
         'hltPixelTracks',
+        'hltPixelVertices',
     ]
 
     process.hltPixelConsumerCPU.eventProducts = []
@@ -213,7 +214,6 @@ def customizeHLTforAlpakaPixelRecoLocal(process):
         process.hltSiPixelDigiErrorsLegacyFormat, # was: hltSiPixelDigis
         process.hltSiPixelRecHits,
         process.hltSiPixelRecHitsLegacyFormat,    # was: hltSiPixelRecHits
-        process.hltPixelTracks,
     )
 
     ###
@@ -316,11 +316,11 @@ def customizeHLTforAlpakaPixelRecoTracking(process):
     )
 
     process.HLTRecoPixelTracksTask = cms.ConditionalTask(
-#         process.hltPixelTracks,
+        process.hltPixelTracks,
     )
 
     process.HLTRecoPixelTracksCPUSerialTask = cms.ConditionalTask(
-#         process.hltPixelTracksCPUSerial,
+        process.hltPixelTracksCPUSerial,
     )
 
     process.HLTRecoPixelTracksCPUSerialSequence = cms.Sequence( process.HLTRecoPixelTracksCPUSerialTask )
