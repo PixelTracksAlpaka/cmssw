@@ -1,5 +1,5 @@
-#ifndef RecoLocalTracker_SiPixelRecHits_gpuPixelRecHits_h
-#define RecoLocalTracker_SiPixelRecHits_gpuPixelRecHits_h
+#ifndef RecoLocalTracker_SiPixelRecHits_alpaka_PixelRecHits_h
+#define RecoLocalTracker_SiPixelRecHits_alpaka_PixelRecHits_h
 
 #include <algorithm>
 #include <cstdint>
@@ -21,7 +21,7 @@
 
 //#define GPU_DEBUG 1
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
-  namespace gpuPixelRecHits {
+  namespace pixelRecHits {
 
     template <typename TrackerTraits>
     class getHits {
@@ -235,7 +235,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
     };
 
-  }  // namespace gpuPixelRecHits
+  }  // namespace pixelRecHits
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
-#endif  // RecoLocalTracker_SiPixelRecHits_plugins_gpuPixelRecHits_h
+#endif  // RecoLocalTracker_SiPixelRecHits_plugins_alpaka_PixelRecHits_h

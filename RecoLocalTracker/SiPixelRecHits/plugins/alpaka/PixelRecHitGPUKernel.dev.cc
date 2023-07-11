@@ -12,7 +12,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
 #include "PixelRecHitGPUKernel.h"
-#include "pixelRecHits.h"
+#include "PixelRecHits.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   using namespace cms::alpakatools;
@@ -50,7 +50,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         BeamSpotPOD const* bs_d,
         pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const* cpeParams,
         Queue queue) const {
-      using namespace gpuPixelRecHits;
+      using namespace pixelRecHits;
       auto nHits = clusters_d.nClusters();
 
       TrackingRecHitAlpakaCollection<TrackerTraits> hits_d(
