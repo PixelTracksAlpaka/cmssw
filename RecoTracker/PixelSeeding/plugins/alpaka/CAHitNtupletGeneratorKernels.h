@@ -268,6 +268,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                                             *reinterpret_cast<uint32_t*>(device_storage_.data() + 2))} {
       alpaka::memset(queue, counters_, 0);
       alpaka::memset(queue, device_nCells_, 0);
+      alpaka::memset(queue, cellStorage_, 0);
       cms::alpakatools::launchZero<Acc1D>(device_tupleMultiplicity_.data(), queue);
       cms::alpakatools::launchZero<Acc1D>(device_hitToTuple_.data(), queue);
     }

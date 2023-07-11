@@ -19,13 +19,14 @@ def customizeHLTforDQMGPUvsCPUPixel(process):
         'hltSiPixelDigiErrorsLegacyFormat',
         'hltSiPixelRecHits',
         'hltSiPixelRecHitsLegacyFormat',
-        'hltPixelTracks',
-        'hltPixelVertices',
+        # 'hltPixelTracks',
+        # 'hltPixelVertices',
     ]
 
     process.hltPixelConsumerCPU.eventProducts = []
     for foo in process.hltPixelConsumerGPU.eventProducts:
         process.hltPixelConsumerCPU.eventProducts += [foo+'CPUSerial']
+    process.hltPixelConsumerCPU.eventProducts += ['hltPixelTracksCPUSerial']
 
     # modify EventContent of DQMGPUvsCPU stream
     if hasattr(process, 'hltOutputDQMGPUvsCPU'):
@@ -59,10 +60,65 @@ def customizeHLTforDQMGPUvsCPUPixel(process):
         minD2cut = cms.double( 1.0E-4 )
     )
 
+    process.hltSiPixelTrackSoAMonitorCPU = cms.EDProducer("SiPixelPhase1MonitorTrackSoAAlpaka",
+        mightGet = cms.optional.untracked.vstring,
+        minQuality = cms.string('loose'),
+        pixelTrackSrc = cms.InputTag('hltPixelTracksCPUSerial'),
+        topFolderName = cms.string('SiPixelHeterogeneous/PixelTrackCPU'),
+        useQualityCut = cms.bool(True)
+    )
+
+    process.hltSiPixelTrackSoAMonitorGPU = cms.EDProducer("SiPixelPhase1MonitorTrackSoAAlpaka",
+        mightGet = cms.optional.untracked.vstring,
+        minQuality = cms.string('loose'),
+        pixelTrackSrc = cms.InputTag('hltPixelTracks'),
+        topFolderName = cms.string('SiPixelHeterogeneous/PixelTrackGPU'),
+        useQualityCut = cms.bool(True)
+    )
+
+    process.hltSiPixelTrackSoACompareGPUvsCPU = cms.EDProducer("SiPixelPhase1CompareTrackSoAAlpaka",
+        deltaR2cut = cms.double(0.04),
+        mightGet = cms.optional.untracked.vstring,
+        minQuality = cms.string('loose'),
+        pixelTrackSrcCPU = cms.InputTag("hltPixelTracksCPUSerial"),
+        pixelTrackSrcGPU = cms.InputTag("hltPixelTracks"),
+        topFolderName = cms.string('SiPixelHeterogeneous/PixelTrackCompareGPUvsCPU'),
+        useQualityCut = cms.bool(True)
+    )
+
+    process.hltSiPixelVertexSoAMonitorCPU = cms.EDProducer("SiPixelMonitorVertexSoAAlpaka",
+        beamSpotSrc = cms.InputTag("offlineBeamSpot"),
+        mightGet = cms.optional.untracked.vstring,
+        pixelVertexSrc = cms.InputTag("hltPixelVerticesCPUSerial"),
+        topFolderName = cms.string('SiPixelHeterogeneous/PixelVertexCPU')
+    )
+
+    process.hltSiPixelVertexSoAMonitorGPU = cms.EDProducer("SiPixelMonitorVertexSoAAlpaka",
+        beamSpotSrc = cms.InputTag("offlineBeamSpot"),
+        mightGet = cms.optional.untracked.vstring,
+        pixelVertexSrc = cms.InputTag("hltPixelVertices"),
+        topFolderName = cms.string('SiPixelHeterogeneous/PixelVertexGPU')
+    )
+
+    process.hltSiPixelVertexSoACompareGPUvsCPU = cms.EDProducer("SiPixelCompareVertexSoAAlpaka",
+        beamSpotSrc = cms.InputTag("offlineBeamSpot"),
+        dzCut = cms.double(1),
+        mightGet = cms.optional.untracked.vstring,
+        pixelVertexSrcCPU = cms.InputTag("hltPixelVerticesCPUSerial"),
+        pixelVertexSrcGPU = cms.InputTag("hltPixelVertices"),
+        topFolderName = cms.string('SiPixelHeterogeneous/PixelVertexCompareGPUvsCPU')
+    )
+
     process.HLTDQMPixelReconstruction = cms.Sequence(
         process.hltSiPixelRecHitsSoAMonitorCPU
       + process.hltSiPixelRecHitsSoAMonitorGPU
       + process.hltSiPixelRecHitsSoACompareGPUvsCPU
+    #   + process.hltSiPixelTrackSoAMonitorCPU
+    #   + process.hltSiPixelTrackSoAMonitorGPU
+    #   + process.hltSiPixelTrackSoACompareGPUvsCPU
+    #   + process.hltSiPixelVertexSoAMonitorCPU
+    #   + process.hltSiPixelVertexSoAMonitorGPU
+    #   + process.hltSiPixelVertexSoACompareGPUvsCPU
     )
 
     # Add CPUSerial sequences to DQM_PixelReconstruction_v Path
@@ -316,7 +372,7 @@ def customizeHLTforAlpakaPixelRecoTracking(process):
     )
 
     process.HLTRecoPixelTracksTask = cms.ConditionalTask(
-        process.hltPixelTracks,
+        # process.hltPixelTracks,
     )
 
     process.HLTRecoPixelTracksCPUSerialTask = cms.ConditionalTask(
