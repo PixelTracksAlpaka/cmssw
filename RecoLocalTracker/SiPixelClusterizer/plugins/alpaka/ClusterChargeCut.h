@@ -32,7 +32,7 @@ namespace pixelClustering {
       auto endModule = clus_view[0].moduleStart();
       if (blockIdx >= endModule)
         return;
-
+      
       const uint32_t gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
 
       for (auto module = firstModule; module < endModule; module += gridDimension) {
@@ -49,10 +49,10 @@ namespace pixelClustering {
         const uint32_t threadIdxLocal(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[0u]);
         if (threadIdxLocal == 0 && nclus > maxNumClustersPerModules)
           printf("Warning too many clusters in module %d in block %d: %d > %d\n",
-                 thisModuleId,
-                 module,
-                 nclus,
-                 maxNumClustersPerModules);
+                thisModuleId,
+                module,
+                nclus,
+                maxNumClustersPerModules);
 
         // Stride = block size.
         const uint32_t blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[0u]);
@@ -81,11 +81,11 @@ namespace pixelClustering {
           nclus = maxNumClustersPerModules;
         }
 
-#ifdef GPU_DEBUG
+  #ifdef GPU_DEBUG
         if (thisModuleId % 100 == 1)
           if (threadIdxLocal == 0)
             printf("start clusterizer for module %d in block %d\n", thisModuleId, module);
-#endif
+  #endif
 
         auto& charge = alpaka::declareSharedVar<int32_t[maxNumClustersPerModules], __COUNTER__>(acc);
         auto& ok = alpaka::declareSharedVar<uint8_t[maxNumClustersPerModules], __COUNTER__>(acc);

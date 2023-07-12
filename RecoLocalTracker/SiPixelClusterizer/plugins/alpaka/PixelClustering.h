@@ -115,6 +115,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     SiPixelDigisSoAv2View digi_view,
                                     SiPixelClustersSoAView clus_view,
                                     const unsigned int numElements) const {
+
         constexpr bool isPhase2 = std::is_base_of<pixelTopology::Phase2, TrackerTraits>::value;
         constexpr const uint32_t pixelStatusSize = isPhase2 ? 1 : PixelStatus::size;
 
