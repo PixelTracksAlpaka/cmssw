@@ -96,18 +96,18 @@ alpaka.toReplaceWith(siPixelDigisClustersPreSplitting,_siPixelDigisClustersFromS
 ))
 
 def _modifyPixelClusterRecoLegacyConverter(process):
-    # replace siPixelClustersPreSplitting with an EDAlias
+    # remove cuda branch of the converter
     if hasattr(process, 'siPixelClustersPreSplitting'):
-        process.load('RecoLocalTracker.SiPixelClusterizer.SiPixelClusterizerAlpaka_cfi')
-        # del process.siPixelClustersPreSplitting
-
-        # process.siPixelClustersPreSplitting = cms.EDAlias(
-        # siPixelDigisClustersPreSplitting = cms.VPSet(
-        #     cms.PSet(type = cms.string("SiPixelClusteredmNewDetSetVector"))
-        # ))
-
+        if hasattr(process.siPixelClustersPreSplitting, 'cuda'):
+            del process.siPixelClustersPreSplitting.cuda
 
 alpaka.toReplaceWith(siPixelClustersPreSplittingTask, cms.Task())
+alpaka.toModify(siPixelClustersPreSplitting,
+    cpu = cms.EDAlias(
+        siPixelDigisClustersPreSplitting = cms.VPSet(
+            cms.PSet(type = cms.string("SiPixelClusteredmNewDetSetVector"))
+        ))
+)
 
 modifyPixelClusterRecoForAlpaka_ = alpaka.makeProcessModifier(_modifyPixelClusterRecoLegacyConverter)
 

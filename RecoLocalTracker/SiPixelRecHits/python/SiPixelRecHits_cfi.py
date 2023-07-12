@@ -133,26 +133,33 @@ siPixelRecHitsPreSplittingAlpaka = _siPixelRecHitAlpakaPhase1.clone(
 from RecoLocalTracker.SiPixelRecHits.siPixelRecHitFromSoAAlpakaPhase1_cfi import siPixelRecHitFromSoAAlpakaPhase1 as _siPixelRecHitFromSoAAlpakaPhase1
 
 
+# def _modifyPixelHitsRecoLegacyConverter(process):
+#     # replace siPixelRecHitsPreSplitting with from SoA converter
+#     if hasattr(process, 'siPixelRecHitsPreSplitting'):
+
+#         del process.siPixelRecHitsPreSplitting.cuda
+
+#         process.siPixelRecHitsPreSplitting = _siPixelRecHitFromSoAAlpakaPhase1.clone(
+#             pixelRecHitSrc = cms.InputTag('siPixelRecHitsPreSplittingAlpaka'),
+#             src = cms.InputTag('siPixelClustersPreSplitting'))
+    
+
 def _modifyPixelHitsRecoLegacyConverter(process):
-    # replace siPixelRecHitsPreSplitting with from SoA converter
-    if hasattr(process, 'siPixelRecHitsPreSplitting'):
+    # remove cuda branch of the converter
+    if hasattr(process, 'siPixelClustersPreSplitting'):
+        if hasattr(process.siPixelClustersPreSplitting, 'cuda'):
+            del process.siPixelClustersPreSplitting.cuda
 
-        #del process.siPixelRecHitsPreSplitting
-
-        process.siPixelRecHitsPreSplitting = _siPixelRecHitFromSoAAlpakaPhase1.clone(
+alpaka.toModify(siPixelRecHitsPreSplitting,
+    cpu = _siPixelRecHitFromSoAAlpakaPhase1.clone(
             pixelRecHitSrc = cms.InputTag('siPixelRecHitsPreSplittingAlpaka'),
             src = cms.InputTag('siPixelClustersPreSplitting'))
     
+)
 
 alpaka.toReplaceWith(siPixelRecHitsPreSplittingTask, cms.Task())
 
 modifyPixelHitsRecoForAlpaka_ = alpaka.makeProcessModifier(_modifyPixelHitsRecoLegacyConverter)
-
-# siPixelRecHitsPreSplittingTaskAlpaka = cms.Task(
-#                         # Reconstruct the pixel hits on the device
-#                         siPixelRecHitsPreSplittingAlpaka,
-#                         # Convert hit soa on host to legacy formats
-#                         siPixelRecHitsPreSplitting)
 
 alpaka.toReplaceWith(siPixelRecHitsPreSplittingTask, cms.Task(
                         # Reconstruct the pixel hits on the device
