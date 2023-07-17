@@ -29,22 +29,16 @@ public:
   template <typename TQueue>
   explicit TrackingRecHitAlpakaDevice(uint32_t nHits,
                                       int32_t offsetBPIX2,
-                                      ParamsOnDevice const* cpeParams,
                                       uint32_t const* hitsModuleStart,
                                       TQueue queue)
       : PortableDeviceCollection<TrackingRecHitAlpakaLayout<TrackerTraits>, TDev>(nHits, queue),
         nHits_(nHits),
-        cpeParams_(cpeParams),
         hitsModuleStart_(hitsModuleStart),
         offsetBPIX2_(offsetBPIX2) {
     phiBinner_ = &(view().phiBinner());
 
     const auto host = cms::alpakatools::host();
     const auto device = cms::alpakatools::devices<alpaka::Pltf<TDev>>()[0];
-
-    auto cpe_h = alpaka::createView(host, cpeParams, 1);
-    auto cpe_d = alpaka::createView(device, &(view().cpeParams()), 1);
-    alpaka::memcpy(queue, cpe_d, cpe_h, 1);
 
     auto start_h = alpaka::createView(host, hitsModuleStart, TrackerTraits::numberOfModules + 1);
     auto start_d = alpaka::createView(device, view().hitsModuleStart().data(), TrackerTraits::numberOfModules + 1);

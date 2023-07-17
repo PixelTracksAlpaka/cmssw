@@ -249,9 +249,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   //                                                                                     float bfield,
   //                                                                                     Queue& queue) const {
   template <typename TrackerTraits>
-  TrackSoACollection<TrackerTraits> CAHitNtupletGenerator<TrackerTraits>::makeTuplesAsync(HitsOnDevice const& hits_d,
-                                                                                          float bfield,
-                                                                                          Queue& queue) const {
+  TrackSoADevice<TrackerTraits> CAHitNtupletGenerator<TrackerTraits>::makeTuplesAsync(HitsOnDevice const& hits_d,
+                                                                                      ParamsOnDevice const* cpeParams,
+                                                                                      float bfield,
+                                                                                      Queue& queue) const {
     using HelixFit = HelixFit<TrackerTraits>;
     // using TrackSoA = TrackSoADevice<TrackerTraits>;
     using TrackSoA = TrackSoACollection<TrackerTraits>;
@@ -268,9 +269,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     HelixFit fitter(bfield, m_params.fitNas4_);
     fitter.allocate(kernels.tupleMultiplicity(), tracks.view());
     if (m_params.useRiemannFit_) {
-      fitter.launchRiemannKernels(hits_d.view(), hits_d.nHits(), TrackerTraits::maxNumberOfQuadruplets, queue);
+      fitter.launchRiemannKernels(hits_d.view(), cpeParams, hits_d.nHits(), TrackerTraits::maxNumberOfQuadruplets, queue);
     } else {
-      fitter.launchBrokenLineKernels(hits_d.view(), hits_d.nHits(), TrackerTraits::maxNumberOfQuadruplets, queue);
+      fitter.launchBrokenLineKernels(hits_d.view(), cpeParams, hits_d.nHits(), TrackerTraits::maxNumberOfQuadruplets, queue);
     }
     kernels.classifyTuples(hits_d.view(), tracks.view(), queue);
 #ifdef GPU_DEBUG

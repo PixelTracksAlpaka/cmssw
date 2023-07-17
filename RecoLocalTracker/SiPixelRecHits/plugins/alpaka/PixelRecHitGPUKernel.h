@@ -31,12 +31,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       PixelRecHitGPUKernel& operator=(const PixelRecHitGPUKernel&) = delete;
       PixelRecHitGPUKernel& operator=(PixelRecHitGPUKernel&&) = delete;
 
-      using ParamsOnGPU = pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>;
+      using ParamsOnDevice = pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>;
 
       TrackingRecHitAlpakaCollection<TrackerTraits> makeHitsAsync(SiPixelDigisCollection const& digis_d,
                                                               SiPixelClustersCollection const& clusters_d,
                                                               BeamSpotPOD const* bs_d,
-                                                              ParamsOnGPU const* cpeParams,
+                                                              ParamsOnDevice const* cpeParams,
                                                               Queue queue) const;
     };
   }  // namespace pixelgpudetails

@@ -68,8 +68,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
     }
 
-    //LogDebug("SiPixelGainCalibrationForHLTSoA")
-    std::cout << "caching calibs for " << n_detectors << " pixel detectors of size " << gains.data().size() << '\n'
+    LogDebug("SiPixelGainCalibrationForHLTSoA") << "caching calibs for " << n_detectors << " pixel detectors of size " << gains.data().size() << '\n'
               << "sizes " << sizeof(char) << ' ' << sizeof(uint8_t) << ' '
               << sizeof(siPixelGainsSoA::DecodingStructure);
 
