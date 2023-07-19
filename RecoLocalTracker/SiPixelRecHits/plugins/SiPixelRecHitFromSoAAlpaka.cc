@@ -26,6 +26,24 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
 
+/*! \file SiPixelRecHitFromSoAAlpaka.cc
+ * ------------------------------------------------------
+ * This EDProducer converts RecHits, stored as SoA on host, into legacy (AoS) RecHits.
+ * The SoA of RecHits is produced with the SiPixelRecHitAlpaka module on device
+ * and moved to host before invoking the conversion (this producer) to legacy RecHits.
+ * ------------------------------------------------------
+ */
+
+/*! \class SiPixelRecHitFromSoAAlpaka
+  *
+  * \brief EDProducer to convert SoA PixelRecHit collection to legacy (AoS) PixelRecHits
+  *
+  * The main method (produce()) loops over detUnits. Using the array holding the starting index
+  * of the hits belonging to each detUnit, it reconstruct RecHits belonging to that detUnit by
+  * accessing corresponding rows in SoA RecHit collections.
+  * The reconstructed RecHits are added the output (AoS) collection of SiPixelRecHits
+ */
+
 template <typename TrackerTraits>
 class SiPixelRecHitFromSoAAlpaka : public edm::global::EDProducer<> {
   using HitModuleStartArray = typename TrackingRecHitAlpakaSoA<TrackerTraits>::HitModuleStartArray;

@@ -19,10 +19,33 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
 
+
+/*! \file PixelRecHits.h
+ * ------------------------------------------------------
+ * Contains getHits class used to produce the collection of PixelRecHits out of
+ * SiPixelDigis and SiPixelClusters and alpaka accelerators.
+ * All three collections are used in the form of SoA. Looping over digis
+ * is done to set cluster properties needed for position estimation.
+ * This is then followed by looping over clusters to create RecHits.
+ * ------------------------------------------------------
+ */
+
+
+
+
 //#define GPU_DEBUG 1
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace pixelRecHits {
 
+/*! \class getHits
+ *
+ * \brief Used to build SoA TrackingRecHit collection from SiPixelClusters and SiPixelDigis SoAs.
+ *
+ * The only method, operator(), is called asynchronously and processes clusters from one module per one block of threads.
+ * It determines and sets cluster properties such as charge and cluster edges using the information from the collection of digis.
+ * These properties are then used to generate recHits from clusters (one cluster per thread).
+ * It calls pixelCPEforDevice to determine the position and errors of the rec hits.
+ */
     template <typename TrackerTraits>
     class getHits {
     public:

@@ -14,8 +14,16 @@
 #include "PixelRecHitGPUKernel.h"
 #include "PixelRecHits.h"
 
+/*! \file PixelRecHitGPUKernel.dev.cc
+ * ------------------------------------------------------
+ * Submits work to device that builds RecHit collection out of clusters and digis
+ * ------------------------------------------------------
+ */
+
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   using namespace cms::alpakatools;
+  //! \class setHitsLayerStart
+  //! \brief Contains the operator that creates an array containing first hits belonging to each layer
   template <typename TrackerTraits>
   class setHitsLayerStart {
   public:
@@ -42,7 +50,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   };
 
   namespace pixelgpudetails {
-
     template <typename TrackerTraits>
     TrackingRecHitAlpakaCollection<TrackerTraits> PixelRecHitGPUKernel<TrackerTraits>::makeHitsAsync(
         SiPixelDigisCollection const& digis_d,

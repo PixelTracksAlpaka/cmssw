@@ -13,6 +13,17 @@
 #include "DataFormats/GeometrySurface/interface/SOARotation.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 
+/*! \file pixelCPEforDevice.h
+ * ------------------------------------------------------
+ * Defines a namespace defining SOA storing Common, Detector and Cluster parameters
+ * that are used in running generic version of the cluster parameter
+ * estimation algorithm, described in CMS NOTE-2007/033, on accelerators with Alpaka.
+ * The namespace defines these functions as well.
+ * ------------------------------------------------------
+ */
+
+
+
 // Nesting this namespace to prevent conflicts with pixelCPEForDevice.h
 namespace CPEFastParametrisation {
   // From https://cmssdt.cern.ch/dxr/CMSSW/source/CondFormats/SiPixelTransient/src/SiPixelGenError.cc#485-486
@@ -23,6 +34,13 @@ namespace CPEFastParametrisation {
   constexpr int kNumErrorBins = 16;
 }  // namespace CPEFastParametrisation
 
+/*! \namespace pixelCPEforDevice
+ *
+ * \brief Defines SOA structures and functions which are used to estimate the position of a given RecHit (cluster)
+ *
+ * The main method position() determines the nominal position of the hit and calls correction() to account for Lorentz angle and cluster charge asymmetry.
+ * The uncertainty on the position estimate can be obtained using information from the database, errorFromDB(), or just from the pixel sizes, errorFromSize().
+ */
 namespace pixelCPEforDevice {
 
   using Status = SiPixelHitStatus;

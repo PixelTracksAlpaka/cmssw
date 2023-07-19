@@ -33,7 +33,23 @@
 
 #include "PixelRecHitGPUKernel.h"
 
+/*! SiPixelRecHitAlpaka.cc
+ * ------------------------------------------------------
+ * This EDProducer produces RecHits asynchronously on the device (GPU) per-event.
+ * After asynchronous production of the RecHit, the main method stores the resulting
+ * RecHit at the corresponding position in the device event.
+ * ------------------------------------------------------
+ */
+
+
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
+  /*! \class SiPixelRecHitAlpaka
+   *
+   *  \brief EDProducer to produces RecHits asynchronously on device
+   *
+   *  The main method, produce(), acts on a device's iEvent utilizing the target device's GPU kernel makeHitsAsync() method
+   *  which returns an SoA of RecHits from the input digits, clusters, beamspot and CPE on the device.
+   */
   template <typename TrackerTraits>
   class SiPixelRecHitAlpaka : public global::EDProducer<> {
   public:
