@@ -64,7 +64,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         const auto workDiv1D = cms::alpakatools::make_workdiv<Acc1D>(blocks, threadsPerBlock);
 
 #ifdef GPU_DEBUG
-        std::cout << "launching getHits kernel on " << alpaka::core::demangled<Acc1D> << " with " << blocks << " blocks" << std::endl;
+        std::cout << "launching getHits kernel on " << alpaka::core::demangled<Acc1D> << " with " << blocks << " blocks"
+                  << std::endl;
 #endif
         alpaka::exec<Acc1D>(queue,
                             workDiv1D,
