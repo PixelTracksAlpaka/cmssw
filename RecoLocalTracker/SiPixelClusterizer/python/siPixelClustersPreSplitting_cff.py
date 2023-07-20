@@ -79,9 +79,6 @@ phase2_tracker.toReplaceWith(siPixelDigisClustersPreSplitting, _siPixelDigisClus
 ###### Alpaka pixel clusters local reco
 ######################################################################
 
-from CalibTracker.SiPixelESProducers.siPixelCablingSoAESProducer_cfi import siPixelCablingSoAESProducer
-from CalibTracker.SiPixelESProducers.siPixelGainCalibrationForHLTSoAESProducer_cfi import siPixelGainCalibrationForHLTSoAESProducer
-
 # reconstruct the pixel digis and clusters on the device
 from RecoLocalTracker.SiPixelClusterizer.siPixelRawToCluster_cfi import siPixelRawToCluster as _siPixelRawToClusterAlpaka
 siPixelClustersPreSplittingAlpaka = _siPixelRawToClusterAlpaka.clone()
@@ -95,7 +92,13 @@ alpaka.toReplaceWith(siPixelDigisClustersPreSplitting,_siPixelDigisClustersFromS
     src = "siPixelClustersPreSplittingAlpaka"
 ))
 
-def _modifyPixelClusterRecoLegacyConverter(process):
+def _modifyPixelClustersRecoForAlpaka(process):
+
+    process.load("CalibTracker.SiPixelESProducers.siPixelCablingSoAESProducer_cfi")
+    process.load("CalibTracker.SiPixelESProducers.siPixelGainCalibrationForHLTSoAESProducer_cfi")
+    #from CalibTracker.SiPixelESProducers.siPixelCablingSoAESProducer_cfi import siPixelCablingSoAESProducer
+    #from CalibTracker.SiPixelESProducers.siPixelGainCalibrationForHLTSoAESProducer_cfi import siPixelGainCalibrationForHLTSoAESProducer
+
     # remove cuda branch of the converter
     if hasattr(process, 'siPixelClustersPreSplitting'):
         if hasattr(process.siPixelClustersPreSplitting, 'cuda'):
@@ -109,7 +112,7 @@ alpaka.toModify(siPixelClustersPreSplitting,
         ))
 )
 
-modifyPixelClusterRecoForAlpaka_ = alpaka.makeProcessModifier(_modifyPixelClusterRecoLegacyConverter)
+modifyPixelClusterRecoForAlpaka_ = alpaka.makeProcessModifier(_modifyPixelClustersRecoForAlpaka)
 
 alpaka.toReplaceWith(siPixelClustersPreSplittingTask, cms.Task(
                         # Reconstruct the pixel clusters with alpaka

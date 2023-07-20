@@ -102,8 +102,9 @@ void PixelCPEFast<TrackerTraits>::fillParamsForGpu() {
 
   commonParamsGPU_.numberOfLaddersInBarrel = TrackerTraits::numberOfLaddersInBarrel;
 
-  LogDebug("PixelCPEFast") << "pitch & thickness " << commonParamsGPU_.thePitchX << ' ' << commonParamsGPU_.thePitchY
-                           << "  " << commonParamsGPU_.theThicknessB << ' ' << commonParamsGPU_.theThicknessE;
+  // LogDebug("PixelCPEFast") 
+  std::cout << "PixelCPEFast" << "pitch & thickness " << commonParamsGPU_.thePitchX << ' ' << commonParamsGPU_.thePitchY
+                           << "  " << commonParamsGPU_.theThicknessB << ' ' << commonParamsGPU_.theThicknessE << "\n";
 
   // zero average geometry
   memset(&averageGeometry_, 0, sizeof(pixelTopology::AverageGeometryT<TrackerTraits>));
@@ -143,17 +144,19 @@ void PixelCPEFast<TrackerTraits>::fillParamsForGpu() {
     auto ladder = ttopo_.pxbLadder(p.theDet->geographicalId());
     if (oldLayer != g.layer) {
       oldLayer = g.layer;
-      LogDebug("PixelCPEFast") << "new layer at " << i << (g.isBarrel ? " B  " : (g.isPosZ ? " E+ " : " E- "))
+      // LogDebug("PixelCPEFast") 
+      std::cout << "PixelCPEFast" << "new layer at " << i << (g.isBarrel ? " B  " : (g.isPosZ ? " E+ " : " E- "))
                                << g.layer << " starting at " << g.rawId << '\n'
-                               << "old layer had " << nl << " ladders";
+                               << "old layer had " << nl << " ladders"  << "\n";
       nl = 0;
     }
     if (oldLadder != ladder) {
       oldLadder = ladder;
-      LogDebug("PixelCPEFast") << "new ladder at " << i << (g.isBarrel ? " B  " : (g.isPosZ ? " E+ " : " E- "))
+      // LogDebug("PixelCPEFast") 
+      std::cout << "PixelCPEFast" << "new ladder at " << i << (g.isBarrel ? " B  " : (g.isPosZ ? " E+ " : " E- "))
                                << ladder << " starting at " << g.rawId << '\n'
                                << "old ladder ave z,r,p mz " << zl / 8.f << " " << rl / 8.f << " " << pl / 8.f << ' '
-                               << miz << ' ' << mxz;
+                               << miz << ' ' << mxz << "\n";
       rl = 0;
       zl = 0;
       pl = 0;

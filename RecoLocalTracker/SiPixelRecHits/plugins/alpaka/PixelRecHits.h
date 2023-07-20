@@ -19,7 +19,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
 
-//#define GPU_DEBUG 1
+#define GPU_DEBUG 1
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace pixelRecHits {
 
@@ -87,13 +87,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           ALPAKA_ASSERT_OFFLOAD(digis[k].moduleId() == me);
         }
 
-        if (me % 100 == 1)
+        if (me % 100 == 1 or true)
           if (threadIdxLocal == 0)
             printf(
                 "hitbuilder: %d clusters in module %d. will write at %d\n", nclus, me, clusters[me].clusModuleStart());
 #endif
 
         for (int startClus = 0, endClus = nclus; startClus < endClus; startClus += MaxHitsInIter) {
+
           auto first = clusters[me].clusModuleStart() + startClus;
 
           int nClusInIter = alpaka::math::min(acc, MaxHitsInIter, endClus - startClus);
@@ -125,13 +126,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               cms::alpakatools::element_index_range_in_block(acc, first);
           uint32_t rowsColsFirstElementIdx = firstElementIdxNoStride;
           uint32_t rowsColsEndElementIdx = endElementIdxNoStride;
+          
           for (uint32_t i = rowsColsFirstElementIdx; i < numElements; ++i) {
             if (not cms::alpakatools::next_valid_element_index_strided(
                     i, rowsColsFirstElementIdx, rowsColsEndElementIdx, blockDimension, numElements))
               break;
             auto id = digis[i].moduleId();
-            if (id == invalidModuleId)
-              continue;  // not valid
+            // if (id == invalidModuleId)
+            //   continue;  // not valid
             if (id != me)
               break;  // end of module
             auto cl = digis[i].clus();
@@ -142,10 +144,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             ALPAKA_ASSERT_OFFLOAD(cl < MaxHitsInIter);
             auto x = digis[i].xx();
             auto y = digis[i].yy();
-            alpaka::atomicMin(acc, &clusParams.minRow[cl], (uint32_t)x, alpaka::hierarchy::Threads{});
-            alpaka::atomicMax(acc, &clusParams.maxRow[cl], (uint32_t)x, alpaka::hierarchy::Threads{});
-            alpaka::atomicMin(acc, &clusParams.minCol[cl], (uint32_t)y, alpaka::hierarchy::Threads{});
-            alpaka::atomicMax(acc, &clusParams.maxCol[cl], (uint32_t)y, alpaka::hierarchy::Threads{});
+            
+            alpaka::atomicMin(acc, &clusParams.minRow[cl], static_cast<uint32_t>(x), alpaka::hierarchy::Threads{});
+            alpaka::atomicMax(acc, &clusParams.maxRow[cl], static_cast<uint32_t>(x), alpaka::hierarchy::Threads{});
+            alpaka::atomicMin(acc, &clusParams.minCol[cl], static_cast<uint32_t>(y), alpaka::hierarchy::Threads{});
+            alpaka::atomicMax(acc, &clusParams.maxCol[cl], static_cast<uint32_t>(y), alpaka::hierarchy::Threads{});
           }
 
           alpaka::syncBlockThreads(acc);
@@ -157,6 +160,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             if (not cms::alpakatools::next_valid_element_index_strided(
                     i, chargeFirstElementIdx, chargeEndElementIdx, blockDimension, numElements))
               break;
+
             auto id = digis[i].moduleId();
             if (id == invalidModuleId)
               continue;  // not valid
@@ -165,12 +169,21 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             auto cl = digis[i].clus();
             if (cl < startClus || cl >= lastClus)
               continue;
+            
+            // printf("clus charge: %.2f %.2f %.2f %.2f %.2f %.2f\n",float(i),
+            //                                                       float(digis[i].moduleId()), 
+            //                                                       float(digis[i].clus()),
+            //                                                       float(digis[i].xx()),
+            //                                                       float(digis[i].yy()),
+            //                                                       float(digis[i].adc()));
+                                                                  
             cl -= startClus;
             ALPAKA_ASSERT_OFFLOAD(cl >= 0);
             ALPAKA_ASSERT_OFFLOAD(cl < MaxHitsInIter);
             auto x = digis[i].xx();
             auto y = digis[i].yy();
             auto ch = digis[i].adc();
+            
             alpaka::atomicAdd(acc, &clusParams.charge[cl], (int32_t)ch, alpaka::hierarchy::Threads{});
             ch = alpaka::math::min(acc, ch, pixmx);
             if (clusParams.minRow[cl] == x)
@@ -184,6 +197,25 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           }
 
           alpaka::syncBlockThreads(acc);
+
+          if (threadIdxLocal == 0)
+          {
+            for (int ic = 0; ic < nclus; ic++) {
+              printf("module: %d - clus: %d - %d - %d - %d - %d - %d - %d - %d - %d - %d \n",
+                        me, 
+                        ic,
+                        clusParams.minRow[ic],
+                        clusParams.maxRow[ic],
+                        clusParams.minCol[ic],
+                        clusParams.maxCol[ic],
+                        clusParams.charge[ic],
+                        clusParams.q_f_X[ic],
+                        clusParams.q_l_X[ic],
+                        clusParams.q_f_Y[ic],
+                        clusParams.q_l_Y[ic]
+                        );  
+            }
+          }
 
           // next one cluster per thread...
 
@@ -229,6 +261,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
             hits[h].rGlobal() = alpaka::math::sqrt(acc, xg * xg + yg * yg);
             hits[h].iphi() = unsafe_atan2s<7>(yg, xg);
+            
+            // printf("%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n",float(clusParams.charge[ic]),
+            //                                          float(me),
+            //                                          float(xl),
+            //                                          float(yl),
+            //                                          float(xg),
+            //                                          float(yg),
+            //                                          float(zg),
+            //                                          float(hits[h].rGlobal()),
+                                                    //  float(hits[h].iphi()));
           });
           alpaka::syncBlockThreads(acc);
         }  // end loop on batches

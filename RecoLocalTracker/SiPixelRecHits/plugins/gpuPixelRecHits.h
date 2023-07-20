@@ -13,7 +13,7 @@
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforGPU.h"
 #include "CUDADataFormats/SiPixelDigi/interface/SiPixelDigisCUDA.h"
 
-//#define GPU_DEBUG 1
+#define GPU_DEBUG 1
 namespace gpuPixelRecHits {
 
   template <typename TrackerTraits>
@@ -73,7 +73,7 @@ namespace gpuPixelRecHits {
       assert(digis[k].moduleId() == me);
     }
 
-    if (me % 100 == 1)
+    if (me % 100 == 1 or true)
       if (threadIdx.x == 0)
         printf("hitbuilder: %d clusters in module %d. will write at %d\n", nclus, me, clusters[me].clusModuleStart());
 #endif
@@ -156,6 +156,25 @@ namespace gpuPixelRecHits {
 
       __syncthreads();
 
+      if (threadIdx.x == 0)
+          {
+            for (int ic = 0; ic < nclus; ic++) {
+              printf("module: %d - clus: %d - %d - %d - %d - %d - %d - %d - %d - %d - %d \n",
+                        me, 
+                        ic,
+                        clusParams.minRow[ic],
+                        clusParams.maxRow[ic],
+                        clusParams.minCol[ic],
+                        clusParams.maxCol[ic],
+                        clusParams.charge[ic],
+                        clusParams.q_f_X[ic],
+                        clusParams.q_l_X[ic],
+                        clusParams.q_f_Y[ic],
+                        clusParams.q_l_Y[ic]
+                        );  
+            }
+          }
+
       // next one cluster per thread...
 
       first = clusters[me].clusModuleStart() + startClus;
@@ -199,6 +218,16 @@ namespace gpuPixelRecHits {
 
         hits[h].rGlobal() = std::sqrt(xg * xg + yg * yg);
         hits[h].iphi() = unsafe_atan2s<7>(yg, xg);
+
+        // printf("%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n",float(hits[h].chargeAndStatus().charge),                                                     float(me),
+        //                                              float(xl),
+        //                                              float(yl),
+        //                                              float(xg),
+        //                                              float(yg),
+        //                                              float(zg),
+        //                                              float(hits[h].rGlobal()),
+        //                                              float(hits[h].iphi()));
+
       }
       __syncthreads();
     }  // end loop on batches

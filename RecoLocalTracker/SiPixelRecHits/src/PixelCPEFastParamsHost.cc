@@ -50,8 +50,9 @@ void PixelCPEFastParamsHost<TrackerTraits>::fillParamsForDevice() {
 
   buffer_->commonParams().numberOfLaddersInBarrel = TrackerTraits::numberOfLaddersInBarrel;
 
-  LogDebug("PixelCPEFastParamsHost") << "pitch & thickness " << buffer_->commonParams().thePitchX << ' ' << buffer_->commonParams().thePitchY
-                           << "  " << buffer_->commonParams().theThicknessB << ' ' << buffer_->commonParams().theThicknessE;
+  // LogDebug("PixelCPEFastParamsHost") 
+  std::cout << "PixelCPEFastParams" << "pitch & thickness " << buffer_->commonParams().thePitchX << ' ' << buffer_->commonParams().thePitchY
+                           << "  " << buffer_->commonParams().theThicknessB << ' ' << buffer_->commonParams().theThicknessE << "\n";
 
   // zero average geometry
   memset(&buffer_->averageGeometry(), 0, sizeof(pixelTopology::AverageGeometryT<TrackerTraits>));
@@ -91,17 +92,19 @@ void PixelCPEFastParamsHost<TrackerTraits>::fillParamsForDevice() {
     auto ladder = ttopo_.pxbLadder(p.theDet->geographicalId());
     if (oldLayer != g.layer) {
       oldLayer = g.layer;
-      LogDebug("PixelCPEFastParamsHost") << "new layer at " << i << (g.isBarrel ? " B  " : (g.isPosZ ? " E+ " : " E- "))
+      // LogDebug("PixelCPEFastParamsHost") 
+     std::cout << "PixelCPEFastParams" << "new layer at " << i << (g.isBarrel ? " B  " : (g.isPosZ ? " E+ " : " E- "))
                                << g.layer << " starting at " << g.rawId << '\n'
-                               << "old layer had " << nl << " ladders";
+                               << "old layer had " << nl << " ladders" << "\n";
       nl = 0;
     }
     if (oldLadder != ladder) {
       oldLadder = ladder;
-      LogDebug("PixelCPEFastParamsHost") << "new ladder at " << i << (g.isBarrel ? " B  " : (g.isPosZ ? " E+ " : " E- "))
+      // LogDebug("PixelCPEFastParamsHost") 
+      std::cout << "PixelCPEFastParams" << "new ladder at " << i << (g.isBarrel ? " B  " : (g.isPosZ ? " E+ " : " E- "))
                                << ladder << " starting at " << g.rawId << '\n'
                                << "old ladder ave z,r,p mz " << zl / 8.f << " " << rl / 8.f << " " << pl / 8.f << ' '
-                               << miz << ' ' << mxz;
+                               << miz << ' ' << mxz << "\n";
       rl = 0;
       zl = 0;
       pl = 0;

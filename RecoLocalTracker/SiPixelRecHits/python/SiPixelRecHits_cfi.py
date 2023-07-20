@@ -114,15 +114,6 @@ pixelNtupletFit.toReplaceWith(siPixelRecHitsPreSplittingTask, cms.Task(
 ###### Alpaka pixel hits local reco
 ######################################################################
 
-## CPE Parameters ESProducer
-siPixelCPEFastParamsESProducerAlpakaPhase1 = cms.ESProducer('PixelCPEFastParamsESProducerAlpakaPhase1@alpaka',
-    ComponentName = cms.string('PixelCPEFastParams'),
-    appendToDataLabel = cms.string(''),
-    alpaka = cms.untracked.PSet(
-        backend = cms.untracked.string('')
-    )
-)
-
 from RecoLocalTracker.SiPixelRecHits.siPixelRecHitAlpakaPhase1_cfi import siPixelRecHitAlpakaPhase1 as _siPixelRecHitAlpakaPhase1
 
 # Hit SoA producer on Device
@@ -132,19 +123,16 @@ siPixelRecHitsPreSplittingAlpaka = _siPixelRecHitAlpakaPhase1.clone(
 
 from RecoLocalTracker.SiPixelRecHits.siPixelRecHitFromSoAAlpakaPhase1_cfi import siPixelRecHitFromSoAAlpakaPhase1 as _siPixelRecHitFromSoAAlpakaPhase1
 
+def _modifyPixelHitsRecoForAlpaka(process):
 
-# def _modifyPixelHitsRecoLegacyConverter(process):
-#     # replace siPixelRecHitsPreSplitting with from SoA converter
-#     if hasattr(process, 'siPixelRecHitsPreSplitting'):
-
-#         del process.siPixelRecHitsPreSplitting.cuda
-
-#         process.siPixelRecHitsPreSplitting = _siPixelRecHitFromSoAAlpakaPhase1.clone(
-#             pixelRecHitSrc = cms.InputTag('siPixelRecHitsPreSplittingAlpaka'),
-#             src = cms.InputTag('siPixelClustersPreSplitting'))
-    
-
-def _modifyPixelHitsRecoLegacyConverter(process):
+    ## CPE Parameters ESProducer
+    process.siPixelCPEFastParamsESProducerAlpakaPhase1 = cms.ESProducer('PixelCPEFastParamsESProducerAlpakaPhase1@alpaka',
+        ComponentName = cms.string('PixelCPEFastParams'),
+        appendToDataLabel = cms.string(''),
+        alpaka = cms.untracked.PSet(
+            backend = cms.untracked.string('')
+        )
+    )
     # remove cuda branch of the converter
     if hasattr(process, 'siPixelClustersPreSplitting'):
         if hasattr(process.siPixelClustersPreSplitting, 'cuda'):
@@ -159,7 +147,7 @@ alpaka.toModify(siPixelRecHitsPreSplitting,
 
 alpaka.toReplaceWith(siPixelRecHitsPreSplittingTask, cms.Task())
 
-modifyPixelHitsRecoForAlpaka_ = alpaka.makeProcessModifier(_modifyPixelHitsRecoLegacyConverter)
+modifyPixelHitsRecoForAlpaka_ = alpaka.makeProcessModifier(_modifyPixelHitsRecoForAlpaka)
 
 alpaka.toReplaceWith(siPixelRecHitsPreSplittingTask, cms.Task(
                         # Reconstruct the pixel hits on the device
