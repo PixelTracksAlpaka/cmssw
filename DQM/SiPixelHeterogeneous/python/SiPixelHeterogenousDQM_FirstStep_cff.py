@@ -125,3 +125,16 @@ phase2_tracker.toReplaceWith(monitorpixelSoACompareSource,_monitorpixelSoACompar
 
 from Configuration.ProcessModifiers.gpuValidationPixel_cff import gpuValidationPixel
 gpuValidationPixel.toReplaceWith(monitorpixelSoASource, monitorpixelSoACompareSource)
+
+from Configuration.ProcessModifiers.alpaka_cff import alpaka
+from DQM.SiPixelHeterogeneous.siPixelPhase1MonitorRecHitsSoAAlpaka_cfi import siPixelPhase1MonitorRecHitsSoAAlpaka as _siPixelPhase1MonitorRecHitsSoAAlpaka
+
+## rechits
+siPixelPhase1MonitorRecHitsSoADevice = _siPixelPhase1MonitorRecHitsSoAAlpaka.clone(
+ pixelHitsSrc = "siPixelRecHitsPreSplittingAlpaka",
+ TopFolderName = "SiPixelHeterogeneous/PixelRecHitsSoADevice"
+)
+
+
+monitorpixelSoASourceAlpaka = cms.Sequence(siPixelPhase1MonitorRecHitsSoADevice)
+alpaka.toReplaceWith(monitorpixelSoASource, monitorpixelSoASourceAlpaka)

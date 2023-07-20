@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from Configuration.Eras.Modifier_run3_common_cff import run3_common
 from Configuration.ProcessModifiers.gpu_cff import gpu
+from Configuration.ProcessModifiers.alpaka_cff import alpaka
 
 # conditions used *only* by the modules running on GPU
 from CalibTracker.SiPixelESProducers.siPixelROCsStatusAndMappingWrapperESProducer_cfi import siPixelROCsStatusAndMappingWrapperESProducer
@@ -73,3 +74,47 @@ phase2_tracker.toReplaceWith(siPixelDigisClustersPreSplitting, _siPixelDigisClus
                             siPixelDigisClustersPreSplitting,
                             # SwitchProducer wrapping the legacy pixel cluster producer or an alias for the pixel clusters information converted from SoA
                             siPixelClustersPreSplitting))
+
+######################################################################
+###### Alpaka pixel clusters local reco
+######################################################################
+
+from CalibTracker.SiPixelESProducers.siPixelCablingSoAESProducer_cfi import siPixelCablingSoAESProducer
+from CalibTracker.SiPixelESProducers.siPixelGainCalibrationForHLTSoAESProducer_cfi import siPixelGainCalibrationForHLTSoAESProducer
+
+# reconstruct the pixel digis and clusters on the device
+from RecoLocalTracker.SiPixelClusterizer.siPixelRawToCluster_cfi import siPixelRawToCluster as _siPixelRawToClusterAlpaka
+siPixelClustersPreSplittingAlpaka = _siPixelRawToClusterAlpaka.clone()
+
+run3_common.toModify(siPixelClustersPreSplittingAlpaka,
+                     isRun2 = False,
+                     clusterThreshold_layer1 = 4000)
+
+from RecoLocalTracker.SiPixelClusterizer.siPixelDigisClustersFromSoAAlpakaPhase1_cfi import siPixelDigisClustersFromSoAAlpakaPhase1 as _siPixelDigisClustersFromSoAAlpakaPhase1
+alpaka.toReplaceWith(siPixelDigisClustersPreSplitting,_siPixelDigisClustersFromSoAAlpakaPhase1.clone(
+    src = "siPixelClustersPreSplittingAlpaka"
+))
+
+def _modifyPixelClusterRecoLegacyConverter(process):
+    # remove cuda branch of the converter
+    if hasattr(process, 'siPixelClustersPreSplitting'):
+        if hasattr(process.siPixelClustersPreSplitting, 'cuda'):
+            del process.siPixelClustersPreSplitting.cuda
+
+alpaka.toReplaceWith(siPixelClustersPreSplittingTask, cms.Task())
+alpaka.toModify(siPixelClustersPreSplitting,
+    cpu = cms.EDAlias(
+        siPixelDigisClustersPreSplitting = cms.VPSet(
+            cms.PSet(type = cms.string("SiPixelClusteredmNewDetSetVector"))
+        ))
+)
+
+modifyPixelClusterRecoForAlpaka_ = alpaka.makeProcessModifier(_modifyPixelClusterRecoLegacyConverter)
+
+alpaka.toReplaceWith(siPixelClustersPreSplittingTask, cms.Task(
+                        # Reconstruct the pixel clusters with alpaka
+                        siPixelClustersPreSplittingAlpaka,
+                        # Convert from host SoA to legacy formats (digis and clusters)
+                        siPixelDigisClustersPreSplitting,
+                        # EDAlias for the clusters
+                        siPixelClustersPreSplitting))
