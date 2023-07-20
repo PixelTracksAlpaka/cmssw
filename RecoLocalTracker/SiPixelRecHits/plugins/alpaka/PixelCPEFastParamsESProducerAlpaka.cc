@@ -24,6 +24,14 @@
 #include "RecoLocalTracker/Records/interface/PixelCPEFastParamsRecord.h"
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 
+/*! \file PixelCPEFastParamsESProducerAlpaka.cc
+ * ------------------------------------------------------
+ * This ESProducer produces a PixelCPEFastParamsHost record.
+ * It provides data on det geometry and CPE error estimation
+ * It is consumed by the SiPixelRecHitAlpaka EDProducer.
+ * ------------------------------------------------------
+ */
+
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   template <typename TrackerTraits>
   class PixelCPEFastParamsESProducerAlpaka : public ESProducer {
