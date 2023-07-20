@@ -237,16 +237,30 @@ namespace cms {
       }
 
       template <typename TAcc>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE void count(const TAcc &acc, T t) {
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE void countHist(const TAcc &acc, T t) {
         uint32_t b = bin(t);
         ALPAKA_ASSERT_OFFLOAD(b < nbins());
         atomicIncrement(acc, off[b]);
       }
 
       template <typename TAcc>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE void fill(const TAcc &acc, T t, index_type j) {
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE void count(const TAcc &acc, T b) {
+        ALPAKA_ASSERT_OFFLOAD((uint32_t)b < nbins());
+        atomicIncrement(acc, off[b]);
+      }
+
+      template <typename TAcc>
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE void fillHist(const TAcc &acc, T t, index_type j) {
         uint32_t b = bin(t);
         ALPAKA_ASSERT_OFFLOAD(b < nbins());
+        auto w = atomicDecrement(acc, off[b]);
+        ALPAKA_ASSERT_OFFLOAD(w > 0);
+        bins[w - 1] = j;
+      }
+
+      template <typename TAcc>
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE void fill(const TAcc &acc, T b, index_type j) {
+        ALPAKA_ASSERT_OFFLOAD((uint32_t)b < nbins());
         auto w = atomicDecrement(acc, off[b]);
         ALPAKA_ASSERT_OFFLOAD(w > 0);
         bins[w - 1] = j;
@@ -292,9 +306,9 @@ namespace cms {
       index_type bins[capacity()];
     };
 
-    template <typename I,       // type stored in the container (usually an index in a vector of the input values)
-              int32_t MAXONES,  // max number of "ones"
-              int32_t MAXMANYS  // max number of "manys"
+    template <typename I,       // type stored in the container (usually an index in a vector of the input values); same as I in HistoContainer
+              int32_t MAXONES,  // max number of "ones"; same as NBINS in HistoContainer
+              int32_t MAXMANYS  // max number of "manys"; same as SIZE in HistoContainer
               >
     using OneToManyAssoc = HistoContainer<uint32_t, MAXONES, MAXMANYS, sizeof(uint32_t) * 8, I, 1>;
 

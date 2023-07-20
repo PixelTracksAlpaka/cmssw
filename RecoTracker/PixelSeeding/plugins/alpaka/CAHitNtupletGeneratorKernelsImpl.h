@@ -432,11 +432,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         using Cell = CACellT<TrackerTraits>;
 
-//#ifdef GPU_DEBUG
+#ifdef GPU_DEBUG
         const uint32_t threadIdx(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
         if (threadIdx == 0)
           printf("starting producing ntuplets from %d cells \n", *nCells);
-//#endif
+#endif
 
         for (auto idx : cms::alpakatools::elements_with_stride(acc, (*nCells))) {
           auto const &thisCell = cells[idx];
@@ -458,17 +458,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             typename Cell::TmpTuple stack;
             stack.reset();
             bool bpix1Start = params.startAt0(pid);
-            thisCell.template find_ntuplets2<maxDepth+2, TAcc>(acc,
-                                                            idx,
-                                                            hh,
-                                                            cells,
-                                                            *cellTracks,
-                                                            tracks_view.hitIndices(),
-                                                            *apc,
-                                                            tracks_view.quality(),
-                                                            stack,
-                                                            params.minHitsPerNtuplet_,
-                                                            bpix1Start);
+            // thisCell.template find_ntuplets2<maxDepth+2, TAcc>(acc,
+            //                                                 idx,
+            //                                                 hh,
+            //                                                 cells,
+            //                                                 *cellTracks,
+            //                                                 tracks_view.hitIndices(),
+            //                                                 *apc,
+            //                                                 tracks_view.quality(),
+            //                                                 stack,
+            //                                                 params.minHitsPerNtuplet_,
+            //                                                 bpix1Start);
             thisCell.template find_ntuplets<maxDepth, TAcc>(acc,
                                                             hh,
                                                             cells,
