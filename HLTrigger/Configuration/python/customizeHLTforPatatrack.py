@@ -25,7 +25,9 @@ def customizeHLTforDQMGPUvsCPUPixel(process):
 
     process.hltPixelConsumerCPU.eventProducts = []
     for foo in process.hltPixelConsumerGPU.eventProducts:
-        if foo != "hltPixelTracks": process.hltPixelConsumerCPU.eventProducts += [foo+'CPUSerial']
+        # if foo != "hltPixelTracks": process.hltPixelConsumerCPU.eventProducts += [foo+'CPUSerial']
+        process.hltPixelConsumerCPU.eventProducts += [foo+'CPUSerial']
+    process.hltPixelConsumerCPU.eventProducts += ['hltPixelTracksCPUSerial']
 
     # modify EventContent of DQMGPUvsCPU stream
     if hasattr(process, 'hltOutputDQMGPUvsCPU'):
@@ -35,8 +37,8 @@ def customizeHLTforDQMGPUvsCPUPixel(process):
             'keep *Cluster*_hltSiPixelClustersCPUSerial_*_*',
             'keep *_hltSiPixelDigiErrorsLegacyFormat_*_*',
             'keep *_hltSiPixelDigiErrorsLegacyFormatCPUSerial_*_*',
-#            'keep *RecHit*_hltSiPixelRecHits_*_*',
-#            'keep *RecHit*_hltSiPixelRecHitsCPUSerial_*_*',
+            # 'keep *RecHit*_hltSiPixelRecHits_*_*',
+            # 'keep *RecHit*_hltSiPixelRecHitsCPUSerial_*_*',
         ]
 
     # PixelRecHits: monitor of CPUSerial product (Alpaka backend: 'serial_sync')
@@ -112,9 +114,9 @@ def customizeHLTforDQMGPUvsCPUPixel(process):
         process.hltSiPixelRecHitsSoAMonitorCPU
       + process.hltSiPixelRecHitsSoAMonitorGPU
       + process.hltSiPixelRecHitsSoACompareGPUvsCPU
-    #   + process.hltSiPixelTrackSoAMonitorCPU
+      + process.hltSiPixelTrackSoAMonitorCPU
       + process.hltSiPixelTrackSoAMonitorGPU
-    #   + process.hltSiPixelTrackSoACompareGPUvsCPU
+      + process.hltSiPixelTrackSoACompareGPUvsCPU
     #   + process.hltSiPixelVertexSoAMonitorCPU
     #   + process.hltSiPixelVertexSoAMonitorGPU
     #   + process.hltSiPixelVertexSoACompareGPUvsCPU
@@ -378,7 +380,7 @@ def customizeHLTforAlpakaPixelRecoTracking(process):
     )
 
     process.HLTRecoPixelTracksCPUSerialTask = cms.ConditionalTask(
-        # process.hltPixelTracksCPUSerial,
+        process.hltPixelTracksCPUSerial,
     )
 
     process.HLTRecoPixelTracksCPUSerialSequence = cms.Sequence( process.HLTRecoPixelTracksCPUSerialTask )
