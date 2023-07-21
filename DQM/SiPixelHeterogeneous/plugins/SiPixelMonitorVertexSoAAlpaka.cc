@@ -21,7 +21,7 @@
 #include "DQMServices/Core/interface/MonitorElement.h"
 #include "DQMServices/Core/interface/DQMEDAnalyzer.h"
 #include "DQMServices/Core/interface/DQMStore.h"
-#include "CUDADataFormats/Vertex/interface/ZVertexSoAHeterogeneousHost.h"
+#include "DataFormats/Vertex/interface/ZVertexSoAHost.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
 class SiPixelMonitorVertexSoAAlpaka : public DQMEDAnalyzer {
@@ -34,8 +34,8 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:
-  edm::EDGetTokenT<ZVertexSoAHost> tokenSoAVertex_;
-  edm::EDGetTokenT<reco::BeamSpot> tokenBeamSpot_;
+  const edm::EDGetTokenT<ZVertexHost> tokenSoAVertex_;
+  const edm::EDGetTokenT<reco::BeamSpot> tokenBeamSpot_;
   std::string topFolderName_;
   MonitorElement* hnVertex;
   MonitorElement* hx;
@@ -51,11 +51,10 @@ private:
 // constructors
 //
 
-SiPixelMonitorVertexSoAAlpaka::SiPixelMonitorVertexSoAAlpaka(const edm::ParameterSet& iConfig) {
-  tokenSoAVertex_ = consumes(iConfig.getParameter<edm::InputTag>("pixelVertexSrc"));
-  tokenBeamSpot_ = consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamSpotSrc"));
-  topFolderName_ = iConfig.getParameter<std::string>("topFolderName");
-}
+SiPixelMonitorVertexSoAAlpaka::SiPixelMonitorVertexSoAAlpaka(const edm::ParameterSet& iConfig)
+    : tokenSoAVertex_(consumes<ZVertexHost>(iConfig.getParameter<edm::InputTag>("pixelVertexSrc"))),
+      tokenBeamSpot_(consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamSpotSrc"))),
+      topFolderName_(iConfig.getParameter<std::string>("topFolderName")) {}
 
 //
 // -- Analyze

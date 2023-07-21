@@ -125,10 +125,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     //                                                  const TrackSoAConstView<TrackerTraits>& tracks_view,
     //                                                  float ptMin,
     //                                                  float ptMax) const {
-      ZVertexCollection Producer<TrackerTraits>::makeAsync(Queue& queue,
-                                                     const TrackSoAConstView<TrackerTraits>& tracks_view,
-                                                     float ptMin,
-                                                     float ptMax) const {
+    ZVertexCollection Producer<TrackerTraits>::makeAsync(Queue& queue,
+                                                         const TrackSoAConstView<TrackerTraits>& tracks_view,
+                                                         float ptMin,
+                                                         float ptMax) const {
 #ifdef PIXVERTEX_DEBUG_PRODUCE
       std::cout << "producing Vertices on GPU" << std::endl;
 #endif  // PIXVERTEX_DEBUG_PRODUCE
