@@ -79,7 +79,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         if (i > 0) {
           cellNeighbors[i].reset();
           alpaka::mem_fence(acc, alpaka::memory_scope::Grid{});
-#ifdef ALAPAKA_ACC_CPU_B_SEQ_T_SEQ_SYNC_BACKEND
+#ifdef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
           theOuterNeighbors = &cellNeighbors[i];
 #else
           auto zero = (PtrAsInt)(&cellNeighbors[0]);
@@ -105,7 +105,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         if (i > 0) {
           cellTracks[i].reset();
           alpaka::mem_fence(acc, alpaka::memory_scope::Grid{});
-#ifdef ALAPAKA_ACC_CPU_B_SEQ_T_SEQ_SYNC_BACKEND
+#ifdef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
           theTracks = &cellTracks[i];
 #else
           auto zero = (PtrAsInt)(&cellTracks[0]);
@@ -348,7 +348,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       // it has no compatible neighbor
       // the ntuplets is then saved if the number of hits it contains is greater
       // than a threshold
-      // printf("find_ntuplets DEPTH %d\n", DEPTH);
 
       if constexpr (DEPTH <= 0) {
         printf("ERROR: CACellT::find_ntuplets reached full depth!\n");
@@ -366,9 +365,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           cells[otherCell].template find_ntuplets<DEPTH - 1>(
               acc, hh, cells, cellTracks, foundNtuplets, apc, quality, tmpNtuplet, minHitsPerNtuplet, startAt0);
         }
-        // if (last) {
-        //   printf("find_ntuplets last is true\n");
-        // }
         if (last) {  // if long enough save...
           if ((unsigned int)(tmpNtuplet.size()) >= minHitsPerNtuplet - 1) {
 #ifdef ONLY_TRIPLETS_IN_HOLE
