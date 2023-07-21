@@ -198,6 +198,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                                                   int32_t offsetBPIX2,
                                                                   Queue &queue) {
     int32_t nhits = hh.metadata().size();
+    // TODO: for some reason the tracks serial case doesn't get the correct offsetBPIX2
+    // so it is needed to re-assign it. Probably need to check the TrackingRecHitHost class
+#ifdef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
+    offsetBPIX2 = hh.offsetBPIX2();
+#endif
 
     using namespace caPixelDoublets;
 
@@ -216,7 +221,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #endif
 
     // in principle we can use "nhits" to heuristically dimension the workspace...
-
     ALPAKA_ASSERT_OFFLOAD(this->device_isOuterHitOfCell_.data());
 
     this->isOuterHitOfCell_ = cms::alpakatools::make_device_buffer<OuterHitOfCell>(queue);

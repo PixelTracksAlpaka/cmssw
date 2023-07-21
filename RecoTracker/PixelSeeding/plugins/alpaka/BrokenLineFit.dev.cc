@@ -26,14 +26,14 @@ using TupleMultiplicity = caStructures::TupleMultiplicityT<TrackerTraits>;
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   template <int N, typename TrackerTraits>
-  class kernel_BLFastFit { 
+  class kernel_BLFastFit {
   public:
     template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
     ALPAKA_FN_ACC void operator()(TAcc const &acc,
                                   Tuples<TrackerTraits> const *__restrict__ foundNtuplets,
                                   TupleMultiplicity<TrackerTraits> const *__restrict__ tupleMultiplicity,
                                   TrackingRecHitAlpakaSoAConstView<TrackerTraits> hh,
-                                  pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const* __restrict__ cpeParams,
+                                  pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const *__restrict__ cpeParams,
                                   typename TrackerTraits::tindex_type *__restrict__ ptkids,
                                   double *__restrict__ phits,
                                   float *__restrict__ phits_ge,
@@ -142,8 +142,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           yerr = nok ? hh[hit].yerrLocal() : yerr;
           dp.frame.toGlobal(hh[hit].xerrLocal(), 0, yerr, ge);
 #else
-          cpeParams->detParams(hh[hit].detectorIndex())
-              .frame.toGlobal(hh[hit].xerrLocal(), 0, hh[hit].yerrLocal(), ge);
+          cpeParams->detParams(hh[hit].detectorIndex()).frame.toGlobal(hh[hit].xerrLocal(), 0, hh[hit].yerrLocal(), ge);
 #endif
 
 #ifdef BL_DUMP_HITS
@@ -250,11 +249,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   };
 
   template <typename TrackerTraits>
-  void HelixFit<TrackerTraits>::launchBrokenLineKernels(const TrackingRecHitAlpakaSoAConstView<TrackerTraits> &hv,
-                                                        pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const* cpeParams,
-                                                        uint32_t hitsInFit,
-                                                        uint32_t maxNumberOfTuples,
-                                                        Queue &queue) {
+  void HelixFit<TrackerTraits>::launchBrokenLineKernels(
+      const TrackingRecHitAlpakaSoAConstView<TrackerTraits> &hv,
+      pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const *cpeParams,
+      uint32_t hitsInFit,
+      uint32_t maxNumberOfTuples,
+      Queue &queue) {
     ALPAKA_ASSERT_OFFLOAD(tuples_);
 
     // auto blockSize = 64;
