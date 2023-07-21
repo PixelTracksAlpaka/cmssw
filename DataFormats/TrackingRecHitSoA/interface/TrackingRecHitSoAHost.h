@@ -37,10 +37,7 @@ public:
 
   // Constructor which specifies the SoA size
   template <typename TQueue>
-  explicit TrackingRecHitAlpakaHost(uint32_t nHits,
-                                    int32_t offsetBPIX2,
-                                    uint32_t const* hitsModuleStart,
-                                    TQueue queue)
+  explicit TrackingRecHitAlpakaHost(uint32_t nHits, int32_t offsetBPIX2, uint32_t const* hitsModuleStart, TQueue queue)
       : PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>(nHits, queue),
         nHits_(nHits),
         hitsModuleStart_(hitsModuleStart),
