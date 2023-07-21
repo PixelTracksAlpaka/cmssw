@@ -117,9 +117,9 @@ def customizeHLTforDQMGPUvsCPUPixel(process):
       + process.hltSiPixelTrackSoAMonitorCPU
       + process.hltSiPixelTrackSoAMonitorGPU
       + process.hltSiPixelTrackSoACompareGPUvsCPU
-    #   + process.hltSiPixelVertexSoAMonitorCPU
-    #   + process.hltSiPixelVertexSoAMonitorGPU
-    #   + process.hltSiPixelVertexSoACompareGPUvsCPU
+      + process.hltSiPixelVertexSoAMonitorCPU
+      + process.hltSiPixelVertexSoAMonitorGPU
+      + process.hltSiPixelVertexSoACompareGPUvsCPU
     )
 
     # Add CPUSerial sequences to DQM_PixelReconstruction_v Path
@@ -421,10 +421,12 @@ def customizeHLTforAlpakaPixelRecoVertexing(process):
 
     process.HLTRecopixelvertexingTask = cms.ConditionalTask(
         process.HLTRecoPixelTracksTask,
+        process.hltPixelVertices,
     )
 
     process.HLTRecopixelvertexingCPUSerialTask = cms.ConditionalTask(
         process.HLTRecoPixelTracksCPUSerialTask,
+        process.hltPixelVerticesCPUSerial,
     )
 
     process.HLTRecopixelvertexingCPUSerialSequence = cms.Sequence( process.HLTRecopixelvertexingCPUSerialTask )
