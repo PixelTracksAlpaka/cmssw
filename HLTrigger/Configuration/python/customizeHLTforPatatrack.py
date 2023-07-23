@@ -25,9 +25,7 @@ def customizeHLTforDQMGPUvsCPUPixel(process):
 
     process.hltPixelConsumerCPU.eventProducts = []
     for foo in process.hltPixelConsumerGPU.eventProducts:
-        # if foo != "hltPixelTracks": process.hltPixelConsumerCPU.eventProducts += [foo+'CPUSerial']
         process.hltPixelConsumerCPU.eventProducts += [foo+'CPUSerial']
-    process.hltPixelConsumerCPU.eventProducts += ['hltPixelTracksCPUSerial']
 
     # modify EventContent of DQMGPUvsCPU stream
     if hasattr(process, 'hltOutputDQMGPUvsCPU'):
@@ -88,21 +86,21 @@ def customizeHLTforDQMGPUvsCPUPixel(process):
     )
 
     process.hltSiPixelVertexSoAMonitorCPU = cms.EDProducer("SiPixelMonitorVertexSoAAlpaka",
-        beamSpotSrc = cms.InputTag("offlineBeamSpot"),
+        beamSpotSrc = cms.InputTag("hltOnlineBeamSpot"),
         mightGet = cms.optional.untracked.vstring,
         pixelVertexSrc = cms.InputTag("hltPixelVerticesCPUSerial"),
         topFolderName = cms.string('SiPixelHeterogeneous/PixelVertexCPU')
     )
 
     process.hltSiPixelVertexSoAMonitorGPU = cms.EDProducer("SiPixelMonitorVertexSoAAlpaka",
-        beamSpotSrc = cms.InputTag("offlineBeamSpot"),
+        beamSpotSrc = cms.InputTag("hltOnlineBeamSpot"),
         mightGet = cms.optional.untracked.vstring,
         pixelVertexSrc = cms.InputTag("hltPixelVertices"),
         topFolderName = cms.string('SiPixelHeterogeneous/PixelVertexGPU')
     )
 
     process.hltSiPixelVertexSoACompareGPUvsCPU = cms.EDProducer("SiPixelCompareVertexSoAAlpaka",
-        beamSpotSrc = cms.InputTag("offlineBeamSpot"),
+        beamSpotSrc = cms.InputTag("hltOnlineBeamSpot"),
         dzCut = cms.double(1),
         mightGet = cms.optional.untracked.vstring,
         pixelVertexSrcCPU = cms.InputTag("hltPixelVerticesCPUSerial"),
