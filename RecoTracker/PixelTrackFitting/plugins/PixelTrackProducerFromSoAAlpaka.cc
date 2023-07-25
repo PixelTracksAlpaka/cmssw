@@ -139,7 +139,7 @@ void PixelTrackProducerFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID strea
 
   hitmap.resize(nhits, nullptr);
 
-  auto const& hitsModuleStart = iEvent.get(hmsToken_);
+  auto const &hitsModuleStart = iEvent.get(hmsToken_);
 
   for (auto const &hit : rcs) {
     auto const &thit = static_cast<BaseTrackerRecHit const &>(hit);
