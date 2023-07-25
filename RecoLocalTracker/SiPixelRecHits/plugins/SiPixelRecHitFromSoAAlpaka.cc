@@ -81,7 +81,7 @@ void SiPixelRecHitFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID streamID,
   SiPixelRecHitCollection output;
   output.reserve(nMaxModules, nHits);
 
-  HMSstorage hmsp{nMaxModules + 1};
+  HMSstorage hmsp(nMaxModules + 1);
 
   if (0 == nHits) {
     hmsp.clear();
@@ -91,7 +91,7 @@ void SiPixelRecHitFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID streamID,
   }
 
   // fill content of HMSstorage product, and put it into the Event
-  for(unsigned int idx = 0; idx < hmsp.size(); ++idx) {
+  for (unsigned int idx = 0; idx < hmsp.size(); ++idx) {
     hmsp[idx] = hits.view().hitsModuleStart()[idx];
   }
   iEvent.emplace(hostPutToken_, std::move(hmsp));
