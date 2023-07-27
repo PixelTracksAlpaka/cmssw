@@ -58,12 +58,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                         this->device_theCells_.data(),
                         this->device_nCells_.data(),
                         this->device_theCellNeighbors_.data(),
-                        this->isOuterHitOfCell_.value().data(),
+                        this->isOuterHitOfCell_.data(),
                         this->m_params.caParams_);
 
     // do not run the fishbone if there are hits only in BPIX1
     auto host_isOuterHitOfCell_ = cms::alpakatools::make_host_buffer<OuterHitOfCell>(queue);
-    alpaka::memcpy(queue, host_isOuterHitOfCell_, this->isOuterHitOfCell_.value());
+    alpaka::memcpy(queue, host_isOuterHitOfCell_, this->isOuterHitOfCell_);
     if (nhits > host_isOuterHitOfCell_.data()->offset && this->m_params.earlyFishbone_) {
       const auto nthTot = 128;
       const auto stride = 16;
@@ -78,7 +78,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                           hh,
                           this->device_theCells_.data(),
                           this->device_nCells_.data(),
-                          this->isOuterHitOfCell_.value().data(),
+                          this->isOuterHitOfCell_.data(),
                           nhits,
                           false);
     }
@@ -183,7 +183,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                           hh,
                           this->device_theCells_.data(),
                           this->device_nCells_.data(),
-                          this->isOuterHitOfCell_.value().data(),
+                          this->isOuterHitOfCell_.data(),
                           nhits,
                           true);
     }
@@ -194,9 +194,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   template <typename TrackerTraits>
-  void CAHitNtupletGeneratorKernels<TrackerTraits>::buildDoublets(const HitsConstView &hh,
-                                                                  int32_t /*offsetBPIX2*/,
-                                                                  Queue &queue) {
+  void CAHitNtupletGeneratorKernels<TrackerTraits>::buildDoublets(const HitsConstView &hh, Queue &queue) {
     int32_t nhits = hh.metadata().size();
 
     using namespace caPixelDoublets;
@@ -218,7 +216,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     // in principle we can use "nhits" to heuristically dimension the workspace...
     ALPAKA_ASSERT_OFFLOAD(this->device_isOuterHitOfCell_.data());
 
-    this->isOuterHitOfCell_ = cms::alpakatools::make_device_buffer<OuterHitOfCell>(queue);
+    // this->isOuterHitOfCell_ = cms::alpakatools::make_device_buffer<OuterHitOfCell>(queue);
     alpaka::exec<Acc1D>(
         queue,
         cms::alpakatools::make_workdiv<Acc1D>(1, 1),
@@ -230,7 +228,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           isOuterHitOfCell->container = container;
           isOuterHitOfCell->offset = *offset;
         },
-        this->isOuterHitOfCell_.value().data(),
+        this->isOuterHitOfCell_.data(),
         this->device_isOuterHitOfCell_.data(),
         &hh.offsetBPIX2());
 
@@ -242,7 +240,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       alpaka::exec<Acc1D>(queue,
                           workDiv1D,
                           initDoublets<TrackerTraits>{},
-                          this->isOuterHitOfCell_.value().data(),
+                          this->isOuterHitOfCell_.data(),
                           nhits,
                           this->device_theCellNeighbors_.data(),
                           this->device_theCellNeighborsContainer_,
@@ -274,7 +272,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                         this->device_theCellNeighbors_.data(),
                         this->device_theCellTracks_.data(),
                         hh,
-                        this->isOuterHitOfCell_.value().data(),
+                        this->isOuterHitOfCell_.data(),
                         nActualPairs,
                         this->m_params.cellCuts_);
 
@@ -407,7 +405,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                           this->device_nCells_.data(),
                           this->device_theCellNeighbors_.data(),
                           this->device_theCellTracks_.data(),
-                          *(this->isOuterHitOfCell_->data()),
+                          this->isOuterHitOfCell_.data(),
                           nhits,
                           this->m_params.cellCuts_.maxNumberOfDoublets_,
                           this->counters_.data());

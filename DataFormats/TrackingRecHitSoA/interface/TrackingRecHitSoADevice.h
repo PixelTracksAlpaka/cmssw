@@ -28,8 +28,7 @@ public:
   // Constructor which specifies the SoA size
   template <typename TQueue>
   explicit TrackingRecHitAlpakaDevice(uint32_t nHits, int32_t offsetBPIX2, uint32_t const* hitsModuleStart, TQueue queue)
-      : PortableDeviceCollection<TrackingRecHitAlpakaLayout<TrackerTraits>, TDev>(nHits, queue),
-        offsetBPIX2_(offsetBPIX2) {
+      : PortableDeviceCollection<TrackingRecHitAlpakaLayout<TrackerTraits>, TDev>(nHits, queue) {
     const auto device = alpaka::getDev(queue);
 
     auto start_h = cms::alpakatools::make_device_view(device, hitsModuleStart, TrackerTraits::numberOfModules + 1);
@@ -44,9 +43,5 @@ public:
 
   uint32_t nHits() const { return view().metadata().size(); }
   uint32_t const* hitsModuleStart() const { return view().hitsModuleStart().data(); }
-  uint32_t offsetBPIX2() const { return offsetBPIX2_; }
-
-private:
-  uint32_t offsetBPIX2_;
 };
 #endif  // DataFormats_RecHits_interface_TrackingRecHitSoADevice_h
