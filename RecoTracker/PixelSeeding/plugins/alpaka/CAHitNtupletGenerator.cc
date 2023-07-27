@@ -21,7 +21,6 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "FWCore/Utilities/interface/isFinite.h"
-// #include "HeterogeneousCore/CUDAServices/interface/CUDAService.h"
 #include "TrackingTools/DetLayers/interface/BarrelDetLayer.h"
 
 #include "CAHitNtupletGenerator.h"
@@ -244,23 +243,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     desc.add<bool>("useSimpleTripletCleaner", true)->setComment("use alternate implementation");
   }
 
-  // template <typename TrackerTraits>
-  // TrackSoADevice<TrackerTraits> CAHitNtupletGenerator<TrackerTraits>::makeTuplesAsync(HitsOnDevice const& hits_d,
-  //                                                                                     float bfield,
-  //                                                                                     Queue& queue) const {
   template <typename TrackerTraits>
   TrackSoACollection<TrackerTraits> CAHitNtupletGenerator<TrackerTraits>::makeTuplesAsync(
       HitsOnDevice const& hits_d, ParamsOnDevice const* cpeParams, float bfield, Queue& queue) const {
     using HelixFit = HelixFit<TrackerTraits>;
-    // using TrackSoA = TrackSoADevice<TrackerTraits>;
     using TrackSoA = TrackSoACollection<TrackerTraits>;
     using GPUKernels = CAHitNtupletGeneratorKernels<TrackerTraits>;
 
     TrackSoA tracks(queue);
 
     GPUKernels kernels(m_params, hits_d.nHits(), queue);
-    // // kernels.setCounters(m_counters);  // Not needed anymore ???
-    // // kernels.allocate(hits_d.nHits(), queue); // Not needed anymore?
+
     kernels.buildDoublets(hits_d.view(), hits_d.offsetBPIX2(), queue);
     kernels.launchKernels(hits_d.view(), tracks.view(), queue);
 

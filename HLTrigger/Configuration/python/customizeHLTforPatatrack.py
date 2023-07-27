@@ -375,7 +375,7 @@ def customizeHLTforAlpakaPixelRecoTracking(process):
     )
 
     process.hltPixelTracksCPUSerial = process.hltPixelTracks.clone(
-        pixelRecHitSrc = 'hltSiPixelRecHits',
+        pixelRecHitSrc = 'hltSiPixelRecHitsCPUSerial',
         alpaka = dict( backend = 'serial_sync' )
     )
 

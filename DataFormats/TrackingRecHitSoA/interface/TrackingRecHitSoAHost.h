@@ -26,52 +26,30 @@ public:
   using PhiBinnerStorageType = typename hitSoA::PhiBinnerStorageType;
   using PhiBinner = typename hitSoA::PhiBinner;
 
-  // This SoA Host is used basically only for DQM
-  // so we  just need a slim constructor
-  explicit TrackingRecHitAlpakaHost(uint32_t nHits)
-      : PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>(nHits) {}
-
   template <typename TQueue>
-  explicit TrackingRecHitAlpakaHost(uint32_t nHits, TQueue queue)
-      : PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>(nHits, queue) {}
+  explicit TrackingRecHitAlpakaHost(uint32_t nHits, int32_t offsetBPIX2, TQueue queue)
+      : PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>(nHits, queue),
+        nHits_(nHits),
+        offsetBPIX2_(offsetBPIX2) {}
 
   // Constructor which specifies the SoA size
   template <typename TQueue>
   explicit TrackingRecHitAlpakaHost(uint32_t nHits, int32_t offsetBPIX2, uint32_t const* hitsModuleStart, TQueue queue)
       : PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>(nHits, queue),
         nHits_(nHits),
-        hitsModuleStart_(hitsModuleStart),
         offsetBPIX2_(offsetBPIX2) {
-    phiBinner_ = &(view().phiBinner());
-
-    const auto host = cms::alpakatools::host();
-    const auto device = cms::alpakatools::devices<alpaka_common::PltfHost>()[0];
-
-    auto start_h = alpaka::createView(host, hitsModuleStart, TrackerTraits::numberOfModules + 1);
-    auto start_d = alpaka::createView(device, view().hitsModuleStart().data(), TrackerTraits::numberOfModules + 1);
-    alpaka::memcpy(queue, start_d, start_h);  //, TrackerTraits::numberOfModules + 1);
-
-    auto nHits_h = alpaka::createView(host, &nHits, 1);
-    auto nHits_d = alpaka::createView(device, &(view().nHits()), 1);
-    alpaka::memcpy(queue, nHits_d, nHits_h, 1);
-
-    auto off_h = alpaka::createView(host, &offsetBPIX2, 1);
-    auto off_d = alpaka::createView(device, &(view().offsetBPIX2()), 1);
-    alpaka::memcpy(queue, off_d, off_h, 1);
+    std::copy(hitsModuleStart, hitsModuleStart + TrackerTraits::numberOfModules + 1, view().hitsModuleStart().data());
+    view().nHits() = nHits;
+    view().offsetBPIX2() = offsetBPIX2;
   }
 
-  uint32_t nHits() const { return nHits_; }
+  uint32_t nHits() const { return nHits_; }  //go to size of view
+  uint32_t const* hitsModuleStart() const { return view().hitsModuleStart().data(); }
   uint32_t offsetBPIX2() const { return offsetBPIX2_; }
-  auto phiBinnerStorage() { return phiBinnerStorage_; }
 
 private:
   uint32_t nHits_;  //Needed for the host SoA size
-  ParamsOnDevice const* cpeParams_;
-  uint32_t const* hitsModuleStart_;  // added from Device for new constructor
   uint32_t offsetBPIX2_;
-
-  PhiBinnerStorageType* phiBinnerStorage_;
-  PhiBinner* phiBinner_;  // added from Device for new constructor
 };
 
 using TrackingRecHitAlpakaHostPhase1 = TrackingRecHitAlpakaHost<pixelTopology::Phase1>;
