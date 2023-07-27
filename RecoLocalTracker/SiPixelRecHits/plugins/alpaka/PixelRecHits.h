@@ -190,7 +190,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           cms::alpakatools::for_each_element_in_block_strided(acc, nClusInIter, [&](uint32_t ic) {
             auto h = first + ic;  // output index in global memory
 
-            assert(h < hits.nHits());
+            assert(h < (uint32_t)hits.metadata().size());
             assert(h < clusters[me + 1].clusModuleStart());
 
             pixelCPEforDevice::position<TrackerTraits>(

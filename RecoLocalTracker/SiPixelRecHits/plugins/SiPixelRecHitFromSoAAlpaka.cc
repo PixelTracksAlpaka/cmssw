@@ -72,7 +72,7 @@ void SiPixelRecHitFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID streamID,
                                                         edm::Event& iEvent,
                                                         const edm::EventSetup& iSetup) const {
   auto const& hits = iEvent.get(hitsToken_);
-  auto nHits = hits.view().nHits();
+  auto nHits = hits.view().metadata().size();
   LogDebug("SiPixelRecHitFromSoAAlpaka") << "converting " << nHits << " Hits";
 
   // allocate a buffer for the indices of the clusters
