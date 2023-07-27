@@ -16,7 +16,6 @@ template <typename TrackerTraits>
 class TrackSoAHost : public PortableHostCollection<TrackLayout<TrackerTraits>> {
 public:
   static constexpr int32_t S = TrackerTraits::maxNumberOfTuples;  //TODO: this could be made configurable at runtime
-  //explicit TrackSoAHost() : PortableHostCollection<TrackLayout<TrackerTraits>>(S) {} //TODO: check if this is needed somewhere
   TrackSoAHost() = default;  // Needed for the dictionary; not sure if line above is needed anymore
 
   using PortableHostCollection<TrackLayout<TrackerTraits>>::view;

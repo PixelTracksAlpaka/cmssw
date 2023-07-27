@@ -16,46 +16,42 @@
 
 namespace pixelCPEforDevice {
 
-constexpr float micronsToCm = 1.0e-4;
+  constexpr float micronsToCm = 1.0e-4;
 
 }
 
 template <typename TrackerTraits>
 class PixelCPEFastParamsHost : public PixelCPEGenericBase {
-  
-   public:
-    using Buffer = cms::alpakatools::host_buffer<pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>>;
-    using ConstBuffer = cms::alpakatools::const_host_buffer<pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>>;
+public:
+  using Buffer = cms::alpakatools::host_buffer<pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>>;
+  using ConstBuffer = cms::alpakatools::const_host_buffer<pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>>;
 
-    PixelCPEFastParamsHost(edm::ParameterSet const& conf,
-                                          const MagneticField* mag,
-                                          const TrackerGeometry& geom,
-                                          const TrackerTopology& ttopo,
-                                          const SiPixelLorentzAngle* lorentzAngle,
-                                          const SiPixelGenErrorDBObject* genErrorDBObject,
-                                          const SiPixelLorentzAngle* lorentzAngleWidth);
-                                          
-    Buffer buffer() { return buffer_; }
-    ConstBuffer buffer() const { return buffer_; }
-    ConstBuffer const_buffer() const { return buffer_; }
-    // pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>* data() const { return buffer_.data(); }
-    auto size() const { return alpaka::getExtentProduct(buffer_); }
+  PixelCPEFastParamsHost(edm::ParameterSet const& conf,
+                         const MagneticField* mag,
+                         const TrackerGeometry& geom,
+                         const TrackerTopology& ttopo,
+                         const SiPixelLorentzAngle* lorentzAngle,
+                         const SiPixelGenErrorDBObject* genErrorDBObject,
+                         const SiPixelLorentzAngle* lorentzAngleWidth);
 
-    static void fillPSetDescription(edm::ParameterSetDescription &desc);
+  Buffer buffer() { return buffer_; }
+  ConstBuffer buffer() const { return buffer_; }
+  ConstBuffer const_buffer() const { return buffer_; }
+  auto size() const { return alpaka::getExtentProduct(buffer_); }
 
-  private:
+  static void fillPSetDescription(edm::ParameterSetDescription& desc);
 
-    LocalPoint localPosition(DetParam const &theDetParam, ClusterParam &theClusterParam) const override;
-    LocalError localError(DetParam const &theDetParam, ClusterParam &theClusterParam) const override;
+private:
+  LocalPoint localPosition(DetParam const& theDetParam, ClusterParam& theClusterParam) const override;
+  LocalError localError(DetParam const& theDetParam, ClusterParam& theClusterParam) const override;
 
-    void errorFromTemplates(DetParam const &theDetParam, ClusterParamGeneric &theClusterParam, float qclus) const;
+  void errorFromTemplates(DetParam const& theDetParam, ClusterParamGeneric& theClusterParam, float qclus) const;
 
-    std::vector<SiPixelGenErrorStore> thePixelGenError_;
-    
-    void fillParamsForDevice();
+  std::vector<SiPixelGenErrorStore> thePixelGenError_;
 
-    Buffer buffer_;
+  void fillParamsForDevice();
 
+  Buffer buffer_;
 };
 // }  // namespace pixelCPEforDevice
 

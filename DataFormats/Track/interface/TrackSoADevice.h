@@ -17,8 +17,7 @@ template <typename TrackerTraits, typename TDev>
 class TrackSoADevice : public PortableDeviceCollection<TrackLayout<TrackerTraits>, TDev> {
 public:
   static constexpr int32_t S = TrackerTraits::maxNumberOfTuples;  //TODO: this could be made configurable at runtime
-  //explicit TrackSoADevice() : PortableCollection<TrackLayout<TrackerTraits>>(S) {} //TODO: check if this is needed somewhere
-  TrackSoADevice() = default;  // necessary for ROOT dictionaries
+  TrackSoADevice() = default;                                     // necessary for ROOT dictionaries
 
   using PortableDeviceCollection<TrackLayout<TrackerTraits>, TDev>::view;
   using PortableDeviceCollection<TrackLayout<TrackerTraits>, TDev>::const_view;
@@ -28,10 +27,6 @@ public:
   template <typename TQueue>
   explicit TrackSoADevice<TrackerTraits, TDev>(TQueue queue)
       : PortableDeviceCollection<TrackLayout<TrackerTraits>, TDev>(S, queue) {}
-
-  // Constructor which specifies the SoA size
-  // explicit TrackSoADevice(Device const& device)
-  //     : PortableDeviceCollection<TrackLayout<TrackerTraits>, TDev>(S, device) {}
 };
 
 namespace pixelTrack {

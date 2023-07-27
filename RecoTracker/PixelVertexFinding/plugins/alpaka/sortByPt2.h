@@ -29,9 +29,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       float* __restrict__ ptv2 = data.ptv2();
       uint16_t* __restrict__ sortInd = data.sortInd();
 
-      // if (threadIdxLocal == 0)
-      //    printf("sorting %d vertices\n",nvFinal);
-
       if (nvFinal < 1)
         return;
 

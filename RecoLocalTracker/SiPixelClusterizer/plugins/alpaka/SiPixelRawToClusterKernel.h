@@ -23,8 +23,6 @@
 #include "DataFormats/SiPixelRawData/interface/SiPixelErrorCompact.h"
 #include "DataFormats/SiPixelRawData/interface/SiPixelFormatterErrors.h"
 #include "DataFormats/SiPixelDetId/interface/PixelChannelIdentifier.h"
-// struct SiPixelFedCablingMapGPU;
-// class SiPixelGainForHLTonGPU;
 
 namespace pixelDetails {
 
@@ -167,12 +165,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                    SiPixelDigisSoAv2View& digis_view,
                                    const uint32_t numDigis,
                                    Queue& queue);
-
-      // std::pair<SiPixelDigisCollection, SiPixelClustersDevice> getResults() {
-      //   digis_d->setNModulesDigis(nModules_Clusters_h[0], nDigis);
-      //   clusters_d->setNClusters(nModules_Clusters_h[1], nModules_Clusters_h[2]);
-      //   return std::make_pair(std::move(*digis_d), std::move(*clusters_d));
-      // }
 
       SiPixelDigisCollection&& getDigis() {
         digis_d->setNModulesDigis(nModules_Clusters_h[0], nDigis);

@@ -45,7 +45,6 @@
 #include "HeterogeneousCore/AlpakaTest/interface/AlpakaESTestRecords.h"
 #include "HeterogeneousCore/AlpakaTest/interface/alpaka/AlpakaESTestData.h"
 
-// #include "SiPixelRawToClusterKernel.h"
 #include "RecoLocalTracker/SiPixelClusterizer/plugins/SiPixelClusterThresholds.h"
 #include "SiPixelRawToClusterKernel.h"
 
@@ -62,7 +61,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     void acquire(device::Event const& iEvent, device::EventSetup const& iSetup) override;
     void produce(device::Event& iEvent, device::EventSetup const& iSetup) override;
 
-    // cms::alpakatools::ContextState<Queue> ctxState_;
     const edm::ESGetToken<TrackerGeometry, TrackerDigiGeometryRecord> geomToken_;
     const edm::EDGetTokenT<edm::DetSetVector<PixelDigi>> pixelDigiToken_;
 
@@ -103,8 +101,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   void SiPixelPhase2DigiToCluster::acquire(device::Event const& iEvent, device::EventSetup const& iSetup) {
-    // cms::cuda::ScopedContextAcquire ctx{iEvent.streamID(), std::move(waitingTaskHolder), ctxState_};
-
     auto const& input = iEvent.get(pixelDigiToken_);
 
     const TrackerGeometry* geom_ = &iSetup.getData(geomToken_);
@@ -157,9 +153,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       return;
     }
 
-    // auto tmp = Algo_.getResults();
     iEvent.emplace(digiPutToken_, std::move(digis_d));
-    iEvent.emplace(clusterPutToken_, Algo_.getClusters());  //std::move(tmp.second));
+    iEvent.emplace(clusterPutToken_, Algo_.getClusters());
     if (includeErrors_) {
       iEvent.emplace(digiErrorPutToken_, Algo_.getErrors());
     }

@@ -6,7 +6,6 @@
 
 using Quality = pixelTrack::Quality;
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
-  //using Quality = pixelTrack::Quality;
   using namespace cms::alpakatools;
   namespace testTrackSoA {
 
@@ -36,7 +35,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     // Kernel which reads from the TrackSoAView to verify
     // that it was written correctly from the fill kernel
-    // template <typename TrackerTraits>
     template <typename TrackerTraits>
     class TestVerifyKernel {
     public:
@@ -59,7 +57,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     // Host function which invokes the two kernels above
-    // template <typename TrackerTraits>
     template <typename TrackerTraits>
     void runKernels(TrackSoAView<TrackerTraits> tracks_view, Queue& queue) {
       uint32_t items = 64;

@@ -59,8 +59,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       bool hasQuality = quality != nullptr;
       auto geom = iRecord.getTransientHandle(geometryToken_);
       SiPixelMappingHost product(pixelgpudetails::MAX_SIZE, cms::alpakatools::host());
-      // auto product = std::make_unique<SiPixelMappingHost>(
-      //     );  //(pixelgpudetails::MAX_SIZE, *(cablingMap.product()), hasQuality, cms::alpakatools::host());
       std::vector<unsigned int> const& fedIds = cablingMap->fedIds();
       std::unique_ptr<SiPixelFedCablingTree> const& cabling = cablingMap->cablingTree();
 
@@ -113,30 +111,21 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         if (mapView[i].rawId() == pixelClustering::invalidModuleId) {
           mapView[i].moduleId() = pixelClustering::invalidModuleId;
         } else {
-          /*
-          std::cout << mapView[i].rawId()[i] << std::endl;
-          */
           auto gdet = trackerGeom->idToDetUnit(mapView[i].rawId());
           if (!gdet) {
-            LogDebug("SiPixelCablingSoAESProducer")
-                // std::cout
-                << " Not found: " << mapView[i].rawId() << std::endl;
+            LogDebug("SiPixelCablingSoAESProducer") << " Not found: " << mapView[i].rawId() << std::endl;
             continue;
           }
           mapView[i].moduleId() = gdet->index();
         }
         LogDebug("SiPixelCablingSoAESProducer")
             << "----------------------------------------------------------------------------" << std::endl;
+        LogDebug("SiPixelCablingSoAESProducer") << i << std::setw(20) << mapView[i].fed() << std::setw(20)
+                                                << mapView[i].link() << std::setw(20) << mapView[i].roc() << std::endl;
         LogDebug("SiPixelCablingSoAESProducer")
-            // std::cout
-            << i << std::setw(20) << mapView[i].fed() << std::setw(20) << mapView[i].link() << std::setw(20)
-            << mapView[i].roc() << std::endl;
-        LogDebug("SiPixelCablingSoAESProducer")
-            // std::cout
             << i << std::setw(20) << mapView[i].rawId() << std::setw(20) << mapView[i].rocInDet() << std::setw(20)
             << mapView[i].moduleId() << std::endl;
         LogDebug("SiPixelCablingSoAESProducer")
-            // std::cout
             << i << std::setw(20) << mapView[i].badRocs() << std::setw(20) << std::endl;
         LogDebug("SiPixelCablingSoAESProducer")
             << "----------------------------------------------------------------------------" << std::endl;

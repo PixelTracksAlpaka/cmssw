@@ -250,8 +250,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           auto const maxpIndex = e - p;
 
           // Here we parallelize in X
-          //p += first;
-          //for (; p < e; p += blockDimensionX) {
           uint32_t firstElementIdxX = firstElementIdxNoStrideX;
           uint32_t endElementIdxX = endElementIdxNoStrideX;
           for (uint32_t pIndex = firstElementIdxX; pIndex < maxpIndex; ++pIndex) {
@@ -284,7 +282,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               alpaka::atomicSub(acc, nCells, (uint32_t)1, alpaka::hierarchy::Blocks{});
               break;
             }  // move to SimpleVector??
-            // int layerPairId, int doubletId, int innerHitId, int outerHitId)
             cells[ind].init(*cellNeighbors, *cellTracks, hh, pairLayerId, i, oi);
             isOuterHitOfCell[oi].push_back(acc, ind);
 #ifdef GPU_DEBUG

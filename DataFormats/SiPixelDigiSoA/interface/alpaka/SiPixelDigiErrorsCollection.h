@@ -7,8 +7,6 @@
 
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsHost.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsDevice.h"
-//#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsUtilities.h"
-//#include "DataFormats/SiPixelRawData/interface/SiPixelErrorCompact.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/CopyToHost.h"
@@ -26,19 +24,7 @@ namespace cms::alpakatools {
   struct CopyToHost<ALPAKA_ACCELERATOR_NAMESPACE::SiPixelDigiErrorsCollection> {
     template <typename TQueue>
     static auto copyAsync(TQueue& queue, ALPAKA_ACCELERATOR_NAMESPACE::SiPixelDigiErrorsCollection const& srcData) {
-      // auto error_vector_d = srcData.error_vector();
-      // auto error_data_h = cms::alpakatools::make_host_buffer<SiPixelErrorCompact[]>(error_vector_d.capacity());
-      // auto error_data_d = srcData.error_data();
-
-      // if (not error_vector_d.empty()) {
-      //   alpaka::memcpy(queue, error_data_h, error_data_d);
-      // }
-
-      // SiPixelDigiErrorsHost dstData(error_vector_d.capacity(), error_data_h);
-      // SiPixelDigiErrorsHost dstData(srcData.error_vector().capacity(), queue);
       SiPixelDigiErrorsHost dstData(srcData.maxFedWords(), queue);
-      // SiPixelDigiErrorsHost dstData(error_vector(srcData.view()).capacity(), queue);
-
       alpaka::memcpy(queue, dstData.buffer(), srcData.buffer());
 
       return dstData;

@@ -43,7 +43,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   void SiPixelGainCalibrationForHLTSoAESProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     edm::ParameterSetDescription desc;
-    //descriptions.add("siPixelGainCalibrationForHLTSoA", desc);
     descriptions.addWithDefaultLabel(desc);
   }
 
@@ -68,16 +67,15 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
     }
 
-    LogDebug("SiPixelGainCalibrationForHLTSoA") << "caching calibs for " << n_detectors << " pixel detectors of size " << gains.data().size() << '\n'
-              << "sizes " << sizeof(char) << ' ' << sizeof(uint8_t) << ' '
-              << sizeof(siPixelGainsSoA::DecodingStructure);
+    LogDebug("SiPixelGainCalibrationForHLTSoA")
+        << "caching calibs for " << n_detectors << " pixel detectors of size " << gains.data().size() << '\n'
+        << "sizes " << sizeof(char) << ' ' << sizeof(uint8_t) << ' ' << sizeof(siPixelGainsSoA::DecodingStructure);
 
-    for (size_t i = 0; i < gains.data().size(); i = i + 2)
-    {
-      product->view().v_pedestals()[i/2].gain = gains.data()[i];
-      product->view().v_pedestals()[i/2].ped = gains.data()[i+1];
+    for (size_t i = 0; i < gains.data().size(); i = i + 2) {
+      product->view().v_pedestals()[i / 2].gain = gains.data()[i];
+      product->view().v_pedestals()[i / 2].ped = gains.data()[i + 1];
     }
-    
+
     //std::copy here
     // do not read back from the (possibly write-combined) memory buffer
     auto minPed = gains.getPedLow();
@@ -118,9 +116,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       assert(p->ibegin != p->iend);
       assert(p->ncols > 0);
 
-      // std::cout << "SiPixelGainCalibrationForHLTGPU;" << i <<  ";" << p->ibegin << ";" << p->iend <<std::endl;
-      product->view().modStarts()[i] =
-          p->ibegin;  //std::make_pair(siPixelGainsSoA::Range(p->ibegin, p->iend), p->ncols);
+      product->view().modStarts()[i] = p->ibegin;
       product->view().modEnds()[i] = p->iend;
       product->view().modCols()[i] = p->ncols;
 

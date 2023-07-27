@@ -43,7 +43,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     using CACell = CACellT<TrackerTraits>;
     using TkSoAHost = TrackSoAHost<TrackerTraits>;
-    // using TkSoADevice = TrackSoADevice<TrackerTraits>;
     using TkSoADevice = TrackSoACollection<TrackerTraits>;
     using HitContainer = typename TrackSoA<TrackerTraits>::HitContainer;
     using Tuple = HitContainer;
@@ -70,7 +69,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     // void beginJob();
     // void endJob();
 
-    TkSoADevice makeTuplesAsync(HitsOnDevice const& hits_d, ParamsOnDevice const* cpeParams, float bfield, Queue& queue) const;
+    TkSoADevice makeTuplesAsync(HitsOnDevice const& hits_d,
+                                ParamsOnDevice const* cpeParams,
+                                float bfield,
+                                Queue& queue) const;
 
   private:
     void buildDoublets(const HitsConstView& hh, Queue& queue) const;
@@ -80,8 +82,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     void launchKernels(const HitsConstView& hh, bool useRiemannFit, Queue& queue) const;
 
     Params m_params;
-
-    // Counters* m_counters = nullptr;
   };
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

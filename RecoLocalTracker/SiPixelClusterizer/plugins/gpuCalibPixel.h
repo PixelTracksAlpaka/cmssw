@@ -51,8 +51,7 @@ namespace gpuCalibPixel {
     for (int i = first; i < numElements; i += gridDim.x * blockDim.x) {
       if (invalidModuleId == id[i])
         continue;
-      
-      auto originalADC = adc[i];
+
       bool isDeadColumn = false, isNoisyColumn = false;
 
       int row = x[i];
@@ -75,9 +74,6 @@ namespace gpuCalibPixel {
         }
         adc[i] = std::clamp(int(vcal), 100, int(std::numeric_limits<uint16_t>::max()));
       }
-      
-      // printf("ThisDigi;%d;%d;%d;%d;%d;%.2f;%.2f\n",id[i], col, row, originalADC,adc[i],pedestal,gain);
-
     }
   }
 

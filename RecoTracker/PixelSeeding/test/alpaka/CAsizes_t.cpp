@@ -1,4 +1,4 @@
-#include "RecoTracker/PixelSeeding/plugins/alpaka/GPUCACell.h"
+#include "RecoTracker/PixelSeeding/plugins/alpaka/CACell.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include <typeinfo>
 #include <iostream>
