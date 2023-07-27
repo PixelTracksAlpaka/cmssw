@@ -110,8 +110,8 @@ void SiPixelCompareRecHitsSoAAlpaka<T>::analyze(const edm::Event& iEvent, const 
   auto const& soa2dHost = rhsoaHost.const_view();
   auto const& soa2dDevice = rhsoaDevice.const_view();
 
-  uint32_t nHitsHost = soa2dHost.nHits();
-  uint32_t nHitsDevice = soa2dDevice.nHits();
+  uint32_t nHitsHost = soa2dHost.metadata().size();
+  uint32_t nHitsDevice = soa2dDevice.metadata().size();
 
   hnHits_->Fill(nHitsHost, nHitsDevice);
   auto detIds = tkGeom_->detUnitIds();

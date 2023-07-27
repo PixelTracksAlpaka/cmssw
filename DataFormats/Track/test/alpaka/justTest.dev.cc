@@ -31,7 +31,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                   int32_t offset) const {
       constexpr uint32_t hitsInFit = N;
       printf("oi %d %d %d", hitsInFit, nHitsL, nHitsH);
-      printf("oi %d", hh.nHits());
+      printf("oi %d", hh.metadata().size());
       ALPAKA_ASSERT_OFFLOAD(ptkids);
       ALPAKA_ASSERT_OFFLOAD(phits);
       ALPAKA_ASSERT_OFFLOAD(phits_ge);

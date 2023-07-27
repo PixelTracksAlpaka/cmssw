@@ -52,9 +52,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         Queue queue) const {
       using namespace pixelRecHits;
       auto nHits = clusters_d.nClusters();
+      auto offsetBPIX2 = clusters_d.offsetBPIX2();
 
-      TrackingRecHitAlpakaCollection<TrackerTraits> hits_d(
-          nHits, clusters_d.offsetBPIX2(), clusters_d->clusModuleStart(), queue);
+      TrackingRecHitAlpakaCollection<TrackerTraits> hits_d(nHits, offsetBPIX2, clusters_d->clusModuleStart(), queue);
 
       int activeModulesWithDigis = digis_d.nModules();
       // protect from empty events

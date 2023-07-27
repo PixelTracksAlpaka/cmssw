@@ -655,7 +655,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         }
         // fill hit indices
         for (auto idx : cms::alpakatools::elements_with_stride(acc, tracks_view.hitIndices().size())) {
-          ALPAKA_ASSERT_OFFLOAD(tracks_view.hitIndices().bins[idx] < hh.nHits());
+          ALPAKA_ASSERT_OFFLOAD(tracks_view.hitIndices().bins[idx] < (uint32_t)hh.metadata().size());
           tracks_view.detIndices().bins[idx] = hh[tracks_view.hitIndices().bins[idx]].detectorIndex();
         }
       }

@@ -28,27 +28,21 @@ public:
 
   template <typename TQueue>
   explicit TrackingRecHitAlpakaHost(uint32_t nHits, int32_t offsetBPIX2, TQueue queue)
-      : PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>(nHits, queue),
-        nHits_(nHits),
-        offsetBPIX2_(offsetBPIX2) {}
+      : PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>(nHits, queue), offsetBPIX2_(offsetBPIX2) {}
 
   // Constructor which specifies the SoA size
   template <typename TQueue>
   explicit TrackingRecHitAlpakaHost(uint32_t nHits, int32_t offsetBPIX2, uint32_t const* hitsModuleStart, TQueue queue)
-      : PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>(nHits, queue),
-        nHits_(nHits),
-        offsetBPIX2_(offsetBPIX2) {
+      : PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>(nHits, queue), offsetBPIX2_(offsetBPIX2) {
     std::copy(hitsModuleStart, hitsModuleStart + TrackerTraits::numberOfModules + 1, view().hitsModuleStart().data());
-    view().nHits() = nHits;
     view().offsetBPIX2() = offsetBPIX2;
   }
 
-  uint32_t nHits() const { return nHits_; }  //go to size of view
+  uint32_t nHits() const { return view().metadata().size(); }
   uint32_t const* hitsModuleStart() const { return view().hitsModuleStart().data(); }
   uint32_t offsetBPIX2() const { return offsetBPIX2_; }
 
 private:
-  uint32_t nHits_;  //Needed for the host SoA size
   uint32_t offsetBPIX2_;
 };
 

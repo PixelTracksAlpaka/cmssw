@@ -252,7 +252,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     TrackSoA tracks(queue);
 
-    GPUKernels kernels(m_params, hits_d.nHits(), queue);
+    GPUKernels kernels(m_params, hits_d.view().metadata().size(), queue);
 
     kernels.buildDoublets(hits_d.view(), hits_d.offsetBPIX2(), queue);
     kernels.launchKernels(hits_d.view(), tracks.view(), queue);
@@ -261,10 +261,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     fitter.allocate(kernels.tupleMultiplicity(), tracks.view());
     if (m_params.useRiemannFit_) {
       fitter.launchRiemannKernels(
-          hits_d.view(), cpeParams, hits_d.nHits(), TrackerTraits::maxNumberOfQuadruplets, queue);
+          hits_d.view(), cpeParams, hits_d.view().metadata().size(), TrackerTraits::maxNumberOfQuadruplets, queue);
     } else {
       fitter.launchBrokenLineKernels(
-          hits_d.view(), cpeParams, hits_d.nHits(), TrackerTraits::maxNumberOfQuadruplets, queue);
+          hits_d.view(), cpeParams, hits_d.view().metadata().size(), TrackerTraits::maxNumberOfQuadruplets, queue);
     }
     kernels.classifyTuples(hits_d.view(), tracks.view(), queue);
 #ifdef GPU_DEBUG
