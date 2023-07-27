@@ -59,7 +59,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         cms::alpakatools::for_each_element_in_grid_strided(acc, numElements, [&](uint32_t i) {
           auto dvgi = view[i];
           if (dvgi.moduleId() != InvId) {
-            //auto originalADC = dvgi.adc();
             float conversionFactor =
                 (isRun2) ? (dvgi.moduleId() < 96 ? VCaltoElectronGain_L1 : VCaltoElectronGain) : 1.f;
             float offset = (isRun2) ? (dvgi.moduleId() < 96 ? VCaltoElectronOffset_L1 : VCaltoElectronOffset) : 0;
@@ -69,13 +68,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             int row = dvgi.xx();
             int col = dvgi.yy();
 
-            
-            auto ret =
+                        auto ret =
                 SiPixelGainUtilities::getPedAndGain(gains, dvgi.moduleId(), col, row, isDeadColumn, isNoisyColumn);
 
             float pedestal = ret.first;
             float gain = ret.second;
-            // float pedestal = 0; float gain = 1.;
             if (isDeadColumn | isNoisyColumn) {
               dvgi.moduleId() = InvId;
               dvgi.adc() = 0;
@@ -84,7 +81,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               float vcal = dvgi.adc() * gain - pedestal * gain;
               dvgi.adc() = std::max(100, int(vcal * conversionFactor + offset));
             }
-            // printf("ThisDigi;%d;%d;%d;%d,%d;%.2f;%.2f\n",dvgi.moduleId(), col, row, originalADC, dvgi.adc(),pedestal,gain);
           }
         });
       }

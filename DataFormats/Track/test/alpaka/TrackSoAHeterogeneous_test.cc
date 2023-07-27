@@ -46,7 +46,6 @@ int main() {
   {
     // Instantiate tracks on device. PortableDeviceCollection allocates
     // SoA on device automatically.
-    // TrackSoADevice<pixelTopology::Phase1> tracks_d(queue);
     TrackSoACollection<pixelTopology::Phase1> tracks_d(queue);
     testTrackSoA::runKernels<pixelTopology::Phase1>(tracks_d.view(), queue);
 

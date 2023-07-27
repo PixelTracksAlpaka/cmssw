@@ -120,7 +120,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       vertexFinder::workSpace::PixelVertexWorkSpaceSoADevice ws_d(queue);
       ::vertexFinder::workSpace::PixelVertexWorkSpaceSoAHost ws_h(queue);
       ZVertexHost vertices_h(queue);
-      // ZVertexDevice vertices_d(queue);
       ZVertexCollection vertices_d(queue);
 
       float eps = 0.1f;
@@ -208,11 +207,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                       << *mx.second << std::endl;
           }
 
-          //          auto workDivSplitter = make_workdiv<Acc1D>(1024, 64);
+          auto workDivSplitter = make_workdiv<Acc1D>(1024, 64);
 
           // one vertex per block!!!
-          // alpaka::exec<Acc1D>(
-          //     queue, workDivSplitter, vertexFinder::splitVerticesKernel{}, vertices_d.view(), ws_d.view(), 9.f);
+          alpaka::exec<Acc1D>(
+              queue, workDivSplitter, vertexFinder::splitVerticesKernel{}, vertices_d.view(), ws_d.view(), 9.f);
           alpaka::memcpy(queue, ws_h.buffer(), ws_d.buffer());
           alpaka::wait(queue);
           std::cout << "after split " << ws_h.view().nvIntermediate() << std::endl;

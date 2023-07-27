@@ -72,7 +72,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         }
         // get it from the ntuple container (one to one to helix)
         auto tkid = *(tupleMultiplicity->begin(nHitsL) + tuple_idx);
-        //        ALPAKA_ASSERT_OFFLOAD(int(tkid) < foundNtuplets->nOnes());
+        ALPAKA_ASSERT_OFFLOAD(tkid < foundNtuplets->nbins());
 
         ptkids[local_idx] = tkid;
 
@@ -86,10 +86,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         riemannFit::Map6xNf<N> hits_ge(phits_ge + local_idx);
 
 #ifdef BL_DUMP_HITS
-        // __shared__ int done;
-        // done = 0;
-        // __syncthreads();
-        // bool dump = (foundNtuplets->size(tkid) == 5 && 0 == atomicAdd(&done, 1));
         auto &&done = alpaka::declareSharedVar<int, __COUNTER__>(acc);
         done = 0;
         alpaka::syncBlockThreads(acc);
@@ -212,8 +208,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         brokenline::karimaki_circle_fit circle;
         riemannFit::LineFit line;
 
-        // brokenline::prepareBrokenLineData<TAcc, riemannFit::Map3xNd<N>, riemannFit::Map4d, N>(
-        //     acc, hits, fast_fit, bField, data);
         brokenline::prepareBrokenLineData(acc, hits, fast_fit, bField, data);
         brokenline::lineFit(acc, hits_ge, fast_fit, bField, data, line);
         brokenline::circleFit(acc, hits, hits_ge, fast_fit, bField, data, circle);
@@ -256,9 +250,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       uint32_t maxNumberOfTuples,
       Queue &queue) {
     ALPAKA_ASSERT_OFFLOAD(tuples_);
-
-    // auto blockSize = 64;
-    // auto numberOfBlocks = (maxNumberOfConcurrentFits_ + blockSize - 1) / blockSize;
 
     uint32_t blockSize = 64;
     uint32_t numberOfBlocks = cms::alpakatools::divide_up_by(maxNumberOfConcurrentFits_, blockSize);

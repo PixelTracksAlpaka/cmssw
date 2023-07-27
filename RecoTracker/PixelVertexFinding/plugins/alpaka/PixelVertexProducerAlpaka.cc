@@ -34,7 +34,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template <typename TrackerTraits>
   class PixelVertexProducerAlpaka : public global::EDProducer<> {
-    // using TkSoADevice = TrackSoADevice<TrackerTraits>;
     using TkSoADevice = TrackSoACollection<TrackerTraits>;
     using GPUAlgo = vertexFinder::Producer<TrackerTraits>;
 
@@ -53,7 +52,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     bool onGPU_;
 
     device::EDGetToken<TkSoADevice> tokenGPUTrack_;
-    // device::EDPutToken<ZVertexDevice> tokenGPUVertex_;
     device::EDPutToken<ZVertexCollection> tokenGPUVertex_;
 
     const GPUAlgo gpuAlgo_;

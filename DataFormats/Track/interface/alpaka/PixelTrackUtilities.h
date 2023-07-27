@@ -110,7 +110,6 @@ namespace pixelTrack {
     using TrackSoAView = typename TrackSoA<TrackerTraits>::template TrackSoAHeterogeneousLayout<>::View;
     using TrackSoAConstView = typename TrackSoA<TrackerTraits>::template TrackSoAHeterogeneousLayout<>::ConstView;
     using tracksHelper = TracksUtilities<TrackerTraits>;
-    // chi2 cut = chi2Scale * (chi2Coeff[0] + pT/GeV * (chi2Coeff[1] + pT/GeV * (chi2Coeff[2] + pT/GeV * chi2Coeff[3])))
     float chi2Coeff[4];
     float chi2MaxPt;  // GeV
     float chi2Scale;

@@ -9,7 +9,6 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 #include "RecoLocalTracker/Records/interface/TkPixelCPERecord.h"
-// #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEFastAlpaka.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/alpaka/PixelCPEFastParamsCollection.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEFastParamsHost.h"
 
@@ -43,8 +42,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     edm::ParameterSet pset_;
     bool useErrorsFromTemplates_;
-
-    // const device::ESGetToken<PixelCPEFastAlpaka<TrackerTraits>, TkPixelCPERecord> cpeToken_;
   };
 
   using namespace edm;

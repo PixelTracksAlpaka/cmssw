@@ -35,6 +35,4 @@
   <!-- SiPixelDigiErrorsHost inherits from PortableHostCollection<SiPixelDigiErrorsSoA> -->
   <class name="SiPixelDigiErrorsHost"/>
   <class name="edm::Wrapper<SiPixelDigiErrorsHost>" splitLevel="0"/>
-
-  <!-- <class name="map<unsigned int,vector<SiPixelRawDataError> >"/> -->
 </lcgdict>

@@ -9,7 +9,6 @@
 #include "DataFormats/FEDRawData/interface/FEDNumbering.h"
 #include "DataFormats/SiPixelDetId/interface/PixelFEDChannel.h"
 #include "DataFormats/SiPixelDigi/interface/PixelDigi.h"
-// #include "DataFormats/SiPixelRawData/interface/SiPixelErrorsSoA.h"
 #include "DataFormats/SiPixelRawData/interface/SiPixelFormatterErrors.h"
 #include "EventFilter/SiPixelRawToDigi/interface/PixelDataFormatter.h"
 #include "FWCore/Framework/interface/ESTransientHandle.h"
@@ -21,7 +20,6 @@
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
-// #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsCollection.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsHost.h"
 
 class SiPixelDigiErrorsFromSoA : public edm::stream::EDProducer<> {
@@ -97,8 +95,7 @@ void SiPixelDigiErrorsFromSoA::produce(edm::Event& iEvent, const edm::EventSetup
   edmNew::DetSetVector<PixelFEDChannel> disabled_channelcollection{};
 
   PixelDataFormatter formatter(cabling_.get(), usePhase1_);  // for phase 1 & 0
-  // const PixelDataFormatter::Errors* formatterErrors = digiErrors.formatterErrors();
-  // assert(formatterErrors != nullptr); // TODO: check what is happening here
+  // assert(formatterErrors != nullptr);                        // TODO: check what is happening here
   auto errors = formatterErrors;  // make a copy
   PixelDataFormatter::DetErrors nodeterrors;
 

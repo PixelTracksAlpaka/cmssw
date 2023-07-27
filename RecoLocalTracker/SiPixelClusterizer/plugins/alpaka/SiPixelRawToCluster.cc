@@ -147,16 +147,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   void SiPixelRawToCluster::acquire(device::Event const& iEvent, device::EventSetup const& iSetup) {
-    // cms::alpakatools::ScopedContextAcquire<Queue> ctx{iEvent.streamID(), std::move(waitingTaskHolder), ctxState_};
     [[maybe_unused]] auto const& hMap = iSetup.getData(mapToken_);
-    // if (SiPixelMappingUtilities::hasQuality(hMap.const_view()) != useQuality_) {
-    //   throw cms::Exception("LogicError")
-    //       << "UseQuality of the module (" << useQuality_
-    //       << ") differs the one from SiPixelROCsStatusAndMappingWrapper. Please fix your configuration.";
-    // }
-    // get the GPU product already here so that the async transfer can begin
-    // const auto* Map = hMap.getGPUProductAsync(iEvent.queue());
-    // const unsigned char* ModulesToUnpack = hMap.getModToUnpAllAsync(iEvent.queue());
     auto const& dGains = iSetup.getData(gainsToken_);
     auto Gains = SiPixelGainCalibrationForHLTDevice(1, iEvent.queue());
     auto modulesToUnpackRegional =
@@ -166,7 +157,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     if (recordWatcher_.check(iSetup) or regions_) {
       // cabling map, which maps online address (fed->link->ROC->local pixel) to offline (DetId->global pixel)
       cablingMap_ = iSetup.getHandle(cablingMapToken_).product();
-      //cablingMap_ = cablingMap.product();
       fedIds_ = cablingMap_->fedIds();
       cabling_ = cablingMap_->cablingTree();
       LogDebug("map version:") << cablingMap_->version();
@@ -265,7 +255,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                             modulesToUnpack,
                             dGains.const_view(),
                             wordFedAppender,
-                            // std::move(errors_),
                             wordCounter,
                             fedCounter,
                             useQuality_,
@@ -275,7 +264,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   void SiPixelRawToCluster::produce(device::Event& iEvent, device::EventSetup const& iSetup) {
-    // std::cout << "SiPixelRawToCluster::produce" << std::endl;
     if (nDigis_ == 0) {
       // Cannot use the default constructor here, as it would not allocate memory.
       // In the case of no digis, clusters_d are not being instantiated, but are
@@ -293,39 +281,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       return;
     }
 
-    // auto tmp = Algo_.getResults();
-
-    // SiPixelDigisHost digis_h(Algo_.getDigis().view().metadata().size(), iEvent.queue());
-    // alpaka::memcpy(iEvent.queue(), digis_h.buffer(), Algo_.getDigis().buffer());
-
-    // SiPixelClustersHost clusters_h(Algo_.getClusters().view().metadata().size(), iEvent.queue());
-    // alpaka::memcpy(iEvent.queue(), clusters_h.buffer(), Algo_.getClusters().buffer());
-
-    // for (int oia = 0; oia < (int)clusters_h.view().metadata().size(); ++oia) {
-    //   std::cout << "clusters_h.view().moduleStart():" << clusters_h.view()[oia].moduleStart() << std::endl;
-    //   std::cout << "clusters_h.view().clusInModule():" << clusters_h.view()[oia].clusInModule() << std::endl;
-    //   std::cout << "clusters_h.view().moduleId():" << clusters_h.view()[oia].moduleId() << std::endl;
-    //   std::cout << "clusters_h.view().clusModuleStart():" << clusters_h.view()[oia].clusModuleStart() << std::endl;
-    // }
-
-    // for (int oia = 0; oia < (int)digis_h.view().metadata().size(); ++oia) {
-    //   std::cout << "digis_h.view().clus():" << digis_h.view()[oia].clus() << std::endl;
-    //   std::cout << "digis_h.view().pdigi():" << digis_h.view()[oia].pdigi() << std::endl;
-    //   std::cout << "digis_h.view().rawIdArr():" << digis_h.view()[oia].rawIdArr() << std::endl;
-    //   std::cout << "digis_h.view().adc():" << digis_h.view()[oia].adc() << std::endl;
-    //   std::cout << "digis_h.view().xx():" << digis_h.view()[oia].xx() << std::endl;
-    //   std::cout << "digis_h.view().yy():" << digis_h.view()[oia].yy() << std::endl;
-    //   std::cout << "digis_h.view().moduleId():" << digis_h.view()[oia].moduleId() << std::endl;
-    // }
-
     iEvent.emplace(digiPutToken_, Algo_.getDigis());  //std::move(tmp.first));
     iEvent.emplace(clusterPutToken_, Algo_.getClusters());
     if (includeErrors_) {
       iEvent.emplace(digiErrorPutToken_, Algo_.getErrors());
       iEvent.emplace(fmtErrorToken_, std::move(errors_));
     }
-
-    // std::cout << "SiPixelRawToCluster::produce" << std::endl;
   }
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
