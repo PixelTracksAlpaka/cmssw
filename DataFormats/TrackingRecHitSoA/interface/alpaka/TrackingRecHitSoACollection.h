@@ -29,7 +29,7 @@ namespace cms::alpakatools {
     template <typename TQueue>
     static auto copyAsync(TQueue& queue,
                           ALPAKA_ACCELERATOR_NAMESPACE::TrackingRecHitAlpakaSoAPhase1 const& deviceData) {
-      TrackingRecHitAlpakaHostPhase1 hostData(deviceData.view().metadata().size(), deviceData.offsetBPIX2(), queue);
+      TrackingRecHitAlpakaHostPhase1 hostData(deviceData.view().metadata().size(), queue);
       alpaka::memcpy(queue, hostData.buffer(), deviceData.buffer());
       return hostData;
     }
@@ -40,7 +40,7 @@ namespace cms::alpakatools {
     template <typename TQueue>
     static auto copyAsync(TQueue& queue,
                           ALPAKA_ACCELERATOR_NAMESPACE::TrackingRecHitAlpakaSoAPhase2 const& deviceData) {
-      TrackingRecHitAlpakaHostPhase2 hostData(deviceData.view().metadata().size(), deviceData.offsetBPIX2(), queue);
+      TrackingRecHitAlpakaHostPhase2 hostData(deviceData.view().metadata().size(), queue);
       alpaka::memcpy(queue, hostData.buffer(), deviceData.buffer());
       return hostData;
     }

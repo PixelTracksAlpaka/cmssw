@@ -79,7 +79,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     uint32_t const *__restrict__ nCells,
                                     CellNeighborsVector<TrackerTraits> const *cellNeighbors,
                                     CellTracksVector<TrackerTraits> const *cellTracks,
-                                    OuterHitOfCell<TrackerTraits> const isOuterHitOfCell,
+                                    OuterHitOfCell<TrackerTraits> const *isOuterHitOfCell,
                                     int32_t nHits,
                                     uint32_t maxNumberOfDoublets,
                                     Counters *counters) const {
@@ -172,7 +172,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         }
 
         for (auto idx : cms::alpakatools::elements_with_stride(acc, nHits))
-          if (isOuterHitOfCell.container[idx].full())  // ++tooManyOuterHitOfCell;
+          if ((*isOuterHitOfCell).container[idx].full())  // ++tooManyOuterHitOfCell;
             printf("OuterHitOfCell overflow %d\n", idx);
       }
     };

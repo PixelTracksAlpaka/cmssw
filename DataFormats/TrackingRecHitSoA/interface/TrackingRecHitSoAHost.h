@@ -17,7 +17,6 @@ public:
   using PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>::view;
   using PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>::const_view;
   using PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>::buffer;
-  // using PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>::bufferSize;
 
   TrackingRecHitAlpakaHost() = default;
 
@@ -27,23 +26,19 @@ public:
   using PhiBinner = typename hitSoA::PhiBinner;
 
   template <typename TQueue>
-  explicit TrackingRecHitAlpakaHost(uint32_t nHits, int32_t offsetBPIX2, TQueue queue)
-      : PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>(nHits, queue), offsetBPIX2_(offsetBPIX2) {}
+  explicit TrackingRecHitAlpakaHost(uint32_t nHits, TQueue queue)
+      : PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>(nHits, queue) {}
 
   // Constructor which specifies the SoA size
   template <typename TQueue>
   explicit TrackingRecHitAlpakaHost(uint32_t nHits, int32_t offsetBPIX2, uint32_t const* hitsModuleStart, TQueue queue)
-      : PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>(nHits, queue), offsetBPIX2_(offsetBPIX2) {
+      : PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>(nHits, queue) {
     std::copy(hitsModuleStart, hitsModuleStart + TrackerTraits::numberOfModules + 1, view().hitsModuleStart().data());
     view().offsetBPIX2() = offsetBPIX2;
   }
 
   uint32_t nHits() const { return view().metadata().size(); }
   uint32_t const* hitsModuleStart() const { return view().hitsModuleStart().data(); }
-  uint32_t offsetBPIX2() const { return offsetBPIX2_; }
-
-private:
-  uint32_t offsetBPIX2_;
 };
 
 using TrackingRecHitAlpakaHostPhase1 = TrackingRecHitAlpakaHost<pixelTopology::Phase1>;

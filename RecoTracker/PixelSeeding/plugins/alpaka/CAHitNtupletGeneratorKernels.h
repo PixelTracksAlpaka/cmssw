@@ -247,6 +247,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           // in principle we can use "nhits" to heuristically dimension the workspace...
           device_isOuterHitOfCell_{
               cms::alpakatools::make_device_buffer<OuterHitOfCellContainer[]>(queue, std::max(1u, nhits))},
+          isOuterHitOfCell_{cms::alpakatools::make_device_buffer<OuterHitOfCell>(queue)},
 
           device_theCellNeighbors_{cms::alpakatools::make_device_buffer<CellNeighborsVector>(queue)},
           device_theCellTracks_{cms::alpakatools::make_device_buffer<CellTracksVector>(queue)},
@@ -281,7 +282,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     void classifyTuples(const HitsConstView& hh, TkSoAView& track_view, Queue& queue);
 
-    void buildDoublets(const HitsConstView& hh, int32_t offsetBPIX2, Queue& queue);
+    void buildDoublets(const HitsConstView& hh, Queue& queue);
     void cleanup(Queue& queue);
 
     static void printCounters(Counters const* counters);
@@ -297,6 +298,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     cms::alpakatools::device_buffer<Device, TupleMultiplicity> device_tupleMultiplicity_;
     cms::alpakatools::device_buffer<Device, CACell[]> device_theCells_;
     cms::alpakatools::device_buffer<Device, OuterHitOfCellContainer[]> device_isOuterHitOfCell_;
+    cms::alpakatools::device_buffer<Device, OuterHitOfCell> isOuterHitOfCell_;
     cms::alpakatools::device_buffer<Device, CellNeighborsVector> device_theCellNeighbors_;
     cms::alpakatools::device_buffer<Device, CellTracksVector> device_theCellTracks_;
     cms::alpakatools::device_buffer<Device, unsigned char[]> cellStorage_;
@@ -306,8 +308,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     cms::alpakatools::AtomicPairCounter* device_hitTuple_apc_;
     cms::alpakatools::AtomicPairCounter* device_hitToTuple_apc_;
     cms::alpakatools::device_view<Device, uint32_t> device_nCells_;
-    // uint32_t* device_nCells_;
-    std::optional<cms::alpakatools::device_buffer<Device, OuterHitOfCell>> isOuterHitOfCell_;
   };
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
