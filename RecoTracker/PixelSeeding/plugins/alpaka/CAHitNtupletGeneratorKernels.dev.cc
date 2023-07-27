@@ -62,9 +62,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                         this->m_params.caParams_);
 
     // do not run the fishbone if there are hits only in BPIX1
-    auto host_isOuterHitOfCell_ = cms::alpakatools::make_host_buffer<OuterHitOfCell>(queue);
-    alpaka::memcpy(queue, host_isOuterHitOfCell_, this->isOuterHitOfCell_);
-    if (nhits > host_isOuterHitOfCell_.data()->offset && this->m_params.earlyFishbone_) {
+    if (this->m_params.earlyFishbone_) {
       const auto nthTot = 128;
       const auto stride = 16;
       const auto blockSize = nthTot / stride;
@@ -168,7 +166,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     alpaka::wait(queue);
 #endif
     // do not run the fishbone if there are hits only in BPIX1
-    if (nhits > host_isOuterHitOfCell_.data()->offset && this->m_params.lateFishbone_) {
+    if (this->m_params.lateFishbone_) {
       const auto nthTot = 128;
       const auto stride = 16;
       const auto blockSize = nthTot / stride;
@@ -216,7 +214,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     // in principle we can use "nhits" to heuristically dimension the workspace...
     ALPAKA_ASSERT_OFFLOAD(this->device_isOuterHitOfCell_.data());
 
-    // this->isOuterHitOfCell_ = cms::alpakatools::make_device_buffer<OuterHitOfCell>(queue);
     alpaka::exec<Acc1D>(
         queue,
         cms::alpakatools::make_workdiv<Acc1D>(1, 1),
