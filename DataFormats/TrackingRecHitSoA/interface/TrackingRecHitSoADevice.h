@@ -27,48 +27,21 @@ public:
   using PhiBinner = typename hitSoA::PhiBinner;
   // Constructor which specifies the SoA size
   template <typename TQueue>
-  explicit TrackingRecHitAlpakaDevice(uint32_t nHits,
-                                      int32_t offsetBPIX2,
-                                      uint32_t const* hitsModuleStart,
-                                      TQueue queue)
-      : PortableDeviceCollection<TrackingRecHitAlpakaLayout<TrackerTraits>, TDev>(nHits, queue),
-        nHits_(nHits),
-        hitsModuleStart_(hitsModuleStart),
-        offsetBPIX2_(offsetBPIX2) {
-    phiBinner_ = &(view().phiBinner());
+  explicit TrackingRecHitAlpakaDevice(uint32_t nHits, int32_t offsetBPIX2, uint32_t const* hitsModuleStart, TQueue queue)
+      : PortableDeviceCollection<TrackingRecHitAlpakaLayout<TrackerTraits>, TDev>(nHits, queue) {
+    const auto device = alpaka::getDev(queue);
 
-    const auto host = cms::alpakatools::host();
-    const auto device = cms::alpakatools::devices<alpaka::Pltf<TDev>>()[0];
+    auto start_h = cms::alpakatools::make_device_view(device, hitsModuleStart, TrackerTraits::numberOfModules + 1);
+    auto start_d =
+        cms::alpakatools::make_device_view(device, view().hitsModuleStart().data(), TrackerTraits::numberOfModules + 1);
+    alpaka::memcpy(queue, start_d, start_h);
 
-    auto start_h = alpaka::createView(host, hitsModuleStart, TrackerTraits::numberOfModules + 1);
-    auto start_d = alpaka::createView(device, view().hitsModuleStart().data(), TrackerTraits::numberOfModules + 1);
-    alpaka::memcpy(queue, start_d, start_h);  //, TrackerTraits::numberOfModules + 1);
-
-    auto nHits_h = alpaka::createView(host, &nHits, 1);
-    auto nHits_d = alpaka::createView(device, &(view().nHits()), 1);
-    alpaka::memcpy(queue, nHits_d, nHits_h, 1);
-
-    auto off_h = alpaka::createView(host, &offsetBPIX2, 1);
-    auto off_d = alpaka::createView(device, &(view().offsetBPIX2()), 1);
-    alpaka::memcpy(queue, off_d, off_h, 1);
+    auto off_h = cms::alpakatools::make_host_view(offsetBPIX2);
+    auto off_d = cms::alpakatools::make_device_view(device, view().offsetBPIX2());
+    alpaka::memcpy(queue, off_d, off_h);
   }
 
-  uint32_t nHits() const { return nHits_; }  //go to size of view
-
-  auto phiBinnerStorage() { return phiBinnerStorage_; }
-  auto hitsModuleStart() const { return hitsModuleStart_; }
-  uint32_t offsetBPIX2() const { return offsetBPIX2_; }
-  auto phiBinner() { return phiBinner_; }
-
-private:
-  uint32_t nHits_;  //Needed for the host SoA size
-
-  //TODO: this is used not that much from the hits (only once in BrokenLineFit), would make sens to remove it from this class.
-  ParamsOnDevice const* cpeParams_;
-  uint32_t const* hitsModuleStart_;
-  uint32_t offsetBPIX2_;
-
-  PhiBinnerStorageType* phiBinnerStorage_;
-  PhiBinner* phiBinner_;
+  uint32_t nHits() const { return view().metadata().size(); }
+  uint32_t const* hitsModuleStart() const { return view().hitsModuleStart().data(); }
 };
 #endif  // DataFormats_RecHits_interface_TrackingRecHitSoADevice_h

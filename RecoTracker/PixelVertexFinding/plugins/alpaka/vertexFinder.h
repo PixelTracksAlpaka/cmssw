@@ -7,7 +7,8 @@
 #include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
 #include "DataFormats/Vertex/interface/ZVertexSoAHost.h"
 #include "DataFormats/Vertex/interface/ZVertexLayout.h"
-#include "DataFormats/Vertex/interface/alpaka/ZVertexSoADevice.h"
+#include "DataFormats/Vertex/interface/alpaka/ZVertexSoACollection.h"
+#include "DataFormats/Vertex/interface/ZVertexSoADevice.h"
 #include "DataFormats/Vertex/interface/alpaka/ZVertexUtilities.h"
 #include "../PixelVertexWorkSpaceLayout.h"
 #include "PixelVertexWorkSpaceUtilitiesAlpaka.h"
@@ -54,7 +55,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       ~Producer() = default;
 
-      ZVertexDevice makeAsync(Queue &queue, const TkSoAConstView &tracks_view, float ptMin, float ptMax) const;
+      // ZVertexDevice makeAsync(Queue &queue, const TkSoAConstView &tracks_view, float ptMin, float ptMax) const;
+      ZVertexCollection makeAsync(Queue &queue, const TkSoAConstView &tracks_view, float ptMin, float ptMax) const;
 
     private:
       const bool oneKernel_;

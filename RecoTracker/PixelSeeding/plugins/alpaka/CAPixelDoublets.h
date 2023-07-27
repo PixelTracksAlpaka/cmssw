@@ -19,16 +19,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const& acc,
-                                    OuterHitOfCell<TrackerTraits> isOuterHitOfCell,
+                                    OuterHitOfCell<TrackerTraits>* isOuterHitOfCell,
                                     int nHits,
                                     CellNeighborsVector<TrackerTraits>* cellNeighbors,
                                     CellNeighbors<TrackerTraits>* cellNeighborsContainer,
                                     CellTracksVector<TrackerTraits>* cellTracks,
                                     CellTracks<TrackerTraits>* cellTracksContainer) const {
-        ALPAKA_ASSERT_OFFLOAD(isOuterHitOfCell.container);
+        ALPAKA_ASSERT_OFFLOAD((*isOuterHitOfCell).container);
 
         for (auto i : cms::alpakatools::elements_with_stride(acc, nHits))
-          isOuterHitOfCell.container[i].reset();
+          (*isOuterHitOfCell).container[i].reset();
 
         const uint32_t threadIdx(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
         if (0 == threadIdx) {
@@ -60,11 +60,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     CellNeighborsVector<TrackerTraits>* cellNeighbors,
                                     CellTracksVector<TrackerTraits>* cellTracks,
                                     HitsConstView<TrackerTraits> hh,
-                                    OuterHitOfCell<TrackerTraits> isOuterHitOfCell,
+                                    OuterHitOfCell<TrackerTraits>* isOuterHitOfCell,
                                     uint32_t nActualPairs,
                                     CellCutsT<TrackerTraits> cuts) const {
         doubletsFromHisto<TrackerTraits>(
-            acc, nActualPairs, cells, nCells, cellNeighbors, cellTracks, hh, isOuterHitOfCell, cuts);
+            acc, nActualPairs, cells, nCells, cellNeighbors, cellTracks, hh, *isOuterHitOfCell, cuts);
       }
     };
   }  // namespace caPixelDoublets

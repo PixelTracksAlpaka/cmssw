@@ -18,7 +18,8 @@
 #include <alpaka/alpaka.hpp>
 
 #include "DataFormats/Track/interface/PixelTrackLayout.h"
-#include "DataFormats/Track/interface/alpaka/TrackSoADevice.h"
+#include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
+#include "DataFormats/Track/interface/TrackSoADevice.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoADevice.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
@@ -67,7 +68,8 @@ int main() {
   {
     int maxNumberOfConcurrentFits_ = 10;
 
-    TrackSoADevice<pixelTopology::Phase1> tracks_d;
+    // TrackSoADevice<pixelTopology::Phase1> tracks_d;
+    TrackSoACollection<pixelTopology::Phase1> tracks_d;
     Tuples *tuples_d = &tracks_d.view().hitIndices();
 
     // auto tuplesMult_d =

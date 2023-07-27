@@ -34,7 +34,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
   private:
-
     edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> magfieldToken_;
     edm::ESGetToken<TrackerGeometry, TrackerDigiGeometryRecord> pDDToken_;
     edm::ESGetToken<TrackerTopology, TrackerTopologyRcd> hTTToken_;
@@ -48,73 +47,74 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     // const device::ESGetToken<PixelCPEFastAlpaka<TrackerTraits>, TkPixelCPERecord> cpeToken_;
   };
 
+  using namespace edm;
 
-using namespace edm;
+  template <typename TrackerTraits>
+  PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::PixelCPEFastParamsESProducerAlpaka(const edm::ParameterSet& p)
+      : ESProducer(p), pset_(p) {
+    auto const& myname = p.getParameter<std::string>("ComponentName");
+    auto const& magname = p.getParameter<edm::ESInputTag>("MagneticFieldRecord");
+    useErrorsFromTemplates_ = p.getParameter<bool>("UseErrorsFromTemplates");
 
-template <typename TrackerTraits>
-PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::PixelCPEFastParamsESProducerAlpaka(const edm::ParameterSet& p) : ESProducer(p), pset_(p) {
-  auto const& myname = p.getParameter<std::string>("ComponentName");
-  auto const& magname = p.getParameter<edm::ESInputTag>("MagneticFieldRecord");
-  useErrorsFromTemplates_ = p.getParameter<bool>("UseErrorsFromTemplates");
-
-  auto cc = setWhatProduced(this, myname);
-  magfieldToken_ = cc.consumes(magname);
-  pDDToken_ = cc.consumes();
-  hTTToken_ = cc.consumes();
-  lorentzAngleToken_ = cc.consumes(edm::ESInputTag(""));
-  lorentzAngleWidthToken_ = cc.consumes(edm::ESInputTag("", "forWidth"));
-  if (useErrorsFromTemplates_) {
-    genErrorDBObjectToken_ = cc.consumes();
+    auto cc = setWhatProduced(this, myname);
+    magfieldToken_ = cc.consumes(magname);
+    pDDToken_ = cc.consumes();
+    hTTToken_ = cc.consumes();
+    lorentzAngleToken_ = cc.consumes(edm::ESInputTag(""));
+    lorentzAngleWidthToken_ = cc.consumes(edm::ESInputTag("", "forWidth"));
+    if (useErrorsFromTemplates_) {
+      genErrorDBObjectToken_ = cc.consumes();
+    }
   }
-}
 
-template <typename TrackerTraits>
-std::unique_ptr<PixelCPEFastParamsHost<TrackerTraits>> 
-PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::produce(const PixelCPEFastParamsRecord& iRecord){
-  // add the new la width object
-  const SiPixelLorentzAngle* lorentzAngleWidthProduct = nullptr;
-  lorentzAngleWidthProduct = &iRecord.get(lorentzAngleWidthToken_);
+  template <typename TrackerTraits>
+  std::unique_ptr<PixelCPEFastParamsHost<TrackerTraits>> PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::produce(
+      const PixelCPEFastParamsRecord& iRecord) {
+    // add the new la width object
+    const SiPixelLorentzAngle* lorentzAngleWidthProduct = nullptr;
+    lorentzAngleWidthProduct = &iRecord.get(lorentzAngleWidthToken_);
 
-  const SiPixelGenErrorDBObject* genErrorDBObjectProduct = nullptr;
+    const SiPixelGenErrorDBObject* genErrorDBObjectProduct = nullptr;
 
-  // Errors take only from new GenError
-  if (useErrorsFromTemplates_) {  // do only when generrors are needed
-    genErrorDBObjectProduct = &iRecord.get(genErrorDBObjectToken_);
-    //} else {
-    //std::cout<<" pass an empty GenError pointer"<<std::endl;
+    // Errors take only from new GenError
+    if (useErrorsFromTemplates_) {  // do only when generrors are needed
+      genErrorDBObjectProduct = &iRecord.get(genErrorDBObjectToken_);
+      //} else {
+      //std::cout<<" pass an empty GenError pointer"<<std::endl;
+    }
+    return std::make_unique<PixelCPEFastParamsHost<TrackerTraits>>(pset_,
+                                                                   &iRecord.get(magfieldToken_),
+                                                                   iRecord.get(pDDToken_),
+                                                                   iRecord.get(hTTToken_),
+                                                                   &iRecord.get(lorentzAngleToken_),
+                                                                   genErrorDBObjectProduct,
+                                                                   lorentzAngleWidthProduct);
   }
-  return std::make_unique<PixelCPEFastParamsHost<TrackerTraits>>(pset_,
-                                                       &iRecord.get(magfieldToken_),
-                                                       iRecord.get(pDDToken_),
-                                                       iRecord.get(hTTToken_),
-                                                       &iRecord.get(lorentzAngleToken_),
-                                                       genErrorDBObjectProduct,
-                                                       lorentzAngleWidthProduct);
-}
 
-template <typename TrackerTraits>
-void PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
-  edm::ParameterSetDescription desc;
+  template <typename TrackerTraits>
+  void PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::fillDescriptions(
+      edm::ConfigurationDescriptions& descriptions) {
+    edm::ParameterSetDescription desc;
 
-  // from PixelCPEBase
-  PixelCPEBase::fillPSetDescription(desc);
+    // from PixelCPEBase
+    PixelCPEBase::fillPSetDescription(desc);
 
-  // from PixelCPEFast
-  PixelCPEFastParamsHost<TrackerTraits>::fillPSetDescription(desc);
+    // from PixelCPEFast
+    PixelCPEFastParamsHost<TrackerTraits>::fillPSetDescription(desc);
 
-  // used by PixelCPEFast
-  desc.add<double>("EdgeClusterErrorX", 50.0);
-  desc.add<double>("EdgeClusterErrorY", 85.0);
-  desc.add<bool>("UseErrorsFromTemplates", true);
-  desc.add<bool>("TruncatePixelCharge", true);
+    // used by PixelCPEFast
+    desc.add<double>("EdgeClusterErrorX", 50.0);
+    desc.add<double>("EdgeClusterErrorY", 85.0);
+    desc.add<bool>("UseErrorsFromTemplates", true);
+    desc.add<bool>("TruncatePixelCharge", true);
 
-  std::string name = "PixelCPEFastParams";
-  name += TrackerTraits::nameModifier;
-  desc.add<std::string>("ComponentName", name);
-  desc.add<edm::ESInputTag>("MagneticFieldRecord", edm::ESInputTag());
+    std::string name = "PixelCPEFastParams";
+    name += TrackerTraits::nameModifier;
+    desc.add<std::string>("ComponentName", name);
+    desc.add<edm::ESInputTag>("MagneticFieldRecord", edm::ESInputTag());
 
-  descriptions.addWithDefaultLabel(desc);
-}
+    descriptions.addWithDefaultLabel(desc);
+  }
 
   // template <typename TrackerTraits>
   // PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::PixelCPEFastParamsESProducerAlpaka(edm::ParameterSet const& iConfig)

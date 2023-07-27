@@ -2,7 +2,8 @@
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Track/interface/TrackSoAHost.h"
-#include "DataFormats/Track/interface/alpaka/TrackSoADevice.h"
+#include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
+#include "DataFormats/Track/interface/TrackSoADevice.h"
 #include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoACollection.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -37,7 +38,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using HitsOnHost = TrackingRecHitAlpakaHost<TrackerTraits>;
 
     using TkSoAHost = TrackSoAHost<TrackerTraits>;
-    using TkSoADevice = TrackSoADevice<TrackerTraits>;
+    // using TkSoADevice = TrackSoADevice<TrackerTraits>;
+    using TkSoADevice = TrackSoACollection<TrackerTraits>;
 
     using Algo = CAHitNtupletGenerator<TrackerTraits>;
 
@@ -52,14 +54,15 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     const device::ESGetToken<PixelCPEFastParams<TrackerTraits>, PixelCPEFastParamsRecord> cpeToken_;
     device::EDGetToken<HitsOnDevice> tokenHit_;
     device::EDPutToken<TkSoADevice> tokenTrack_;
-    
 
     Algo deviceAlgo_;
   };
 
   template <typename TrackerTraits>
   CAHitNtupletAlpaka<TrackerTraits>::CAHitNtupletAlpaka(const edm::ParameterSet& iConfig)
-      : tokenField_(esConsumes()), cpeToken_(esConsumes()), deviceAlgo_(iConfig, consumesCollector()) {
+      : tokenField_(esConsumes()),
+        cpeToken_(esConsumes(edm::ESInputTag("", iConfig.getParameter<std::string>("CPE")))),
+        deviceAlgo_(iConfig, consumesCollector()) {
     tokenHit_ = consumes(iConfig.getParameter<edm::InputTag>("pixelRecHitSrc"));
     tokenTrack_ = produces();
   }
@@ -70,13 +73,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     desc.add<edm::InputTag>("pixelRecHitSrc", edm::InputTag("siPixelRecHitsPreSplittingCUDA"));
 
+    std::string cpe = "PixelCPEFastParams";
+    cpe += TrackerTraits::nameModifier;
+    desc.add<std::string>("CPE", cpe);
+
     Algo::fillDescriptions(desc);
     descriptions.addWithDefaultLabel(desc);
   }
 
   template <typename TrackerTraits>
   void CAHitNtupletAlpaka<TrackerTraits>::produce(device::Event& iEvent, const device::EventSetup& es) {
-
     auto bf = 1. / es.getData(tokenField_).inverseBzAtOriginInGeV();
 
     auto& fcpe = es.getData(cpeToken_);

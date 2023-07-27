@@ -10,7 +10,8 @@
 #include <functional>
 #include <vector>
 
-#include "DataFormats/Track/interface/alpaka/TrackSoADevice.h"
+#include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
+#include "DataFormats/Track/interface/TrackSoADevice.h"
 #include "DataFormats/Track/interface/TrackSoAHost.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
@@ -20,7 +21,6 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "FWCore/Utilities/interface/isFinite.h"
-// #include "HeterogeneousCore/CUDAServices/interface/CUDAService.h"
 #include "TrackingTools/DetLayers/interface/BarrelDetLayer.h"
 
 #include "CAHitNtupletGenerator.h"
@@ -244,33 +244,31 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   template <typename TrackerTraits>
-  TrackSoADevice<TrackerTraits> CAHitNtupletGenerator<TrackerTraits>::makeTuplesAsync(HitsOnDevice const& hits_d,
-                                                                                      ParamsOnDevice const* cpeParams,
-                                                                                      float bfield,
-                                                                                      Queue& queue) const {
+  TrackSoACollection<TrackerTraits> CAHitNtupletGenerator<TrackerTraits>::makeTuplesAsync(
+      HitsOnDevice const& hits_d, ParamsOnDevice const* cpeParams, float bfield, Queue& queue) const {
     using HelixFit = HelixFit<TrackerTraits>;
-    using TrackSoA = TrackSoADevice<TrackerTraits>;
+    using TrackSoA = TrackSoACollection<TrackerTraits>;
     using GPUKernels = CAHitNtupletGeneratorKernels<TrackerTraits>;
 
     TrackSoA tracks(queue);
 
-    GPUKernels kernels(m_params, hits_d.nHits(), queue);
-    // kernels.setCounters(m_counters);  // Not needed anymore ???
-    // kernels.allocate(hits_d.nHits(), queue); // Not needed anymore?
-    kernels.buildDoublets(hits_d.view(), hits_d.offsetBPIX2(), queue);
+    GPUKernels kernels(m_params, hits_d.view().metadata().size(), queue);
+
+    kernels.buildDoublets(hits_d.view(), queue);
     kernels.launchKernels(hits_d.view(), tracks.view(), queue);
 
     HelixFit fitter(bfield, m_params.fitNas4_);
     fitter.allocate(kernels.tupleMultiplicity(), tracks.view());
     if (m_params.useRiemannFit_) {
-      fitter.launchRiemannKernels(hits_d.view(), cpeParams, hits_d.nHits(), TrackerTraits::maxNumberOfQuadruplets, queue);
+      fitter.launchRiemannKernels(
+          hits_d.view(), cpeParams, hits_d.view().metadata().size(), TrackerTraits::maxNumberOfQuadruplets, queue);
     } else {
-      fitter.launchBrokenLineKernels(hits_d.view(), cpeParams, hits_d.nHits(), TrackerTraits::maxNumberOfQuadruplets, queue);
+      fitter.launchBrokenLineKernels(
+          hits_d.view(), cpeParams, hits_d.view().metadata().size(), TrackerTraits::maxNumberOfQuadruplets, queue);
     }
     kernels.classifyTuples(hits_d.view(), tracks.view(), queue);
 #ifdef GPU_DEBUG
-    cudaDeviceSynchronize();
-    cudaCheck(cudaGetLastError());
+    alpaka::wait(queue);
     std::cout << "finished building pixel tracks on GPU" << std::endl;
 #endif
 

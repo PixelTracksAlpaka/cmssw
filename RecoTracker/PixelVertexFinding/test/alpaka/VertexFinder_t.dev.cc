@@ -120,7 +120,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       vertexFinder::workSpace::PixelVertexWorkSpaceSoADevice ws_d(queue);
       ::vertexFinder::workSpace::PixelVertexWorkSpaceSoAHost ws_h(queue);
       ZVertexHost vertices_h(queue);
-      ZVertexDevice vertices_d(queue);
+      // ZVertexDevice vertices_d(queue);
+      ZVertexCollection vertices_d(queue);
 
       float eps = 0.1f;
       std::array<float, 3> par{{eps, 0.01f, 9.0f}};

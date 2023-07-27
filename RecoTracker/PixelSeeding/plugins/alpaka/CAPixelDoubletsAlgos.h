@@ -111,7 +111,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                       HitsConstView<TrackerTraits> hh,
                       OuterHitOfCell<TrackerTraits> isOuterHitOfCell,
                       CellCutsT<TrackerTraits> const& cuts) {  // ysize cuts (z in the barrel)  times 8
-      // these are used if doClusterCut is true
+                                                               // these are used if doClusterCut is true
 
       const bool doClusterCut = cuts.doClusterCut_;
       const bool doZ0Cut = cuts.doZ0Cut_;
@@ -269,11 +269,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
             if (doZ0Cut && z0cutoff(oi))
               continue;
+
             auto mop = hh[oi].iphi();
             uint16_t idphi = std::min(std::abs(int16_t(mop - mep)), std::abs(int16_t(mep - mop)));
             if (idphi > iphicut)
               continue;
-
             if (doClusterCut && cuts.zSizeCut(acc, hh, i, oi))
               continue;
             if (doPtCut && ptcut(oi, idphi))

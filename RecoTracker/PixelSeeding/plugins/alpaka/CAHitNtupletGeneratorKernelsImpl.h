@@ -79,7 +79,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     uint32_t const *__restrict__ nCells,
                                     CellNeighborsVector<TrackerTraits> const *cellNeighbors,
                                     CellTracksVector<TrackerTraits> const *cellTracks,
-                                    OuterHitOfCell<TrackerTraits> const isOuterHitOfCell,
+                                    OuterHitOfCell<TrackerTraits> const *isOuterHitOfCell,
                                     int32_t nHits,
                                     uint32_t maxNumberOfDoublets,
                                     Counters *counters) const {
@@ -92,7 +92,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           alpaka::atomicAdd(acc, &c.nHits, static_cast<unsigned long long>(nHits), alpaka::hierarchy::Blocks{});
           alpaka::atomicAdd(acc, &c.nCells, static_cast<unsigned long long>(*nCells), alpaka::hierarchy::Blocks{});
           alpaka::atomicAdd(
-              acc, &c.nTuples, static_cast<unsigned long long>(apc->get().m), alpaka::hierarchy::Blocks{});
+              acc, &c.nTuples, static_cast<unsigned long long>(apc->get().first), alpaka::hierarchy::Blocks{});
           alpaka::atomicAdd(acc,
                             &c.nFitTracks,
                             static_cast<unsigned long long>(tupleMultiplicity->size()),
@@ -103,12 +103,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         if (0 == threadIdx) {
           printf("number of found cells %d \n found tuples %d with total hits %d out of %d\n",
                  *nCells,
-                 apc->get().m,
-                 apc->get().n,
+                 apc->get().first,
+                 apc->get().second,
                  nHits);
-          if (apc->get().m < TrackerTraits::maxNumberOfQuadruplets) {
-            ALPAKA_ASSERT_OFFLOAD(tracks_view.hitIndices().size(apc->get().m) == 0);
-            ALPAKA_ASSERT_OFFLOAD(tracks_view.hitIndices().size() == apc->get().n);
+          if (apc->get().first < TrackerTraits::maxNumberOfQuadruplets) {
+            ALPAKA_ASSERT_OFFLOAD(tracks_view.hitIndices().size(apc->get().first) == 0);
+            ALPAKA_ASSERT_OFFLOAD(tracks_view.hitIndices().size() == apc->get().second);
           }
         }
         const auto ntNbins = foundNtuplets->nbins();
@@ -124,7 +124,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #endif
 
         if (0 == threadIdx) {
-          if (apc->get().m >= TrackerTraits::maxNumberOfQuadruplets)
+          if (apc->get().first >= TrackerTraits::maxNumberOfQuadruplets)
             printf("Tuples overflow\n");
           if (*nCells >= maxNumberOfDoublets)
             printf("Cells overflow\n");
@@ -172,7 +172,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         }
 
         for (auto idx : cms::alpakatools::elements_with_stride(acc, nHits))
-          if (isOuterHitOfCell.container[idx].full())  // ++tooManyOuterHitOfCell;
+          if ((*isOuterHitOfCell).container[idx].full())  // ++tooManyOuterHitOfCell;
             printf("OuterHitOfCell overflow %d\n", idx);
       }
     };
@@ -342,7 +342,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     CACellT<TrackerTraits> *cells,
                                     uint32_t *nCells,
                                     CellNeighborsVector<TrackerTraits> *cellNeighbors,
-                                    OuterHitOfCell<TrackerTraits> const isOuterHitOfCell,
+                                    OuterHitOfCell<TrackerTraits> const *isOuterHitOfCell,
                                     CAParams<TrackerTraits> params) const {
         using Cell = CACellT<TrackerTraits>;
 
@@ -369,49 +369,49 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               auto cellIndex = idx;
               auto &thisCell = cells[idx];
               auto innerHitId = thisCell.inner_hit_id();
-              // if (int(innerHitId) < isOuterHitOfCell.offset)
-              //   continue;
-              uint32_t numberOfPossibleNeighbors = isOuterHitOfCell[innerHitId].size();
-              auto vi = isOuterHitOfCell[innerHitId].data();
+              if (int(innerHitId) >= isOuterHitOfCell->offset) {
+                uint32_t numberOfPossibleNeighbors = (*isOuterHitOfCell)[innerHitId].size();
+                auto vi = (*isOuterHitOfCell)[innerHitId].data();
 
-              auto ri = thisCell.inner_r(hh);
-              auto zi = thisCell.inner_z(hh);
+                auto ri = thisCell.inner_r(hh);
+                auto zi = thisCell.inner_z(hh);
 
-              auto ro = thisCell.outer_r(hh);
-              auto zo = thisCell.outer_z(hh);
-              auto isBarrel = thisCell.inner_detIndex(hh) < last_barrel_detIndex;
+                auto ro = thisCell.outer_r(hh);
+                auto zo = thisCell.outer_z(hh);
+                auto isBarrel = thisCell.inner_detIndex(hh) < last_barrel_detIndex;
 
-              cms::alpakatools::for_each_element_in_block_strided(
-                  acc,
-                  numberOfPossibleNeighbors,
-                  0u,
-                  [&](uint32_t j) {
-                    auto otherCell = (vi[j]);
-                    auto &oc = cells[otherCell];
-                    auto r1 = oc.inner_r(hh);
-                    auto z1 = oc.inner_z(hh);
-                    bool aligned =
-                        Cell::areAlignedRZ(r1,
-                                           z1,
-                                           ri,
-                                           zi,
-                                           ro,
-                                           zo,
-                                           params.ptmin_,
-                                           isBarrel ? params.CAThetaCutBarrel_
-                                                    : params.CAThetaCutForward_);  // 2.f*thetaCut); // FIXME tune cuts
-                    if (aligned &&
-                        thisCell.dcaCut(hh,
-                                        oc,
-                                        oc.inner_detIndex(hh) < last_bpix1_detIndex ? params.dcaCutInnerTriplet_
-                                                                                    : params.dcaCutOuterTriplet_,
-                                        params.hardCurvCut_)) {  // FIXME tune cuts
-                      oc.addOuterNeighbor(acc, cellIndex, *cellNeighbors);
-                      thisCell.setStatusBits(Cell::StatusBit::kUsed);
-                      oc.setStatusBits(Cell::StatusBit::kUsed);
-                    }
-                  },
-                  dimIndexX);  // loop on inner cells
+                cms::alpakatools::for_each_element_in_block_strided(
+                    acc,
+                    numberOfPossibleNeighbors,
+                    0u,
+                    [&](uint32_t j) {
+                      auto otherCell = (vi[j]);
+                      auto &oc = cells[otherCell];
+                      auto r1 = oc.inner_r(hh);
+                      auto z1 = oc.inner_z(hh);
+                      bool aligned = Cell::areAlignedRZ(
+                          r1,
+                          z1,
+                          ri,
+                          zi,
+                          ro,
+                          zo,
+                          params.ptmin_,
+                          isBarrel ? params.CAThetaCutBarrel_
+                                   : params.CAThetaCutForward_);  // 2.f*thetaCut); // FIXME tune cuts
+                      if (aligned &&
+                          thisCell.dcaCut(hh,
+                                          oc,
+                                          oc.inner_detIndex(hh) < last_bpix1_detIndex ? params.dcaCutInnerTriplet_
+                                                                                      : params.dcaCutOuterTriplet_,
+                                          params.hardCurvCut_)) {  // FIXME tune cuts
+                        oc.addOuterNeighbor(acc, cellIndex, *cellNeighbors);
+                        thisCell.setStatusBits(Cell::StatusBit::kUsed);
+                        oc.setStatusBits(Cell::StatusBit::kUsed);
+                      }
+                    },
+                    dimIndexX);  // loop on inner cells
+              }
             },
             dimIndexY);  // loop on outer cells
       }
@@ -458,6 +458,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             typename Cell::TmpTuple stack;
             stack.reset();
             bool bpix1Start = params.startAt0(pid);
+            // thisCell.template find_ntuplets2<maxDepth+2, TAcc>(acc,
+            //                                                 idx,
+            //                                                 hh,
+            //                                                 cells,
+            //                                                 *cellTracks,
+            //                                                 tracks_view.hitIndices(),
+            //                                                 *apc,
+            //                                                 tracks_view.quality(),
+            //                                                 stack,
+            //                                                 params.minHitsPerNtuplet_,
+            //                                                 bpix1Start);
             thisCell.template find_ntuplets<maxDepth, TAcc>(acc,
                                                             hh,
                                                             cells,
@@ -644,7 +655,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         }
         // fill hit indices
         for (auto idx : cms::alpakatools::elements_with_stride(acc, tracks_view.hitIndices().size())) {
-          ALPAKA_ASSERT_OFFLOAD(tracks_view.hitIndices().bins[idx] < hh.nHits());
+          ALPAKA_ASSERT_OFFLOAD(tracks_view.hitIndices().bins[idx] < (uint32_t)hh.metadata().size());
           tracks_view.detIndices().bins[idx] = hh[tracks_view.hitIndices().bins[idx]].detectorIndex();
         }
       }
@@ -658,7 +669,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     TkSoAView<TrackerTraits> tracks_view,
                                     cms::alpakatools::AtomicPairCounter *apc) const {
         // clamp the number of tracks to the capacity of the SoA
-        auto ntracks = std::min<int>(apc->get().m, tracks_view.metadata().size() - 1);
+        auto ntracks = std::min<int>(apc->get().first, tracks_view.metadata().size() - 1);
         const uint32_t threadIdx(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
         if (0 == threadIdx)
           tracks_view.nTracks() = ntracks;

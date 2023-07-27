@@ -156,9 +156,9 @@ namespace cms {
       }
 
       static constexpr uint32_t sizeT() { return S; }
-      static constexpr uint32_t nbins() { return NBINS; }
       static constexpr int32_t nhists() { return NHISTS; }
-      static constexpr uint32_t totbins() { return NHISTS * NBINS + 1; }
+      static constexpr uint32_t nbins() { return NHISTS == 1 ? NBINS - 1 : NBINS; }
+      static constexpr uint32_t totbins() { return NHISTS == 1 ? NBINS : NHISTS * NBINS + 1; }
       static constexpr uint32_t nbits() { return ilog2(NBINS - 1) + 1; }
       static constexpr int32_t capacity() { return SIZE; }
 
@@ -209,24 +209,24 @@ namespace cms {
       template <typename TAcc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE int32_t
       bulkFill(const TAcc &acc, AtomicPairCounter &apc, index_type const *v, uint32_t n) {
-        auto c = apc.add(acc, n);
-        if (c.m >= nbins())
-          return -int32_t(c.m);
-        off[c.m] = c.n;
+        auto c = apc.inc_add(acc, n);
+        if (c.first >= nbins())
+          return -int32_t(c.first);
+        off[c.first] = c.second;
         for (uint32_t j = 0; j < n; ++j)
-          bins[c.n + j] = v[j];
-        return c.m;
+          bins[c.second + j] = v[j];
+        return c.first;
       }
 
       template <typename TAcc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void bulkFinalize(const TAcc &acc, AtomicPairCounter const &apc) {
-        off[apc.get().m] = apc.get().n;
+        off[apc.get().first] = apc.get().second;
       }
 
       template <typename TAcc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void bulkFinalizeFill(const TAcc &acc, AtomicPairCounter const &apc) {
-        auto m = apc.get().m;
-        auto n = apc.get().n;
+        auto m = apc.get().first;
+        auto n = apc.get().second;
 
         if (m >= nbins()) {  // overflow!
           off[nbins()] = uint32_t(off[nbins() - 1]);
@@ -237,16 +237,30 @@ namespace cms {
       }
 
       template <typename TAcc>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE void count(const TAcc &acc, T t) {
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE void countHist(const TAcc &acc, T t) {
         uint32_t b = bin(t);
         ALPAKA_ASSERT_OFFLOAD(b < nbins());
         atomicIncrement(acc, off[b]);
       }
 
       template <typename TAcc>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE void fill(const TAcc &acc, T t, index_type j) {
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE void count(const TAcc &acc, T b) {
+        ALPAKA_ASSERT_OFFLOAD((uint32_t)b < nbins());
+        atomicIncrement(acc, off[b]);
+      }
+
+      template <typename TAcc>
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE void fillHist(const TAcc &acc, T t, index_type j) {
         uint32_t b = bin(t);
         ALPAKA_ASSERT_OFFLOAD(b < nbins());
+        auto w = atomicDecrement(acc, off[b]);
+        ALPAKA_ASSERT_OFFLOAD(w > 0);
+        bins[w - 1] = j;
+      }
+
+      template <typename TAcc>
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE void fill(const TAcc &acc, T b, index_type j) {
+        ALPAKA_ASSERT_OFFLOAD((uint32_t)b < nbins());
         auto w = atomicDecrement(acc, off[b]);
         ALPAKA_ASSERT_OFFLOAD(w > 0);
         bins[w - 1] = j;
@@ -292,9 +306,9 @@ namespace cms {
       index_type bins[capacity()];
     };
 
-    template <typename I,       // type stored in the container (usually an index in a vector of the input values)
-              int32_t MAXONES,  // max number of "ones"
-              int32_t MAXMANYS  // max number of "manys"
+    template <typename I,       // type stored in the container (usually an index in a vector of the input values); same as I in HistoContainer
+              int32_t MAXONES,  // max number of "ones"; same as NBINS in HistoContainer
+              int32_t MAXMANYS  // max number of "manys"; same as SIZE in HistoContainer
               >
     using OneToManyAssoc = HistoContainer<uint32_t, MAXONES, MAXMANYS, sizeof(uint32_t) * 8, I, 1>;
 

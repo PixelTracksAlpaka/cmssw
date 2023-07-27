@@ -94,7 +94,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #endif
 
         for (int startClus = 0, endClus = nclus; startClus < endClus; startClus += MaxHitsInIter) {
-          auto first = clusters[me].clusModuleStart() + startClus;
+          auto first = clusters[1 + blockIdx].moduleStart();
 
           int nClusInIter = alpaka::math::min(acc, MaxHitsInIter, endClus - startClus);
           int lastClus = startClus + nClusInIter;
@@ -186,11 +186,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           alpaka::syncBlockThreads(acc);
 
           // next one cluster per thread...
-
+          first = clusters[me].clusModuleStart() + startClus;
           cms::alpakatools::for_each_element_in_block_strided(acc, nClusInIter, [&](uint32_t ic) {
             auto h = first + ic;  // output index in global memory
 
-            assert(h < hits.nHits());
+            assert(h < (uint32_t)hits.metadata().size());
             assert(h < clusters[me + 1].clusModuleStart());
 
             pixelCPEforDevice::position<TrackerTraits>(

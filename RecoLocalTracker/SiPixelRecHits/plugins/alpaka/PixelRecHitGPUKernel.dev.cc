@@ -52,9 +52,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         Queue queue) const {
       using namespace pixelRecHits;
       auto nHits = clusters_d.nClusters();
+      auto offsetBPIX2 = clusters_d.offsetBPIX2();
 
-      TrackingRecHitAlpakaCollection<TrackerTraits> hits_d(
-          nHits, clusters_d.offsetBPIX2(), clusters_d->clusModuleStart(), queue);
+      TrackingRecHitAlpakaCollection<TrackerTraits> hits_d(nHits, offsetBPIX2, clusters_d->clusModuleStart(), queue);
 
       int activeModulesWithDigis = digis_d.nModules();
       // protect from empty events
@@ -64,7 +64,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         const auto workDiv1D = cms::alpakatools::make_workdiv<Acc1D>(blocks, threadsPerBlock);
 
 #ifdef GPU_DEBUG
-        std::cout << "launching getHits kernel on " << alpaka::core::demangled<Acc1D> << " with " << blocks << " blocks" << std::endl;
+        std::cout << "launching getHits kernel on " << alpaka::core::demangled<Acc1D> << " with " << blocks << " blocks"
+                  << std::endl;
 #endif
         alpaka::exec<Acc1D>(queue,
                             workDiv1D,

@@ -79,7 +79,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         if (i > 0) {
           cellNeighbors[i].reset();
           alpaka::mem_fence(acc, alpaka::memory_scope::Grid{});
-#ifdef ALAPAKA_ACC_CPU_B_SEQ_T_SEQ_SYNC_BACKEND
+#ifdef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
           theOuterNeighbors = &cellNeighbors[i];
 #else
           auto zero = (PtrAsInt)(&cellNeighbors[0]);
@@ -105,7 +105,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         if (i > 0) {
           cellTracks[i].reset();
           alpaka::mem_fence(acc, alpaka::memory_scope::Grid{});
-#ifdef ALAPAKA_ACC_CPU_B_SEQ_T_SEQ_SYNC_BACKEND
+#ifdef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
           theTracks = &cellTracks[i];
 #else
           auto zero = (PtrAsInt)(&cellTracks[0]);
@@ -290,6 +290,47 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     // trying to free the track building process from hardcoded layers, leaving
     // the visit of the graph based on the neighborhood connections between cells.
+    //   template <int DEPTH, typename TAcc>
+    //   ALPAKA_FN_ACC ALPAKA_FN_INLINE void find_ntuplets2(TAcc const& acc,
+    //                                                     unsigned int me,
+    //                                                     const HitsConstView& hh,
+    //                                                     CACellT* __restrict__ cells,
+    //                                                     CellTracksVector& cellTracks,
+    //                                                     HitContainer& foundNtuplets,
+    //                                                     cms::alpakatools::AtomicPairCounter& apc,
+    //                                                     Quality* __restrict__ quality,
+    //                                                     TmpTuple& tmpNtuplet,
+    //                                                     const unsigned int minHitsPerNtuplet,
+    //                                                     bool startAt0) const {
+    //     // the building process for a track ends if:
+    //     // it has no right neighbor
+    //     // it has no compatible neighbor
+    //     // the ntuplets is then saved if the number of hits it contains is greater
+    //     // than a threshold
+    //     printf("find_ntuplets_test for cell %d at DEPTH %d\n", me, DEPTH);
+    //     printf("neighbours: ");
+    //     for (unsigned int otherCell : outerNeighbors()) {
+    //       printf("%d, ", otherCell);
+    // if (cells[otherCell].isKilled())
+    //   printf("(skipped) ");
+    //     }
+    //     printf("\n");
+
+    //     if constexpr (DEPTH <= 0) {
+    //       printf("ERROR: CACellT::find_ntuplets reached full depth!\n");
+    //       ALPAKA_ASSERT_OFFLOAD(false);
+    //     } else {
+    //       bool last = true;
+    //       for (unsigned int otherCell : outerNeighbors()) {
+    //         if (cells[otherCell].isKilled())
+    //           continue;  // killed by earlyFishbone
+    //         last = false;
+    //         cells[otherCell].template find_ntuplets2<DEPTH - 1>(
+    //             acc, otherCell, hh, cells, cellTracks, foundNtuplets, apc, quality, tmpNtuplet, minHitsPerNtuplet, startAt0);
+    //       }
+    //       if(last){printf("find_ntuplets_test last is true\n");}
+    //     }
+    //   }
 
     template <int DEPTH, typename TAcc>
     ALPAKA_FN_ACC ALPAKA_FN_INLINE void find_ntuplets(TAcc const& acc,
@@ -314,7 +355,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       } else {
         auto doubletId = this - cells;
         tmpNtuplet.push_back_unsafe(doubletId);
-        ALPAKA_ASSERT_OFFLOAD(tmpNtuplet.size() <= 4);
+        ALPAKA_ASSERT_OFFLOAD(tmpNtuplet.size() <= int(TrackerTraits::maxHitsOnTrack - 3));
 
         bool last = true;
         for (unsigned int otherCell : outerNeighbors()) {
@@ -324,7 +365,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           cells[otherCell].template find_ntuplets<DEPTH - 1>(
               acc, hh, cells, cellTracks, foundNtuplets, apc, quality, tmpNtuplet, minHitsPerNtuplet, startAt0);
         }
-
         if (last) {  // if long enough save...
           if ((unsigned int)(tmpNtuplet.size()) >= minHitsPerNtuplet - 1) {
 #ifdef ONLY_TRIPLETS_IN_HOLE

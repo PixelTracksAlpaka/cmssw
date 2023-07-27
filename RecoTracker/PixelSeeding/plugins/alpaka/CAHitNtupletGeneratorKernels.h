@@ -247,6 +247,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           // in principle we can use "nhits" to heuristically dimension the workspace...
           device_isOuterHitOfCell_{
               cms::alpakatools::make_device_buffer<OuterHitOfCellContainer[]>(queue, std::max(1u, nhits))},
+          isOuterHitOfCell_{cms::alpakatools::make_device_buffer<OuterHitOfCell>(queue)},
 
           device_theCellNeighbors_{cms::alpakatools::make_device_buffer<CellNeighborsVector>(queue)},
           device_theCellTracks_{cms::alpakatools::make_device_buffer<CellTracksVector>(queue)},
@@ -261,13 +262,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
           // NB: In legacy, device_storage_ was allocated inside allocateOnGPU
           device_storage_{
-              cms::alpakatools::make_device_buffer<cms::alpakatools::AtomicPairCounter::c_type[]>(queue, 3u)},
+              cms::alpakatools::make_device_buffer<cms::alpakatools::AtomicPairCounter::DoubleWord[]>(queue, 3u)},
           device_hitTuple_apc_{reinterpret_cast<cms::alpakatools::AtomicPairCounter*>(device_storage_.data())},
           device_hitToTuple_apc_{reinterpret_cast<cms::alpakatools::AtomicPairCounter*>(device_storage_.data() + 1)},
           device_nCells_{cms::alpakatools::make_device_view(alpaka::getDev(queue),
                                                             *reinterpret_cast<uint32_t*>(device_storage_.data() + 2))} {
       alpaka::memset(queue, counters_, 0);
       alpaka::memset(queue, device_nCells_, 0);
+      alpaka::memset(queue, cellStorage_, 0);
       cms::alpakatools::launchZero<Acc1D>(device_tupleMultiplicity_.data(), queue);
       cms::alpakatools::launchZero<Acc1D>(device_hitToTuple_.data(), queue);
     }
@@ -280,7 +282,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     void classifyTuples(const HitsConstView& hh, TkSoAView& track_view, Queue& queue);
 
-    void buildDoublets(const HitsConstView& hh, int32_t offsetBPIX2, Queue& queue);
+    void buildDoublets(const HitsConstView& hh, Queue& queue);
     void cleanup(Queue& queue);
 
     static void printCounters(Counters const* counters);
@@ -296,17 +298,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     cms::alpakatools::device_buffer<Device, TupleMultiplicity> device_tupleMultiplicity_;
     cms::alpakatools::device_buffer<Device, CACell[]> device_theCells_;
     cms::alpakatools::device_buffer<Device, OuterHitOfCellContainer[]> device_isOuterHitOfCell_;
+    cms::alpakatools::device_buffer<Device, OuterHitOfCell> isOuterHitOfCell_;
     cms::alpakatools::device_buffer<Device, CellNeighborsVector> device_theCellNeighbors_;
     cms::alpakatools::device_buffer<Device, CellTracksVector> device_theCellTracks_;
     cms::alpakatools::device_buffer<Device, unsigned char[]> cellStorage_;
     CellNeighbors* device_theCellNeighborsContainer_;
     CellTracks* device_theCellTracksContainer_;
-    cms::alpakatools::device_buffer<Device, cms::alpakatools::AtomicPairCounter::c_type[]> device_storage_;
+    cms::alpakatools::device_buffer<Device, cms::alpakatools::AtomicPairCounter::DoubleWord[]> device_storage_;
     cms::alpakatools::AtomicPairCounter* device_hitTuple_apc_;
     cms::alpakatools::AtomicPairCounter* device_hitToTuple_apc_;
     cms::alpakatools::device_view<Device, uint32_t> device_nCells_;
-    // uint32_t* device_nCells_;
-    std::optional<cms::alpakatools::device_buffer<Device, OuterHitOfCell>> isOuterHitOfCell_;
   };
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
