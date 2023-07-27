@@ -43,6 +43,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     OuterHitOfCell<TrackerTraits> const* isOuterHitOfCellWrap,
                                     int32_t nHits,
                                     bool checkTrack) const {
+        if (nHits <= isOuterHitOfCellWrap->offset)
+          return;
         constexpr auto maxCellsPerHit = CACellT<TrackerTraits>::maxCellsPerHit;
 
         auto const isOuterHitOfCell = isOuterHitOfCellWrap->container;
