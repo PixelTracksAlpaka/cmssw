@@ -9,6 +9,16 @@
 
 #include "pixelCPEforDevice.h"
 
+/*! \file PixelCPEFastParamsDevice.h
+ * ------------------------------------------------------
+ * Defines buffer on device that contain parameters
+ * related to tracker geometry and detector parameters
+ * ------------------------------------------------------
+ */
+
+//! \class PixelCPEFastParamsDevice
+//! \brief Defines a buffer used to store tracker geometry
+//! and detector parameters in device memory
 template <typename TDev, typename TrackerTraits>
 class PixelCPEFastParamsDevice {
 public:

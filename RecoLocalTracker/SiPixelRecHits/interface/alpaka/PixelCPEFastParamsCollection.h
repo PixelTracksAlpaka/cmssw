@@ -9,6 +9,14 @@
 #include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/CopyToDevice.h"
 
+/*! \file PixelCPEFastParamsCollection.h
+ * ------------------------------------------------------
+ * Defines a method to asynchronously copy host buffer, filled with
+ * ParamsOnDevice objects in the constructor of PixelCPEFastParamsHost,
+ * to the buffer on device, defined in PixelCPEFastParamsDevice.h
+ * ------------------------------------------------------
+ */
+
 // TODO: The class is created via inheritance of the PortableCollection.
 // This is generally discouraged, and should be done via composition.
 // See: https://github.com/cms-sw/cmssw/pull/40465#discussion_r1067364306
