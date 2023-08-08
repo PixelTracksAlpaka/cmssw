@@ -49,10 +49,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                       const device::EventSetup& iSetup) const;
     void produce(edm::StreamID streamID, device::Event& iEvent, const device::EventSetup& iSetup) const override;
 
-    bool onGPU_;
-
-    device::EDGetToken<TkSoADevice> tokenGPUTrack_;
-    device::EDPutToken<ZVertexCollection> tokenGPUVertex_;
+    device::EDGetToken<TkSoADevice> tokenDeviceTrack_;
+    device::EDPutToken<ZVertexCollection> tokenDeviceVertex_;
 
     const GPUAlgo gpuAlgo_;
 
@@ -63,8 +61,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template <typename TrackerTraits>
   PixelVertexProducerAlpaka<TrackerTraits>::PixelVertexProducerAlpaka(const edm::ParameterSet& conf)
-      : onGPU_(conf.getParameter<bool>("onGPU")),
-        gpuAlgo_(conf.getParameter<bool>("oneKernel"),
+      : gpuAlgo_(conf.getParameter<bool>("oneKernel"),
                  conf.getParameter<bool>("useDensity"),
                  conf.getParameter<bool>("useDBSCAN"),
                  conf.getParameter<bool>("useIterative"),
@@ -75,8 +72,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         ptMin_(conf.getParameter<double>("PtMin")),  // 0.5 GeV
         ptMax_(conf.getParameter<double>("PtMax"))   // 75. GeV
   {
-    tokenGPUTrack_ = consumes(conf.getParameter<edm::InputTag>("pixelTrackSrc"));
-    tokenGPUVertex_ = produces();
+    tokenDeviceTrack_ = consumes(conf.getParameter<edm::InputTag>("pixelTrackSrc"));
+    tokenDeviceVertex_ = produces();
   }
 
   template <typename TrackerTraits>
@@ -85,7 +82,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     // Only one of these three algos can be used at once.
     // Maybe this should become a Plugin Factory
-    desc.add<bool>("onGPU", true);
     desc.add<bool>("oneKernel", true);
     desc.add<bool>("useDensity", true);
     desc.add<bool>("useDBSCAN", false);
@@ -107,9 +103,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   void PixelVertexProducerAlpaka<TrackerTraits>::produceOnGPU(edm::StreamID streamID,
                                                               device::Event& iEvent,
                                                               const device::EventSetup& iSetup) const {
-    auto const& hTracks = iEvent.get(tokenGPUTrack_);
+    auto const& hTracks = iEvent.get(tokenDeviceTrack_);
 
-    iEvent.emplace(tokenGPUVertex_, gpuAlgo_.makeAsync(iEvent.queue(), hTracks.view(), ptMin_, ptMax_));
+    iEvent.emplace(tokenDeviceVertex_, gpuAlgo_.makeAsync(iEvent.queue(), hTracks.view(), ptMin_, ptMax_));
   }
 
   template <typename TrackerTraits>
