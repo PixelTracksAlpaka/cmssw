@@ -150,7 +150,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           queue, loadTracksWorkDiv, loadTracks<TrackerTraits>{}, tracks_view, soa, ws_d.view(), ptMin, ptMax);
 
       // Running too many thread lead to problems when printf is enabled.
-      const auto finderSorterWorkDiv = cms::alpakatools::make_workdiv<Acc1D>(1, 1024 - 256);
+      const auto finderSorterWorkDiv = cms::alpakatools::make_workdiv<Acc1D>(1, 1024 - 128);
       const auto splitterFitterWorkDiv = cms::alpakatools::make_workdiv<Acc1D>(1024, 128);
 
       if (oneKernel_) {
