@@ -48,7 +48,6 @@ public:
 
     DecodingStructure const* __restrict__ lp = v_pedestals_;
     auto s = lp[offset / 2];
-
     isDeadColumn = (s.ped & 0xFF) == deadFlag_;
     isNoisyColumn = (s.ped & 0xFF) == noisyFlag_;
 

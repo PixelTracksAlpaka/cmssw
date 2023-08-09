@@ -56,6 +56,7 @@ namespace gpuCalibPixel {
 
       int row = x[i];
       int col = y[i];
+
       auto ret = ped->getPedAndGain(id[i], col, row, isDeadColumn, isNoisyColumn);
       float pedestal = ret.first;
       float gain = ret.second;
