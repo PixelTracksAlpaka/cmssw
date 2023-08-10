@@ -180,3 +180,28 @@ from Configuration.ProcessModifiers.gpuValidationPixel_cff import gpuValidationP
 (pixelNtupletFit & gpu & gpuValidationPixel).toModify(pixelTracksSoA.cpu,
     pixelRecHitSrc = "siPixelRecHitsPreSplittingSoA@cpu"
     )
+
+######################################################################
+
+### Alpaka Pixel Track Reco
+
+from Configuration.ProcessModifiers.alpaka_cff import alpaka
+
+from RecoTracker.PixelSeeding.caHitNtupletAlpakaPhase1_cfi import caHitNtupletAlpakaPhase1 as _pixelTracksAlpaka
+pixelTracksAlpaka = _pixelTracksAlpaka.clone()
+
+from  RecoTracker.PixelTrackFitting.pixelTrackProducerFromSoAAlpakaPhase1_cfi import pixelTrackProducerFromSoAAlpakaPhase1 as _pixelTrackProducerFromSoAAlpakaPhase1
+
+alpaka.toReplaceWith(pixelTracks, _pixelTrackProducerFromSoAAlpakaPhase1.clone(
+    pixelRecHitLegacySrc = "siPixelRecHitsPreSplitting",
+))
+
+alpaka.toReplaceWith(pixelTracksTask, cms.Task(
+                         # Build the pixel ntuplets and the pixel tracks in SoA format on the Device
+                        pixelTracksAlpaka,
+                         # Convert the pixel tracks from SoA to legacy format
+                        pixelTracks))
+
+
+
+

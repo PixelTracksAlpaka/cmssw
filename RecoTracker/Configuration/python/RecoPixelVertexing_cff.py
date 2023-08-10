@@ -82,9 +82,30 @@ from Configuration.ProcessModifiers.gpuValidationPixel_cff import gpuValidationP
     pixelVerticesTask.copy()
 ))
 
+### Alpaka
+
+## Alpaka Vertices
+
+from RecoTracker.PixelVertexFinding.pixelVertexProducerAlpakaPhase1_cfi import pixelVertexProducerAlpakaPhase1 as _pixelVerticesAlpaka
+pixelVerticesAlpaka = _pixelVerticesAlpaka.clone()
+
+from RecoTracker.PixelVertexFinding.pixelVertexFromSoAAlpaka_cfi import pixelVertexFromSoAAlpaka as _pixelVertexFromSoAAlpaka
+pixelVerticesAlpaka = _pixelVerticesAlpaka.clone()
+
+alpaka.toReplaceWith(pixelVertices, _pixelVertexFromSoAAlpaka.clone())
+
+alpaka.toReplaceWith(pixelVerticesTask, cms.Task(
+    # Build the pixel vertices in SoA format on Device
+    pixelVerticesAlpaka,
+    # Convert the pixel vertices from Portable SoA (on Host) to legacy format
+    pixelVertices
+))
+
 # Tasks and Sequences
 recopixelvertexingTask = cms.Task(
     pixelTracksTask,
     pixelVerticesTask
 )
 recopixelvertexing = cms.Sequence(recopixelvertexingTask)
+
+
