@@ -13,8 +13,6 @@
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/SimpleVector.h"
 
-// #include "pixelClusteringUtilities.h"
-
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   namespace pixelClustering {
@@ -117,6 +115,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     SiPixelDigisSoAv2View digi_view,
                                     SiPixelClustersSoAView clus_view,
                                     const unsigned int numElements) const {
+
         constexpr bool isPhase2 = std::is_base_of<pixelTopology::Phase2, TrackerTraits>::value;
         constexpr const uint32_t pixelStatusSize = isPhase2 ? 1 : PixelStatus::size;
 
@@ -205,7 +204,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                   acc, PixelStatus::size, [&](uint32_t i) { status[i] = 0; });
               alpaka::syncBlockThreads(acc);
 
-              // for (uint32_t i = firstElementIdx; i < msize - 1; ++i) {
               cms::alpakatools::for_each_element_in_block_strided(acc, msize - 1, firstElementIdx, [&](uint32_t i) {
                 // skip invalid pixels
                 if (digi_view[i].moduleId() == ::pixelClustering::invalidModuleId)
@@ -213,13 +211,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                 PixelStatus::promote(acc, status, digi_view[i].xx(), digi_view[i].yy());
               });
               alpaka::syncBlockThreads(acc);
-              // for (uint32_t i = firstElementIdx; i < msize - 1; ++i) {
               cms::alpakatools::for_each_element_in_block_strided(acc, msize - 1, firstElementIdx, [&](uint32_t i) {
                 // skip invalid pixels
                 if (digi_view[i].moduleId() == ::pixelClustering::invalidModuleId)
                   return;
                 if (PixelStatus::isDuplicate(status, digi_view[i].xx(), digi_view[i].yy())) {
-                  // printf("found dup %d %d %d %d\n", i, digi_view[i].moduleId(), digi_view[i].xx(), digi_view[i].yy());
                   digi_view[i].moduleId() = ::pixelClustering::invalidModuleId;
                   digi_view[i].rawIdArr() = 0;
                 }

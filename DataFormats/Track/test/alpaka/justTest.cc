@@ -68,13 +68,9 @@ int main() {
   {
     int maxNumberOfConcurrentFits_ = 10;
 
-    // TrackSoADevice<pixelTopology::Phase1> tracks_d;
     TrackSoACollection<pixelTopology::Phase1> tracks_d;
     Tuples *tuples_d = &tracks_d.view().hitIndices();
 
-    // auto tuplesMult_d =
-    //     cms::alpakatools::make_device_buffer<typename TupleMultiplicity>(queue, maxNumberOfConcurrentFits_);
-    // const Tuples *tuples_d;
     const TupleMultiplicity *tuplesMult_d;
 
     const TrackingRecHitAlpakaSoA<pixelTopology::Phase1>::ParamsOnDevice *cpeParams;

@@ -113,7 +113,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         }
         const auto ntNbins = foundNtuplets->nbins();
 
-        // for (int idx = first, nt = tracks_view.hitIndices().nbins(); idx < nt; idx += gridDim.x * blockDim.x) {
         for (auto idx : cms::alpakatools::elements_with_stride(acc, ntBins)) {
           if (tracks_view.hitIndices().size(idx) > TrackerTraits::maxHitsOnTrack)  // current real limit
             printf("ERROR %d, %d\n", idx, tracks_view.hitIndices().size(idx));
@@ -139,22 +138,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                  cellNeighbors->size(),
                  cellTracks->size(),
                  hitToTuple->size());
-// printf("cellTracksSizes;");
-// for (int i = 0; i < cellTracks->size(); i++) {
-//   printf("%d;",cellTracks[i].size());
-// }
-//
-// printf("\n");
-// printf("cellNeighborsSizes;");
-// for (int i = 0; i < cellNeighbors->size(); i++) {
-//   printf("%d;",cellNeighbors[i].size());
-// }
-// printf("\n");
 #endif
         }
 
         const auto ntNCells = (*nCells);
-        // for (int idx = first, nt = (*nCells); idx < nt; idx += gridDim.x * blockDim.x) {
         for (auto idx : cms::alpakatools::elements_with_stride(acc, ntNCells)) {
           auto const &thisCell = cells[idx];
           if (thisCell.hasFishbone() && !thisCell.isKilled())
@@ -268,7 +255,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           auto score = [&](auto it) { return std::abs(TracksUtilities<TrackerTraits>::tip(tracks_view, it)); };
 
           // full crazy combinatorics
-          // full crazy combinatorics
           int ntr = thisCell.tracks().size();
           for (int i = 0; i < ntr - 1; ++i) {
             auto it = thisCell.tracks()[i];
@@ -358,8 +344,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         constexpr uint32_t last_bpix1_detIndex = TrackerTraits::last_bpix1_detIndex;
         constexpr uint32_t last_barrel_detIndex = TrackerTraits::last_barrel_detIndex;
-
-        // const Vec2D nCellsVec{(*nCells), 1u};
 
         cms::alpakatools::for_each_element_in_grid_strided(
             acc,
@@ -458,17 +442,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             typename Cell::TmpTuple stack;
             stack.reset();
             bool bpix1Start = params.startAt0(pid);
-            // thisCell.template find_ntuplets2<maxDepth+2, TAcc>(acc,
-            //                                                 idx,
-            //                                                 hh,
-            //                                                 cells,
-            //                                                 *cellTracks,
-            //                                                 tracks_view.hitIndices(),
-            //                                                 *apc,
-            //                                                 tracks_view.quality(),
-            //                                                 stack,
-            //                                                 params.minHitsPerNtuplet_,
-            //                                                 bpix1Start);
             thisCell.template find_ntuplets<maxDepth, TAcc>(acc,
                                                             hh,
                                                             cells,

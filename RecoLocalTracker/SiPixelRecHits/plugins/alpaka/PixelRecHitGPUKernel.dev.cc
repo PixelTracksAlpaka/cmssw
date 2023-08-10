@@ -83,8 +83,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         // assuming full warp of threads is better than a smaller number...
         if (nHits) {
           const auto workDiv1D = cms::alpakatools::make_workdiv<Acc1D>(1, 32);
-          // setHitsLayerStart<TrackerTraits>
-          //     <<<1, 32, 0, stream>>>(clusters_d->clusModuleStart(), cpeParams, hits_d.view().hitsLayerStart().data());
           alpaka::exec<Acc1D>(queue,
                               workDiv1D,
                               setHitsLayerStart<TrackerTraits>{},

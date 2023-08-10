@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
 
-# This modifier is for replacing CPU modules with GPU counterparts
+# This modifier is for enabling alpaka modules
 
-alpaka =  cms.Modifier()
+alpaka = cms.Modifier()

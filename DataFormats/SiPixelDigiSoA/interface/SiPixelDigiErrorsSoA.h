@@ -5,12 +5,7 @@
 #include "DataFormats/SiPixelRawData/interface/SiPixelErrorCompact.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/SimpleVector.h"
 
-// using SiPixelErrorCompactVec = cms::alpakatools::SimpleVector<SiPixelErrorCompact>;
-
-GENERATE_SOA_LAYOUT(SiPixelDigiErrorsLayout,
-                    SOA_COLUMN(SiPixelErrorCompact, pixelErrors),
-                    SOA_SCALAR(uint32_t, size))  //,
-// SOA_SCALAR(SiPixelErrorCompactVec, pixelErrorsVec))
+GENERATE_SOA_LAYOUT(SiPixelDigiErrorsLayout, SOA_COLUMN(SiPixelErrorCompact, pixelErrors), SOA_SCALAR(uint32_t, size))
 
 using SiPixelDigiErrorsSoA = SiPixelDigiErrorsLayout<>;
 using SiPixelDigiErrorsSoAView = SiPixelDigiErrorsSoA::View;

@@ -68,7 +68,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       alpaka::syncBlockThreads(acc);
 
       if (verbose && 0 == threadIdxLocal)
-        printf("booked hist with %d bins, size %d for %d tracks\n", hist.nbins(), hist.capacity(), nt);
+        printf("booked hist with %d bins, size %d for %d tracks\n", hist.totbins(), hist.capacity(), nt);
 
       ALPAKA_ASSERT_OFFLOAD(nt <= hist.capacity());
 
@@ -81,7 +81,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         izt[i] = iz - INT8_MIN;
         ALPAKA_ASSERT_OFFLOAD(iz - INT8_MIN >= 0);
         ALPAKA_ASSERT_OFFLOAD(iz - INT8_MIN < 256);
-        hist.count(acc, izt[i]);
+        hist.countHist(acc, izt[i]);
         iv[i] = i;
         nn[i] = 0;
       }
@@ -93,10 +93,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       alpaka::syncBlockThreads(acc);
       ALPAKA_ASSERT_OFFLOAD(hist.size() == nt);
       for (auto i : cms::alpakatools::elements_with_stride(acc, nt)) {
-        hist.fill(acc, izt[i], uint16_t(i));
+        hist.fillHist(acc, izt[i], uint16_t(i));
       }
       alpaka::syncBlockThreads(acc);
-
       // count neighbours
       for (auto i : cms::alpakatools::elements_with_stride(acc, nt)) {
         if (ezt2[i] > er2mx)
@@ -114,7 +113,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         cms::alpakatools::forEachInBins(hist, izt[i], 1, loop);
       }
-
       alpaka::syncBlockThreads(acc);
 
       // find closest above me .... (we ignore the possibility of two j at same distance from i)
@@ -135,7 +133,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         };
         cms::alpakatools::forEachInBins(hist, izt[i], 1, loop);
       }
-
       alpaka::syncBlockThreads(acc);
 
 #ifdef GPU_DEBUG

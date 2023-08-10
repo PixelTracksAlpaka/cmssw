@@ -40,6 +40,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         using helper = TracksUtilities<TrackerTraits>;
 
         for (auto idx : cms::alpakatools::elements_with_stride(acc, tracks_view.nTracks())) {
+          // TODO: since nHits is not used anywhere else it gives of an unused variable warning. Check!
           // auto nHits = helper::nHits(tracks_view, idx);
           // ALPAKA_ASSERT_OFFLOAD(nHits >= 3);
 
@@ -121,10 +122,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #endif
 
     template <typename TrackerTraits>
-    // ZVertexDevice Producer<TrackerTraits>::makeAsync(Queue& queue,
-    //                                                  const TrackSoAConstView<TrackerTraits>& tracks_view,
-    //                                                  float ptMin,
-    //                                                  float ptMax) const {
     ZVertexCollection Producer<TrackerTraits>::makeAsync(Queue& queue,
                                                          const TrackSoAConstView<TrackerTraits>& tracks_view,
                                                          float ptMin,
@@ -132,12 +129,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #ifdef PIXVERTEX_DEBUG_PRODUCE
       std::cout << "producing Vertices on GPU" << std::endl;
 #endif  // PIXVERTEX_DEBUG_PRODUCE
-      // ZVertexDevice vertices(queue);
       ZVertexCollection vertices(queue);
 
       auto soa = vertices.view();
 
-      //ALPAKA_ASSERT_OFFLOAD(vertices.buffer());
+      // ALPAKA_ASSERT_OFFLOAD(vertices.buffer());
 
       auto ws_d = workSpace::PixelVertexWorkSpaceSoADevice(queue);
 
@@ -154,7 +150,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           queue, loadTracksWorkDiv, loadTracks<TrackerTraits>{}, tracks_view, soa, ws_d.view(), ptMin, ptMax);
 
       // Running too many thread lead to problems when printf is enabled.
-      const auto finderSorterWorkDiv = cms::alpakatools::make_workdiv<Acc1D>(1, 1024 - 256);
+      const auto finderSorterWorkDiv = cms::alpakatools::make_workdiv<Acc1D>(1, 1024 - 128);
       const auto splitterFitterWorkDiv = cms::alpakatools::make_workdiv<Acc1D>(1024, 128);
 
       if (oneKernel_) {

@@ -12,9 +12,6 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/CopyToHost.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
-// TODO: The class is created via inheritance of the PortableCollection.
-// This is generally discouraged, and should be done via composition.
-// See: https://github.com/cms-sw/cmssw/pull/40465#discussion_r1067364306
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #ifdef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
   using SiPixelClustersCollection = SiPixelClustersHost;

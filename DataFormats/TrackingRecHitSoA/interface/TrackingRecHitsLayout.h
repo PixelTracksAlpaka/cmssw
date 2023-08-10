@@ -41,8 +41,6 @@ struct TrackingRecHitAlpakaSoA {
                       SOA_COLUMN(int16_t, clusterSizeX),
                       SOA_COLUMN(int16_t, clusterSizeY),
                       SOA_COLUMN(uint16_t, detectorIndex),
-
-                      //   SOA_SCALAR(uint32_t, nHits),
                       SOA_SCALAR(int32_t, offsetBPIX2),
                       //These above could be separated in a specific
                       //layout since they don't depends on the template

@@ -5,10 +5,8 @@
 
 #include <alpaka/alpaka.hpp>
 
-//#include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisHost.h"
-//#include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisSoAv2.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/CopyToHost.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 

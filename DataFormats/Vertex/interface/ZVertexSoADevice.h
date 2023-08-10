@@ -20,10 +20,6 @@ public:
   // Constructor which specifies the SoA size
   template <typename TQueue>
   explicit ZVertexSoADevice(TQueue queue) : PortableDeviceCollection<ZVertexSoAHeterogeneousLayout<>, TDev>(S, queue) {}
-
-  // Constructor which specifies the SoA size
-  // explicit ZVertexSoADevice(Device const& device)
-  //     : PortableDeviceCollection<ZVertexSoAHeterogeneousLayout<>, TDev>(S, device) {}
 };
 
 using namespace ::zVertex;

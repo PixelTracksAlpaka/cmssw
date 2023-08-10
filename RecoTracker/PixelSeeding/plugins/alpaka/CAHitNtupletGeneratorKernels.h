@@ -228,8 +228,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using Quality = ::pixelTrack::Quality;
     using HitContainer = typename TrackSoA<TrackerTraits>::HitContainer;
 
-    // CAHitNtupletGeneratorKernels() = default;
-
     CAHitNtupletGeneratorKernels(Params const& params, uint32_t nhits, Queue& queue)
         : m_params(params),
           //////////////////////////////////////////////////////////

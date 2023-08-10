@@ -107,7 +107,7 @@ namespace cms {
     template <typename Hist, typename V, typename Func>
     ALPAKA_FN_ACC ALPAKA_FN_INLINE void forEachInBins(Hist const &hist, V value, int n, Func func) {
       int bs = Hist::bin(value);
-      int be = std::min(int(Hist::nbins() - 1), bs + n);
+      int be = std::min(int(Hist::totbins() - 1), bs + n);
       bs = std::max(0, bs - n);
       ALPAKA_ASSERT_OFFLOAD(be >= bs);
       for (auto pj = hist.begin(bs); pj < hist.end(be); ++pj) {
@@ -306,10 +306,11 @@ namespace cms {
       index_type bins[capacity()];
     };
 
-    template <typename I,       // type stored in the container (usually an index in a vector of the input values); same as I in HistoContainer
-              int32_t MAXONES,  // max number of "ones"; same as NBINS in HistoContainer
-              int32_t MAXMANYS  // max number of "manys"; same as SIZE in HistoContainer
-              >
+    template <
+        typename I,  // type stored in the container (usually an index in a vector of the input values); same as I in HistoContainer
+        int32_t MAXONES,  // max number of "ones"; same as NBINS in HistoContainer
+        int32_t MAXMANYS  // max number of "manys"; same as SIZE in HistoContainer
+        >
     using OneToManyAssoc = HistoContainer<uint32_t, MAXONES, MAXMANYS, sizeof(uint32_t) * 8, I, 1>;
 
   }  // namespace alpakatools

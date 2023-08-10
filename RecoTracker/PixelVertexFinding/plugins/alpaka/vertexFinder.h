@@ -55,7 +55,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       ~Producer() = default;
 
-      // ZVertexDevice makeAsync(Queue &queue, const TkSoAConstView &tracks_view, float ptMin, float ptMax) const;
       ZVertexCollection makeAsync(Queue &queue, const TkSoAConstView &tracks_view, float ptMin, float ptMax) const;
 
     private:
