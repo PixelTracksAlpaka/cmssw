@@ -96,8 +96,8 @@ phase2_tracker.toReplaceWith(siPixelDigisClustersPreSplitting, _siPixelDigisClus
                             siPixelClustersPreSplitting))
 
 ######################################################################
-###### Alpaka pixel clusters local reco
-######################################################################
+
+### Alpaka Pixel Clusters Reco
 
 from CalibTracker.SiPixelESProducers.siPixelCablingSoAESProducer_cfi import siPixelCablingSoAESProducer
 from CalibTracker.SiPixelESProducers.siPixelGainCalibrationForHLTSoAESProducer_cfi import siPixelGainCalibrationForHLTSoAESProducer
@@ -115,21 +115,13 @@ alpaka.toReplaceWith(siPixelDigisClustersPreSplitting,_siPixelDigisClustersFromS
     src = "siPixelClustersPreSplittingAlpaka"
 ))
 
-def _modifyPixelClusterRecoLegacyConverter(process):
-    # replace siPixelClustersPreSplitting with an EDAlias
-    if hasattr(process, 'siPixelClustersPreSplitting'):
-        process.load('RecoLocalTracker.SiPixelClusterizer.SiPixelClusterizerAlpaka_cfi')
-        # del process.siPixelClustersPreSplitting
+from RecoLocalTracker.SiPixelClusterizer.siPixelDigisClustersFromSoAAlpakaPhase1_cfi import siPixelDigisClustersFromSoAAlpakaPhase1 as _siPixelDigisClustersFromSoAAlpakaPhase1
 
-        # process.siPixelClustersPreSplitting = cms.EDAlias(
-        # siPixelDigisClustersPreSplitting = cms.VPSet(
-        #     cms.PSet(type = cms.string("SiPixelClusteredmNewDetSetVector"))
-        # ))
-
-
-alpaka.toReplaceWith(siPixelClustersPreSplittingTask, cms.Task())
-
-modifyPixelClusterRecoForAlpaka_ = alpaka.makeProcessModifier(_modifyPixelClusterRecoLegacyConverter)
+alpaka.toModify(siPixelClustersPreSplitting,
+    cpu = _siPixelDigisClustersFromSoAAlpakaPhase1.clone(
+        src = cms.InputTag('siPixelClustersPreSplittingAlpaka')
+    )
+)
 
 alpaka.toReplaceWith(siPixelClustersPreSplittingTask, cms.Task(
                         # Reconstruct the pixel clusters with alpaka

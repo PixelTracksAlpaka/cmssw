@@ -54,7 +54,7 @@ void PixelVertexProducerFromSoAAlpaka::fillDescriptions(edm::ConfigurationDescri
 
   desc.add<edm::InputTag>("TrackCollection", edm::InputTag("pixelTracks"));
   desc.add<edm::InputTag>("beamSpot", edm::InputTag("offlineBeamSpot"));
-  desc.add<edm::InputTag>("src", edm::InputTag("pixelVerticesSoA"));
+  desc.add<edm::InputTag>("src", edm::InputTag("pixelVerticesAlpaka"));
 
   descriptions.add("pixelVertexFromSoAAlpaka", desc);
 }

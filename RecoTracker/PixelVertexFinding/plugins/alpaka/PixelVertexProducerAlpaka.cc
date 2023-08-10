@@ -94,7 +94,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     desc.add<double>("PtMin", 0.5);
     desc.add<double>("PtMax", 75.);
-    desc.add<edm::InputTag>("pixelTrackSrc", edm::InputTag("pixelTracksCUDA"));
+    desc.add<edm::InputTag>("pixelTrackSrc", edm::InputTag("pixelTracksAlpaka"));
 
     descriptions.addWithDefaultLabel(desc);
   }
