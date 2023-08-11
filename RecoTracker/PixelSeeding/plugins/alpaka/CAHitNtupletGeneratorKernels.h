@@ -37,6 +37,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     //CAParams
     struct CACommon {
+      const uint32_t maxNumberOfDoublets_;
       const uint32_t minHitsPerNtuplet_;
       const float ptmin_;
       const float CAThetaCutBarrel_;
@@ -203,6 +204,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   public:
     using TrackerTraits = TTTraits;
     using QualityCuts = ::pixelTrack::QualityCutsT<TrackerTraits>;
+    using CellCuts = caPixelDoublets::CellCutsT<TrackerTraits>;
     using Params = caHitNtupletGenerator::ParamsT<TrackerTraits>;
     using CAParams = caHitNtupletGenerator::CAParamsT<TrackerTraits>;
     using Counters = caHitNtupletGenerator::Counters;
@@ -235,13 +237,15 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           //////////////////////////////////////////////////////////
           counters_{cms::alpakatools::make_device_buffer<Counters>(queue)},
 
+          
+
           // workspace
           device_hitToTuple_{cms::alpakatools::make_device_buffer<HitToTuple>(queue)},
           device_tupleMultiplicity_{cms::alpakatools::make_device_buffer<TupleMultiplicity>(queue)},
 
           // NB: In legacy, device_theCells_ and device_isOuterHitOfCell_ were allocated inside buildDoublets
           device_theCells_{
-              cms::alpakatools::make_device_buffer<CACell[]>(queue, m_params.cellCuts_.maxNumberOfDoublets_)},
+              cms::alpakatools::make_device_buffer<CACell[]>(queue, m_params.caParams_.maxNumberOfDoublets_)},
           // in principle we can use "nhits" to heuristically dimension the workspace...
           device_isOuterHitOfCell_{
               cms::alpakatools::make_device_buffer<OuterHitOfCellContainer[]>(queue, std::max(1u, nhits))},
@@ -254,6 +258,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               queue,
               TrackerTraits::maxNumOfActiveDoublets * sizeof(CellNeighbors) +
                   TrackerTraits::maxNumOfActiveDoublets * sizeof(CellTracks))},
+          device_cellCuts_{cms::alpakatools::make_device_buffer<CellCuts>(queue)},
           device_theCellNeighborsContainer_{reinterpret_cast<CellNeighbors*>(cellStorage_.data())},
           device_theCellTracksContainer_{reinterpret_cast<CellTracks*>(
               cellStorage_.data() + TrackerTraits::maxNumOfActiveDoublets * sizeof(CellNeighbors))},
@@ -268,6 +273,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       alpaka::memset(queue, counters_, 0);
       alpaka::memset(queue, device_nCells_, 0);
       alpaka::memset(queue, cellStorage_, 0);
+
+      auto cellCuts_h = cms::alpakatools::make_host_view(m_params.cellCuts_);
+      alpaka::memcpy(queue, device_cellCuts_, cellCuts_h);
+      
       cms::alpakatools::launchZero<Acc1D>(device_tupleMultiplicity_.data(), queue);
       cms::alpakatools::launchZero<Acc1D>(device_hitToTuple_.data(), queue);
     }
@@ -300,6 +309,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     cms::alpakatools::device_buffer<Device, CellNeighborsVector> device_theCellNeighbors_;
     cms::alpakatools::device_buffer<Device, CellTracksVector> device_theCellTracks_;
     cms::alpakatools::device_buffer<Device, unsigned char[]> cellStorage_;
+    cms::alpakatools::device_buffer<Device, CellCuts> device_cellCuts_;
     CellNeighbors* device_theCellNeighborsContainer_;
     CellTracks* device_theCellTracksContainer_;
     cms::alpakatools::device_buffer<Device, cms::alpakatools::AtomicPairCounter::DoubleWord[]> device_storage_;

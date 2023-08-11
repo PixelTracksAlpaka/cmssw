@@ -7,6 +7,7 @@
 
 #include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersCollection.h"
 #include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersDevice.h"
+#include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsCollection.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsDevice.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
@@ -56,6 +57,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     ~SiPixelPhase2DigiToCluster() override = default;
 
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+    using Algo = pixelDetails::SiPixelRawToClusterKernel<pixelTopology::Phase2>;
 
   private:
     void acquire(device::Event const& iEvent, device::EventSetup const& iSetup) override;
@@ -68,8 +70,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     device::EDPutToken<SiPixelDigiErrorsCollection> digiErrorPutToken_;
     device::EDPutToken<SiPixelClustersCollection> clusterPutToken_;
 
-    pixelDetails::SiPixelRawToClusterKernel Algo_;
-
+    Algo Algo_;
+    
     const bool includeErrors_;
     const SiPixelClusterThresholds clusterThresholds_;
     uint32_t nDigis_ = 0;
@@ -94,8 +96,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     edm::ParameterSetDescription desc;
 
     desc.add<bool>("IncludeErrors", true);
-    desc.add<int32_t>("clusterThreshold_layer1", kSiPixelClusterThresholdsDefaultPhase2.layer1);
-    desc.add<int32_t>("clusterThreshold_otherLayers", kSiPixelClusterThresholdsDefaultPhase2.otherLayers);
+    desc.add<int32_t>("clusterThreshold_layer1", pixelClustering::clusterThresholdLayerOne); //FIXME (fix the CUDA)
+    desc.add<int32_t>("clusterThreshold_otherLayers", pixelClustering::clusterThresholdOtherLayers);
     desc.add<edm::InputTag>("InputDigis", edm::InputTag("simSiPixelDigis:Pixel"));
     descriptions.addWithDefaultLabel(desc);
   }

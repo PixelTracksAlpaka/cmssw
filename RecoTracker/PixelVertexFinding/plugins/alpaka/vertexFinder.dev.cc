@@ -71,12 +71,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 // #define THREE_KERNELS
 #ifndef THREE_KERNELS
-    class vertexFinderOneKernel {
+    class vertexFinderOneKernel { //FIXME: CUDA do not have the split here
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
                                     VtxSoAView pdata,
                                     WsSoAView pws,
+                                    bool doSplit,
                                     int minT,      // min number of neighbours to be "seed"
                                     float eps,     // max absolute distance to cluster
                                     float errmax,  // max error to be "seed"
@@ -86,10 +87,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         alpaka::syncBlockThreads(acc);
         fitVertices(acc, pdata, pws, maxChi2ForFirstFit);
         alpaka::syncBlockThreads(acc);
-        splitVertices(acc, pdata, pws, maxChi2ForSplit);
-        alpaka::syncBlockThreads(acc);
-        fitVertices(acc, pdata, pws, maxChi2ForFinalFit);
-        alpaka::syncBlockThreads(acc);
+        if (doSplit)
+        {
+          splitVertices(acc, pdata, pws, maxChi2ForSplit);
+          alpaka::syncBlockThreads(acc);
+          fitVertices(acc, pdata, pws, maxChi2ForFinalFit);
+          alpaka::syncBlockThreads(acc);
+        }
         sortByPt2(acc, pdata, pws);
       }
     };
@@ -157,13 +161,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         // implemented only for density clustesrs
 #ifndef THREE_KERNELS
         alpaka::exec<Acc1D>(
-            queue, finderSorterWorkDiv, vertexFinderOneKernel{}, soa, ws_d.view(), minT, eps, errmax, chi2max);
+            queue, finderSorterWorkDiv, vertexFinderOneKernel{}, soa, ws_d.view(), doSplitting_, minT, eps, errmax, chi2max);
 #else
         alpaka::exec<Acc1D>(
             queue, finderSorterWorkDiv, vertexFinderOneKernel{}, soa, ws_d.view(), minT, eps, errmax, chi2max);
 
         // one block per vertex...
-        alpaka::exec<Acc1D>(queue, splitterFitterWorkDiv, splitVerticesKernel{}, soa, ws_d.view(), maxChi2ForSplit);
+        if (doSplitting_) //FIXME: CUDA doesn't have this
+          alpaka::exec<Acc1D>(queue, splitterFitterWorkDiv, splitVerticesKernel{}, soa, ws_d.view(), maxChi2ForSplit);
         alpaka::exec<Acc1D>(queue, finderSorterWorkDiv{}, soa, ws_d.view());
 #endif
       } else {  // five kernels
@@ -181,11 +186,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         alpaka::exec<Acc1D>(queue, finderSorterWorkDiv, fitVerticesKernel{}, soa, ws_d.view(), maxChi2ForFirstFit);
 
         // one block per vertex...
-        alpaka::exec<Acc1D>(queue, splitterFitterWorkDiv, splitVerticesKernel{}, soa, ws_d.view(), maxChi2ForSplit);
+        if (doSplitting_) {
+          alpaka::exec<Acc1D>(queue, splitterFitterWorkDiv, splitVerticesKernel{}, soa, ws_d.view(), maxChi2ForSplit);
 
-        alpaka::exec<Acc1D>(queue, finderSorterWorkDiv, fitVerticesKernel{}, soa, ws_d.view(), maxChi2ForFinalFit);
-
-        alpaka::exec<Acc1D>(queue, finderSorterWorkDiv, sortByPt2Kernel{}, soa, ws_d.view());
+          alpaka::exec<Acc1D>(queue, finderSorterWorkDiv, fitVerticesKernel{}, soa, ws_d.view(), maxChi2ForFinalFit);
+        }
+          alpaka::exec<Acc1D>(queue, finderSorterWorkDiv, sortByPt2Kernel{}, soa, ws_d.view());
       }
 
       return vertices;
@@ -193,5 +199,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     template class Producer<pixelTopology::Phase1>;
     template class Producer<pixelTopology::Phase2>;
+    template class Producer<pixelTopology::HIonPhase1>;
   }  // namespace vertexFinder
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

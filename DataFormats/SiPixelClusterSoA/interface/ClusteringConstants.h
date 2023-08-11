@@ -15,6 +15,12 @@ namespace pixelClustering {
 #endif
   constexpr uint32_t maxHitsInModule() { return 1024; }
 
+  constexpr uint16_t clusterThresholdLayerOne = 2000;
+  constexpr uint16_t clusterThresholdOtherLayers = 4000;
+
+  constexpr uint16_t clusterThresholdPhase2LayerOne = 4000;
+  constexpr uint16_t clusterThresholdPhase2OtherLayers = 4000;
+
   constexpr uint32_t maxNumDigis = 3 * 256 * 1024;  // @PU=200 µ=530k σ=50k this is >4σ away
   constexpr uint16_t maxNumModules = 4000;
 

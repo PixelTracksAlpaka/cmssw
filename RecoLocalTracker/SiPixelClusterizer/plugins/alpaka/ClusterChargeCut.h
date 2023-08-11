@@ -25,6 +25,7 @@ namespace pixelClustering {
             clusterThresholds,  // charge cut on cluster in electrons (for layer 1 and for other layers)
         const uint32_t numElements) const {
       constexpr int startBPIX2 = TrackerTraits::layerStart[1];
+      constexpr int32_t maxNumClustersPerModules = TrackerTraits::maxNumClustersPerModules;
       [[maybe_unused]] constexpr int nMaxModules = TrackerTraits::numberOfModules;
 
       const uint32_t blockIdx(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
@@ -42,7 +43,7 @@ namespace pixelClustering {
         ALPAKA_ASSERT_OFFLOAD(nMaxModules < maxNumModules);
         ALPAKA_ASSERT_OFFLOAD(startBPIX2 < nMaxModules);
 
-        auto nclus = clus_view[thisModuleId].clusInModule();
+        uint32_t nclus = clus_view[thisModuleId].clusInModule();
         if (nclus == 0)
           return;
 
@@ -119,7 +120,26 @@ namespace pixelClustering {
 
         // renumber
         auto& ws = alpaka::declareSharedVar<uint16_t[32], __COUNTER__>(acc);
-        cms::alpakatools::blockPrefixScan(acc, newclusId, nclus, ws);
+        constexpr uint32_t maxThreads = 1024;
+        auto minClust = std::min(nclus,maxThreads);
+
+        cms::alpakatools::blockPrefixScan(acc, newclusId, minClust, ws);
+
+        if constexpr (maxNumClustersPerModules > maxThreads)  //only if needed
+        {
+
+          for (uint32_t offset = maxThreads; offset < nclus; offset += maxThreads) {
+            cms::alpakatools::blockPrefixScan(acc, newclusId + offset, nclus - offset, ws);
+            
+            cms::alpakatools::for_each_element_in_block_strided(
+            acc, nclus - offset, [&](uint32_t i) { 
+              uint32_t prevBlockEnd = ((i + offset/ maxThreads) * maxThreads) - 1;
+              newclusId[i] += newclusId[prevBlockEnd];
+            } 
+              );
+            alpaka::syncBlockThreads(acc);
+          }
+        }
 
         ALPAKA_ASSERT_OFFLOAD(nclus >= newclusId[nclus - 1]);
 

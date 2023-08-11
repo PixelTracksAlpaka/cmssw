@@ -6,6 +6,7 @@
 
 #include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersCollection.h"
 #include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersDevice.h"
+#include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigiErrorsCollection.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsDevice.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
@@ -60,12 +61,14 @@
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
+  template <typename TrackerTraits>
   class SiPixelRawToCluster : public stream::SynchronizingEDProducer<> {
   public:
     explicit SiPixelRawToCluster(const edm::ParameterSet& iConfig);
     ~SiPixelRawToCluster() override = default;
 
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+    using Algo = pixelDetails::SiPixelRawToClusterKernel<TrackerTraits>;
 
   private:
     void acquire(device::Event const& iEvent, device::EventSetup const& iSetup) override;
@@ -87,17 +90,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     const SiPixelFedCablingMap* cablingMap_ = nullptr;
     std::unique_ptr<PixelUnpackingRegions> regions_;
 
-    pixelDetails::SiPixelRawToClusterKernel Algo_;
+    Algo Algo_;
     PixelDataFormatter::Errors errors_;
 
-    const bool isRun2_;
     const bool includeErrors_;
     const bool useQuality_;
     uint32_t nDigis_;
     const SiPixelClusterThresholds clusterThresholds_;
   };
 
-  SiPixelRawToCluster::SiPixelRawToCluster(const edm::ParameterSet& iConfig)
+  template <typename TrackerTraits>
+  SiPixelRawToCluster<TrackerTraits>::SiPixelRawToCluster(const edm::ParameterSet& iConfig)
       : rawGetToken_(consumes<FEDRawDataCollection>(iConfig.getParameter<edm::InputTag>("InputLabel"))),
         digiPutToken_(produces()),
         clusterPutToken_(produces()),
@@ -105,7 +108,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         gainsToken_(esConsumes()),
         cablingMapToken_(esConsumes<SiPixelFedCablingMap, SiPixelFedCablingMapRcd>(
             edm::ESInputTag("", iConfig.getParameter<std::string>("CablingMapLabel")))),
-        isRun2_(iConfig.getParameter<bool>("isRun2")),
         includeErrors_(iConfig.getParameter<bool>("IncludeErrors")),
         useQuality_(iConfig.getParameter<bool>("UseQualityInfo")),
         clusterThresholds_{iConfig.getParameter<int32_t>("clusterThreshold_layer1"),
@@ -121,17 +123,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }
   }
 
-  void SiPixelRawToCluster::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+  template <typename TrackerTraits>
+  void SiPixelRawToCluster<TrackerTraits>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
     edm::ParameterSetDescription desc;
-    desc.add<bool>("isRun2", true);
     desc.add<bool>("IncludeErrors", true);
     desc.add<bool>("UseQualityInfo", false);
     // Note: this parameter is obsolete: it is ignored and will have no effect.
     // It is kept to avoid breaking older configurations, and will not be printed in the generated cfi.py file.
     desc.addOptionalNode(edm::ParameterDescription<uint32_t>("MaxFEDWords", 0, true), false)
         ->setComment("This parameter is obsolete and will be ignored.");
-    desc.add<int32_t>("clusterThreshold_layer1", kSiPixelClusterThresholdsDefaultPhase1.layer1);
-    desc.add<int32_t>("clusterThreshold_otherLayers", kSiPixelClusterThresholdsDefaultPhase1.otherLayers);
+    desc.add<int32_t>("clusterThreshold_layer1", pixelClustering::clusterThresholdLayerOne);
+    desc.add<int32_t>("clusterThreshold_otherLayers", pixelClustering::clusterThresholdOtherLayers);
     desc.add<edm::InputTag>("InputLabel", edm::InputTag("rawDataCollector"));
     {
       edm::ParameterSetDescription psd0;
@@ -146,7 +148,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     descriptions.addWithDefaultLabel(desc);
   }
 
-  void SiPixelRawToCluster::acquire(device::Event const& iEvent, device::EventSetup const& iSetup) {
+  template <typename TrackerTraits>
+  void SiPixelRawToCluster<TrackerTraits>::acquire(device::Event const& iEvent, device::EventSetup const& iSetup) {
     [[maybe_unused]] auto const& hMap = iSetup.getData(mapToken_);
     auto const& dGains = iSetup.getData(gainsToken_);
     auto Gains = SiPixelGainCalibrationForHLTDevice(1, iEvent.queue());
@@ -245,12 +248,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       return;
 
     // copy the FED data to a single cpu buffer
-    pixelDetails::SiPixelRawToClusterKernel::WordFedAppender wordFedAppender(nDigis_);
+    typename Algo::WordFedAppender wordFedAppender(nDigis_);
     for (uint32_t i = 0; i < fedIds_.size(); ++i) {
       wordFedAppender.initializeWordFed(fedIds_[i], index[i], start[i], words[i]);
     }
-    Algo_.makeClustersAsync(isRun2_,
-                            clusterThresholds_,
+    Algo_.makePhase1ClustersAsync(clusterThresholds_,
                             hMap.const_view(),
                             modulesToUnpack,
                             dGains.const_view(),
@@ -263,7 +265,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                             iEvent.queue());
   }
 
-  void SiPixelRawToCluster::produce(device::Event& iEvent, device::EventSetup const& iSetup) {
+  template <typename TrackerTraits>
+  void SiPixelRawToCluster<TrackerTraits>::produce(device::Event& iEvent, device::EventSetup const& iSetup) {
     if (nDigis_ == 0) {
       // Cannot use the default constructor here, as it would not allocate memory.
       // In the case of no digis, clusters_d are not being instantiated, but are
@@ -289,8 +292,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }
   }
 
+  using SiPixelRawToClusterPhase1 = SiPixelRawToCluster<pixelTopology::Phase1>;
+  using SiPixelRawToClusterHIonPhase1 = SiPixelRawToCluster<pixelTopology::HIonPhase1>;
+
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 // define as framework plugin
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/MakerMacros.h"
-DEFINE_FWK_ALPAKA_MODULE(SiPixelRawToCluster);
+DEFINE_FWK_ALPAKA_MODULE(SiPixelRawToClusterPhase1);
+DEFINE_FWK_ALPAKA_MODULE(SiPixelRawToClusterHIonPhase1);

@@ -39,6 +39,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                bool useDensity,
                bool useDBSCAN,
                bool useIterative,
+               bool doSplitting,
                int iminT,      // min number of neighbours to be "core"
                float ieps,     // max absolute distance to cluster
                float ierrmax,  // max error to be "seed"
@@ -48,6 +49,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             useDensity_(useDensity),
             useDBSCAN_(useDBSCAN),
             useIterative_(useIterative),
+            doSplitting_(doSplitting),
             minT(iminT),
             eps(ieps),
             errmax(ierrmax),
@@ -58,10 +60,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       ZVertexCollection makeAsync(Queue &queue, const TkSoAConstView &tracks_view, float ptMin, float ptMax) const;
 
     private:
-      const bool oneKernel_;
-      const bool useDensity_;
-      const bool useDBSCAN_;
-      const bool useIterative_;
+      const bool oneKernel_; // run everything (cluster,fit,split,sort) in one kernel. Uses only density clusterizer
+      const bool useDensity_; // use density clusterizer
+      const bool useDBSCAN_; // use DBScan clusterizer
+      const bool useIterative_; // use iterative clusterizer
+      const bool doSplitting_; //run vertex splitting 
 
       int minT;       // min number of neighbours to be "core"
       float eps;      // max absolute distance to cluster

@@ -39,10 +39,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     const auto nthTot = 64;
     const auto stride = 4;
     auto blockSize = nthTot / stride;
-    auto numberOfBlocks = cms::alpakatools::divide_up_by(3 * m_params.cellCuts_.maxNumberOfDoublets_ / 4, blockSize);
+    auto numberOfBlocks = cms::alpakatools::divide_up_by(3 * m_params.caParams_.maxNumberOfDoublets_ / 4, blockSize);
     const auto rescale = numberOfBlocks / 65536;
     blockSize *= (rescale + 1);
-    numberOfBlocks = cms::alpakatools::divide_up_by(3 * m_params.cellCuts_.maxNumberOfDoublets_ / 4, blockSize);
+    numberOfBlocks = cms::alpakatools::divide_up_by(3 * m_params.caParams_.maxNumberOfDoublets_ / 4, blockSize);
     ALPAKA_ASSERT_OFFLOAD(numberOfBlocks < 65536);
     ALPAKA_ASSERT_OFFLOAD(blockSize > 0 && 0 == blockSize % 16);
     const Vec2D blks{numberOfBlocks, 1u};
@@ -81,7 +81,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                           false);
     }
     blockSize = 64;
-    numberOfBlocks = cms::alpakatools::divide_up_by(3 * m_params.cellCuts_.maxNumberOfDoublets_ / 4, blockSize);
+    numberOfBlocks = cms::alpakatools::divide_up_by(3 * m_params.caParams_.maxNumberOfDoublets_ / 4, blockSize);
     auto workDiv1D = cms::alpakatools::make_workdiv<Acc1D>(numberOfBlocks, blockSize);
     alpaka::exec<Acc1D>(queue,
                         workDiv1D,
@@ -134,7 +134,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #endif
 
     // remove duplicates (tracks that share a doublet)
-    numberOfBlocks = cms::alpakatools::divide_up_by(3 * m_params.cellCuts_.maxNumberOfDoublets_ / 4, blockSize);
+    numberOfBlocks = cms::alpakatools::divide_up_by(3 * m_params.caParams_.maxNumberOfDoublets_ / 4, blockSize);
     workDiv1D = cms::alpakatools::make_workdiv<Acc1D>(numberOfBlocks, blockSize);
 
     alpaka::exec<Acc1D>(queue,
@@ -271,6 +271,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                         hh,
                         this->isOuterHitOfCell_.data(),
                         nActualPairs,
+                        this->m_params.caParams_.maxNumberOfDoublets_,
                         this->m_params.cellCuts_);
 
 #ifdef GPU_DEBUG
@@ -296,7 +297,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     if (this->m_params.lateFishbone_) {
       // apply fishbone cleaning to good tracks
-      numberOfBlocks = cms::alpakatools::divide_up_by(3 * m_params.cellCuts_.maxNumberOfDoublets_ / 4, blockSize);
+      numberOfBlocks = cms::alpakatools::divide_up_by(3 * m_params.caParams_.maxNumberOfDoublets_ / 4, blockSize);
       workDiv1D = cms::alpakatools::make_workdiv<Acc1D>(numberOfBlocks, blockSize);
       alpaka::exec<Acc1D>(queue,
                           workDiv1D,
@@ -307,7 +308,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }
 
     // mark duplicates (tracks that share a doublet)
-    numberOfBlocks = cms::alpakatools::divide_up_by(3 * m_params.cellCuts_.maxNumberOfDoublets_ / 4, blockSize);
+    numberOfBlocks = cms::alpakatools::divide_up_by(3 * m_params.caParams_.maxNumberOfDoublets_ / 4, blockSize);
     workDiv1D = cms::alpakatools::make_workdiv<Acc1D>(numberOfBlocks, blockSize);
     alpaka::exec<Acc1D>(queue,
                         workDiv1D,
@@ -388,7 +389,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     if (this->m_params.doStats_) {
       numberOfBlocks =
-          cms::alpakatools::divide_up_by(std::max(nhits, m_params.cellCuts_.maxNumberOfDoublets_), blockSize);
+          cms::alpakatools::divide_up_by(std::max(nhits, m_params.caParams_.maxNumberOfDoublets_), blockSize);
       workDiv1D = cms::alpakatools::make_workdiv<Acc1D>(numberOfBlocks, blockSize);
 
       alpaka::exec<Acc1D>(queue,
@@ -404,7 +405,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                           this->device_theCellTracks_.data(),
                           this->isOuterHitOfCell_.data(),
                           nhits,
-                          this->m_params.cellCuts_.maxNumberOfDoublets_,
+                          this->m_params.caParams_.maxNumberOfDoublets_,
                           this->counters_.data());
     }
 
@@ -463,5 +464,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template class CAHitNtupletGeneratorKernels<pixelTopology::Phase1>;
   template class CAHitNtupletGeneratorKernels<pixelTopology::Phase2>;
+  template class CAHitNtupletGeneratorKernels<pixelTopology::HIonPhase1>;
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

@@ -62,9 +62,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     HitsConstView<TrackerTraits> hh,
                                     OuterHitOfCell<TrackerTraits>* isOuterHitOfCell,
                                     uint32_t nActualPairs,
+                                    const uint32_t maxNumOfDoublets,
                                     CellCutsT<TrackerTraits> cuts) const {
         doubletsFromHisto<TrackerTraits>(
-            acc, nActualPairs, cells, nCells, cellNeighbors, cellTracks, hh, *isOuterHitOfCell, cuts);
+            acc, nActualPairs, maxNumOfDoublets, cells, nCells, cellNeighbors, cellTracks, hh, *isOuterHitOfCell, cuts);
       }
     };
   }  // namespace caPixelDoublets

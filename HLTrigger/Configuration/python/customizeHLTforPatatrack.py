@@ -191,8 +191,7 @@ def customizeHLTforAlpakaPixelRecoLocal(process):
     #  - SiPixelDigisCollection
     #  - SiPixelDigiErrorsCollection *
     #  - SiPixelFormatterErrors *
-    process.hltSiPixelClusters = cms.EDProducer('SiPixelRawToCluster@alpaka',
-        isRun2 = cms.bool(False),
+    process.hltSiPixelClusters = cms.EDProducer('SiPixelRawToClusterPhase1@alpaka',
         mightGet = cms.optional.untracked.vstring,
         IncludeErrors = cms.bool(True),
         UseQualityInfo = cms.bool(False),

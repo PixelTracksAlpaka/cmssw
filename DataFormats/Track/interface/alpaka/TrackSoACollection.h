@@ -22,15 +22,27 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   template <typename TrackerTraits>
   using TrackSoACollection = TrackSoADevice<TrackerTraits, Device>;
 #endif
-  //Classes definition for Phase1/Phase2, to make the classes_def lighter. Not actually used in the code.
+  //Classes definition for Phase1/Phase2/HIonPhase1, to make the classes_def lighter. Not actually used in the code.
   namespace pixelTrack {
     using TrackSoACollectionPhase1 = TrackSoACollection<pixelTopology::Phase1>;
     using TrackSoACollectionPhase2 = TrackSoACollection<pixelTopology::Phase2>;
+    using TrackSoACollectionHIonPhase1 = TrackSoACollection<pixelTopology::HIonPhase1>;
   }  // namespace pixelTrack
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 namespace cms::alpakatools {
   // TODO: Is this the right place for the specialization? Or should it be in PortableDeviceProduct?
+  template <typename TrackerTraits>
+  struct CopyToHost<ALPAKA_ACCELERATOR_NAMESPACE::TrackSoACollection<TrackerTraits>> {
+    template <typename TQueue>
+    static auto copyAsync(TQueue& queue,
+                          ALPAKA_ACCELERATOR_NAMESPACE::TrackSoACollection<TrackerTraits> const& deviceData) {
+      ::TrackSoAHost<TrackerTraits> hostData(queue);
+      alpaka::memcpy(queue, hostData.buffer(), deviceData.buffer());
+      return hostData;
+    }
+  };
+
   template <>
   struct CopyToHost<ALPAKA_ACCELERATOR_NAMESPACE::pixelTrack::TrackSoACollectionPhase1> {
     template <typename TQueue>
@@ -52,6 +64,18 @@ namespace cms::alpakatools {
       return hostData;
     }
   };
+
+  template <>
+  struct CopyToHost<ALPAKA_ACCELERATOR_NAMESPACE::pixelTrack::TrackSoACollectionHIonPhase1> {
+    template <typename TQueue>
+    static auto copyAsync(TQueue& queue,
+                          ALPAKA_ACCELERATOR_NAMESPACE::pixelTrack::TrackSoACollectionHIonPhase1 const& deviceData) {
+      ::pixelTrack::TrackSoAHostHIonPhase1 hostData(queue);
+      alpaka::memcpy(queue, hostData.buffer(), deviceData.buffer());
+      return hostData;
+    }
+  };
+
 }  // namespace cms::alpakatools
 
 #endif  // DataFormats_Track_interface_alpaka_TrackSoACollection_h

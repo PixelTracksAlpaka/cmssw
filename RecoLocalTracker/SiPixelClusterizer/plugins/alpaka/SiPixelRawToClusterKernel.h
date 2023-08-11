@@ -119,6 +119,7 @@ namespace pixelDetails {
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace pixelDetails {
 
+    template <typename TrackerTraits>
     class SiPixelRawToClusterKernel {
     public:
       class WordFedAppender {
@@ -126,10 +127,18 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         WordFedAppender();
         ~WordFedAppender() = default;
 
-        WordFedAppender(uint32_t words);
+        WordFedAppender(uint32_t words) 
+          :word_{cms::alpakatools::make_host_buffer<unsigned int[], Platform>(words)},
+          fedId_{cms::alpakatools::make_host_buffer<unsigned char[], Platform>(words)} {};
 
-        void initializeWordFed(int fedId, unsigned int wordCounterGPU, const uint32_t* src, unsigned int length);
 
+        void initializeWordFed(int fedId,
+                              unsigned int wordCounterGPU,
+                              const uint32_t *src,
+                              unsigned int length) {
+          std::memcpy(word_.data() + wordCounterGPU, src, sizeof(uint32_t) * length);
+          std::memset(fedId_.data() + wordCounterGPU / 2, fedId - 1200, length / 2);
+        }
         auto word() const { return word_; }
         auto fedId() const { return fedId_; }
 
@@ -146,14 +155,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       SiPixelRawToClusterKernel(SiPixelRawToClusterKernel&&) = delete;
       SiPixelRawToClusterKernel& operator=(const SiPixelRawToClusterKernel&) = delete;
       SiPixelRawToClusterKernel& operator=(SiPixelRawToClusterKernel&&) = delete;
-
-      void makeClustersAsync(bool isRun2,
-                             const SiPixelClusterThresholds clusterThresholds,
+  
+      void makePhase1ClustersAsync(const SiPixelClusterThresholds clusterThresholds,
                              const SiPixelMappingLayoutSoAConstView& cablingMap,
                              const unsigned char* modToUnp,
                              const SiPixelGainCalibrationForHLTSoAConstView& gains,
                              const WordFedAppender& wordFed,
-                             //  SiPixelFormatterErrors&& errors,
                              const uint32_t wordCounter,
                              const uint32_t fedCounter,
                              bool useQualityInfo,

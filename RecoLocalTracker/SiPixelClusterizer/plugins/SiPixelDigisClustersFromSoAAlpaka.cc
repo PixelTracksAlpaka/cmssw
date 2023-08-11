@@ -45,7 +45,8 @@ template <typename TrackerTraits>
 SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::SiPixelDigisClustersFromSoAAlpaka(const edm::ParameterSet& iConfig)
     : topoToken_(esConsumes()),
       digisHostToken_(consumes(iConfig.getParameter<edm::InputTag>("src"))),
-      clusterThresholds_{iConfig.getParameter<int>("clusterThreshold_layer1"), iConfig.getParameter<int>("clusterThreshold_otherLayers")},
+      clusterThresholds_(iConfig.getParameter<int>("clusterThreshold_layer1"),
+                         iConfig.getParameter<int>("clusterThreshold_otherLayers")),
       produceDigis_(iConfig.getParameter<bool>("produceDigis")),
       storeDigis_(iConfig.getParameter<bool>("produceDigis") && iConfig.getParameter<bool>("storeDigis")),
       clustersPutToken_(produces()) {
@@ -57,8 +58,8 @@ template <typename TrackerTraits>
 void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
   desc.add<edm::InputTag>("src", edm::InputTag("siPixelDigisSoA"));
-  desc.add<int>("clusterThreshold_layer1", kSiPixelClusterThresholdsDefaultPhase1.layer1);
-  desc.add<int>("clusterThreshold_otherLayers", kSiPixelClusterThresholdsDefaultPhase1.otherLayers);
+  desc.add<int>("clusterThreshold_layer1", pixelClustering::clusterThresholdLayerOne);
+  desc.add<int>("clusterThreshold_otherLayers", pixelClustering::clusterThresholdOtherLayers);
   desc.add<bool>("produceDigis", true);
   desc.add<bool>("storeDigis", true);
 
@@ -105,7 +106,7 @@ void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID,
   }
 
   int32_t nclus = -1;
-  PixelClusterizerBase::AccretionCluster aclusters[pixelClustering::maxNumClustersPerModules];
+  PixelClusterizerBase::AccretionCluster aclusters[TrackerTraits::maxNumClustersPerModules];
 #ifdef EDM_ML_DEBUG
   auto totClustersFilled = 0;
 #endif
@@ -180,7 +181,7 @@ void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID,
       // fill clusters
 #ifdef EDM_ML_DEBUG
     assert(digisView[i].clus() >= 0);
-    assert(digisView[i].clus() < pixelClustering::maxNumClustersPerModules);
+    assert(digisView[i].clus() < TrackerTraits::maxNumClustersPerModules);
 #endif
     nclus = std::max(digisView[i].clus(), nclus);
     auto row = dig.row();
@@ -210,3 +211,6 @@ DEFINE_FWK_MODULE(SiPixelDigisClustersFromSoAAlpakaPhase1);
 
 using SiPixelDigisClustersFromSoAAlpakaPhase2 = SiPixelDigisClustersFromSoAAlpaka<pixelTopology::Phase2>;
 DEFINE_FWK_MODULE(SiPixelDigisClustersFromSoAAlpakaPhase2);
+
+using SiPixelDigisClustersFromSoAAlpakaHIonPhase1 = SiPixelDigisClustersFromSoAAlpaka<pixelTopology::HIonPhase1>;
+DEFINE_FWK_MODULE(SiPixelDigisClustersFromSoAAlpakaHIonPhase1);

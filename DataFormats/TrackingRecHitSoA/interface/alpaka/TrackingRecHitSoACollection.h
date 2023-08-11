@@ -20,6 +20,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   //Classes definition for Phase1/Phase2, to make the classes_def lighter. Not actually used in the code.
   using TrackingRecHitAlpakaSoAPhase1 = TrackingRecHitAlpakaCollection<pixelTopology::Phase1>;
   using TrackingRecHitAlpakaSoAPhase2 = TrackingRecHitAlpakaCollection<pixelTopology::Phase2>;
+  using TrackingRecHitAlpakaSoAHIonPhase1 = TrackingRecHitAlpakaCollection<pixelTopology::HIonPhase1>;
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
