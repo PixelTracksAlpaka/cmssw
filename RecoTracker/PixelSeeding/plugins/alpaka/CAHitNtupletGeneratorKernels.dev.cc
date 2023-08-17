@@ -411,6 +411,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     if (this->m_params.doStats_) {
       // counters (add flag???)
+   
       numberOfBlocks = cms::alpakatools::divide_up_by(HitToTuple::capacity(), blockSize);
       workDiv1D = cms::alpakatools::make_workdiv<Acc1D>(numberOfBlocks, blockSize);
       alpaka::exec<Acc1D>(queue,
@@ -461,7 +462,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }
 #endif
   }
-
+/*
+template <typename TrackerTraits>
+void CAHitNtupletGeneratorKernels<TrackerTraits>::printCounters() {
+    auto workDiv1D = cms::alpakatools::make_workdiv<Acc1D>(1,1);
+    alpaka::exec<Acc1D>(queue_,workDiv1D,kernel_printCounters{},this->counters_.data());
+}
+*/
   template class CAHitNtupletGeneratorKernels<pixelTopology::Phase1>;
   template class CAHitNtupletGeneratorKernels<pixelTopology::Phase2>;
   template class CAHitNtupletGeneratorKernels<pixelTopology::HIonPhase1>;

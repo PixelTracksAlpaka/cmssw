@@ -228,10 +228,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         if (mez < TrackerTraits::minz[pairLayerId] || mez > TrackerTraits::maxz[pairLayerId])
           continue;
-
+        // printf("Z cut\n");
         if (doClusterCut && outer > pixelTopology::last_barrel_layer && cuts.clusterCut(acc, hh, i))
           continue;
-
+        // printf("Cluster cut\n");
         auto mep = hh[i].iphi();
         auto mer = hh[i].rGlobal();
 
@@ -251,10 +251,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         };
 
         auto iphicut = cuts.phiCuts[pairLayerId];
+        // printf("id %d phicut %d %.2f %.2f %d \n",pairLayerId,iphicut,z0cut,hardPtCut,maxNumOfDoublets);
 
         auto kl = PhiBinner::bin(int16_t(mep - iphicut));
         auto kh = PhiBinner::bin(int16_t(mep + iphicut));
         auto incr = [](auto& k) { return k = (k + 1) % PhiBinner::nbins(); };
+
+        // printf("i %d %.2f %.2f %d %d %d %d \n",i,mez,mer,hh[i].detectorIndex(),hoff,kl,kh);
 
 #ifdef GPU_DEBUG
         int tot = 0;
@@ -294,13 +297,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
             auto mop = hh[oi].iphi();
             uint16_t idphi = std::min(std::abs(int16_t(mop - mep)), std::abs(int16_t(mep - mop)));
+
             if (idphi > iphicut)
               continue;
+
             if (doClusterCut && cuts.zSizeCut(acc, hh, i, oi))
               continue;
+
             if (doPtCut && ptcut(oi, idphi))
               continue;
-
+            // printf(">allcuts \n");
             auto ind = alpaka::atomicAdd(acc, nCells, (uint32_t)1, alpaka::hierarchy::Blocks{});
             if (ind >= maxNumOfDoublets) {
               alpaka::atomicSub(acc, nCells, (uint32_t)1, alpaka::hierarchy::Blocks{});
@@ -317,7 +323,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         }
 //      #endif
 #ifdef GPU_DEBUG
-        if (tooMany > 0)
+        if (tooMany > 0 or true)
           printf("OuterHitOfCell full for %d in layer %d/%d, %d,%d %d, %d %.3f %.3f\n",
                  i,
                  inner,

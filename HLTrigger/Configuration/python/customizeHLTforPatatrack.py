@@ -197,6 +197,10 @@ def customizeHLTforAlpakaPixelRecoLocal(process):
         UseQualityInfo = cms.bool(False),
         clusterThreshold_layer1 = cms.int32(4000),
         clusterThreshold_otherLayers = cms.int32(4000),
+        VCaltoElectronGain      = cms.double(1),  # all gains=1, pedestals=0
+        VCaltoElectronGain_L1   = cms.double(1),
+        VCaltoElectronOffset    = cms.double(0),
+        VCaltoElectronOffset_L1 = cms.double(0),
         InputLabel = cms.InputTag('rawDataCollector'),
         Regions = cms.PSet(
             inputs = cms.optional.VInputTag,

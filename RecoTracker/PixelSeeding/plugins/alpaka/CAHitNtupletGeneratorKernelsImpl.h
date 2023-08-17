@@ -99,7 +99,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                             alpaka::hierarchy::Blocks{});
         }
 
-#ifdef NTUPLE_DEBUG
+#ifdef NTUPLE_DEBUGS
         if (0 == threadIdx) {
           printf("number of found cells %d \n found tuples %d with total hits %d out of %d\n",
                  *nCells,

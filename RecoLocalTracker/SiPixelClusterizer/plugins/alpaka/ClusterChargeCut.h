@@ -21,8 +21,7 @@ namespace pixelClustering {
         const TAcc& acc,
         SiPixelDigisSoAv2View digi_view,
         SiPixelClustersSoAView clus_view,
-        SiPixelClusterThresholds
-            clusterThresholds,  // charge cut on cluster in electrons (for layer 1 and for other layers)
+        SiPixelClusterThresholds clusterThresholds,  // charge cut on cluster in electrons (for layer 1 and for other layers)
         const uint32_t numElements) const {
       constexpr int startBPIX2 = TrackerTraits::layerStart[1];
       constexpr int32_t maxNumClustersPerModules = TrackerTraits::maxNumClustersPerModules;
@@ -114,6 +113,7 @@ namespace pixelClustering {
         alpaka::syncBlockThreads(acc);
 
         auto chargeCut = clusterThresholds.getThresholdForLayerOnCondition(thisModuleId < startBPIX2);
+        
         cms::alpakatools::for_each_element_in_block_strided(
             acc, nclus, [&](uint32_t i) { newclusId[i] = ok[i] = charge[i] > chargeCut ? 1 : 0; });
         alpaka::syncBlockThreads(acc);
@@ -149,6 +149,11 @@ namespace pixelClustering {
         clus_view[thisModuleId].clusInModule() = newclusId[nclus - 1];
         alpaka::syncBlockThreads(acc);
 
+        #ifdef GPU_DEBUG
+        if (thisModuleId % 100 == 1)
+          if (threadIdxLocal == 0)
+            printf("module %d -> chargeCut = %d; nclus (pre cut) = %d; nclus (after cut) = %d\n",thisModuleId, chargeCut,nclus,clus_view[thisModuleId].clusInModule());
+        #endif
         // mark bad cluster again
         cms::alpakatools::for_each_element_in_block_strided(acc, nclus, [&](uint32_t i) {
           if (0 == ok[i])

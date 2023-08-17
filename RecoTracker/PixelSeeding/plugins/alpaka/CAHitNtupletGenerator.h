@@ -82,6 +82,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     void launchKernels(const HitsConstView& hh, bool useRiemannFit, Queue& queue) const;
 
     Params m_params;
+
   };
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

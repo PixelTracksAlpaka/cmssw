@@ -235,8 +235,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           //////////////////////////////////////////////////////////
           // ALLOCATIONS FOR THE INTERMEDIATE RESULTS (STAYS ON WORKER)
           //////////////////////////////////////////////////////////
-          counters_{cms::alpakatools::make_device_buffer<Counters>(queue)},
-
+          counters_{cms::alpakatools::make_device_buffer<Counters>(queue)}, 
           
 
           // workspace
@@ -290,14 +289,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     void classifyTuples(const HitsConstView& hh, TkSoAView& track_view, Queue& queue);
 
     void buildDoublets(const HitsConstView& hh, Queue& queue);
-    void cleanup(Queue& queue);
 
-    static void printCounters(Counters const* counters);
+    static void printCounters();
 
   protected:
     // params
     Params const& m_params;
-
     cms::alpakatools::device_buffer<Device, Counters> counters_;
 
     // workspace

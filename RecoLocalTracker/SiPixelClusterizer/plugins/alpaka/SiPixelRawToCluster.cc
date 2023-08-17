@@ -111,7 +111,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         includeErrors_(iConfig.getParameter<bool>("IncludeErrors")),
         useQuality_(iConfig.getParameter<bool>("UseQualityInfo")),
         clusterThresholds_{iConfig.getParameter<int32_t>("clusterThreshold_layer1"),
-                           iConfig.getParameter<int32_t>("clusterThreshold_otherLayers")} {
+                           iConfig.getParameter<int32_t>("clusterThreshold_otherLayers"),
+                           static_cast<float>(iConfig.getParameter<double>("VCaltoElectronGain")),
+                           static_cast<float>(iConfig.getParameter<double>("VCaltoElectronGain_L1")),
+                           static_cast<float>(iConfig.getParameter<double>("VCaltoElectronOffset")),
+                           static_cast<float>(iConfig.getParameter<double>("VCaltoElectronOffset_L1"))} {
     if (includeErrors_) {
       digiErrorPutToken_ = produces();
       fmtErrorToken_ = produces();
@@ -134,6 +138,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         ->setComment("This parameter is obsolete and will be ignored.");
     desc.add<int32_t>("clusterThreshold_layer1", pixelClustering::clusterThresholdLayerOne);
     desc.add<int32_t>("clusterThreshold_otherLayers", pixelClustering::clusterThresholdOtherLayers);
+    desc.add<double>("VCaltoElectronGain", 47.f);
+    desc.add<double>("VCaltoElectronGain_L1", 50.f);
+    desc.add<double>("VCaltoElectronOffset", -60.f);
+    desc.add<double>("VCaltoElectronOffset_L1", -670.f);
+    
     desc.add<edm::InputTag>("InputLabel", edm::InputTag("rawDataCollector"));
     {
       edm::ParameterSetDescription psd0;

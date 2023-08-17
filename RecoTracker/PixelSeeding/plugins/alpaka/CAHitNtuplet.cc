@@ -49,6 +49,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
   private:
+
+    //void endJob() override;
+
     edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> tokenField_;
     const device::ESGetToken<PixelCPEFastParams<TrackerTraits>, PixelCPEFastParamsRecord> cpeToken_;
     device::EDGetToken<HitsOnDevice> tokenHit_;

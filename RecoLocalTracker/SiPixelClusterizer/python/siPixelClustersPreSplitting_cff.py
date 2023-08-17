@@ -103,11 +103,10 @@ from CalibTracker.SiPixelESProducers.siPixelCablingSoAESProducer_cfi import siPi
 from CalibTracker.SiPixelESProducers.siPixelGainCalibrationForHLTSoAESProducer_cfi import siPixelGainCalibrationForHLTSoAESProducer
 
 # reconstruct the pixel digis and clusters on the device
-from RecoLocalTracker.SiPixelClusterizer.siPixelRawToCluster_cfi import siPixelRawToCluster as _siPixelRawToClusterAlpaka
+from RecoLocalTracker.SiPixelClusterizer.siPixelRawToClusterPhase1_cfi import siPixelRawToClusterPhase1 as _siPixelRawToClusterAlpaka
 siPixelClustersPreSplittingAlpaka = _siPixelRawToClusterAlpaka.clone()
 
 run3_common.toModify(siPixelClustersPreSplittingAlpaka,
-                     isRun2 = False,
                      clusterThreshold_layer1 = 4000)
 
 from RecoLocalTracker.SiPixelClusterizer.siPixelDigisClustersFromSoAAlpakaPhase1_cfi import siPixelDigisClustersFromSoAAlpakaPhase1 as _siPixelDigisClustersFromSoAAlpakaPhase1

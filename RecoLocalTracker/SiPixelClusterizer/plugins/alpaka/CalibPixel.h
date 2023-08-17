@@ -20,23 +20,13 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
 #include "RecoLocalTracker/SiPixelClusterizer/plugins/SiPixelClusterThresholds.h"
 
+// #define GPU_DEBUG
+
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace calibPixel {
     using namespace cms::alpakatools;
     constexpr uint16_t InvId = std::numeric_limits<uint16_t>::max() - 1;
     // must be > MaxNumModules
-
-    // valid for run2
-    constexpr float VCaltoElectronGain = 47;         // L2-4: 47 +- 4.7
-    constexpr float VCaltoElectronGain_L1 = 50;      // L1:   49.6 +- 2.6
-    constexpr float VCaltoElectronOffset = -60;      // L2-4: -60 +- 130
-    constexpr float VCaltoElectronOffset_L1 = -670;  // L1:   -670 +- 220
-
-    //for phase2
-    constexpr float ElectronPerADCGain = 1500;
-    constexpr int8_t Phase2ReadoutMode = 3;
-    constexpr uint16_t Phase2DigiBaseline = 1000;
-    constexpr uint8_t Phase2KinkADC = 8;
 
     struct calibDigis {
       template <typename TAcc>
@@ -84,10 +74,18 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               
               float conversionFactor = dvgi.moduleId() < 96 ? VCaltoElectronGain_L1 : VCaltoElectronGain;
               float offset = dvgi.moduleId() < 96 ? VCaltoElectronOffset_L1 : VCaltoElectronOffset;
-              
-              vcal = vcal * conversionFactor + offset;
 
+              #ifdef GPU_DEBUG
+              auto old_adc = dvgi.adc();
+              #endif
               dvgi.adc() = std::max(100, int(vcal * conversionFactor + offset));
+
+              #ifdef GPU_DEBUG
+              if (threadIdxGlobal == 0)
+                    printf("module %d pixel %d -> old_adc = %d; vcal = %.2f; conversionFactor = %.2f; offset = %.2f; new_adc = %d \n",
+                                  dvgi.moduleId(), i, old_adc,vcal,conversionFactor,offset,dvgi.adc());
+              #endif
+
             }
           }
         });
