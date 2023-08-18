@@ -130,16 +130,6 @@ pixelNtupletFit.toReplaceWith(siPixelRecHitsPreSplittingTask, cms.Task(
 ######################################################################
 
 ### Alpaka Pixel Hits Reco
-
-## CPE Parameters ESProducer
-siPixelCPEFastParamsESProducerAlpakaPhase1 = cms.ESProducer('PixelCPEFastParamsESProducerAlpakaPhase1@alpaka',
-    ComponentName = cms.string('PixelCPEFastParams'),
-    appendToDataLabel = cms.string(''),
-    alpaka = cms.untracked.PSet(
-        backend = cms.untracked.string('')
-    )
-)
-
 from RecoLocalTracker.SiPixelRecHits.siPixelRecHitAlpakaPhase1_cfi import siPixelRecHitAlpakaPhase1 as _siPixelRecHitAlpakaPhase1
 
 # Hit SoA producer on Device
