@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from Configuration.Eras.Modifier_run3_common_cff import run3_common
 from Configuration.ProcessModifiers.gpu_cff import gpu
+from Configuration.ProcessModifiers.alpaka_cff import alpaka
 
 # conditions used *only* by the modules running on GPU
 from CalibTracker.SiPixelESProducers.siPixelROCsStatusAndMappingWrapperESProducer_cfi import siPixelROCsStatusAndMappingWrapperESProducer
@@ -93,3 +94,38 @@ phase2_tracker.toReplaceWith(siPixelDigisClustersPreSplitting, _siPixelDigisClus
                             siPixelDigisClustersPreSplitting,
                             # SwitchProducer wrapping the legacy pixel cluster producer or an alias for the pixel clusters information converted from SoA
                             siPixelClustersPreSplitting))
+
+######################################################################
+
+### Alpaka Pixel Clusters Reco
+
+from CalibTracker.SiPixelESProducers.siPixelCablingSoAESProducer_cfi import siPixelCablingSoAESProducer
+from CalibTracker.SiPixelESProducers.siPixelGainCalibrationForHLTSoAESProducer_cfi import siPixelGainCalibrationForHLTSoAESProducer
+
+# reconstruct the pixel digis and clusters on the device
+from RecoLocalTracker.SiPixelClusterizer.siPixelRawToClusterPhase1_cfi import siPixelRawToClusterPhase1 as _siPixelRawToClusterAlpaka
+siPixelClustersPreSplittingAlpaka = _siPixelRawToClusterAlpaka.clone()
+
+run3_common.toModify(siPixelClustersPreSplittingAlpaka,
+                     clusterThreshold_layer1 = 4000)
+
+from RecoLocalTracker.SiPixelClusterizer.siPixelDigisClustersFromSoAAlpakaPhase1_cfi import siPixelDigisClustersFromSoAAlpakaPhase1 as _siPixelDigisClustersFromSoAAlpakaPhase1
+alpaka.toReplaceWith(siPixelDigisClustersPreSplitting,_siPixelDigisClustersFromSoAAlpakaPhase1.clone(
+    src = "siPixelClustersPreSplittingAlpaka"
+))
+
+from RecoLocalTracker.SiPixelClusterizer.siPixelDigisClustersFromSoAAlpakaPhase1_cfi import siPixelDigisClustersFromSoAAlpakaPhase1 as _siPixelDigisClustersFromSoAAlpakaPhase1
+
+alpaka.toModify(siPixelClustersPreSplitting,
+    cpu = _siPixelDigisClustersFromSoAAlpakaPhase1.clone(
+        src = cms.InputTag('siPixelClustersPreSplittingAlpaka')
+    )
+)
+
+alpaka.toReplaceWith(siPixelClustersPreSplittingTask, cms.Task(
+                        # Reconstruct the pixel clusters with alpaka
+                        siPixelClustersPreSplittingAlpaka,
+                        # Convert from host SoA to legacy formats (digis and clusters)
+                        siPixelDigisClustersPreSplitting,
+                        # EDAlias for the clusters
+                        siPixelClustersPreSplitting))

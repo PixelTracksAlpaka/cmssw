@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from HeterogeneousCore.CUDACore.SwitchProducerCUDA import SwitchProducerCUDA
 from Configuration.ProcessModifiers.gpu_cff import gpu
+from Configuration.ProcessModifiers.alpaka_cff import alpaka
 
 # legacy pixel rechit producer
 siPixelRecHits = cms.EDProducer("SiPixelRecHitConverter",
@@ -125,3 +126,27 @@ pixelNtupletFit.toReplaceWith(siPixelRecHitsPreSplittingTask, cms.Task(
     # producing and converting on cpu (if needed)
     siPixelRecHitsPreSplittingSoA
 ))
+
+######################################################################
+
+### Alpaka Pixel Hits Reco
+from RecoLocalTracker.SiPixelRecHits.siPixelRecHitAlpakaPhase1_cfi import siPixelRecHitAlpakaPhase1 as _siPixelRecHitAlpakaPhase1
+
+# Hit SoA producer on Device
+siPixelRecHitsPreSplittingAlpaka = _siPixelRecHitAlpakaPhase1.clone(
+    src = "siPixelClustersPreSplittingAlpaka"
+)
+
+from RecoLocalTracker.SiPixelRecHits.siPixelRecHitFromSoAAlpakaPhase1_cfi import siPixelRecHitFromSoAAlpakaPhase1 as _siPixelRecHitFromSoAAlpakaPhase1
+
+alpaka.toModify(siPixelRecHitsPreSplitting,
+    cpu = _siPixelRecHitFromSoAAlpakaPhase1.clone(
+            pixelRecHitSrc = cms.InputTag('siPixelRecHitsPreSplittingAlpaka'),
+            src = cms.InputTag('siPixelClustersPreSplitting'))
+)
+
+alpaka.toReplaceWith(siPixelRecHitsPreSplittingTask, cms.Task(
+                        # Reconstruct the pixel hits on the device
+                        siPixelRecHitsPreSplittingAlpaka,
+                        # Convert hit soa on host to legacy formats
+                        siPixelRecHitsPreSplitting))
