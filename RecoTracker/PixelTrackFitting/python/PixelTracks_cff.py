@@ -225,6 +225,20 @@ alpaka.toReplaceWith(pixelTracksTask, cms.Task(
                          # Convert the pixel tracks from SoA to legacy format
                         pixelTracks))
 
+### Alpaka Device vs Host validation
 
+from Configuration.ProcessModifiers.alpakaValidationPixel_cff import alpakaValidationPixel
+
+# Hit SoA producer on serial backend
+pixelTracksAlpakaSerial = pixelTracksAlpaka.clone(
+    pixelRecHitSrc = 'siPixelRecHitsPreSplittingAlpakaSerial',
+    alpaka = dict( backend = 'serial_sync' )
+)
+
+alpakaValidationPixel.toReplaceWith(pixelTracksTask, cms.Task(
+                        # Reconstruct and convert the pixel tracks with alpaka on device
+                        pixelTracksTask.copy(),
+                        # SoA serial counterpart
+                        pixelTracksAlpakaSerial))
 
 

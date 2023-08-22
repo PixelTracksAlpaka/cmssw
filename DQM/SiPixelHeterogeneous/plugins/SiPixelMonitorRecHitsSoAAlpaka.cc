@@ -183,14 +183,16 @@ template<typename T>
 void SiPixelMonitorRecHitsSoAAlpaka<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   // monitorpixelRecHitsSoA
   edm::ParameterSetDescription desc;
-  desc.add<edm::InputTag>("pixelHitsSrc", edm::InputTag("siPixelRecHitsPreSplittingSoA"));
-  desc.add<std::string>("TopFolderName", "SiPixelHeterogeneous/PixelRecHitsSoA");
+  desc.add<edm::InputTag>("pixelHitsSrc", edm::InputTag("siPixelRecHitsPreSplittingAlpaka"));
+  desc.add<std::string>("TopFolderName", "SiPixelHeterogeneous/PixelRecHitsAlpaka");
   descriptions.addWithDefaultLabel(desc);
 }
 
 using SiPixelPhase1MonitorRecHitsSoAAlpaka = SiPixelMonitorRecHitsSoAAlpaka<pixelTopology::Phase1>;
 using SiPixelPhase2MonitorRecHitsSoAAlpaka = SiPixelMonitorRecHitsSoAAlpaka<pixelTopology::Phase2>;
+using SiPixelHIonPhase1MonitorRecHitsSoAAlpaka = SiPixelMonitorRecHitsSoAAlpaka<pixelTopology::HIonPhase1>;
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(SiPixelPhase1MonitorRecHitsSoAAlpaka);
 DEFINE_FWK_MODULE(SiPixelPhase2MonitorRecHitsSoAAlpaka);
+DEFINE_FWK_MODULE(SiPixelHIonPhase1MonitorRecHitsSoAAlpaka);

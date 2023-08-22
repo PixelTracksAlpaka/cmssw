@@ -129,3 +129,15 @@ alpaka.toReplaceWith(siPixelClustersPreSplittingTask, cms.Task(
                         siPixelDigisClustersPreSplitting,
                         # EDAlias for the clusters
                         siPixelClustersPreSplitting))
+
+### Alpaka Device vs Host validation
+
+from Configuration.ProcessModifiers.alpakaValidationPixel_cff import alpakaValidationPixel
+
+siPixelClustersPreSplittingAlpakaSerial = siPixelClustersPreSplittingAlpaka.clone( alpaka = dict( backend = 'serial_sync' ))
+
+alpakaValidationPixel.toReplaceWith(siPixelClustersPreSplittingTask, cms.Task(
+                        # Reconstruct and convert the pixel clusters with alpaka on device
+                        siPixelClustersPreSplittingTask.copy(),
+                        # SoA serial counterpart
+                        siPixelClustersPreSplittingAlpakaSerial))

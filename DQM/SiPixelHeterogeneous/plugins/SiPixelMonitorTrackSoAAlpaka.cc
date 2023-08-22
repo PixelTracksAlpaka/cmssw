@@ -181,8 +181,8 @@ template <typename T>
 void SiPixelMonitorTrackSoAAlpaka<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   // monitorpixelTrackSoA
   edm::ParameterSetDescription desc;
-  desc.add<edm::InputTag>("pixelTrackSrc", edm::InputTag("pixelTracksSoA"));
-  desc.add<std::string>("topFolderName", "SiPixelHeterogeneous/PixelTrackSoA");
+  desc.add<edm::InputTag>("pixelTrackSrc", edm::InputTag("pixelTracksAlpaka"));
+  desc.add<std::string>("topFolderName", "SiPixelHeterogeneous/PixelTrackAlpaka");
   desc.add<bool>("useQualityCut", true);
   desc.add<std::string>("minQuality", "loose");
   descriptions.addWithDefaultLabel(desc);
@@ -190,5 +190,8 @@ void SiPixelMonitorTrackSoAAlpaka<T>::fillDescriptions(edm::ConfigurationDescrip
 
 using SiPixelPhase1MonitorTrackSoAAlpaka = SiPixelMonitorTrackSoAAlpaka<pixelTopology::Phase1>;
 using SiPixelPhase2MonitorTrackSoAAlpaka = SiPixelMonitorTrackSoAAlpaka<pixelTopology::Phase2>;
+using SiPixelHIonPhase1MonitorTrackSoAAlpaka = SiPixelMonitorTrackSoAAlpaka<pixelTopology::HIonPhase1>;
 
 DEFINE_FWK_MODULE(SiPixelPhase1MonitorTrackSoAAlpaka);
+DEFINE_FWK_MODULE(SiPixelPhase2MonitorTrackSoAAlpaka);
+DEFINE_FWK_MODULE(SiPixelHIonPhase1MonitorTrackSoAAlpaka);

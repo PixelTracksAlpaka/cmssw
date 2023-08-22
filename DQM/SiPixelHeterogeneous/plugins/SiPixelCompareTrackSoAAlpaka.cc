@@ -300,9 +300,9 @@ template<typename T>
 void SiPixelCompareTrackSoAAlpaka<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   // monitorpixelTrackSoA
   edm::ParameterSetDescription desc;
-  desc.add<edm::InputTag>("pixelTrackSrcCPU", edm::InputTag("pixelTracksSoA@cpu"));
-  desc.add<edm::InputTag>("pixelTrackSrcGPU", edm::InputTag("pixelTracksSoA@cuda"));
-  desc.add<std::string>("topFolderName", "SiPixelHeterogeneous/PixelTrackCompareGPUvsCPU");
+  desc.add<edm::InputTag>("pixelTrackSrcCPU", edm::InputTag("pixelTracksAlpakaSerial"));
+  desc.add<edm::InputTag>("pixelTrackSrcGPU", edm::InputTag("pixelTracksAlpaka"));
+  desc.add<std::string>("topFolderName", "SiPixelHeterogeneous/PixelTrackCompareDeviceVSHost");
   desc.add<bool>("useQualityCut", true);
   desc.add<std::string>("minQuality", "loose");
   desc.add<double>("deltaR2cut", 0.04);
@@ -311,6 +311,8 @@ void SiPixelCompareTrackSoAAlpaka<T>::fillDescriptions(edm::ConfigurationDescrip
 
 using SiPixelPhase1CompareTrackSoAAlpaka = SiPixelCompareTrackSoAAlpaka<pixelTopology::Phase1>;
 using SiPixelPhase2CompareTrackSoAAlpaka = SiPixelCompareTrackSoAAlpaka<pixelTopology::Phase2>;
+using SiPixelHIonPhase1CompareTrackSoAAlpaka = SiPixelCompareTrackSoAAlpaka<pixelTopology::HIonPhase1>;
 
 DEFINE_FWK_MODULE(SiPixelPhase1CompareTrackSoAAlpaka);
 DEFINE_FWK_MODULE(SiPixelPhase2CompareTrackSoAAlpaka);
+DEFINE_FWK_MODULE(SiPixelHIonPhase1CompareTrackSoAAlpaka);
