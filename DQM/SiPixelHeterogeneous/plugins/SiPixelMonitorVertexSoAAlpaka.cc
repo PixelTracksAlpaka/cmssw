@@ -122,9 +122,9 @@ void SiPixelMonitorVertexSoAAlpaka::bookHistograms(DQMStore::IBooker& ibooker,
 void SiPixelMonitorVertexSoAAlpaka::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   // monitorpixelVertexSoA
   edm::ParameterSetDescription desc;
-  desc.add<edm::InputTag>("pixelVertexSrc", edm::InputTag("pixelVerticesSoA"));
+  desc.add<edm::InputTag>("pixelVertexSrc", edm::InputTag("pixelVerticesAlpaka"));
   desc.add<edm::InputTag>("beamSpotSrc", edm::InputTag("offlineBeamSpot"));
-  desc.add<std::string>("topFolderName", "SiPixelHeterogeneous/PixelVertexSoA");
+  desc.add<std::string>("topFolderName", "SiPixelHeterogeneous/PixelVertexAlpaka");
   descriptions.addWithDefaultLabel(desc);
 }
 

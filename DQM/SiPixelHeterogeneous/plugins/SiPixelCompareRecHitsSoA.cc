@@ -238,9 +238,9 @@ template<typename T>
 void SiPixelCompareRecHitsSoA<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   // monitorpixelRecHitsSoA
   edm::ParameterSetDescription desc;
-  desc.add<edm::InputTag>("pixelHitsSrcCPU", edm::InputTag("siPixelRecHitsPreSplittingSoA@cpu"));
-  desc.add<edm::InputTag>("pixelHitsSrcGPU", edm::InputTag("siPixelRecHitsPreSplittingSoA@cuda"));
-  desc.add<std::string>("topFolderName", "SiPixelHeterogeneous/PixelRecHitsCompareGPUvsCPU");
+  desc.add<edm::InputTag>("pixelHitsSrcCPU", edm::InputTag("siPixelRecHitsPreSplittingAlpakaSerial"));
+  desc.add<edm::InputTag>("pixelHitsSrcGPU", edm::InputTag("siPixelRecHitsPreSplittingAlpaka"));
+  desc.add<std::string>("topFolderName", "SiPixelHeterogeneous/PixelRecHitsCompareDeviceVsHost");
   desc.add<double>("minD2cut", 0.0001);
   descriptions.addWithDefaultLabel(desc);
 }

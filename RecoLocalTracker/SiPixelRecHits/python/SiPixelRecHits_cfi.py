@@ -150,3 +150,22 @@ alpaka.toReplaceWith(siPixelRecHitsPreSplittingTask, cms.Task(
                         siPixelRecHitsPreSplittingAlpaka,
                         # Convert hit soa on host to legacy formats
                         siPixelRecHitsPreSplitting))
+
+
+### Alpaka Device vs Host validation
+
+from Configuration.ProcessModifiers.alpakaValidationPixel_cff import alpakaValidationPixel
+
+# Hit SoA producer on serial backend
+siPixelRecHitsPreSplittingAlpakaSerial = siPixelRecHitsPreSplittingAlpaka.clone(
+    src = "siPixelClustersPreSplittingAlpakaSerial",
+    alpaka = dict( backend = 'serial_sync' )
+)
+
+alpakaValidationPixel.toReplaceWith(siPixelRecHitsPreSplittingTask, cms.Task(
+                        # Reconstruct and convert the pixel hit with alpaka on device
+                        siPixelRecHitsPreSplittingTask.copy(),
+                        # SoA serial counterpart
+                        siPixelRecHitsPreSplittingAlpakaSerial))
+
+

@@ -227,16 +227,18 @@ template<typename T>
 void SiPixelCompareRecHitsSoAAlpaka<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   // monitorpixelRecHitsSoAAlpaka
   edm::ParameterSetDescription desc;
-  desc.add<edm::InputTag>("pixelHitsSrcCPU", edm::InputTag("siPixelRecHitsPreSplittingSoA@Host"));
-  desc.add<edm::InputTag>("pixelHitsSrcGPU", edm::InputTag("siPixelRecHitsPreSplittingSoA@cuda"));
-  desc.add<std::string>("topFolderName", "SiPixelHeterogeneous/PixelRecHitsCompareDevicevsHost");
+  desc.add<edm::InputTag>("pixelHitsSrcCPU", edm::InputTag("siPixelRecHitsPreSplittingAlpakaSerial"));
+  desc.add<edm::InputTag>("pixelHitsSrcGPU", edm::InputTag("siPixelRecHitsPreSplittingAlpaka"));
+  desc.add<std::string>("topFolderName", "SiPixelHeterogeneous/PixelRecHitsCompareDeviceVSHost");
   desc.add<double>("minD2cut", 0.0001);
   descriptions.addWithDefaultLabel(desc);
 }
 
 using SiPixelPhase1CompareRecHitsSoAAlpaka = SiPixelCompareRecHitsSoAAlpaka<pixelTopology::Phase1>;
 using SiPixelPhase2CompareRecHitsSoAAlpaka = SiPixelCompareRecHitsSoAAlpaka<pixelTopology::Phase2>;
+using SiPixelHIonPhase1CompareRecHitsSoAAlpaka = SiPixelCompareRecHitsSoAAlpaka<pixelTopology::HIonPhase1>;
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(SiPixelPhase1CompareRecHitsSoAAlpaka);
 DEFINE_FWK_MODULE(SiPixelPhase2CompareRecHitsSoAAlpaka);
+DEFINE_FWK_MODULE(SiPixelHIonPhase1CompareRecHitsSoAAlpaka);

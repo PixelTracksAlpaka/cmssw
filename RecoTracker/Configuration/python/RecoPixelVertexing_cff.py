@@ -117,6 +117,23 @@ alpaka.toReplaceWith(pixelVerticesTask, cms.Task(
     pixelVertices
 ))
 
+### Alpaka Device vs Host validation
+
+from Configuration.ProcessModifiers.alpakaValidationPixel_cff import alpakaValidationPixel
+
+# Hit SoA producer on serial backend
+pixelVerticesAlpakaSerial = pixelVerticesAlpaka.clone(
+    pixelTrackSrc = 'pixelTracksAlpakaSerial',
+    alpaka = dict( backend = 'serial_sync' )
+)
+
+alpakaValidationPixel.toReplaceWith(pixelVerticesTask, cms.Task(
+                        # Reconstruct and convert the pixel tracks with alpaka on device
+                        pixelVerticesTask.copy(),
+                        # SoA serial counterpart
+                        pixelVerticesAlpakaSerial))
+
+
 # Tasks and Sequences
 recopixelvertexingTask = cms.Task(
     pixelTracksTask,
