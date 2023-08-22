@@ -109,8 +109,23 @@ siPixelClustersPreSplittingAlpaka = _siPixelRawToClusterAlpaka.clone()
 run3_common.toModify(siPixelClustersPreSplittingAlpaka,
                      clusterThreshold_layer1 = 4000)
 
+from RecoLocalTracker.SiPixelClusterizer.siPixelPhase2DigiToCluster_cfi import siPixelPhase2DigiToCluster as _siPixelPhase2DigiToCluster
+
+phase2_tracker.toReplaceWith(siPixelClustersPreSplittingAlpaka,_siPixelPhase2DigiToCluster.clone(
+  Phase2ReadoutMode = PixelDigitizerAlgorithmCommon.Phase2ReadoutMode.value(), # Flag to decide Readout Mode : linear TDR (-1), dual slope with slope parameters (+1,+2,+3,+4 ...) with threshold subtraction
+  Phase2DigiBaseline = int(PixelDigitizerAlgorithmCommon.ThresholdInElectrons_Barrel.value()), #Same for barrel and endcap
+  Phase2KinkADC = 8,
+  ElectronPerADCGain = PixelDigitizerAlgorithmCommon.ElectronPerAdc.value()
+))
+
 from RecoLocalTracker.SiPixelClusterizer.siPixelDigisClustersFromSoAAlpakaPhase1_cfi import siPixelDigisClustersFromSoAAlpakaPhase1 as _siPixelDigisClustersFromSoAAlpakaPhase1
-alpaka.toReplaceWith(siPixelDigisClustersPreSplitting,_siPixelDigisClustersFromSoAAlpakaPhase1.clone(
+from RecoLocalTracker.SiPixelClusterizer.siPixelDigisClustersFromSoAAlpakaPhase2_cfi import siPixelDigisClustersFromSoAAlpakaPhase2 as _siPixelDigisClustersFromSoAAlpakaPhase2
+
+(alpaka & ~phase2_tracker).toReplaceWith(siPixelDigisClustersPreSplitting,_siPixelDigisClustersFromSoAAlpakaPhase1.clone(
+    src = "siPixelClustersPreSplittingAlpaka"
+))
+
+(alpaka & phase2_tracker).toReplaceWith(siPixelDigisClustersPreSplitting,_siPixelDigisClustersFromSoAAlpakaPhase2.clone(
     src = "siPixelClustersPreSplittingAlpaka"
 ))
 
@@ -122,6 +137,7 @@ alpaka.toModify(siPixelClustersPreSplitting,
     )
 )
 
+# Run3
 alpaka.toReplaceWith(siPixelClustersPreSplittingTask, cms.Task(
                         # Reconstruct the pixel clusters with alpaka
                         siPixelClustersPreSplittingAlpaka,
@@ -129,6 +145,15 @@ alpaka.toReplaceWith(siPixelClustersPreSplittingTask, cms.Task(
                         siPixelDigisClustersPreSplitting,
                         # EDAlias for the clusters
                         siPixelClustersPreSplitting))
+
+# Phase2
+(alpaka & phase2_tracker).toReplaceWith(siPixelClustersPreSplittingTask, cms.Task(
+                            # Reconstruct the pixel clusters on Device from copied digis
+                            siPixelClustersPreSplittingAlpaka,
+                            # Convert the pixel digis (except errors) and clusters to the legacy format
+                            siPixelDigisClustersPreSplitting,
+                            # SwitchProducer wrapping the legacy pixel cluster producer or an alias for the pixel clusters information converted from SoA
+                            siPixelClustersPreSplitting))
 
 ### Alpaka Device vs Host validation
 
@@ -141,3 +166,4 @@ alpakaValidationPixel.toReplaceWith(siPixelClustersPreSplittingTask, cms.Task(
                         siPixelClustersPreSplittingTask.copy(),
                         # SoA serial counterpart
                         siPixelClustersPreSplittingAlpakaSerial))
+                        

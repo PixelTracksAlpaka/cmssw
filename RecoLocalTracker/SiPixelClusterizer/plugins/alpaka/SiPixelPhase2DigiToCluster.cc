@@ -86,7 +86,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         clusterPutToken_(produces()),
         includeErrors_(iConfig.getParameter<bool>("IncludeErrors")),
         clusterThresholds_{iConfig.getParameter<int32_t>("clusterThreshold_layer1"),
-                           iConfig.getParameter<int32_t>("clusterThreshold_otherLayers")} {
+                           iConfig.getParameter<int32_t>("clusterThreshold_otherLayers"),
+                          static_cast<float>(iConfig.getParameter<double>("ElectronPerADCGain")),
+                          static_cast<int8_t>(iConfig.getParameter<int>("Phase2ReadoutMode")),
+                          static_cast<uint16_t>(iConfig.getParameter<uint32_t>("Phase2DigiBaseline")),
+                          static_cast<uint8_t>(iConfig.getParameter<uint32_t>("Phase2KinkADC"))} {
     if (includeErrors_) {
       digiErrorPutToken_ = produces();
     }
@@ -98,6 +102,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     desc.add<bool>("IncludeErrors", true);
     desc.add<int32_t>("clusterThreshold_layer1", pixelClustering::clusterThresholdLayerOne); //FIXME (fix the CUDA)
     desc.add<int32_t>("clusterThreshold_otherLayers", pixelClustering::clusterThresholdOtherLayers);
+    desc.add<double>("ElectronPerADCGain", 1500.);
+    desc.add<int32_t>("Phase2ReadoutMode", 3);
+    desc.add<uint32_t>("Phase2DigiBaseline", 1000);
+    desc.add<uint32_t>("Phase2KinkADC", 8);
     desc.add<edm::InputTag>("InputDigis", edm::InputTag("simSiPixelDigis:Pixel"));
     descriptions.addWithDefaultLabel(desc);
   }

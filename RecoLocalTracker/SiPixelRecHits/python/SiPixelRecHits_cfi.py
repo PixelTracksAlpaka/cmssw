@@ -113,9 +113,6 @@ pixelNtupletFit.toReplaceWith(siPixelRecHitsPreSplittingTask, cms.Task(
         )
         )
 
-
-#(gpu & pixelNtupletFit & phase2_tracker).toReplaceWith(siPixelRecHitsPreSplitting , cuda = _siPixelRecHitFromCUDAPhase2.clone())
-
 (gpu & pixelNtupletFit).toReplaceWith(siPixelRecHitsPreSplittingTask, cms.Task(
     # reconstruct the pixel rechits on the gpu or on the cpu
     # (normally only one of the two is run because only one is consumed from later stages)
@@ -131,19 +128,31 @@ pixelNtupletFit.toReplaceWith(siPixelRecHitsPreSplittingTask, cms.Task(
 
 ### Alpaka Pixel Hits Reco
 from RecoLocalTracker.SiPixelRecHits.siPixelRecHitAlpakaPhase1_cfi import siPixelRecHitAlpakaPhase1 as _siPixelRecHitAlpakaPhase1
+from RecoLocalTracker.SiPixelRecHits.siPixelRecHitAlpakaPhase2_cfi import siPixelRecHitAlpakaPhase2 as _siPixelRecHitAlpakaPhase2
 
 # Hit SoA producer on Device
 siPixelRecHitsPreSplittingAlpaka = _siPixelRecHitAlpakaPhase1.clone(
     src = "siPixelClustersPreSplittingAlpaka"
 )
+phase2_tracker.toReplaceWith(siPixelRecHitsPreSplittingAlpaka,_siPixelRecHitAlpakaPhase2.clone(
+    src = "siPixelClustersPreSplittingAlpaka"
+))
 
 from RecoLocalTracker.SiPixelRecHits.siPixelRecHitFromSoAAlpakaPhase1_cfi import siPixelRecHitFromSoAAlpakaPhase1 as _siPixelRecHitFromSoAAlpakaPhase1
+from RecoLocalTracker.SiPixelRecHits.siPixelRecHitFromSoAAlpakaPhase2_cfi import siPixelRecHitFromSoAAlpakaPhase2 as _siPixelRecHitFromSoAAlpakaPhase2
 
-alpaka.toModify(siPixelRecHitsPreSplitting,
+(alpaka & ~phase2_tracker).toModify(siPixelRecHitsPreSplitting,
     cpu = _siPixelRecHitFromSoAAlpakaPhase1.clone(
             pixelRecHitSrc = cms.InputTag('siPixelRecHitsPreSplittingAlpaka'),
             src = cms.InputTag('siPixelClustersPreSplitting'))
 )
+
+(alpaka & phase2_tracker).toModify(siPixelRecHitsPreSplitting,
+    cpu = _siPixelRecHitFromSoAAlpakaPhase2.clone(
+            pixelRecHitSrc = cms.InputTag('siPixelRecHitsPreSplittingAlpaka'),
+            src = cms.InputTag('siPixelClustersPreSplitting'))
+)
+
 
 alpaka.toReplaceWith(siPixelRecHitsPreSplittingTask, cms.Task(
                         # Reconstruct the pixel hits on the device
