@@ -102,12 +102,12 @@ from Configuration.ProcessModifiers.gpuValidationPixel_cff import gpuValidationP
 
 ## Alpaka Vertices
 
-from RecoTracker.PixelVertexFinding.pixelVertexProducerAlpakaPhase1_cfi import pixelVertexProducerAlpakaPhase1 as _pixelVerticesAlpaka
-pixelVerticesAlpaka = _pixelVerticesAlpaka.clone()
+from RecoTracker.PixelVertexFinding.pixelVertexProducerAlpakaPhase1_cfi import pixelVertexProducerAlpakaPhase1 as _pixelVerticesAlpakaPhase1
+from RecoTracker.PixelVertexFinding.pixelVertexProducerAlpakaPhase2_cfi import pixelVertexProducerAlpakaPhase2 as _pixelVerticesAlpakaPhase2
+pixelVerticesAlpaka = _pixelVerticesAlpakaPhase1.clone()
+phase2_tracker.toReplaceWith(pixelVerticesAlpaka,_pixelVerticesAlpakaPhase2.clone())
 
 from RecoTracker.PixelVertexFinding.pixelVertexFromSoAAlpaka_cfi import pixelVertexFromSoAAlpaka as _pixelVertexFromSoAAlpaka
-pixelVerticesAlpaka = _pixelVerticesAlpaka.clone()
-
 alpaka.toReplaceWith(pixelVertices, _pixelVertexFromSoAAlpaka.clone())
 
 alpaka.toReplaceWith(pixelVerticesTask, cms.Task(

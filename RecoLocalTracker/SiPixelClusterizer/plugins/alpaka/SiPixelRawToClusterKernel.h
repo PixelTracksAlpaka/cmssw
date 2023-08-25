@@ -185,6 +185,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       SiPixelDigiErrorsCollection&& getErrors() { return std::move(*digiErrors_d); }
 
+      auto nModules() { return nModules_Clusters_h[0]; }
+
     private:
       uint32_t nDigis = 0;
 

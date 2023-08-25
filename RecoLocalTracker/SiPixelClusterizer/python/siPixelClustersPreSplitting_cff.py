@@ -126,17 +126,30 @@ from RecoLocalTracker.SiPixelClusterizer.siPixelDigisClustersFromSoAAlpakaPhase2
 ))
 
 (alpaka & phase2_tracker).toReplaceWith(siPixelDigisClustersPreSplitting,_siPixelDigisClustersFromSoAAlpakaPhase2.clone(
+    clusterThreshold_layer1 = 4000,
+    clusterThreshold_otherLayers = 4000,
     src = "siPixelClustersPreSplittingAlpaka"
 ))
 
 from RecoLocalTracker.SiPixelClusterizer.siPixelDigisClustersFromSoAAlpakaPhase1_cfi import siPixelDigisClustersFromSoAAlpakaPhase1 as _siPixelDigisClustersFromSoAAlpakaPhase1
+from RecoLocalTracker.SiPixelClusterizer.siPixelDigisClustersFromSoAAlpakaPhase2_cfi import siPixelDigisClustersFromSoAAlpakaPhase2 as _siPixelDigisClustersFromSoAAlpakaPhase2
 
 alpaka.toModify(siPixelClustersPreSplitting,
-    cpu = _siPixelDigisClustersFromSoAAlpakaPhase1.clone(
-        src = cms.InputTag('siPixelClustersPreSplittingAlpaka')
+    cpu = cms.EDAlias(
+        siPixelDigisClustersPreSplitting = cms.VPSet(
+            cms.PSet(type = cms.string("SiPixelClusteredmNewDetSetVector"))
+        )
     )
+    # _siPixelDigisClustersFromSoAAlpakaPhase1.clone(
+    #     src = cms.InputTag('siPixelClustersPreSplittingAlpaka')
+    # )
 )
 
+# (alpaka & phase2_tracker).toModify(siPixelClustersPreSplitting,
+#     cpu = _siPixelDigisClustersFromSoAAlpakaPhase2.clone(
+#         src = cms.InputTag('siPixelClustersPreSplittingAlpaka')
+#     )
+# )
 # Run3
 alpaka.toReplaceWith(siPixelClustersPreSplittingTask, cms.Task(
                         # Reconstruct the pixel clusters with alpaka

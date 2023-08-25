@@ -19,7 +19,7 @@
 // local include(s)
 #include "PixelClusterizerBase.h"
 #include "SiPixelClusterThresholds.h"
-
+#define EDM_ML_DEBUG
 template <typename TrackerTraits>
 class SiPixelDigisClustersFromSoAAlpaka : public edm::global::EDProducer<> {
 public:
@@ -77,6 +77,7 @@ void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID,
   const auto& ttopo = iSetup.getData(topoToken_);
   constexpr auto maxModules = TrackerTraits::numberOfModules;
 
+  std::cout << "SiPixelDigisClustersFromSoAAlpaka " << __LINE__ <<std::endl;
   std::unique_ptr<edm::DetSetVector<PixelDigi>> outputDigis;
   if (produceDigis_)
     outputDigis = std::make_unique<edm::DetSetVector<PixelDigi>>();
@@ -85,32 +86,42 @@ void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID,
   auto outputClusters = std::make_unique<SiPixelClusterCollectionNew>();
   outputClusters->reserve(maxModules, nDigis / 2);
 
+  std::cout << "SiPixelDigisClustersFromSoAAlpaka " << __LINE__ <<std::endl;
   edm::DetSet<PixelDigi>* detDigis = nullptr;
   uint32_t detId = 0;
+  std::cout << "SiPixelDigisClustersFromSoAAlpaka " << digisView[0].adc() << std::endl;
+  std::cout << "SiPixelDigisClustersFromSoAAlpaka " << nDigis <<std::endl;
+
   for (uint32_t i = 0; i < nDigis; i++) {
     // check for uninitialized digis
     // this is set in RawToDigi_kernel in SiPixelRawToClusterGPUKernel.cu
     if (digisView[i].rawIdArr() == 0)
       continue;
+    std::cout << "SiPixelDigisClustersFromSoAAlpaka " << __LINE__ <<std::endl;
     // check for noisy/dead pixels (electrons set to 0)
     if (digisView[i].adc() == 0)
       continue;
 
+    std::cout << "SiPixelDigisClustersFromSoAAlpaka " << __LINE__ <<std::endl;
+
     detId = digisView[i].rawIdArr();
     if (storeDigis_) {
+      std::cout << "SiPixelDigisClustersFromSoAAlpaka " << __LINE__ <<std::endl;
       detDigis = &outputDigis->find_or_insert(detId);
+      std::cout << "SiPixelDigisClustersFromSoAAlpaka " << __LINE__ <<std::endl;
       if ((*detDigis).empty())
         (*detDigis).data.reserve(64);  // avoid the first relocations
     }
+    std::cout << "SiPixelDigisClustersFromSoAAlpaka " << __LINE__ <<std::endl;
     break;
   }
-
+  std::cout << "SiPixelDigisClustersFromSoAAlpaka " << __LINE__ <<std::endl;
   int32_t nclus = -1;
   PixelClusterizerBase::AccretionCluster aclusters[TrackerTraits::maxNumClustersPerModules];
 #ifdef EDM_ML_DEBUG
   auto totClustersFilled = 0;
 #endif
-
+  std::cout << "SiPixelDigisClustersFromSoAAlpaka " << __LINE__ <<std::endl;
   auto fillClusters = [&](uint32_t detId) {
     if (nclus < 0)
       return;  // this in reality should never happen
@@ -121,17 +132,18 @@ void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID,
       auto const& acluster = aclusters[ic];
       // in any case we cannot  go out of sync with gpu...
       if (!std::is_base_of<pixelTopology::Phase2, TrackerTraits>::value and acluster.charge < clusterThreshold)
-        edm::LogWarning("SiPixelDigisClustersFromSoAAlpaka") << "cluster below charge Threshold "
+        // edm::LogWarning("SiPixelDigisClustersFromSoAAlpaka") 
+        std::cout << "cluster below charge Threshold "
                                                        << "Layer/DetId/clusId " << layer << '/' << detId << '/' << ic
-                                                       << " size/charge " << acluster.isize << '/' << acluster.charge;
+                                                       << " size/charge " << acluster.isize << '/' << acluster.charge << "\n";
       // sort by row (x)
       spc.emplace_back(acluster.isize, acluster.adc, acluster.x, acluster.y, acluster.xmin, acluster.ymin, ic);
       aclusters[ic].clear();
 #ifdef EDM_ML_DEBUG
       ++totClustersFilled;
       const auto& cluster{spc.back()};
-      LogDebug("SiPixelDigisClustersFromSoAAlpaka")
-          << "putting in this cluster " << ic << " " << cluster.charge() << " " << cluster.pixelADC().size();
+      // LogDebug("SiPixelDigisClustersFromSoAAlpaka")
+        std::cout  << "putting in this cluster " << ic << " " << cluster.charge() << " " << cluster.pixelADC().size() << "\n";
 #endif
       std::push_heap(spc.begin(), spc.end(), [](SiPixelCluster const& cl1, SiPixelCluster const& cl2) {
         return cl1.minPixelRow() < cl2.minPixelRow();
@@ -145,7 +157,7 @@ void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID,
     if (spc.empty())
       spc.abort();
   };
-
+  std::cout << "SiPixelDigisClustersFromSoAAlpaka " << __LINE__ <<std::endl;
   for (uint32_t i = 0; i < nDigis; i++) {
     // check for uninitialized digis
     if (digisView[i].rawIdArr() == 0)
@@ -176,12 +188,13 @@ void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID,
       }
     }
     PixelDigi dig{digisView[i].pdigi()};
+    std::cout << "SiPixelDigisClustersFromSoAAlpaka " << __LINE__ <<std::endl;
     if (storeDigis_)
       (*detDigis).data.emplace_back(dig);
       // fill clusters
 #ifdef EDM_ML_DEBUG
     assert(digisView[i].clus() >= 0);
-    assert(digisView[i].clus() < TrackerTraits::maxNumClustersPerModules);
+    assert(digisView[i].clus() < static_cast<int>(TrackerTraits::maxNumClustersPerModules));
 #endif
     nclus = std::max(digisView[i].clus(), nclus);
     auto row = dig.row();
@@ -189,7 +202,7 @@ void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID,
     SiPixelCluster::PixelPos pix(row, col);
     aclusters[digisView[i].clus()].add(pix, digisView[i].adc());
   }
-
+  std::cout << "SiPixelDigisClustersFromSoAAlpaka " << __LINE__ <<std::endl;
   // fill final clusters
   if (detId > 0)
     fillClusters(detId);
@@ -200,7 +213,7 @@ void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID,
 
   if (produceDigis_)
     iEvent.put(digisPutToken_, std::move(outputDigis));
-
+  std::cout << "SiPixelDigisClustersFromSoAAlpaka " << __LINE__ <<std::endl;
   iEvent.put(clustersPutToken_, std::move(outputClusters));
 }
 

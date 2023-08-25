@@ -53,7 +53,7 @@ void SiPixelDigisSoAFromCUDA::acquire(const edm::Event& iEvent,
 
   nDigis_ = digis_d.nDigis();
   nDigis_ = digis_d.nDigis();
-  digis_h_ = cms::cuda::PortableHostCollection<SiPixelDigisSoALayout<>>(digis_d.view().metadata().size(), ctx.stream());
+  digis_h_ = cms::cuda::PortableHostCollection<SiPixelDigisSoALayout<>>(digis_d.nDigis(), ctx.stream());
   cudaCheck(cudaMemcpyAsync(digis_h_.buffer().get(),
                             digis_d.const_buffer().get(),
                             digis_d.bufferSize(),

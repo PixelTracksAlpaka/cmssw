@@ -92,12 +92,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
     };
 
+
     struct calibDigisPhase2 {
       template <typename TAcc>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
                                     SiPixelClusterThresholds clusterThresholds,
-                                    SiPixelDigisSoAv2View& view,
-                                    SiPixelClustersSoAView& clus_view,
+                                    SiPixelDigisSoAv2View view,
+                                    SiPixelClustersSoAView clus_view,
                                     int numElements
       ) const {
 

@@ -13,6 +13,8 @@
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/SimpleVector.h"
 
+#define GPU_DEBUG
+
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   namespace pixelClustering {
@@ -198,7 +200,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           alpaka::syncBlockThreads(acc);
 #endif
           // remove duplicate pixels
-          if constexpr (not isPhase2 and false) {
+          if constexpr (not isPhase2 and false) { //FIXME remove THIS
             if (msize > 1) {
               cms::alpakatools::for_each_element_in_block_strided(
                   acc, PixelStatus::size, [&](uint32_t i) { status[i] = 0; });

@@ -656,7 +656,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
 #ifdef GPU_DEBUG
         alpaka::wait(queue);
-        std::cout << "CUDA countModules kernel launch with " << blocks << " blocks of "
+        std::cout << "SiPixelRawToClusterKernel countModules kernel launch with " << blocks << " blocks of "
                   << threadsPerBlockOrElementsPerThread << " threadsPerBlockOrElementsPerThread\n";
 #endif
 
@@ -675,7 +675,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         // Though, it does not have to be the same number for CPU/GPU cases.
 
 #ifdef GPU_DEBUG
-        std::cout << "CUDA findClus kernel launch with " << numberOfModules << " blocks of " << 256
+        std::cout << "SiPixelRawToClusterKernel findClus kernel launch with " << numberOfModules << " blocks of " << 256
                   << " threadsPerBlockOrElementsPerThread\n";
 #endif
 
@@ -734,6 +734,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                                             SiPixelDigisSoAv2View &digis_view,
                                                             const uint32_t numDigis,
                                                             Queue &queue) {
+      
       using namespace pixelClustering;
       using pixelTopology::Phase2;
       nDigis = numDigis;
@@ -744,13 +745,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           cms::alpakatools::divide_up_by(std::max<int>(numDigis, numberOfModules), threadsPerBlockOrElementsPerThread);
       const auto workDiv = cms::alpakatools::make_workdiv<Acc1D>(blocks, threadsPerBlockOrElementsPerThread);
 
-      // alpaka::enqueue(queue,
-      //                 alpaka::createTaskKernel<Acc1D>(
-      //                     workDiv, calibPixel::calibDigisPhase2{}, digis_view, clusters_d->view(), numDigis));
+      alpaka::enqueue(queue,
+                      alpaka::createTaskKernel<Acc1D>(
+                          workDiv, calibPixel::calibDigisPhase2{}, clusterThresholds, digis_view, clusters_d->view(), numDigis));
 
 #ifdef GPU_DEBUG
       alpaka::wait(queue);
-      std::cout << "CUDA countModules kernel launch with " << blocks << " blocks of "
+      std::cout << "SiPixelRawToClusterKernel countModules kernel launch with " << blocks << " blocks of "
                 << threadsPerBlockOrElementsPerThread << " threadsPerBlockOrElementsPerThread\n";
 #endif
       alpaka::enqueue(queue,
@@ -765,7 +766,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
 #ifdef GPU_DEBUG
       alpaka::wait(queue);
-      std::cout << "CUDA findClus kernel launch with " << numberOfModules << " blocks of " << 256
+      std::cout << "SiPixelRawToClusterKernel findClus kernel launch with " << numberOfModules << " blocks of " << 256
                 << " threadsPerBlockOrElementsPerThread\n";
 #endif
       alpaka::enqueue(
@@ -811,6 +812,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       auto nModules_Clusters_h_2 = cms::alpakatools::make_host_view(nModules_Clusters_h.data() + 2, 1u);
       alpaka::memcpy(queue, nModules_Clusters_h_2, bpix2ClusterStart);
+
+      std::cout << "SiPixelPhase2DigiToCluster: " << numDigis 
+              << " nModules_Clusters_h[0]" << nModules_Clusters_h[0] 
+              << " nModules_Clusters_h[1]" << nModules_Clusters_h[1]
+              << " nModules_Clusters_h[2]" << nModules_Clusters_h[2] << std::endl;
 
     }  //
 

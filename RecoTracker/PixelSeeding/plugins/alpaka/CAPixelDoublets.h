@@ -64,6 +64,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     uint32_t nActualPairs,
                                     const uint32_t maxNumOfDoublets,
                                     CellCutsT<TrackerTraits> cuts) const {
+
+        const uint32_t dimIndexY = 0u;
+        const uint32_t dimIndexX = 1u;
+        const uint32_t threadIdxLocalY(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[dimIndexY]);
+        const uint32_t threadIdxLocalX(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[dimIndexX]);
+        if (threadIdxLocalY == 0 && threadIdxLocalX == 0) printf("getDoubletsFromHisto start cut\n");
+        
         doubletsFromHisto<TrackerTraits>(
             acc, nActualPairs, maxNumOfDoublets, cells, nCells, cellNeighbors, cellTracks, hh, *isOuterHitOfCell, cuts);
       }

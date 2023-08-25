@@ -162,6 +162,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
       return;
     }
+    
+    digis_d.setNModulesDigis(Algo_.nModules(), nDigis_);
 
     iEvent.emplace(digiPutToken_, std::move(digis_d));
     iEvent.emplace(clusterPutToken_, Algo_.getClusters());
