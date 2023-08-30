@@ -30,20 +30,9 @@
 #include "SiPixelRawToClusterKernel.h"
 
 // #define GPU_DEBUG
+
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace pixelDetails {
-
-    // SiPixelRawToClusterKernel::WordFedAppender::WordFedAppender(uint32_t words)
-    //     : word_{cms::alpakatools::make_host_buffer<unsigned int[], Platform>(words)},
-    //       fedId_{cms::alpakatools::make_host_buffer<unsigned char[], Platform>(words)} {}
-
-    // void SiPixelRawToClusterKernel::WordFedAppender::initializeWordFed(int fedId,
-    //                                                                    unsigned int wordCounterGPU,
-    //                                                                    const uint32_t *src,
-    //                                                                    unsigned int length) {
-    //   std::memcpy(word_.data() + wordCounterGPU, src, sizeof(uint32_t) * length);
-    //   std::memset(fedId_.data() + wordCounterGPU / 2, fedId - 1200, length / 2);
-    // }
 
     ////////////////////
 
@@ -531,22 +520,21 @@ namespace pixelDetails {
         alpaka::syncBlockThreads(acc);
       }
 #ifdef GPU_DEBUG
-      // ALPAKA_ASSERT_OFFLOAD(0 == clus_view.[0].moduleStart());
-      // auto c0 = std::min(maxHitsInModule(), cluStart[0]);
-      // ALPAKA_ASSERT_OFFLOAD(c0 == clus_view.[1].moduleStart());
-      // ALPAKA_ASSERT_OFFLOAD(clus_view.[1024].moduleStart() >= clus_view.[1023].moduleStart());
-      // ALPAKA_ASSERT_OFFLOAD(clus_view.[1025].moduleStart() >= clus_view.[1024].moduleStart());
-      // ALPAKA_ASSERT_OFFLOAD(clus_view.[nMaxModules].moduleStart() >= clus_view.[1025].moduleStart());
+      ALPAKA_ASSERT_OFFLOAD(0 == clus_view[0].moduleStart());
+      auto c0 = std::min(maxHitsInModule, clus_view[1].clusModuleStart());
+      ALPAKA_ASSERT_OFFLOAD(c0 == clus_view[1].moduleStart());
+      ALPAKA_ASSERT_OFFLOAD(clus_view[1024].moduleStart() >= clus_view[1023].moduleStart());
+      ALPAKA_ASSERT_OFFLOAD(clus_view[1025].moduleStart() >= clus_view[1024].moduleStart());
+      ALPAKA_ASSERT_OFFLOAD(clus_view[nMaxModules].moduleStart() >= clus_view[1025].moduleStart());
 
-      // //for (int i = first, iend = nMaxModules + 1; i < iend; i += blockDim.x) {
-      // cms::alpakatools::for_each_element_in_block_strided(acc, nMaxModules + 1, [&](uint32_t i) {
-      //   if (0 != i)
-      //     ALPAKA_ASSERT_OFFLOAD(clus_view[i].moduleStart() >= clus_view[i - i].moduleStart());
-      //   // [BPX1, BPX2, BPX3, BPX4,  FP1,  FP2,  FP3,  FN1,  FN2,  FN3, LAST_VALID]
-      //   // [   0,   96,  320,  672, 1184, 1296, 1408, 1520, 1632, 1744,       1856]
-      //   if (i == 96 || i == 1184 || i == 1744 || i == nMaxModules)
-      //     printf("moduleStart %d %d\n", i, clus_view[i].moduleStart());
-      // });
+      //for (int i = first, iend = nMaxModules + 1; i < iend; i += blockDim.x) {
+      cms::alpakatools::for_each_element_in_block_strided(acc, nMaxModules + 1, [&](uint32_t i) {
+        if (0 != i)
+          ALPAKA_ASSERT_OFFLOAD(clus_view[i].moduleStart() >= clus_view[i - i].moduleStart());
+        // Check BPX2 (1), FP1 (4)
+        if (i == TrackerTraits::layerStart[1] || i == TrackerTraits::layerStart[4])
+          printf("moduleStart %d %d\n", i, clus_view[i].moduleStart());
+      });
 #endif
       // avoid overflow
       constexpr auto MAX_HITS = TrackerTraits::maxNumberOfHits; 
@@ -656,7 +644,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
 #ifdef GPU_DEBUG
         alpaka::wait(queue);
-        std::cout << "SiPixelRawToClusterKernel countModules kernel launch with " << blocks << " blocks of "
+        std::cout << "countModules kernel launch with " << blocks << " blocks of "
                   << threadsPerBlockOrElementsPerThread << " threadsPerBlockOrElementsPerThread\n";
 #endif
 
@@ -675,7 +663,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         // Though, it does not have to be the same number for CPU/GPU cases.
 
 #ifdef GPU_DEBUG
-        std::cout << "SiPixelRawToClusterKernel findClus kernel launch with " << numberOfModules << " blocks of " << 256
+        std::cout << " findClus kernel launch with " << numberOfModules << " blocks of " << 256
                   << " threadsPerBlockOrElementsPerThread\n";
 #endif
 
@@ -751,7 +739,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
 #ifdef GPU_DEBUG
       alpaka::wait(queue);
-      std::cout << "SiPixelRawToClusterKernel countModules kernel launch with " << blocks << " blocks of "
+      std::cout << "countModules kernel launch with " << blocks << " blocks of "
                 << threadsPerBlockOrElementsPerThread << " threadsPerBlockOrElementsPerThread\n";
 #endif
       alpaka::enqueue(queue,
@@ -766,7 +754,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
 #ifdef GPU_DEBUG
       alpaka::wait(queue);
-      std::cout << "SiPixelRawToClusterKernel findClus kernel launch with " << numberOfModules << " blocks of " << 256
+      std::cout << "findClus kernel launch with " << numberOfModules << " blocks of " << 256
                 << " threadsPerBlockOrElementsPerThread\n";
 #endif
       alpaka::enqueue(
@@ -813,11 +801,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       auto nModules_Clusters_h_2 = cms::alpakatools::make_host_view(nModules_Clusters_h.data() + 2, 1u);
       alpaka::memcpy(queue, nModules_Clusters_h_2, bpix2ClusterStart);
 
-      std::cout << "SiPixelPhase2DigiToCluster: " << numDigis 
-              << " nModules_Clusters_h[0]" << nModules_Clusters_h[0] 
-              << " nModules_Clusters_h[1]" << nModules_Clusters_h[1]
-              << " nModules_Clusters_h[2]" << nModules_Clusters_h[2] << std::endl;
-
+      #ifdef GPU_DEBUG
+        std::cout << "SiPixelPhase2DigiToCluster: results \n" 
+                << " > no. of digis: " << numDigis << std::endl
+                << " > no. of active modules: " << nModules_Clusters_h[0] << std::endl
+                << " > no. of clusters: " << nModules_Clusters_h[1] << std::endl
+                << " > bpix2 offset: " << nModules_Clusters_h[2] << std::endl;
+      #endif 
     }  //
 
     template class SiPixelRawToClusterKernel<pixelTopology::Phase1>;

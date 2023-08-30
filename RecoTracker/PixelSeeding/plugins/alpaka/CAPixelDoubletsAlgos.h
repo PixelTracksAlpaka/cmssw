@@ -165,7 +165,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       const uint32_t dimIndexX = 1u;
       const uint32_t threadIdxLocalY(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[dimIndexY]);
       const uint32_t threadIdxLocalX(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[dimIndexX]);
-      if (threadIdxLocalY == 0 && threadIdxLocalX == 0) printf("doubletsFromHisto start cut\n");
 
       if (threadIdxLocalY == 0 && threadIdxLocalX == 0) {
         innerLayerCumulativeSize[0] = layerSize(TrackerTraits::layerPairs[0]);
@@ -175,21 +174,21 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         ntot = innerLayerCumulativeSize[nPairs - 1];
       }
       alpaka::syncBlockThreads(acc);
-if (threadIdxLocalY == 0 && threadIdxLocalX == 0) printf("%d\n",__LINE__);
+
       // x runs faster
       const uint32_t blockDimensionX(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[dimIndexX]);
       const auto& [firstElementIdxNoStrideX, endElementIdxNoStrideX] =
           cms::alpakatools::element_index_range_in_block(acc, 0u, dimIndexX);
 
       uint32_t pairLayerId = 0;  // cannot go backward
-if (threadIdxLocalY == 0 && threadIdxLocalX == 0) printf("%d\n",__LINE__);
+
       // Outermost loop on Y
       const uint32_t gridDimensionY(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc)[dimIndexY]);
       const auto& [firstElementIdxNoStrideY, endElementIdxNoStrideY] =
           cms::alpakatools::element_index_range_in_grid(acc, 0u, dimIndexY);
       uint32_t firstElementIdxY = firstElementIdxNoStrideY;
       uint32_t endElementIdxY = endElementIdxNoStrideY;
-      if (threadIdxLocalY == 0 && threadIdxLocalX == 0)
+      
       for (uint32_t j = firstElementIdxY; j < ntot; ++j) {
         if (not cms::alpakatools::next_valid_element_index_strided(
                 j, firstElementIdxY, endElementIdxY, gridDimensionY, ntot))
@@ -202,37 +201,36 @@ if (threadIdxLocalY == 0 && threadIdxLocalX == 0) printf("%d\n",__LINE__);
         ALPAKA_ASSERT_OFFLOAD(pairLayerId < nPairs);
         ALPAKA_ASSERT_OFFLOAD(j < innerLayerCumulativeSize[pairLayerId]);
         ALPAKA_ASSERT_OFFLOAD(0 == pairLayerId || j >= innerLayerCumulativeSize[pairLayerId - 1]);
-if (threadIdxLocalY == 0 && threadIdxLocalX == 0) printf("%d\n",__LINE__);
+
         uint8_t inner = TrackerTraits::layerPairs[2 * pairLayerId];
         uint8_t outer = TrackerTraits::layerPairs[2 * pairLayerId + 1];
         ALPAKA_ASSERT_OFFLOAD(outer > inner);
-if (threadIdxLocalY == 0 && threadIdxLocalX == 0) printf("%d\n",__LINE__);
+
         auto hoff = PhiBinner::histOff(outer);
         auto i = (0 == pairLayerId) ? j : j - innerLayerCumulativeSize[pairLayerId - 1];
         i += offsets[inner];
-if (threadIdxLocalY == 0 && threadIdxLocalX == 0) printf("%d\n",__LINE__);
+
         ALPAKA_ASSERT_OFFLOAD(i >= offsets[inner]);
         ALPAKA_ASSERT_OFFLOAD(i < offsets[inner + 1]);
-if (threadIdxLocalY == 0 && threadIdxLocalX == 0) printf("%d\n",__LINE__);
+
         // found hit corresponding to our cuda thread, now do the job
-        if (threadIdxLocalY == 0 && threadIdxLocalX == 0) printf("%d %d %d %d\n",__LINE__,i,offsets[inner],inner);
         if (hh[i].detectorIndex() > pixelClustering::maxNumModules)
           continue;  // invalid
-if (threadIdxLocalY == 0 && threadIdxLocalX == 0) printf("%d\n",__LINE__);
+
         /* maybe clever, not effective when zoCut is on
       auto bpos = (mi%8)/4;  // if barrel is 1 for z>0
       auto fpos = (outer>3) & (outer<7);
       if ( ((inner<3) & (outer>3)) && bpos!=fpos) continue;
       */
-if (threadIdxLocalY == 0 && threadIdxLocalX == 0) printf("%d\n",__LINE__);
+
         auto mez = hh[i].zGlobal();
-if (threadIdxLocalY == 0 && threadIdxLocalX == 0) printf("%d\n",__LINE__);
+
         if (mez < TrackerTraits::minz[pairLayerId] || mez > TrackerTraits::maxz[pairLayerId])
           continue;
-        if (threadIdxLocalY == 0 && threadIdxLocalX == 0) printf("Z cut\n");
+
         if (doClusterCut && outer > pixelTopology::last_barrel_layer && cuts.clusterCut(acc, hh, i))
           continue;
-        if (threadIdxLocalY == 0 && threadIdxLocalX == 0) printf("Cluster cut\n");
+
         auto mep = hh[i].iphi();
         auto mer = hh[i].rGlobal();
 
@@ -252,13 +250,10 @@ if (threadIdxLocalY == 0 && threadIdxLocalX == 0) printf("%d\n",__LINE__);
         };
 
         auto iphicut = cuts.phiCuts[pairLayerId];
-        if (threadIdxLocalY == 0 && threadIdxLocalX == 0)  printf("id %d phicut %d %.2f %.2f %d \n",pairLayerId,iphicut,z0cut,hardPtCut,maxNumOfDoublets);
 
         auto kl = PhiBinner::bin(int16_t(mep - iphicut));
         auto kh = PhiBinner::bin(int16_t(mep + iphicut));
         auto incr = [](auto& k) { return k = (k + 1) % PhiBinner::nbins(); };
-
-        if (threadIdxLocalY == 0 && threadIdxLocalX == 0)  printf("i %d %.2f %.2f %d %d %d %d \n",i,mez,mer,hh[i].detectorIndex(),hoff,kl,kh);
 
 #ifdef GPU_DEBUG
         int tot = 0;
@@ -307,7 +302,7 @@ if (threadIdxLocalY == 0 && threadIdxLocalX == 0) printf("%d\n",__LINE__);
 
             if (doPtCut && ptcut(oi, idphi))
               continue;
-            if (threadIdxLocalY == 0 && threadIdxLocalX == 0)  printf(">allcuts \n");
+
             auto ind = alpaka::atomicAdd(acc, nCells, (uint32_t)1, alpaka::hierarchy::Blocks{});
             if (ind >= maxNumOfDoublets) {
               alpaka::atomicSub(acc, nCells, (uint32_t)1, alpaka::hierarchy::Blocks{});

@@ -13,7 +13,8 @@
 
 #include "PixelRecHitGPUKernel.h"
 #include "PixelRecHits.h"
-#define GPU_DEBUG
+
+//#define GPU_DEBUG
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   using namespace cms::alpakatools;
@@ -58,7 +59,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       TrackingRecHitAlpakaCollection<TrackerTraits> hits_d(nHits, offsetBPIX2, clusters_d->clusModuleStart(), queue);
 
       int activeModulesWithDigis = digis_d.nModules();
-      std::cout << "activeModulesWithDigis " << activeModulesWithDigis << " nHits " << nHits << std::endl;
+     
       // protect from empty events
       if (activeModulesWithDigis) {
         int threadsPerBlock = 128;

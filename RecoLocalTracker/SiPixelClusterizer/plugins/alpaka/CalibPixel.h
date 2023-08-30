@@ -111,7 +111,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         // zero for next kernels...
 
         if (0 == threadIdxGlobal)
-          clus_view[0].clusModuleStart() = clus_view[0].moduleStart();
+          clus_view[0].clusModuleStart() = clus_view[0].moduleStart() = 0;
+          
         cms::alpakatools::for_each_element_in_grid_strided(
             acc, phase2PixelTopology::numberOfModules, [&](uint32_t i) { clus_view[i].clusInModule() = 0; });
 
