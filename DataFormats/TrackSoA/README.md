@@ -5,11 +5,11 @@ storing information about `TrackSoA`s created during the Pixel-local Reconstruct
 chain. It stores data in an SoA manner. It combines the data contained in the
 deprecated `TrackSoAHeterogeneousT` and `TrajectoryStateSoAT` classes. 
 
-The host format is inheriting from `DataFormats/Common/interface/PortableHostCollection.h`,
-while the device format is inheriting from `DataFormats/Common/interface/PortableDeviceCollection.h`
+The host format is inheriting from `DataFormats/Portable/interface/PortableHostCollection.h`,
+while the device format is inheriting from `DataFormats/Portable/interface/PortableDeviceCollection.h`
 
 Both formats use the same SoA Layout (`TrackSoAHeterogeneousLayout`) which is generated
-via the `GENERATE_SOA_LAYOUT` macro in the `PixelTrackUtilities.h` file.
+via the `GENERATE_SOA_LAYOUT` macro in the `PixelTrackDefinitions.h` file.
 
 ## Notes
 
@@ -30,7 +30,7 @@ Instances of this class are to be used for:
 
 ## TrackSoADevice
 
-The version of the data format to be used for storing `Track` data on the GPU.
+The version of the data format to be used for storing `TrackSoA` data on the GPU.
 
 Instances of `TrackSoADevice` are to be created on host and be
 used on device only. To do so, the instance's `view()` method is to be called
@@ -39,6 +39,19 @@ possible on the host side.
 
 ## TrackSoACollection
 
+Depending on the Alpaka accelerator back-end enabled, `TrackSoACollection` wraps either the Host or Device SoA:
+
+```cpp
+
+#ifdef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
+  template <typename TrackerTraits>
+  using TrackSoACollection = TrackSoAHost<TrackerTraits>;
+#else
+  template <typename TrackerTraits>
+  using TrackSoACollection = TrackSoADevice<TrackerTraits, Device>;
+#endif
+
+```
 
 ## Utilities
 
