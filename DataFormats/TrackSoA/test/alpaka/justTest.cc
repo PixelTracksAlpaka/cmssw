@@ -17,9 +17,9 @@
 
 #include <alpaka/alpaka.hpp>
 
-#include "DataFormats/Track/interface/PixelTrackLayout.h"
-#include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
-#include "DataFormats/Track/interface/TrackSoADevice.h"
+#include "DataFormats/TrackSoA/interface/PixelTrackLayout.h"
+#include "DataFormats/TrackSoA/interface/alpaka/TrackSoACollection.h"
+#include "DataFormats/TrackSoA/interface/TrackSoADevice.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoADevice.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"

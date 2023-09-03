@@ -10,9 +10,9 @@
 #include <functional>
 #include <vector>
 
-#include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
-#include "DataFormats/Track/interface/TrackSoADevice.h"
-#include "DataFormats/Track/interface/TrackSoAHost.h"
+#include "DataFormats/TrackSoA/interface/alpaka/TrackSoACollection.h"
+#include "DataFormats/TrackSoA/interface/TrackSoADevice.h"
+#include "DataFormats/TrackSoA/interface/TrackSoAHost.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Event.h"

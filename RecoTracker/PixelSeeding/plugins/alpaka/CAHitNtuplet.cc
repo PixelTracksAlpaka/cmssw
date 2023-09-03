@@ -1,9 +1,9 @@
 #include <alpaka/alpaka.hpp>
 
 #include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/Track/interface/TrackSoAHost.h"
-#include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
-#include "DataFormats/Track/interface/TrackSoADevice.h"
+#include "DataFormats/TrackSoA/interface/TrackSoAHost.h"
+#include "DataFormats/TrackSoA/interface/alpaka/TrackSoACollection.h"
+#include "DataFormats/TrackSoA/interface/TrackSoADevice.h"
 #include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoACollection.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/ESHandle.h"

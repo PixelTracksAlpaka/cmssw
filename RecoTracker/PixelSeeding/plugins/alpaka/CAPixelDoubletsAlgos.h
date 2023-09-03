@@ -16,7 +16,7 @@
 #include "CAStructures.h"
 #include "CACell.h"
 
-//#define GPU_DEBUG
+// #define GPU_DEBUG
 //#define NTUPLE_DEBUG
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace caPixelDoublets {
@@ -161,8 +161,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       auto& innerLayerCumulativeSize = alpaka::declareSharedVar<uint32_t[TrackerTraits::nPairs], __COUNTER__>(acc);
       auto& ntot = alpaka::declareSharedVar<uint32_t, __COUNTER__>(acc);
 
-      const uint32_t dimIndexY = 0u;
-      const uint32_t dimIndexX = 1u;
+      constexpr uint32_t dimIndexY = 0u;
+      constexpr uint32_t dimIndexX = 1u;
       const uint32_t threadIdxLocalY(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[dimIndexY]);
       const uint32_t threadIdxLocalX(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[dimIndexX]);
 
@@ -319,8 +319,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         }
 //      #endif
 #ifdef GPU_DEBUG
-        if (tooMany > 0 or true)
-          printf("OuterHitOfCell full for %d in layer %d/%d, %d,%d %d, %d %.3f %.3f\n",
+        if (tooMany > 0 or tot > 0)
+          printf("OuterHitOfCell for %d in layer %d/%d, %d,%d %d, %d %.3f %.3f\n",
                  i,
                  inner,
                  outer,
@@ -329,7 +329,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                  tooMany,
                  iphicut,
                  TrackerTraits::minz[pairLayerId],
-                 TrackerTraits::maxz[pairLayerId]);
+                 TrackerTraits::maxz[pairLayerId],
+                 tooMany > 0 ? "FULL!!" : "not full.");
 #endif
       }  // loop in block...
     }    // namespace caPixelDoublets

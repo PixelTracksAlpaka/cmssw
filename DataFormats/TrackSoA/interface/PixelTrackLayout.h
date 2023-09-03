@@ -5,7 +5,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
-#include "DataFormats/Track/interface/PixelTrackDefinitions.h"
+#include "DataFormats/TrackSoA/interface/PixelTrackDefinitions.h"
 
 template <typename TrackerTraits>
 struct TrackSoA {

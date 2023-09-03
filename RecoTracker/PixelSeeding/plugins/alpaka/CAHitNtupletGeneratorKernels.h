@@ -8,9 +8,9 @@
 #include "CAPixelDoublets.h"
 #include "CAStructures.h"
 
-#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
-#include "DataFormats/Track/interface/PixelTrackDefinitions.h"
-#include "DataFormats/Track/interface/TrackSoAHost.h"
+#include "DataFormats/TrackSoA/interface/alpaka/PixelTrackUtilities.h"
+#include "DataFormats/TrackSoA/interface/PixelTrackDefinitions.h"
+#include "DataFormats/TrackSoA/interface/TrackSoAHost.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/AtomicPairCounter.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"

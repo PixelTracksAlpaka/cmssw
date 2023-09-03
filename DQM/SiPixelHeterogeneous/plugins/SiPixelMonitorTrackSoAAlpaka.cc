@@ -23,7 +23,7 @@
 #include "DQMServices/Core/interface/MonitorElement.h"
 #include "DQMServices/Core/interface/DQMEDAnalyzer.h"
 #include "DQMServices/Core/interface/DQMStore.h"
-#include "DataFormats/Track/interface/TrackSoAHost.h"
+#include "DataFormats/TrackSoA/interface/TrackSoAHost.h"
 
 template <typename T>
 class SiPixelMonitorTrackSoAAlpaka : public DQMEDAnalyzer {

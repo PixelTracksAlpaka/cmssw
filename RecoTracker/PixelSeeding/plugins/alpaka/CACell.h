@@ -13,8 +13,8 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/VecArray.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/SimpleVector.h"
 #include "RecoTracker/PixelSeeding/interface/CircleEq.h"
-#include "DataFormats/Track/interface/PixelTrackDefinitions.h"
-#include "DataFormats/Track/interface/PixelTrackLayout.h"
+#include "DataFormats/TrackSoA/interface/PixelTrackDefinitions.h"
+#include "DataFormats/TrackSoA/interface/PixelTrackLayout.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "CAStructures.h"
 

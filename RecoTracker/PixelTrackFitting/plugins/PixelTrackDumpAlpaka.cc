@@ -16,7 +16,7 @@
 #include "RecoTracker/TkMSParametrization/interface/PixelRecoUtilities.h"
 
 #include "DataFormats/Vertex/interface/ZVertexSoAHost.h"
-#include "DataFormats/Track/interface/TrackSoAHost.h"
+#include "DataFormats/TrackSoA/interface/TrackSoAHost.h"
 
 template <typename TrackerTraits>
 class PixelTrackDumpAlpakaT : public edm::global::EDAnalyzer<> {

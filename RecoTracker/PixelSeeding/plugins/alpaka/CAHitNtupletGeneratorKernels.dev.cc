@@ -193,7 +193,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template <typename TrackerTraits>
   void CAHitNtupletGeneratorKernels<TrackerTraits>::buildDoublets(const HitsConstView &hh, Queue &queue) {
-    int32_t nhits = hh.metadata().size();
+    auto nhits = hh.metadata().size();
 
     using namespace caPixelDoublets;
 
@@ -234,6 +234,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       // at least one block!
       int blocks = std::max(1u, cms::alpakatools::divide_up_by(nhits, threadsPerBlock));
       const auto workDiv1D = cms::alpakatools::make_workdiv<Acc1D>(blocks, threadsPerBlock);
+      
       alpaka::exec<Acc1D>(queue,
                           workDiv1D,
                           initDoublets<TrackerTraits>{},
@@ -257,10 +258,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     const int stride = 4;
     const int threadsPerBlock = TrackerTraits::getDoubletsFromHistoMaxBlockSize / stride;
-    const uint32_t blocks = cms::alpakatools::divide_up_by(4 * nhits, threadsPerBlock);
+    int blocks = (4 * nhits + threadsPerBlock - 1) / threadsPerBlock;
     const Vec2D blks{blocks, 1u};
     const Vec2D thrs{threadsPerBlock, stride};
     const auto workDiv2D = cms::alpakatools::make_workdiv<Acc2D>(blks, thrs);
+
     alpaka::exec<Acc2D>(queue,
                         workDiv2D,
                         getDoubletsFromHisto<TrackerTraits>{},

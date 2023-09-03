@@ -48,8 +48,8 @@
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 
-#include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
-#include "DataFormats/Track/interface/TrackSoAHost.h"
+#include "DataFormats/TrackSoA/interface/alpaka/PixelTrackUtilities.h"
+#include "DataFormats/TrackSoA/interface/TrackSoAHost.h"
 #include "DataFormats/Vertex/interface/ZVertexSoAHost.h"
 
 namespace L2TauTagNNv1 {

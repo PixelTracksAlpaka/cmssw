@@ -4,10 +4,10 @@
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
-#include "DataFormats/Track/interface/PixelTrackLayout.h"
-#include "DataFormats/Track/interface/PixelTrackDefinitions.h"
-#include "DataFormats/Track/interface/TrackSoAHost.h"
-#include "DataFormats/Track/interface/TrackSoADevice.h"
+#include "DataFormats/TrackSoA/interface/PixelTrackLayout.h"
+#include "DataFormats/TrackSoA/interface/PixelTrackDefinitions.h"
+#include "DataFormats/TrackSoA/interface/TrackSoAHost.h"
+#include "DataFormats/TrackSoA/interface/TrackSoADevice.h"
 #include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/CopyToHost.h"
 

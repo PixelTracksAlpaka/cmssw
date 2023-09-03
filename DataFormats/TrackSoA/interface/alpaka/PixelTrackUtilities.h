@@ -2,8 +2,8 @@
 #define DataFormats_Track_PixelTrackUtilities_h
 
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
-#include "DataFormats/Track/interface/PixelTrackDefinitions.h"
-#include "DataFormats/Track/interface/PixelTrackLayout.h"
+#include "DataFormats/TrackSoA/interface/PixelTrackDefinitions.h"
+#include "DataFormats/TrackSoA/interface/PixelTrackLayout.h"
 
 // Methods that operate on View and ConstView of the TrackSoA, and cannot be class methods.
 template <typename TrackerTraits>

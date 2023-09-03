@@ -15,9 +15,9 @@
 
 #include <alpaka/alpaka.hpp>
 #include <unistd.h>
-#include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
-#include "DataFormats/Track/interface/TrackSoADevice.h"
-#include "DataFormats/Track/interface/TrackSoAHost.h"
+#include "DataFormats/TrackSoA/interface/alpaka/TrackSoACollection.h"
+#include "DataFormats/TrackSoA/interface/TrackSoADevice.h"
+#include "DataFormats/TrackSoA/interface/TrackSoAHost.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/devices.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/host.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"

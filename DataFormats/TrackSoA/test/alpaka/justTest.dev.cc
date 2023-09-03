@@ -1,6 +1,6 @@
 #include <alpaka/alpaka.hpp>
 
-#include "DataFormats/Track/interface/PixelTrackLayout.h"
+#include "DataFormats/TrackSoA/interface/PixelTrackLayout.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoADevice.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoAHost.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
