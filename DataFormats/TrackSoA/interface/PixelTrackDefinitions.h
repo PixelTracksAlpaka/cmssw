@@ -7,7 +7,7 @@ namespace pixelTrack {
 
   enum class Quality : uint8_t { bad = 0, edup, dup, loose, strict, tight, highPurity, notQuality };
   constexpr uint32_t qualitySize{uint8_t(Quality::notQuality)};
-  const std::string qualityName[qualitySize]{"bad", "edup", "dup", "loose", "strict", "tight", "highPurity"};
+  constexpr std::array<std::string_view, qualitySize>{"bad", "edup", "dup", "loose", "strict", "tight", "highPurity"};
   inline Quality qualityByName(std::string const &name) {
     auto qp = std::find(qualityName, qualityName + qualitySize, name) - qualityName;
     return static_cast<Quality>(qp);
