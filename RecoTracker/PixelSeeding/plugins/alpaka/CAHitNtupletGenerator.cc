@@ -330,4 +330,5 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   template class CAHitNtupletGenerator<pixelTopology::Phase1>;
   template class CAHitNtupletGenerator<pixelTopology::Phase2>;
   template class CAHitNtupletGenerator<pixelTopology::HIonPhase1>;
+  template class CAHitNtupletGenerator<pixelTopology::Phase1Strip>;
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

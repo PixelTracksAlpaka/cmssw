@@ -472,5 +472,6 @@ void CAHitNtupletGeneratorKernels<TrackerTraits>::printCounters() {
   template class CAHitNtupletGeneratorKernels<pixelTopology::Phase1>;
   template class CAHitNtupletGeneratorKernels<pixelTopology::Phase2>;
   template class CAHitNtupletGeneratorKernels<pixelTopology::HIonPhase1>;
+  template class CAHitNtupletGeneratorKernels<pixelTopology::Phase1Strip>;
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

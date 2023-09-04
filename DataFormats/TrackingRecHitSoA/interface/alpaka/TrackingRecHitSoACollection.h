@@ -21,6 +21,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   using TrackingRecHitAlpakaSoAPhase1 = TrackingRecHitAlpakaCollection<pixelTopology::Phase1>;
   using TrackingRecHitAlpakaSoAPhase2 = TrackingRecHitAlpakaCollection<pixelTopology::Phase2>;
   using TrackingRecHitAlpakaSoAHIonPhase1 = TrackingRecHitAlpakaCollection<pixelTopology::HIonPhase1>;
+  using TrackingRecHitAlpakaSoAPhase1Strip = TrackingRecHitAlpakaCollection<pixelTopology::Phase1Strip>;
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
@@ -42,6 +43,17 @@ namespace cms::alpakatools {
     static auto copyAsync(TQueue& queue,
                           ALPAKA_ACCELERATOR_NAMESPACE::TrackingRecHitAlpakaSoAPhase2 const& deviceData) {
       TrackingRecHitAlpakaHostPhase2 hostData(deviceData.view().metadata().size(), queue);
+      alpaka::memcpy(queue, hostData.buffer(), deviceData.buffer());
+      return hostData;
+    }
+  };
+
+  template <>
+  struct CopyToHost<ALPAKA_ACCELERATOR_NAMESPACE::TrackingRecHitAlpakaSoAPhase1Strip> {
+    template <typename TQueue>
+    static auto copyAsync(TQueue& queue,
+                          ALPAKA_ACCELERATOR_NAMESPACE::TrackingRecHitAlpakaSoAPhase1Strip const& deviceData) {
+      TrackingRecHitAlpakaHostPhase1Strip hostData(deviceData.view().metadata().size(), queue);
       alpaka::memcpy(queue, hostData.buffer(), deviceData.buffer());
       return hostData;
     }

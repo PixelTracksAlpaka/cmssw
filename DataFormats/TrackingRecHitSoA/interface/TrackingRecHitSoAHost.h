@@ -44,5 +44,6 @@ public:
 using TrackingRecHitAlpakaHostPhase1 = TrackingRecHitAlpakaHost<pixelTopology::Phase1>;
 using TrackingRecHitAlpakaHostPhase2 = TrackingRecHitAlpakaHost<pixelTopology::Phase2>;
 using TrackingRecHitAlpakaHostHIonPhase1 = TrackingRecHitAlpakaHost<pixelTopology::HIonPhase1>;
+using TrackingRecHitAlpakaHostPhase1Strip = TrackingRecHitAlpakaHost<pixelTopology::Phase1Strip>;
 
 #endif  // CUDADataFormats_Track_TrackHeterogeneousT_H

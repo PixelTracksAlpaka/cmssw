@@ -27,6 +27,10 @@ public:
   using PhiBinner = typename hitSoA::PhiBinner;
   // Constructor which specifies the SoA size
   template <typename TQueue>
+  explicit TrackingRecHitAlpakaDevice(uint32_t nHits, TQueue queue)
+      : PortableDeviceCollection<TrackingRecHitAlpakaLayout<TrackerTraits>, TDev>(nHits, queue) {}
+      
+  template <typename TQueue>
   explicit TrackingRecHitAlpakaDevice(uint32_t nHits, int32_t offsetBPIX2, uint32_t const* hitsModuleStart, TQueue queue)
       : PortableDeviceCollection<TrackingRecHitAlpakaLayout<TrackerTraits>, TDev>(nHits, queue) {
     const auto device = alpaka::getDev(queue);

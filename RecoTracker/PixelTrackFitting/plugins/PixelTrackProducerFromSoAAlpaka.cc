@@ -26,6 +26,12 @@
 #include "TrackingTools/TrajectoryParametrization/interface/CurvilinearTrajectoryError.h"
 #include "TrackingTools/TrajectoryParametrization/interface/GlobalTrajectoryParameters.h"
 
+//New for strips
+#include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2DCollection.h"
+#include "Geometry/CommonTopologies/interface/GluedGeomDet.h"
+#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
+
 #include "DataFormats/Track/interface/alpaka/PixelTrackUtilities.h"
 #include "RecoTracker/PixelTrackFitting/interface/alpaka/FitUtils.h"
 
@@ -56,26 +62,31 @@ private:
   // Event Data tokens
   const edm::EDGetTokenT<reco::BeamSpot> tBeamSpot_;
   const edm::EDGetTokenT<TkSoAHost> tokenTrack_;
-  const edm::EDGetTokenT<SiPixelRecHitCollectionNew> cpuHits_;
-  const edm::EDGetTokenT<HMSstorage> hmsToken_;
+  const edm::EDGetTokenT<SiPixelRecHitCollectionNew> cpuPixelHits_;
+  edm::EDGetTokenT<SiStripMatchedRecHit2DCollection> cpuStripHits_;
+  edm::EDGetTokenT<HMSstorage> hmsToken_;
   // Event Setup tokens
+  const edm::ESGetToken<TrackerGeometry, TrackerDigiGeometryRecord> geomToken_;
   const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> idealMagneticFieldToken_;
   const edm::ESGetToken<TrackerTopology, TrackerTopologyRcd> ttTopoToken_;
 
   int32_t const minNumberOfHits_;
   pixelTrack::Quality const minQuality_;
+  const bool useStripHits_;
 };
 
 template <typename TrackerTraits>
 PixelTrackProducerFromSoAAlpaka<TrackerTraits>::PixelTrackProducerFromSoAAlpaka(const edm::ParameterSet &iConfig)
     : tBeamSpot_(consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamSpot"))),
       tokenTrack_(consumes(iConfig.getParameter<edm::InputTag>("trackSrc"))),
-      cpuHits_(consumes<SiPixelRecHitCollectionNew>(iConfig.getParameter<edm::InputTag>("pixelRecHitLegacySrc"))),
-      hmsToken_(consumes<HMSstorage>(iConfig.getParameter<edm::InputTag>("pixelRecHitLegacySrc"))),
+      cpuPixelHits_(consumes<SiPixelRecHitCollectionNew>(iConfig.getParameter<edm::InputTag>("pixelRecHitLegacySrc"))),
+      // hmsToken_(consumes<HMSstorage>(iConfig.getParameter<edm::InputTag>("pixelRecHitLegacySrc"))),
+      geomToken_(esConsumes<TrackerGeometry, TrackerDigiGeometryRecord>()),
       idealMagneticFieldToken_(esConsumes()),
       ttTopoToken_(esConsumes()),
       minNumberOfHits_(iConfig.getParameter<int>("minNumberOfHits")),
-      minQuality_(pixelTrack::qualityByName(iConfig.getParameter<std::string>("minQuality"))) {
+      minQuality_(pixelTrack::qualityByName(iConfig.getParameter<std::string>("minQuality"))),
+      useStripHits_(iConfig.getParameter<bool>("useStripHits")) {
   if (minQuality_ == pixelTrack::Quality::notQuality) {
     throw cms::Exception("PixelTrackConfiguration")
         << iConfig.getParameter<std::string>("minQuality") + " is not a pixelTrack::Quality";
@@ -91,16 +102,29 @@ PixelTrackProducerFromSoAAlpaka<TrackerTraits>::PixelTrackProducerFromSoAAlpaka(
   // around a rare race condition in framework scheduling
   produces<reco::TrackCollection>();
   produces<IndToEdm>();
+  if (useStripHits_) {
+    cpuStripHits_ = consumes<SiStripMatchedRecHit2DCollection>(iConfig.getParameter<edm::InputTag>("stripRecHitLegacySrc"));
+    hmsToken_ = consumes<HMSstorage>(iConfig.getParameter<edm::InputTag>("hitModuleStartSrc"));
+  }
+  else {
+    hmsToken_ = consumes<HMSstorage>(iConfig.getParameter<edm::InputTag>("pixelRecHitLegacySrc"));
+  }
 }
 
 template <typename TrackerTraits>
 void PixelTrackProducerFromSoAAlpaka<TrackerTraits>::fillDescriptions(edm::ConfigurationDescriptions &descriptions) {
   edm::ParameterSetDescription desc;
+
+  desc.add<edm::InputTag>("pixelRecHitLegacySrc", edm::InputTag("siPixelRecHitsPreSplitting"));
+  desc.add<edm::InputTag>("hitModuleStartSrc", edm::InputTag("siPixelRecHitsPreSplitting"));
+  desc.add<bool>("useStripHits", false);
+  desc.add<edm::InputTag>("stripRecHitLegacySrc", edm::InputTag("siStripMatchedRecHits", "matchedRecHit"));
+
   desc.add<edm::InputTag>("beamSpot", edm::InputTag("offlineBeamSpot"));
   desc.add<edm::InputTag>("trackSrc", edm::InputTag("pixelTracksAlpaka"));
-  desc.add<edm::InputTag>("pixelRecHitLegacySrc", edm::InputTag("siPixelRecHitsPreSplittingLegacy"));
   desc.add<int>("minNumberOfHits", 0);
   desc.add<std::string>("minQuality", "loose");
+
   descriptions.addWithDefaultLabel(desc);
 }
 
@@ -132,35 +156,78 @@ void PixelTrackProducerFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID strea
   const auto &bsh = iEvent.get(tBeamSpot_);
   GlobalPoint bs(bsh.x0(), bsh.y0(), bsh.z0());
 
-  auto const &rechits = iEvent.get(cpuHits_);
-  std::vector<TrackingRecHit const *> hitmap;
-  auto const &rcs = rechits.data();
-  auto const nhits = rcs.size();
+  edm::ESHandle<TrackerGeometry> theTrackerGeometry = iSetup.getHandle(geomToken_);
 
-  hitmap.resize(nhits, nullptr);
+  auto const &pixelRecHitsDSV = iEvent.get(cpuPixelHits_);
+  auto const &pixelRechits = pixelRecHitsDSV.data();
+  auto nPixelHits = pixelRechits.size();
 
   auto const &hitsModuleStart = iEvent.get(hmsToken_);
+  auto fc = hitsModuleStart;
 
-  for (auto const &hit : rcs) {
+  size_t nStripHits = 0;
+  const edmNew::DetSetVector<SiStripMatchedRecHit2D>* stripRechitsDSV = nullptr;
+
+   if (useStripHits_) {
+    stripRechitsDSV = &iEvent.get(cpuStripHits_);
+    nStripHits = hitsModuleStart[TrackerTraits::numberOfModules] - hitsModuleStart[TrackerTraits::numberOfPixelModules];
+  }
+  
+  size_t nhits = nPixelHits + nStripHits;
+
+  std::vector<TrackingRecHit const *> hitmap(nhits, nullptr);
+  std::vector<int> counter(nhits, 0);
+
+  for (auto const &hit : pixelRechits) {
     auto const &thit = static_cast<BaseTrackerRecHit const &>(hit);
     auto const detI = thit.det()->index();
     auto const &clus = thit.firstClusterRef();
     assert(clus.isPixel());
-    auto const idx = hitsModuleStart[detI] + clus.pixelCluster().originalId();
+    auto const idx = fc[detI] + clus.pixelCluster().originalId();
     if (idx >= hitmap.size())
       hitmap.resize(idx + 256, nullptr);  // only in case of hit overflow in one module
 
     assert(nullptr == hitmap[idx]);
     hitmap[idx] = &hit;
+    ++counter[idx];
+  }
+
+  std::cout << "hitmap nulls:" << std::count(hitmap.begin(), hitmap.end(), nullptr) << std::endl;
+
+  if (useStripHits_) {
+    for (const auto& moduleHits : *stripRechitsDSV) {
+      const GluedGeomDet* theStripDet = dynamic_cast<const GluedGeomDet*>(theTrackerGeometry->idToDet(moduleHits[0].geographicalId()));
+      int moduleIdx = (theStripDet->stereoDet())->index();
+      // auto moduleIdx = moduleHits[0].stereoHit().det()->index();
+      if (moduleIdx >= TrackerTraits::numberOfModules)
+        break;
+      // std::cout << "module index: " << moduleIdx <<
+      //   ", " << moduleHits.size() << 
+      //   ", " << (hitsModuleStart[moduleIdx + 1] - hitsModuleStart[moduleIdx]) << std::endl;
+      for (auto i = 0u; i < moduleHits.size(); ++i) {
+        auto j = hitsModuleStart[moduleIdx] + i;
+        // if (j > hitmap.size())
+        //   std::cout << "invalid memory access: " <<
+        //     "i = " << i <<
+        //     ", j = " << j << 
+        //     ", moduleIdx = " << moduleIdx << std::endl;
+        // else
+          hitmap[j] = &*(moduleHits.begin() + i);
+          ++counter[j];
+      }
+    }
   }
 
   std::vector<const TrackingRecHit *> hits;
-  hits.reserve(5);
+  hits.reserve(5); //TODO: Move to the average depending on tracker traits
 
   auto const &tsoa = iEvent.get(tokenTrack_);
   auto const *quality = tsoa.view().quality();
   auto const &hitIndices = tsoa.view().hitIndices();
   auto nTracks = tsoa.view().nTracks();
+
+  std::cout << "max hit index = " << *std::max_element(hitIndices.begin(), hitIndices.end()) << std::endl;
+  std::cout << "hitmap.size() = " << hitmap.size() << std::endl;
 
   tracks.reserve(nTracks);
 
@@ -189,8 +256,17 @@ void PixelTrackProducerFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID strea
 
     hits.resize(nHits);
     auto b = hitIndices.begin(it);
-    for (int iHit = 0; iHit < nHits; ++iHit)
-      hits[iHit] = hitmap[*(b + iHit)];
+    
+    for (int iHit = 0; iHit < nHits; ++iHit) {
+      size_t idx = *(b + iHit);
+      hits[iHit] = hitmap[idx];
+      if (hitmap.size() <= idx) {
+        std::cout << "Invalid memory access: " <<
+          "it = " << it <<
+          ", ihit = " << iHit <<
+          ", idx = " << idx << std::endl;
+      }
+    }
 
     // mind: this values are respect the beamspot!
 
@@ -256,3 +332,6 @@ DEFINE_FWK_MODULE(PixelTrackProducerFromSoAAlpakaPhase1);
 
 using PixelTrackProducerFromSoAAlpakaPhase2 = PixelTrackProducerFromSoAAlpaka<pixelTopology::Phase2>;
 DEFINE_FWK_MODULE(PixelTrackProducerFromSoAAlpakaPhase2);
+
+using PixelTrackProducerFromSoAAlpakaPhase1Strip = PixelTrackProducerFromSoAAlpaka<pixelTopology::Phase1Strip>;
+DEFINE_FWK_MODULE(PixelTrackProducerFromSoAAlpakaPhase1Strip);

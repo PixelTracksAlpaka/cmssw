@@ -133,6 +133,11 @@ alpakaValidationPixel.toReplaceWith(pixelVerticesTask, cms.Task(
                         # SoA serial counterpart
                         pixelVerticesAlpakaSerial))
 
+# strip tracks
+from RecoTracker.PixelVertexFinding.pixelVertexProducerAlpakaPhase1Strip_cfi import pixelVertexProducerAlpakaPhase1Strip as _pixelVertexProducerAlpakaPhase1Strip
+from Configuration.ProcessModifiers.stripNtupletFit_cff import stripNtupletFit
+
+(alpaka & stripNtupletFit & ~phase2_tracker).toReplaceWith(pixelVerticesAlpaka, _pixelVertexProducerAlpakaPhase1Strip.clone())
 
 # Tasks and Sequences
 recopixelvertexingTask = cms.Task(
@@ -140,5 +145,6 @@ recopixelvertexingTask = cms.Task(
     pixelVerticesTask
 )
 recopixelvertexing = cms.Sequence(recopixelvertexingTask)
+
 
 

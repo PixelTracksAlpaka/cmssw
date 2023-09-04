@@ -250,3 +250,31 @@ alpakaValidationPixel.toReplaceWith(pixelTracksTask, cms.Task(
                         pixelTracksAlpakaSerial))
 
 
+# Patatrack with strip hits (alpaka-only)
+
+from Configuration.ProcessModifiers.stripNtupletFit_cff import stripNtupletFit
+from RecoLocalTracker.Configuration.RecoLocalTracker_cff import striptrackerlocalrecoTask
+from RecoLocalTracker.SiStripRecHitConverter.siStripRecHitSoAPhase1_cfi import siStripRecHitSoAPhase1
+from SimTracker.TrackAssociatorProducers.quickTrackAssociatorByHits_cfi import quickTrackAssociatorByHits, quickTrackAssociatorByHitsTrackerHitAssociator
+from Validation.RecoTrack.TrackValidation_cff import quickTrackAssociatorByHitsPreSplitting
+
+# from RecoTracker.PixelSeeding.caHitNtupletAlpakaPhase1_cfi import caHitNtupletAlpakaPhase1 as _pixelTracksAlpakaPhase1
+# pixelStripTracksAlpaka = _pixelTracksAlpakaPhase1.clone()
+
+(alpaka & stripNtupletFit & ~phase2_tracker).toModify(pixelTracksSoA.cpu, pixelRecHitSrc = cms.InputTag("siStripRecHitSoAHostPhase1"))
+(alpaka & stripNtupletFit & ~phase2_tracker).toModify(pixelTracks, useStripHits = cms.bool(True), hitModuleStartSrc = cms.InputTag("siStripRecHitSoAHostPhase1"))
+(alpaka & stripNtupletFit & ~phase2_tracker).toReplaceWith(quickTrackAssociatorByHits, quickTrackAssociatorByHitsTrackerHitAssociator)
+(alpaka & stripNtupletFit & ~phase2_tracker).toReplaceWith(quickTrackAssociatorByHits, quickTrackAssociatorByHitsTrackerHitAssociator.clone(cluster2TPSrc = "tpClusterProducerPreSplitting"))
+
+(alpaka & stripNtupletFit & ~phase2_tracker).toModify(pixelTracks, hitModuleStartSrc = cms.InputTag("siStripRecHitSoAHostPhase1"))
+(alpaka & stripNtupletFit & ~phase2_tracker).toReplaceWith(pixelTracksTask, cms.Task(
+    # build legacy strip hits
+    striptrackerlocalrecoTask,
+    # mix pixel and strip hits in a SoA
+    siStripRecHitSoAPhase1,
+    # build the pixel ntuplets and the pixel tracks in SoA format on the GPU
+    pixelTracksSoA,
+    # convert the pixel tracks from SoA to legacy format
+    pixelTracks
+))
+
