@@ -197,7 +197,7 @@ template<typename T>
 void SiPixelMonitorRecHitsSoA<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   // monitorpixelRecHitsSoA
   edm::ParameterSetDescription desc;
-  desc.add<edm::InputTag>("pixelHitsSrc", edm::InputTag("siPixelRecHitsPreSplittingAlpaka"));
+  desc.add<edm::InputTag>("pixelHitsSrc", edm::InputTag("siPixelRecHitsPreSplittingSoA"));
   desc.add<std::string>("TopFolderName", "SiPixelHeterogeneous/PixelRecHitsSoA");
   descriptions.addWithDefaultLabel(desc);
 }
