@@ -2,15 +2,20 @@
 #define DataFormats_Track_PixelTrackDefinitions_h
 #include <string>
 #include <algorithm>
+#include <stdexcept>
 
 namespace pixelTrack {
 
   enum class Quality : uint8_t { bad = 0, edup, dup, loose, strict, tight, highPurity, notQuality };
   constexpr uint32_t qualitySize{uint8_t(Quality::notQuality)};
-  constexpr std::array<std::string_view, qualitySize>{"bad", "edup", "dup", "loose", "strict", "tight", "highPurity"};
+  const std::string qualityName[qualitySize]{"bad", "edup", "dup", "loose", "strict", "tight", "highPurity"};
   inline Quality qualityByName(std::string const &name) {
     auto qp = std::find(qualityName, qualityName + qualitySize, name) - qualityName;
-    return static_cast<Quality>(qp);
+    auto ret = static_cast<Quality>(qp);
+    if (ret == pixelTrack::Quality::notQuality)
+      throw std::invalid_argument(name + "is not a pixelTrack::Quality!");
+  
+    return ret;
   }
 
 #ifdef GPU_SMALL_EVENTS
