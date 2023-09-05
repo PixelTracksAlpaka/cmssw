@@ -1492,11 +1492,11 @@ upgradeWFs['PatatrackFullRecoTripletsGPUValidation'] = PatatrackWorkflow(
 )
 
 
-##Alpaka workflows
+#Alpaka workflows
 
-upgradeWFs['PatatrackPixelOnlyAlapaka'] = PatatrackWorkflow(
+upgradeWFs['PatatrackPixelOnlyAlpaka'] = PatatrackWorkflow(
     digi = {
-        # the HLT menu is already set up for using GPUs if available and if the "gpu" modifier is enabled
+        '--procModifiers': 'alpaka' 
     },
     reco = {
         '-s': 'RAW2DIGI:RawToDigi_pixelOnly,RECO:reconstruction_pixelTrackingOnly,VALIDATION:@pixelTrackingOnlyValidation,DQM:@pixelTrackingOnlyDQM',
@@ -1509,7 +1509,21 @@ upgradeWFs['PatatrackPixelOnlyAlapaka'] = PatatrackWorkflow(
     offset = 0.55,
 )
 
-upgradeWFs['PatatrackPixelOnlyAlapakaValidation'] = PatatrackWorkflow(
+upgradeWFs['PatatrackPixelOnlyAlpakaProfiling'] = PatatrackWorkflow(
+    digi = {
+        '--procModifiers': 'alpaka'
+    },
+    reco = {
+        '-s': 'RAW2DIGI:RawToDigi_pixelOnly,RECO:reconstruction_pixelTrackingOnly',
+        '--procModifiers': 'alpaka',
+        '--customise' : 'RecoTracker/Configuration/customizePixelOnlyForProfiling.customizePixelOnlyForProfilingGPUOnly'
+    },
+    harvest = None,
+    suffix = 'Patatrack_PixelOnlyAlpaka_Profiling',
+    offset = 0.554,
+)
+
+upgradeWFs['PatatrackPixelOnlyAlpakaValidation'] = PatatrackWorkflow(
     digi = {
         # the HLT menu is already set up for using GPUs if available and if the "gpu" modifier is enabled
     },
