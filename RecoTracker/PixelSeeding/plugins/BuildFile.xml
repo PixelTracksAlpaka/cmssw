@@ -24,7 +24,7 @@
 <library file="alpaka/*.cc" name="RecoTrackerPixelSeedingPortable">
  <use name="alpaka"/>
   <use name="DataFormats/Portable"/>
-  <use name="DataFormats/Track"/>
+  <use name="DataFormats/TrackSoA"/>
   <use name="DataFormats/TrackingRecHitSoA"/>
   <use name="FWCore/Utilities"/>
   <use name="HeterogeneousCore/AlpakaCore"/>

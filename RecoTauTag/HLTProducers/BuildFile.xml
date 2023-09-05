@@ -17,7 +17,7 @@
 <use name="HLTrigger/HLTcore"/>
 <use name="RecoTracker/TkTrackingRegions"/>
 <use name="DataFormats/SiPixelClusterSoA"/>
-<use name="DataFormats/Track"/>
+<use name="DataFormats/TrackSoA"/>
 <use name="DataFormats/Vertex"/>
 <use name="PhysicsTools/TensorFlow"/>
 <use name="root"/>

@@ -11,7 +11,7 @@
 <use name="DataFormats/TrackingRecHit"/>
 <use name="DataFormats/TrackingRecHitSoA"/>
 <use name="DataFormats/TrackReco"/>
-<use name="DataFormats/Track"/>
+<use name="DataFormats/TrackSoA"/>
 <use name="FWCore/Framework"/>
 <use name="FWCore/MessageLogger"/>
 <use name="FWCore/ParameterSet"/>
