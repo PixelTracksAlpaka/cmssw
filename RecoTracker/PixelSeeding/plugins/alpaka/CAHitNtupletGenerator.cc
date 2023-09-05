@@ -13,15 +13,11 @@
 #include "DataFormats/TrackSoA/interface/alpaka/TrackSoACollection.h"
 #include "DataFormats/TrackSoA/interface/TrackSoADevice.h"
 #include "DataFormats/TrackSoA/interface/TrackSoAHost.h"
-#include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "FWCore/Utilities/interface/EDMException.h"
-#include "FWCore/Utilities/interface/isFinite.h"
-#include "TrackingTools/DetLayers/interface/BarrelDetLayer.h"
 
 #include "CAHitNtupletGenerator.h"
 #include "CAHitNtupletGeneratorKernels.h"
@@ -137,7 +133,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   using namespace std;
 
   template <typename TrackerTraits>
-  CAHitNtupletGenerator<TrackerTraits>::CAHitNtupletGenerator(const edm::ParameterSet& cfg, edm::ConsumesCollector& iC)
+  CAHitNtupletGenerator<TrackerTraits>::CAHitNtupletGenerator(const edm::ParameterSet& cfg)
       : m_params(makeCommonParams(cfg),
                  makeCellCuts<TrackerTraits>(cfg),
                  topologyCuts<TrackerTraits>::makeQualityCuts(cfg.getParameterSet("trackQualityCuts")),

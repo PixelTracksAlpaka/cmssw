@@ -176,6 +176,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       auto r1 = otherCell.inner_r(hh);
       auto z1 = otherCell.inner_z(hh);
       auto isBarrel = otherCell.outer_detIndex(hh) < TrackerTraits::last_barrel_detIndex;
+      // TODO tune CA cuts below (theta and dca)
       bool aligned =
           areAlignedRZ(r1,
                        z1,
@@ -184,12 +185,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                        ro,
                        zo,
                        ptmin,
-                       isBarrel ? caThetaCutBarrel : caThetaCutForward);  // 2.f*thetaCut); // FIXME tune cuts
+                       isBarrel ? caThetaCutBarrel : caThetaCutForward);  
       return (aligned && dcaCut(hh,
                                 otherCell,
                                 otherCell.inner_detIndex(hh) < TrackerTraits::last_bpix1_detIndex ? dcaCutInnerTriplet
                                                                                                   : dcaCutOuterTriplet,
-                                hardCurvCut));  // FIXME tune cuts
+                                hardCurvCut));  
     }
 
     ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) static bool areAlignedRZ(

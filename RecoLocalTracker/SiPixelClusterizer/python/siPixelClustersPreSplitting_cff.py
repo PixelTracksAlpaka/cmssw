@@ -35,7 +35,6 @@ run3_common.toModify(siPixelClustersPreSplittingCUDA,
                      VCaltoElectronOffset    = 0,
                      VCaltoElectronOffset_L1 = 0)
 
-
 from RecoLocalTracker.SiPixelClusterizer.siPixelDigisClustersFromSoAPhase1_cfi import siPixelDigisClustersFromSoAPhase1 as _siPixelDigisClustersFromSoAPhase1
 from RecoLocalTracker.SiPixelClusterizer.siPixelDigisClustersFromSoAPhase2_cfi import siPixelDigisClustersFromSoAPhase2 as _siPixelDigisClustersFromSoAPhase2
 
@@ -99,15 +98,26 @@ phase2_tracker.toReplaceWith(siPixelDigisClustersPreSplitting, _siPixelDigisClus
 
 ### Alpaka Pixel Clusters Reco
 
-from CalibTracker.SiPixelESProducers.siPixelCablingSoAESProducer_cfi import siPixelCablingSoAESProducer
-from CalibTracker.SiPixelESProducers.siPixelGainCalibrationForHLTSoAESProducer_cfi import siPixelGainCalibrationForHLTSoAESProducer
+#from CalibTracker.SiPixelESProducers.siPixelCablingSoAESProducer_cfi import siPixelCablingSoAESProducer
+#from CalibTracker.SiPixelESProducers.siPixelGainCalibrationForHLTSoAESProducer_cfi import siPixelGainCalibrationForHLTSoAESProducer
+
+def _addProcessCalibTrackerAlpakaES(process):
+    process.load("CalibTracker.SiPixelESProducers.siPixelCablingSoAESProducer_cfi")   
+    process.load("CalibTracker.SiPixelESProducers.siPixelGainCalibrationForHLTSoAESProducer_cfi")
+
+modifyConfigurationCalibTrackerAlpakaES_ = alpaka.makeProcessModifier(_addProcessCalibTrackerAlpakaES)
 
 # reconstruct the pixel digis and clusters on the device
 from RecoLocalTracker.SiPixelClusterizer.siPixelRawToClusterPhase1_cfi import siPixelRawToClusterPhase1 as _siPixelRawToClusterAlpaka
 siPixelClustersPreSplittingAlpaka = _siPixelRawToClusterAlpaka.clone()
 
 run3_common.toModify(siPixelClustersPreSplittingAlpaka,
-                     clusterThreshold_layer1 = 4000)
+                     # use the pixel channel calibrations scheme for Run 3
+                     clusterThreshold_layer1 = 4000,
+                     VCaltoElectronGain      = 1,  # all gains=1, pedestals=0
+                     VCaltoElectronGain_L1   = 1,
+                     VCaltoElectronOffset    = 0,
+                     VCaltoElectronOffset_L1 = 0)
 
 from RecoLocalTracker.SiPixelClusterizer.siPixelPhase2DigiToCluster_cfi import siPixelPhase2DigiToCluster as _siPixelPhase2DigiToCluster
 

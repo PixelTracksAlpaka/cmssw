@@ -24,16 +24,5 @@ def _addProcessCPEsAlpaka(process):
     process.load("RecoLocalTracker.SiPixelRecHits.pixelCPEFastParamsESProducerAlpakaPhase1_cfi")
     process.load("RecoLocalTracker.SiPixelRecHits.pixelCPEFastParamsESProducerAlpakaPhase2_cfi")
 
-modifyConfigurationStandardSequencesServicesAddTritonService_ = alpaka.makeProcessModifier(_addProcessCPEsAlpaka)
-
-## CPE Parameters ESProducer
-#siPixelCPEFastParamsESProducerAlpakaPhase1 = cms.ESProducer('PixelCPEFastParamsESProducerAlpakaPhase1@alpaka',
-#    ComponentName = cms.string('PixelCPEFastParams'),
-#    appendToDataLabel = cms.string(''),
-#    alpaka = cms.untracked.PSet(
-#        backend = cms.untracked.string('')
-#    )
-#)
-## CPE Parameters ESProducer
-
+modifyConfigurationForAlpakaCPEs_ = alpaka.makeProcessModifier(_addProcessCPEsAlpaka)
 

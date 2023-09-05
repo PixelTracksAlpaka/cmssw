@@ -116,7 +116,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               // || l[ic]!=l[jc]) continue;
               auto cos12 = x[ic] * x[jc] + y[ic] * y[jc] + z[ic] * z[jc];
 
-              // THIS IF WAS ADDED!!!
               if (d[ic] != d[jc] && cos12 * cos12 >= 0.99999f * (n[ic] * n[jc])) {
                 // alligned:  kill farthest (prefer consecutive layers)
                 // if same layer prefer farthest (longer level arm) and make space for intermediate hit
@@ -139,17 +138,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                   }
                 }
               }
-
-              // REMOVED THIS AND ADDED LINES ABOVE!!!
-              // if (d[ic] != d[jc] && cos12 * cos12 >= 0.99999f * n[ic] * n[jc]) {
-              //   // alligned:  kill farthest  (prefer consecutive layers)
-              //   if (n[ic] > n[jc]) {
-              //     ci.theDoubletId = -1;
-              //     break;
-              //   } else {
-              //     cj.theDoubletId = -1;
-              //   }
-              // }
             }  //cj
           }    // ci
         }      // hits
@@ -157,4 +145,4 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
   }  // namespace caPixelDoublets
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
-#endif  // RecoPixelVertexing_PixelTriplets_gpuFishbone_h
+#endif  // RecoPixelVertexing_PixelTriplets_alpaka_CAFishbone_h

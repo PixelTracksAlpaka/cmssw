@@ -1,26 +1,21 @@
 #include <alpaka/alpaka.hpp>
 
-#include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/TrackSoA/interface/TrackSoAHost.h"
 #include "DataFormats/TrackSoA/interface/alpaka/TrackSoACollection.h"
 #include "DataFormats/TrackSoA/interface/TrackSoADevice.h"
 #include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoACollection.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
-#include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
-#include "FWCore/PluginManager/interface/ModuleDef.h"
 #include "FWCore/Utilities/interface/ESGetToken.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "FWCore/Utilities/interface/RunningAverage.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/EDGetToken.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/EDPutToken.h"
-#include "HeterogeneousCore/AlpakaCore/interface/alpaka/ESGetToken.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/Event.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/EventSetup.h"
-#include "HeterogeneousCore/AlpakaCore/interface/alpaka/ProducerBase.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/stream/EDProducer.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
@@ -49,13 +44,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
   private:
-
-    //void endJob() override;
-
-    edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> tokenField_;
+  
+    const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> tokenField_;
     const device::ESGetToken<PixelCPEFastParams<TrackerTraits>, PixelCPEFastParamsRecord> cpeToken_;
-    device::EDGetToken<HitsOnDevice> tokenHit_;
-    device::EDPutToken<TkSoADevice> tokenTrack_;
+    const device::EDGetToken<HitsOnDevice> tokenHit_;
+    const device::EDPutToken<TkSoADevice> tokenTrack_;
 
     Algo deviceAlgo_;
   };
@@ -64,9 +57,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   CAHitNtupletAlpaka<TrackerTraits>::CAHitNtupletAlpaka(const edm::ParameterSet& iConfig)
       : tokenField_(esConsumes()),
         cpeToken_(esConsumes(edm::ESInputTag("", iConfig.getParameter<std::string>("CPE")))),
-        deviceAlgo_(iConfig, consumesCollector()) {
-    tokenHit_ = consumes(iConfig.getParameter<edm::InputTag>("pixelRecHitSrc"));
-    tokenTrack_ = produces();
+        deviceAlgo_(iConfig),
+        tokenHit_(iConfig.getParameter<edm::InputTag>("pixelRecHitSrc")),
+        tokenTrack_(produces()) {
+
   }
 
   template <typename TrackerTraits>

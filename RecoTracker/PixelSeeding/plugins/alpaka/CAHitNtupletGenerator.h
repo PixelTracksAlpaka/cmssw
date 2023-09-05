@@ -12,8 +12,6 @@
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoACollection.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/Utilities/interface/EDGetToken.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/SimpleVector.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
 
 #include "CAHitNtupletGeneratorKernels.h"
@@ -59,8 +57,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using ParamsOnDevice = pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>;
 
   public:
-    CAHitNtupletGenerator(const edm::ParameterSet& cfg, edm::ConsumesCollector&& iC) : CAHitNtupletGenerator(cfg, iC){};
-    CAHitNtupletGenerator(const edm::ParameterSet& cfg, edm::ConsumesCollector& iC);
+    CAHitNtupletGenerator(const edm::ParameterSet& cfg); 
 
     static void fillDescriptions(edm::ParameterSetDescription& desc);
     static void fillDescriptionsCommon(edm::ParameterSetDescription& desc);
