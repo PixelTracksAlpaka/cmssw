@@ -57,9 +57,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   CAHitNtupletAlpaka<TrackerTraits>::CAHitNtupletAlpaka(const edm::ParameterSet& iConfig)
       : tokenField_(esConsumes()),
         cpeToken_(esConsumes(edm::ESInputTag("", iConfig.getParameter<std::string>("CPE")))),
-        deviceAlgo_(iConfig),
-        tokenHit_(iConfig.getParameter<edm::InputTag>("pixelRecHitSrc")),
-        tokenTrack_(produces()) {
+        tokenHit_(consumes(iConfig.getParameter<edm::InputTag>("pixelRecHitSrc"))),
+        tokenTrack_(produces()),
+        deviceAlgo_(iConfig) {
 
   }
 

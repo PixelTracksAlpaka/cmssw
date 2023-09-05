@@ -101,7 +101,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template <typename TrackerTraits>
   SiPixelRawToCluster<TrackerTraits>::SiPixelRawToCluster(const edm::ParameterSet& iConfig)
-      : rawGetToken_(consumes<FEDRawDataCollection>(iConfig.getParameter<edm::InputTag>("InputLabel"))),
+      : rawGetToken_(consumes(iConfig.getParameter<edm::InputTag>("InputLabel"))),
         digiPutToken_(produces()),
         clusterPutToken_(produces()),
         mapToken_(esConsumes()),

@@ -123,7 +123,7 @@ void PixelTrackProducerFromSoAT<TrackerTraits>::produce(edm::StreamID streamID,
                                                  reco::TrackBase::highPurity};
   assert(reco::TrackBase::highPurity == recoQuality[int(pixelTrack::Quality::highPurity)]);
 
-  std::cout << "Converting gpu helix in reco tracks" << std::endl;
+  // std::cout << "Converting gpu helix in reco tracks" << std::endl;
 
   auto indToEdmP = std::make_unique<IndToEdm>();
   auto &indToEdm = *indToEdmP;
@@ -248,7 +248,7 @@ void PixelTrackProducerFromSoAT<TrackerTraits>::produce(edm::StreamID streamID,
     // filter???
     tracks.emplace_back(track.release(), hits);
   }
-  std::cout << "processed " << nt << " good tuples " << tracks.size() << "out of " << indToEdm.size() << std::endl;
+  // std::cout << "processed " << nt << " good tuples " << tracks.size() << "out of " << indToEdm.size() << std::endl;
 
   // store tracks
   storeTracks(iEvent, tracks, httopo);

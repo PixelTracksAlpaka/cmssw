@@ -8,7 +8,7 @@ import FWCore.ParameterSet.Config as cms
 def customizePixelOnlyForProfilingGPUOnly(process):
 
   process.consumer = cms.EDAnalyzer("GenericConsumer",
-      eventProducts = cms.untracked.vstring('pixelTracksSoA', 'pixelVerticesSoA','pixelTracksAlpaka','pixelVerticesAlpaka')
+      eventProducts = cms.untracked.vstring('pixelTracksCUDA', 'pixelVerticesCUDA','pixelTracksAlpaka','pixelVerticesAlpaka')
   )
 
   process.consume_step = cms.EndPath(process.consumer)

@@ -268,13 +268,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           // Hence, maxiter can be tuned accordingly to the workdiv.
           constexpr unsigned int maxiter = 16;
           ALPAKA_ASSERT_OFFLOAD((hist.size() / blockDimension) <= maxiter);
-#if defined(ALPAKA_ACC_GPU_CUDA_ASYNC_BACKEND) || defined(ALPAKA_ACC_GPU_HIP_ASYNC_BACKEND)
+#ifndef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
           constexpr uint32_t threadDimension = 1;
 #else
           // NB: can be tuned.
           constexpr uint32_t threadDimension = 256;
 #endif
-
 #ifndef NDEBUG
           [[maybe_unused]] const uint32_t runTimeThreadDimension(
               alpaka::getWorkDiv<alpaka::Thread, alpaka::Elems>(acc)[0u]);
