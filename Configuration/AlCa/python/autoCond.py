@@ -39,7 +39,7 @@ autoCond = {
     'run3_data_prompt'             : '132X_dataRun3_Prompt_frozen_v1',
     # GlobalTag for Run3 offline data reprocessing - snapshot at 2023-08-11 17:04:34 (UTC)
     'run3_data'                    : '132X_dataRun3_v1',
-    # GlobalTag for MC production with perfectly aligned and calibrated detector for Phase1 2017 (and 0,0,~0-centred beamspot)
+   # GlobalTag for MC production with perfectly aligned and calibrated detector for Phase1 2017 (and 0,0,~0-centred beamspot)
     'phase1_2017_design'           : '131X_mc2017_design_v2',
     # GlobalTag for MC production with realistic conditions for Phase1 2017 detector
     'phase1_2017_realistic'        : '131X_mc2017_realistic_v2',
@@ -76,11 +76,17 @@ autoCond = {
     # GlobalTag for MC production with perfectly aligned and calibrated detector for Phase1 2023
     'phase1_2023_design'           : '132X_mcRun3_2023_design_v1',
     # GlobalTag for MC production with realistic conditions for Phase1 2023
+<<<<<<< HEAD
     'phase1_2023_realistic'        : '132X_mcRun3_2023_realistic_v2',
     # GlobalTag for MC production with realistic conditions for Phase1 post BPix issue 2023
     'phase1_2023_realistic_postBPix'  : '132X_mcRun3_2023_realistic_postBPix_v1',
     # GlobalTag for MC production (cosmics) with realistic conditions for Phase1 2023,  Strip tracker in DECO mode
     'phase1_2023_cosmics'          : '132X_mcRun3_2023cosmics_realistic_deco_v2',
+=======
+    'phase1_2023_realistic'        : '131X_mcRun3_2023_realistic_v9',
+    # GlobalTag for MC production (cosmics) with realistic conditions for Phase1 2023,  Strip tracker in DECO mode
+    'phase1_2023_cosmics'          : '131X_mcRun3_2023cosmics_realistic_deco_v9',
+>>>>>>> PixelTracksAlpaka/merge_all_pixels_13_2_0
     # GlobalTag for MC production (cosmics) with perfectly aligned and calibrated detector for Phase1 2023, Strip tracker in DECO mode
     'phase1_2023_cosmics_design'   : '132X_mcRun3_2023cosmics_design_deco_v1',
     # GlobalTag for MC production with realistic conditions for Phase1 2023 detector for Heavy Ion
