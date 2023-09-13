@@ -1,5 +1,5 @@
-#ifndef CondFormats_SiPixelObjects_SiPixelGainCalibrationForHLTLayout_h
-#define CondFormats_SiPixelObjects_SiPixelGainCalibrationForHLTLayout_h
+#ifndef CondFormats_SiPixelObjects_interface_SiPixelGainCalibrationForHLTLayout_h
+#define CondFormats_SiPixelObjects_interface_SiPixelGainCalibrationForHLTLayout_h
 
 #include <array>
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
@@ -36,7 +36,7 @@ GENERATE_SOA_LAYOUT(SiPixelGainCalibrationForHLTLayout,
                     SOA_SCALAR(float, link))
 
 using SiPixelGainCalibrationForHLTSoA = SiPixelGainCalibrationForHLTLayout<>;
-using SiPixelGainCalibrationForHLTSoAView = SiPixelGainCalibrationForHLTLayout<>::View;
-using SiPixelGainCalibrationForHLTSoAConstView = SiPixelGainCalibrationForHLTLayout<>::ConstView;
+using SiPixelGainCalibrationForHLTSoAView = SiPixelGainCalibrationForHLTSoA::View;
+using SiPixelGainCalibrationForHLTSoAConstView = SiPixelGainCalibrationForHLTSoA::ConstView;
 
-#endif  // CondFormats_SiPixelObjects_SiPixelGainCalibrationForHLTLayout_h
+#endif  // CondFormats_SiPixelObjects_interface_SiPixelGainCalibrationForHLTLayout_h

@@ -1,5 +1,5 @@
-#ifndef CondFormats_SiPixelObjects_SiPixelMappingLayout_h
-#define CondFormats_SiPixelObjects_SiPixelMappingLayout_h
+#ifndef CondFormats_SiPixelObjects_interface_SiPixelMappingLayout_h
+#define CondFormats_SiPixelObjects_interface_SiPixelMappingLayout_h
 
 #include <array>
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
@@ -17,8 +17,8 @@ GENERATE_SOA_LAYOUT(SiPixelMappingLayout,
                     SOA_SCALAR(unsigned int, size),
                     SOA_SCALAR(bool, hasQuality))
 
-using SiPixelMappingLayoutSoA = SiPixelMappingLayout<>;
-using SiPixelMappingLayoutSoAView = SiPixelMappingLayout<>::View;
-using SiPixelMappingLayoutSoAConstView = SiPixelMappingLayout<>::ConstView;
+using SiPixelMappingSoA = SiPixelMappingLayout<>;
+using SiPixelMappingSoAView = SiPixelMappingSoA::View;
+using SiPixelMappingSoAConstView = SiPixelMappingSoA::ConstView;
 
-#endif  // CondFormats_SiPixelObjects_SiPixelMappingLayout_h
+#endif  // CondFormats_SiPixelObjects_interface_SiPixelMappingLayout_h

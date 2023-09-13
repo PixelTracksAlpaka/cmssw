@@ -62,8 +62,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       std::vector<unsigned int> const& fedIds = cablingMap->fedIds();
       std::unique_ptr<SiPixelFedCablingTree> const& cabling = cablingMap->cablingTree();
 
-      unsigned int startFed = *(fedIds.begin());
-      unsigned int endFed = *(fedIds.end() - 1);
+      unsigned int startFed = fedIds.front();
+      unsigned int endFed = fedIds.back();
 
       sipixelobjects::CablingPathToDetUnit path;
       int index = 1;

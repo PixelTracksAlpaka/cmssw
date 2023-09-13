@@ -1,5 +1,5 @@
-#ifndef DataFormats_SiPixelMappingSoA_alpaka_SiPixelClustersDevice_h
-#define DataFormats_SiPixelMappingSoA_alpaka_SiPixelClustersDevice_h
+#ifndef CondFormats_SiPixelObjects_interface_alpaka_SiPixelMappingDevice_h
+#define CondFormats_SiPixelObjects_interface_alpaka_SiPixelMappingDevice_h
 
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
@@ -11,7 +11,6 @@
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   using SiPixelMappingDevice = PortableCollection<SiPixelMappingLayout<>>;
-  using SiPixelMappingHost = PortableHostCollection<SiPixelMappingLayout<>>;
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 

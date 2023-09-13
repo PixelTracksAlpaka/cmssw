@@ -157,7 +157,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       SiPixelRawToClusterKernel& operator=(SiPixelRawToClusterKernel&&) = delete;
   
       void makePhase1ClustersAsync(const SiPixelClusterThresholds clusterThresholds,
-                             const SiPixelMappingLayoutSoAConstView& cablingMap,
+                             const SiPixelMappingSoAConstView& cablingMap,
                              const unsigned char* modToUnp,
                              const SiPixelGainCalibrationForHLTSoAConstView& gains,
                              const WordFedAppender& wordFed,

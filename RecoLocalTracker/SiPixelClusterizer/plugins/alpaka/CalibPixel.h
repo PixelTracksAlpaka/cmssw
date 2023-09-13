@@ -1,5 +1,5 @@
-#ifndef RecoLocalTracker_SiPixelClusterizer_alpaka_CalibPixel_h
-#define RecoLocalTracker_SiPixelClusterizer_alpaka_CalibPixel_h
+#ifndef RecoLocalTracker_SiPixelClusterizer_plugins_alpaka_CalibPixel_h
+#define RecoLocalTracker_SiPixelClusterizer_plugins_alpaka_CalibPixel_h
 
 #include <algorithm>
 #include <cstdint>
@@ -150,4 +150,4 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }  // namespace calibPixel
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
-#endif  // RecoLocalTracker_SiPixelClusterizer_alpaka_CalibPixel.h
+#endif  // RecoLocalTracker_SiPixelClusterizer_plugins_alpaka_CalibPixel_h

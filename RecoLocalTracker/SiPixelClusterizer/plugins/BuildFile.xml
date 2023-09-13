@@ -24,7 +24,6 @@
 <library file="alpaka/*.cc" name="RecoLocalTrackerSiPixelClusterizerPluginsPortable">
   <use name="alpaka"/>
   <use name="CalibTracker/Records"/>
-  <use name="HeterogeneousCore/AlpakaTest"/>
   <use name="DataFormats/Portable"/>
   <use name="FWCore/Framework"/>
   <use name="HeterogeneousCore/AlpakaCore"/>

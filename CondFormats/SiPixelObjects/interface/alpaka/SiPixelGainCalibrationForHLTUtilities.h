@@ -1,6 +1,5 @@
-
-#ifndef CondFormats_SiPixelObjects_alpaka_SiPixelGainUtilities_h
-#define CondFormats_SiPixelObjects_alpaka_SiPixelGainUtilities_h
+#ifndef CondFormats_SiPixelObjects_interface_alpaka_SiPixelGainCalibrationForHLTUtilities_h
+#define CondFormats_SiPixelObjects_interface_alpaka_SiPixelGainCalibrationForHLTUtilities_h
 
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
@@ -39,4 +38,4 @@ struct SiPixelGainUtilities {
   };
 };
 
-#endif  //CondFormats_SiPixelObjects_alpaka_SiPixelGainUtilities_h
+#endif  //CondFormats_SiPixelObjects_interface_alpaka_SiPixelGainCalibrationForHLTUtilities_h

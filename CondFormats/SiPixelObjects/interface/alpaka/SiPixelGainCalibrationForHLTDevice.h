@@ -1,5 +1,5 @@
-#ifndef CondFormats_SiPixelObjects_alpaka_SiPixelGainCalibrationForHLTDevice_h
-#define CondFormats_SiPixelObjects_alpaka_SiPixelGainCalibrationForHLTDevice_h
+#ifndef CondFormats_SiPixelObjects_interface_alpaka_SiPixelGainCalibrationForHLTDevice_h
+#define CondFormats_SiPixelObjects_interface_alpaka_SiPixelGainCalibrationForHLTDevice_h
 
 #include <alpaka/alpaka.hpp>
 #include "DataFormats/Portable/interface/alpaka/PortableCollection.h"

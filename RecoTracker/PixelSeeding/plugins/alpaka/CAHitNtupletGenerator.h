@@ -32,7 +32,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using HitsView = TrackingRecHitAlpakaSoAView<TrackerTraits>;
     using HitsConstView = TrackingRecHitAlpakaSoAConstView<TrackerTraits>;
     using HitsOnDevice = TrackingRecHitAlpakaCollection<TrackerTraits>;
-    using HitsOnHost = TrackingRecHitAlpakaHost<TrackerTraits>;
+    using HitsOnHost = TrackingRecHitHost<TrackerTraits>;
     using hindex_type = typename TrackingRecHitAlpakaSoA<TrackerTraits>::hindex_type;
 
     using HitToTuple = caStructures::HitToTupleT<TrackerTraits>;

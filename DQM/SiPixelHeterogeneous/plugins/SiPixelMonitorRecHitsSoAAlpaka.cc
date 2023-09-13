@@ -19,7 +19,7 @@
 template <typename T>
 class SiPixelMonitorRecHitsSoAAlpaka : public DQMEDAnalyzer {
 public:
-  using HitsOnHost = TrackingRecHitAlpakaHost<T>;
+  using HitsOnHost = TrackingRecHitHost<T>;
 
   explicit SiPixelMonitorRecHitsSoAAlpaka(const edm::ParameterSet&);
   ~SiPixelMonitorRecHitsSoAAlpaka() override = default;

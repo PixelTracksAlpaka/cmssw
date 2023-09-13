@@ -18,16 +18,13 @@ struct TrackingRecHitAlpakaSoA {
                                                      8 * sizeof(int16_t),
                                                      hindex_type,
                                                      TrackerTraits::numberOfLayers>;  //28 for phase2 geometry
-
   using PhiBinnerStorageType = typename PhiBinner::index_type;
   using AverageGeometry = pixelTopology::AverageGeometryT<TrackerTraits>;
-  using ParamsOnDevice = pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>;
-
   using HitLayerStartArray = std::array<hindex_type, TrackerTraits::numberOfLayers + 1>;
   using HitModuleStartArray = std::array<hindex_type, TrackerTraits::numberOfModules + 1>;
 
   //Is it better to have two split?
-  GENERATE_SOA_LAYOUT(TrackingRecHitAlpakaSoALayout,
+  GENERATE_SOA_LAYOUT(Layout,
                       SOA_COLUMN(float, xLocal),
                       SOA_COLUMN(float, yLocal),
                       SOA_COLUMN(float, xerrLocal),
@@ -54,12 +51,12 @@ struct TrackingRecHitAlpakaSoA {
 
 template <typename TrackerTraits>
 using TrackingRecHitAlpakaLayout =
-    typename TrackingRecHitAlpakaSoA<TrackerTraits>::template TrackingRecHitAlpakaSoALayout<>;
+    typename TrackingRecHitAlpakaSoA<TrackerTraits>::template Layout<>;
 template <typename TrackerTraits>
 using TrackingRecHitAlpakaSoAView =
-    typename TrackingRecHitAlpakaSoA<TrackerTraits>::template TrackingRecHitAlpakaSoALayout<>::View;
+    typename TrackingRecHitAlpakaSoA<TrackerTraits>::template Layout<>::View;
 template <typename TrackerTraits>
 using TrackingRecHitAlpakaSoAConstView =
-    typename TrackingRecHitAlpakaSoA<TrackerTraits>::template TrackingRecHitAlpakaSoALayout<>::ConstView;
+    typename TrackingRecHitAlpakaSoA<TrackerTraits>::template Layout<>::ConstView;
 
 #endif

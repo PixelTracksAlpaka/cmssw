@@ -130,7 +130,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         constexpr const uint32_t pixelStatusSize = isPhase2 ? 1 : PixelStatus::size;
 
         // packed words array used to store the PixelStatus of each pixel
-        auto&& status = alpaka::declareSharedVar<uint32_t[pixelStatusSize], __COUNTER__>(acc);
+        auto& status = alpaka::declareSharedVar<uint32_t[pixelStatusSize], __COUNTER__>(acc);
 
         // find the index of the first pixel not belonging to this module (or invalid)
         auto& msize = alpaka::declareSharedVar<unsigned int, __COUNTER__>(acc);

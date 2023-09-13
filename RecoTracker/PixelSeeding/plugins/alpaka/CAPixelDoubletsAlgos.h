@@ -187,7 +187,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       const auto& [firstElementIdxNoStrideY, endElementIdxNoStrideY] =
           cms::alpakatools::element_index_range_in_grid(acc, 0u, dimIndexY);
       uint32_t firstElementIdxY = firstElementIdxNoStrideY;
-      uint32_t endElementIdxY = endElementIdxNoStrideY;
 
       for (uint32_t j = firstElementIdxY; j < ntot; j += gridDimensionY) {
 
@@ -271,7 +270,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
           // Here we parallelize in X
           uint32_t firstElementIdxX = firstElementIdxNoStrideX;
-          uint32_t endElementIdxX = endElementIdxNoStrideX;
           for (uint32_t pIndex = firstElementIdxX; pIndex < maxpIndex; pIndex += blockDimensionX) {
 
             auto oi = p[pIndex];  // auto oi = __ldg(p); is not allowed since __ldg is device-only

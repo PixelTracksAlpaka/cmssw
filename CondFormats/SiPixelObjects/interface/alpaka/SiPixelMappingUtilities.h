@@ -1,6 +1,5 @@
-
-#ifndef CondFormats_SiPixelObjects_alpaka_SiPixelMappingUtilities_h
-#define CondFormats_SiPixelObjects_alpaka_SiPixelMappingUtilities_h
+#ifndef CondFormats_SiPixelObjects_interface_alpaka_SiPixelMappingUtilities_h
+#define CondFormats_SiPixelObjects_interface_alpaka_SiPixelMappingUtilities_h
 
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
@@ -12,7 +11,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   struct SiPixelMappingUtilities {
     ALPAKA_FN_HOST_ACC ALPAKA_FN_ACC ALPAKA_FN_INLINE static bool hasQuality(
-        const SiPixelMappingLayoutSoAConstView& view) {
+        const SiPixelMappingSoAConstView& view) {
       return view.hasQuality();
     }
 
@@ -51,4 +50,4 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }
   };
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
-#endif  //CondFormats_SiPixelObjects_alpaka_SiPixelMappingUtilities_h
+#endif  //CondFormats_SiPixelObjects_interface_alpaka_SiPixelMappingUtilities_h

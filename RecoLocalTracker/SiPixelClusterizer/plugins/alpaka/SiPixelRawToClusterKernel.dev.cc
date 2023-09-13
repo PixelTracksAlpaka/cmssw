@@ -50,7 +50,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     ALPAKA_FN_ACC bool isBarrel(uint32_t rawId) { return (1 == ((rawId >> 25) & 0x7)); }
 
-    ALPAKA_FN_ACC ::pixelDetails::DetIdGPU getRawId(const SiPixelMappingLayoutSoAConstView &cablingMap,
+    ALPAKA_FN_ACC ::pixelDetails::DetIdGPU getRawId(const SiPixelMappingSoAConstView &cablingMap,
                                                     uint8_t fed,
                                                     uint32_t link,
                                                     uint32_t roc) {
@@ -180,7 +180,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     ALPAKA_FN_ACC uint8_t checkROC(uint32_t errorWord,
                                    uint8_t fedId,
                                    uint32_t link,
-                                   const SiPixelMappingLayoutSoAConstView &cablingMap,
+                                   const SiPixelMappingSoAConstView &cablingMap,
                                    bool debug = false) {
       uint8_t errorType = (errorWord >> ::pixelDetails::ROC_shift) & ::pixelDetails::ERROR_mask;
       if (errorType < 25)
@@ -260,7 +260,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     ALPAKA_FN_ACC uint32_t getErrRawID(uint8_t fedId,
                                        uint32_t errWord,
                                        uint32_t errorType,
-                                       const SiPixelMappingLayoutSoAConstView &cablingMap,
+                                       const SiPixelMappingSoAConstView &cablingMap,
                                        bool debug = false) {
       uint32_t rID = 0xffffffff;
 
@@ -330,7 +330,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     struct RawToDigi_kernel {
       template <typename TAcc>
       ALPAKA_FN_ACC void operator()(const TAcc &acc,
-                                    const SiPixelMappingLayoutSoAConstView &cablingMap,
+                                    const SiPixelMappingSoAConstView &cablingMap,
                                     const unsigned char *modToUnp,
                                     const uint32_t wordCounter,
                                     const uint32_t *word,
@@ -554,7 +554,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     // Interface to outside
     template <typename TrackerTraits>
     void SiPixelRawToClusterKernel<TrackerTraits>::makePhase1ClustersAsync(const SiPixelClusterThresholds clusterThresholds,
-                                                      const SiPixelMappingLayoutSoAConstView &cablingMap,
+                                                      const SiPixelMappingSoAConstView &cablingMap,
                                                       const unsigned char *modToUnp,
                                                       const SiPixelGainCalibrationForHLTSoAConstView &gains,
                                                       const WordFedAppender &wordFed,

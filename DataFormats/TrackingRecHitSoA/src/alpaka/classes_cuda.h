@@ -1,5 +1,5 @@
-#ifndef DataFormats_TrackingRecHitSoA_Alpaka_Classes_CUDA_h
-#define DataFormats_TrackingRecHitSoA_Alpaka_Classes_CUDA_h
+#ifndef DataFormats_TrackingRecHitSoA_alpaka_alasses_cuda_h
+#define DataFormats_TrackingRecHitSoA_alpaka_alasses_cuda_h
 
 #include "DataFormats/Common/interface/DeviceProduct.h"
 #include "DataFormats/Common/interface/Wrapper.h"
@@ -10,4 +10,4 @@
 
 using namespace pixelTopology;
 
-#endif  // DataFormats_Track_src_alpaka_classes_cuda_h
+#endif  // DataFormats_TrackingRecHitSoA_alpaka_alasses_cuda_h

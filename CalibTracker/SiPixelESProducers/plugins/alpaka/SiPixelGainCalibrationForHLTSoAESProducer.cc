@@ -48,11 +48,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   std::unique_ptr<SiPixelGainCalibrationForHLTHost> SiPixelGainCalibrationForHLTSoAESProducer::produce(
       const SiPixelGainCalibrationForHLTSoARcd& iRecord) {
-    auto gainsRecord = iRecord.getHandle(gainsToken_);
-    auto geomRecord = iRecord.getHandle(geometryToken_);
 
-    auto const& geom = *(geomRecord);
-    auto const& gains = *(gainsRecord);
+    auto const& gains= iRecord.get(gainsToken_);
+    auto const& geom = iRecord.get(geometryToken_);
 
     auto product = std::make_unique<SiPixelGainCalibrationForHLTHost>(gains.data().size(), cms::alpakatools::host());
 

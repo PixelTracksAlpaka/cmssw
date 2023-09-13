@@ -11,7 +11,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
 template <typename TrackerTraits, typename TDev>
-class TrackingRecHitAlpakaDevice : public PortableDeviceCollection<TrackingRecHitAlpakaLayout<TrackerTraits>, TDev> {
+class TrackingRecHitDevice : public PortableDeviceCollection<TrackingRecHitAlpakaLayout<TrackerTraits>, TDev> {
 public:
   using hitSoA = TrackingRecHitAlpakaSoA<TrackerTraits>;
   //Need to decorate the class with the inherited portable accessors being now a template
@@ -19,15 +19,11 @@ public:
   using PortableDeviceCollection<TrackingRecHitAlpakaLayout<TrackerTraits>, TDev>::const_view;
   using PortableDeviceCollection<TrackingRecHitAlpakaLayout<TrackerTraits>, TDev>::buffer;
 
-  TrackingRecHitAlpakaDevice() = default;
+  TrackingRecHitDevice() = default;
 
-  using AverageGeometry = typename hitSoA::AverageGeometry;
-  using ParamsOnDevice = typename hitSoA::ParamsOnDevice;
-  using PhiBinnerStorageType = typename hitSoA::PhiBinnerStorageType;
-  using PhiBinner = typename hitSoA::PhiBinner;
   // Constructor which specifies the SoA size
   template <typename TQueue>
-  explicit TrackingRecHitAlpakaDevice(uint32_t nHits, int32_t offsetBPIX2, uint32_t const* hitsModuleStart, TQueue queue)
+  explicit TrackingRecHitDevice(uint32_t nHits, int32_t offsetBPIX2, uint32_t const* hitsModuleStart, TQueue queue)
       : PortableDeviceCollection<TrackingRecHitAlpakaLayout<TrackerTraits>, TDev>(nHits, queue) {
     const auto device = alpaka::getDev(queue);
 

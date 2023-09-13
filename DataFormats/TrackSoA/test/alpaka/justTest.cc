@@ -75,7 +75,7 @@ int main() {
 
     const TrackingRecHitAlpakaSoA<pixelTopology::Phase1>::ParamsOnDevice *cpeParams;
     uint32_t const oi = 1;
-    TrackingRecHitAlpakaDevice<pixelTopology::Phase1> hits_d(1, 1, cpeParams, &oi, queue);
+    TrackingRecHitDevice<pixelTopology::Phase1> hits_d(1, 1, cpeParams, &oi, queue);
 
     auto tkidGPU = cms::alpakatools::make_device_buffer<typename pixelTopology::Phase1::tindex_type[]>(
         queue, maxNumberOfConcurrentFits_);

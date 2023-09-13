@@ -39,7 +39,7 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
   // Data has been implicitly copied from Device to Host by the framework
-  using HitsOnHost = TrackingRecHitAlpakaHost<TrackerTraits>;
+  using HitsOnHost = TrackingRecHitHost<TrackerTraits>;
 
 private:
   void produce(edm::StreamID streamID, edm::Event& iEvent, const edm::EventSetup& iSetup) const override;
