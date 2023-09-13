@@ -28,32 +28,20 @@
 #include "DataFormats/FEDRawData/interface/FEDRawDataCollection.h"
 #include "EventFilter/SiPixelRawToDigi/interface/PixelDataFormatter.h"
 #include "EventFilter/SiPixelRawToDigi/interface/PixelUnpackingRegions.h"
-#include "FWCore/Framework/interface/ConsumesCollector.h"
-#include "FWCore/Framework/interface/ESHandle.h"
-#include "FWCore/Framework/interface/ESTransientHandle.h"
 #include "FWCore/Framework/interface/ESWatcher.h"
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/EventSetup.h"
-#include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "RecoTracker/Record/interface/CkfComponentsRecord.h"
 
-#include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/stream/SynchronizingEDProducer.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/EDPutToken.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/ESGetToken.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/Event.h"
-#include "HeterogeneousCore/AlpakaTest/interface/AlpakaESTestRecords.h"
-#include "HeterogeneousCore/AlpakaTest/interface/alpaka/AlpakaESTestData.h"
 
 #include "RecoLocalTracker/SiPixelClusterizer/plugins/SiPixelClusterThresholds.h"
 #include "DataFormats/SiPixelRawData/interface/SiPixelFormatterErrors.h"
@@ -168,7 +156,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     // initialize cabling map or update if necessary
     if (recordWatcher_.check(iSetup) or regions_) {
       // cabling map, which maps online address (fed->link->ROC->local pixel) to offline (DetId->global pixel)
-      cablingMap_ = iSetup.getHandle(cablingMapToken_).product();
+      cablingMap_ = &iSetup.getData(cablingMapToken_);
       fedIds_ = cablingMap_->fedIds();
       cabling_ = cablingMap_->cablingTree();
       LogDebug("map version:") << cablingMap_->version();
@@ -180,7 +168,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                       << " " << regions_->nForwardModules() << " " << regions_->nModules();
 
       modulesToUnpackRegional = SiPixelMappingUtilities::getModToUnpRegionalAsync(
-          *(regions_->modulesToUnpack()), (cablingMap_->cablingTree()).get(), cablingMap_->fedIds(), iEvent.queue());
+          *(regions_->modulesToUnpack()), cabling_.get(), fedIds_, iEvent.queue());
       modulesToUnpack = modulesToUnpackRegional.data();
     } else {
       modulesToUnpack = hMap->modToUnpDefault();
@@ -282,18 +270,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       // still used downstream to initialize TrackingRecHitSoADevice. If there
       // are no valid pointers to clusters' Collection columns, instantiation
       // of TrackingRecHits fail. Example: workflow 11604.0
-      SiPixelDigisCollection digis_d = SiPixelDigisCollection(nDigis_, iEvent.queue());
-      SiPixelClustersCollection clusters_d{pixelTopology::Phase1::numberOfModules, iEvent.queue()};
-      iEvent.emplace(digiPutToken_, std::move(digis_d));
-      iEvent.emplace(clusterPutToken_, std::move(clusters_d));
+
+      iEvent.emplace(digiPutToken_, nDigis_, iEvent.queue());
+      iEvent.emplace(clusterPutToken_, pixelTopology::Phase1::numberOfModules, iEvent.queue());
       if (includeErrors_) {
-        iEvent.emplace(digiErrorPutToken_, SiPixelDigiErrorsCollection());
-        iEvent.emplace(fmtErrorToken_, std::move(errors_));
+        iEvent.emplace(digiErrorPutToken_);
+        iEvent.emplace(fmtErrorToken_);
       }
       return;
     }
 
-    iEvent.emplace(digiPutToken_, Algo_.getDigis());  //std::move(tmp.first));
+    iEvent.emplace(digiPutToken_, Algo_.getDigis());
     iEvent.emplace(clusterPutToken_, Algo_.getClusters());
     if (includeErrors_) {
       iEvent.emplace(digiErrorPutToken_, Algo_.getErrors());

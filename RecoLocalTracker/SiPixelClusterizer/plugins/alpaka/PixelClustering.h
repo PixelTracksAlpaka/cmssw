@@ -440,8 +440,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               if (foundClusters > 8)
                 printf("max hit %d in %d\n", foundClusters, thisModuleId);
             }
-#endif
-#ifdef GPU_DEBUG
             if (thisModuleId % 100 == 1)
               printf("%d clusters in module %d\n", foundClusters, thisModuleId);
 #endif

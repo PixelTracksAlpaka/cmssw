@@ -527,7 +527,6 @@ namespace pixelDetails {
       ALPAKA_ASSERT_OFFLOAD(clus_view[1025].moduleStart() >= clus_view[1024].moduleStart());
       ALPAKA_ASSERT_OFFLOAD(clus_view[nMaxModules].moduleStart() >= clus_view[1025].moduleStart());
 
-      //for (int i = first, iend = nMaxModules + 1; i < iend; i += blockDim.x) {
       cms::alpakatools::for_each_element_in_block_strided(acc, nMaxModules + 1, [&](uint32_t i) {
         if (0 != i)
           ALPAKA_ASSERT_OFFLOAD(clus_view[i].moduleStart() >= clus_view[i - i].moduleStart());
@@ -596,30 +595,25 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         alpaka::memcpy(queue, word_d, wordFed.word(), wordCounter);
         alpaka::memcpy(queue, fedId_d, wordFed.fedId(), wordCounter / 2);
         // Launch rawToDigi kernel
-        alpaka::enqueue(queue,
-                        alpaka::createTaskKernel<Acc1D>(workDiv,
-                                                        RawToDigi_kernel(),
-                                                        cablingMap,
-                                                        modToUnp,
-                                                        wordCounter,
-                                                        word_d.data(),
-                                                        fedId_d.data(),
-                                                        digis_d->view(),
-                                                        digiErrors_d->view(),
-                                                        useQualityInfo,
-                                                        includeErrors,
-                                                        debug));
+        alpaka::exec<Acc1D>(queue,
+                            workDiv,
+                            RawToDigi_kernel(),
+                            cablingMap,
+                            modToUnp,
+                            wordCounter,
+                            word_d.data(),
+                            fedId_d.data(),
+                            digis_d->view(),
+                            digiErrors_d->view(),
+                            useQualityInfo,
+                            includeErrors,
+                            debug);
 
 #ifdef GPU_DEBUG
         alpaka::wait(queue);
         std::cout << "RawToDigi_kernel was run smoothly!" << std::endl;
 #endif
 
-#ifdef TODO
-        if (includeErrors) {
-          digiErrors_d.copyErrorToHostAsync(stream);
-        }
-#endif
       }
       // End of Raw2Digi and passing data for clustering
 
@@ -638,9 +632,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                                            threadsPerBlockOrElementsPerThread);
         const auto workDiv = cms::alpakatools::make_workdiv<Acc1D>(blocks, threadsPerBlockOrElementsPerThread);
 
-        alpaka::enqueue(queue,
-                        alpaka::createTaskKernel<Acc1D>(
-                            workDiv, calibDigis(), clusterThresholds, digis_d->view(), clusters_d->view(), gains, wordCounter));
+        alpaka::exec<Acc1D>(queue, workDiv, calibDigis(), clusterThresholds, digis_d->view(), clusters_d->view(), gains, wordCounter);
 
 #ifdef GPU_DEBUG
         alpaka::wait(queue);
@@ -648,10 +640,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                   << threadsPerBlockOrElementsPerThread << " threadsPerBlockOrElementsPerThread\n";
 #endif
 
-        alpaka::enqueue(
-            queue,
-            alpaka::createTaskKernel<Acc1D>(
-                workDiv, countModules<TrackerTraits>(), digis_d->view(), clusters_d->view(), wordCounter));
+        alpaka::exec<Acc1D>(
+            queue, workDiv, countModules<TrackerTraits>(), digis_d->view(), clusters_d->view(), wordCounter);
 
         auto moduleStartFirstElement =
             cms::alpakatools::make_device_view(alpaka::getDev(queue), clusters_d->view().moduleStart(), 1u);
@@ -667,25 +657,25 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                   << " threadsPerBlockOrElementsPerThread\n";
 #endif
 
-        alpaka::enqueue(queue,
-                        alpaka::createTaskKernel<Acc1D>(workDivMaxNumModules,
-                                                        findClus<TrackerTraits>(),
-                                                        digis_d->view(),
-                                                        clusters_d->view(),
-                                                        wordCounter));
+        alpaka::exec<Acc1D>(queue,
+                            workDivMaxNumModules,
+                            findClus<TrackerTraits>(),
+                            digis_d->view(),
+                            clusters_d->view(),
+                            wordCounter);
 
 #ifdef GPU_DEBUG
         alpaka::wait(queue);
 #endif
 
         // apply charge cut
-        alpaka::enqueue(queue,
-                        alpaka::createTaskKernel<Acc1D>(workDivMaxNumModules,
-                                                        ::pixelClustering::clusterChargeCut<TrackerTraits>(),
-                                                        digis_d->view(),
-                                                        clusters_d->view(),
-                                                        clusterThresholds,
-                                                        wordCounter));
+        alpaka::exec<Acc1D>(queue,
+                            workDivMaxNumModules,
+                            ::pixelClustering::clusterChargeCut<TrackerTraits>(),
+                            digis_d->view(),
+                            clusters_d->view(),
+                            clusterThresholds,
+                            wordCounter);
         // count the module start indices already here (instead of
         // rechits) so that the number of clusters/hits can be made
         // available in the rechit producer without additional points of
@@ -693,10 +683,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         // MUST be ONE block
         const auto workDivOneBlock = cms::alpakatools::make_workdiv<Acc1D>(1u, 1024u);
-        alpaka::enqueue(
-            queue,
-            alpaka::createTaskKernel<Acc1D>(
-                workDivOneBlock, ::pixelDetails::fillHitsModuleStart<TrackerTraits>(), clusters_d->view()));
+        alpaka::exec<Acc1D>(
+            queue, workDivOneBlock, ::pixelDetails::fillHitsModuleStart<TrackerTraits>(), clusters_d->view());
 
         // last element holds the number of all clusters
         const auto clusModuleStartLastElement = cms::alpakatools::make_device_view(
@@ -733,18 +721,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           cms::alpakatools::divide_up_by(std::max<int>(numDigis, numberOfModules), threadsPerBlockOrElementsPerThread);
       const auto workDiv = cms::alpakatools::make_workdiv<Acc1D>(blocks, threadsPerBlockOrElementsPerThread);
 
-      alpaka::enqueue(queue,
-                      alpaka::createTaskKernel<Acc1D>(
-                          workDiv, calibPixel::calibDigisPhase2{}, clusterThresholds, digis_view, clusters_d->view(), numDigis));
+      alpaka::exec<Acc1D>(queue, workDiv, calibPixel::calibDigisPhase2{}, clusterThresholds, digis_view, clusters_d->view(), numDigis);
 
 #ifdef GPU_DEBUG
       alpaka::wait(queue);
       std::cout << "countModules kernel launch with " << blocks << " blocks of "
                 << threadsPerBlockOrElementsPerThread << " threadsPerBlockOrElementsPerThread\n";
 #endif
-      alpaka::enqueue(queue,
-                      alpaka::createTaskKernel<Acc1D>(
-                          workDiv, countModules<pixelTopology::Phase2>(), digis_view, clusters_d->view(), numDigis));
+      alpaka::exec<Acc1D>(queue, workDiv, countModules<pixelTopology::Phase2>(), digis_view, clusters_d->view(), numDigis);
 
       auto moduleStartFirstElement =
           cms::alpakatools::make_device_view(alpaka::getDev(queue), clusters_d->view().moduleStart(), 1u);
@@ -758,22 +742,20 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       std::cout << "findClus kernel launch with " << numberOfModules << " blocks of " << threadsPerBlock
                 << " threadsPerBlockOrElementsPerThread\n";
 #endif
-      alpaka::enqueue(
-          queue,
-          alpaka::createTaskKernel<Acc1D>(
-              workDivMaxNumModules, findClus<pixelTopology::Phase2>(), digis_view, clusters_d->view(), numDigis));
+      alpaka::exec<Acc1D>(
+          queue, workDivMaxNumModules, findClus<pixelTopology::Phase2>(), digis_view, clusters_d->view(), numDigis);
 #ifdef GPU_DEBUG
       alpaka::wait(queue);
 #endif
 
       // apply charge cut
-      alpaka::enqueue(queue,
-                      alpaka::createTaskKernel<Acc1D>(workDivMaxNumModules,
-                                                      ::pixelClustering::clusterChargeCut<pixelTopology::Phase2>(),
-                                                      digis_view,
-                                                      clusters_d->view(),
-                                                      clusterThresholds,
-                                                      numDigis));
+      alpaka::exec<Acc1D>(queue,
+                          workDivMaxNumModules,
+                          ::pixelClustering::clusterChargeCut<pixelTopology::Phase2>(),
+                          digis_view,
+                          clusters_d->view(),
+                          clusterThresholds,
+                          numDigis);
 
       // count the module start indices already here (instead of
       // rechits) so that the number of clusters/hits can be made
@@ -782,10 +764,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       // MUST be ONE block
       const auto workDivOneBlock = cms::alpakatools::make_workdiv<Acc1D>(1u, 1024u);
-      alpaka::enqueue(
-          queue,
-          alpaka::createTaskKernel<Acc1D>(
-              workDivOneBlock, ::pixelDetails::fillHitsModuleStart<pixelTopology::Phase2>(), clusters_d->view()));
+      alpaka::exec<Acc1D>(
+          queue, workDivOneBlock, ::pixelDetails::fillHitsModuleStart<pixelTopology::Phase2>(), clusters_d->view());
 
       // last element holds the number of all clusters
       const auto clusModuleStartLastElement = cms::alpakatools::make_device_view(

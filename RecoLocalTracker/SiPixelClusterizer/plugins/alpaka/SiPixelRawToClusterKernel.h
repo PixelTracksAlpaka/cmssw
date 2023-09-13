@@ -173,17 +173,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                    const uint32_t numDigis,
                                    Queue& queue);
 
-      SiPixelDigisCollection&& getDigis() {
+      SiPixelDigisCollection getDigis() {
         digis_d->setNModulesDigis(nModules_Clusters_h[0], nDigis);
         return std::move(*digis_d);
       }
 
-      SiPixelClustersCollection&& getClusters() {
+      SiPixelClustersCollection getClusters() {
         clusters_d->setNClusters(nModules_Clusters_h[1], nModules_Clusters_h[2]);
         return std::move(*clusters_d);
       }
 
-      SiPixelDigiErrorsCollection&& getErrors() { return std::move(*digiErrors_d); }
+      SiPixelDigiErrorsCollection getErrors() { return std::move(*digiErrors_d); }
 
       auto nModules() { return nModules_Clusters_h[0]; }
 
