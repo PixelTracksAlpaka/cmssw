@@ -8,6 +8,7 @@
 <use name="FWCore/Utilities"/>
 <use name="RecoTracker/Record"/>
 <use name="CalibTracker/SiPixelESProducers"/>
+<use name="CondFormats/SiPixelObjects"/>
 
 <iftool name="cuda-gcc-support">
   <use name="cuda"/>
