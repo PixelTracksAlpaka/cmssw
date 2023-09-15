@@ -154,7 +154,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         cms::alpakatools::make_device_buffer<unsigned char[]>(iEvent.queue(), ::pixelgpudetails::MAX_SIZE);
     const unsigned char* modulesToUnpack;
     // initialize cabling map or update if necessary
-    if (recordWatcher_.check(iSetup) or regions_) {
+    if (recordWatcher_.check(iSetup)) {
       // cabling map, which maps online address (fed->link->ROC->local pixel) to offline (DetId->global pixel)
       cablingMap_ = &iSetup.getData(cablingMapToken_);
       fedIds_ = cablingMap_->fedIds();
