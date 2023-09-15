@@ -12,14 +12,10 @@
 class SiPixelClustersHost : public PortableHostCollection<SiPixelClustersSoA> {
 public:
   SiPixelClustersHost() = default;
-  ~SiPixelClustersHost() = default;
 
   template <typename TQueue>
   explicit SiPixelClustersHost(size_t maxModules, TQueue queue)
       : PortableHostCollection<SiPixelClustersSoA>(maxModules + 1, queue) {}
-
-  SiPixelClustersHost(SiPixelClustersHost &&) = default;
-  SiPixelClustersHost &operator=(SiPixelClustersHost &&) = default;
 
   void setNClusters(uint32_t nClusters, int32_t offsetBPIX2) {
     nClusters_h = nClusters;

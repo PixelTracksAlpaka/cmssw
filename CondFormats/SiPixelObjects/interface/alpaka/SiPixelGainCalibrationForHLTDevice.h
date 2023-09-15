@@ -7,8 +7,7 @@
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
-  using SiPixelGainCalibrationForHLTDevice = PortableCollection<SiPixelGainCalibrationForHLTLayout<>>;
-  using SiPixelGainCalibrationForHLTHost = PortableHostCollection<SiPixelGainCalibrationForHLTLayout<>>;
+  using SiPixelGainCalibrationForHLTDevice = PortableCollection<SiPixelGainCalibrationForHLTSoA>;
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
-#endif  // CondFormats_SiPixelObjects_alpaka_SiPixelGainCalibrationForHLTDevice_h
+#endif  // CondFormats_SiPixelObjects_interface_alpaka_SiPixelGainCalibrationForHLTDevice_h

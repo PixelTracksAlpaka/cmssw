@@ -16,14 +16,10 @@ public:
   template <typename TQueue>
   explicit SiPixelDigisDevice(size_t maxFedWords, TQueue queue)
       : PortableDeviceCollection<SiPixelDigisSoAv2, TDev>(maxFedWords + 1, queue) {}
-  ~SiPixelDigisDevice() = default;
 
   // Constructor which specifies the SoA size
   explicit SiPixelDigisDevice(size_t maxFedWords, TDev const &device)
       : PortableDeviceCollection<SiPixelDigisSoAv2, TDev>(maxFedWords + 1, device) {}
-
-  SiPixelDigisDevice(SiPixelDigisDevice &&) = default;
-  SiPixelDigisDevice &operator=(SiPixelDigisDevice &&) = default;
 
   void setNModulesDigis(uint32_t nModules, uint32_t nDigis) {
     nModules_h = nModules;

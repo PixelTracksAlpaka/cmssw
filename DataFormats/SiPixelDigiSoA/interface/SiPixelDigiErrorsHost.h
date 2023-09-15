@@ -17,10 +17,6 @@ public:
   template <typename TQueue>
   explicit SiPixelDigiErrorsHost(int maxFedWords, TQueue queue)
       : PortableHostCollection<SiPixelDigiErrorsSoA>(maxFedWords, queue), maxFedWords_(maxFedWords) {}
-  ~SiPixelDigiErrorsHost() = default;
-
-  SiPixelDigiErrorsHost(SiPixelDigiErrorsHost&&) = default;
-  SiPixelDigiErrorsHost& operator=(SiPixelDigiErrorsHost&&) = default;
 
   int maxFedWords() const { return maxFedWords_; }
 

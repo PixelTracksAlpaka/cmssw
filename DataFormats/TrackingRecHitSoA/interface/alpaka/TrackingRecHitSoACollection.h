@@ -25,23 +25,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 namespace cms::alpakatools {
-  template <>
-  struct CopyToHost<ALPAKA_ACCELERATOR_NAMESPACE::TrackingRecHitAlpakaSoAPhase1> {
+  template <typename TrackerTraits>
+  struct CopyToHost<ALPAKA_ACCELERATOR_NAMESPACE::TrackingRecHitAlpakaCollection<TrackerTraits>> {
     template <typename TQueue>
     static auto copyAsync(TQueue& queue,
-                          ALPAKA_ACCELERATOR_NAMESPACE::TrackingRecHitAlpakaSoAPhase1 const& deviceData) {
-      TrackingRecHitHostPhase1 hostData(deviceData.view().metadata().size(), queue);
-      alpaka::memcpy(queue, hostData.buffer(), deviceData.buffer());
-      return hostData;
-    }
-  };
-
-  template <>
-  struct CopyToHost<ALPAKA_ACCELERATOR_NAMESPACE::TrackingRecHitAlpakaSoAPhase2> {
-    template <typename TQueue>
-    static auto copyAsync(TQueue& queue,
-                          ALPAKA_ACCELERATOR_NAMESPACE::TrackingRecHitAlpakaSoAPhase2 const& deviceData) {
-      TrackingRecHitHostPhase2 hostData(deviceData.view().metadata().size(), queue);
+                          ALPAKA_ACCELERATOR_NAMESPACE::TrackingRecHitAlpakaCollection<TrackerTraits> const& deviceData) {
+      TrackingRecHitHost<TrackerTraits> hostData(deviceData.view().metadata().size(), queue);
       alpaka::memcpy(queue, hostData.buffer(), deviceData.buffer());
       return hostData;
     }

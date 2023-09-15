@@ -13,10 +13,6 @@ public:
   template <typename TQueue>
   explicit SiPixelDigisHost(size_t maxFedWords, TQueue queue)
       : PortableHostCollection<SiPixelDigisSoAv2>(maxFedWords + 1, queue) {}
-  ~SiPixelDigisHost() = default;
-
-  SiPixelDigisHost(SiPixelDigisHost &&) = default;
-  SiPixelDigisHost &operator=(SiPixelDigisHost &&) = default;
 
   void setNModulesDigis(uint32_t nModules, uint32_t nDigis) {
     nModules_h = nModules;

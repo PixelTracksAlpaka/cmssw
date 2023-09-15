@@ -24,18 +24,18 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     ALPAKA_STATIC_ACC_MEM_GLOBAL uint32_t gMaxHit = 0;
 #endif
 
-    struct PixelStatus {
+    namespace PixelStatus {
       // Phase-1 pixel modules
-      static constexpr uint32_t pixelSizeX = pixelTopology::Phase1::numRowsInModule;
-      static constexpr uint32_t pixelSizeY = pixelTopology::Phase1::numColsInModule;
+      constexpr uint32_t pixelSizeX = pixelTopology::Phase1::numRowsInModule;
+      constexpr uint32_t pixelSizeY = pixelTopology::Phase1::numColsInModule;
 
       // Use 0x00, 0x01, 0x03 so each can be OR'ed on top of the previous ones
       enum Status : uint32_t { kEmpty = 0x00, kFound = 0x01, kDuplicate = 0x03 };
 
-      static constexpr uint32_t bits = 2;
-      static constexpr uint32_t mask = (0x01 << bits) - 1;
-      static constexpr uint32_t valuesPerWord = sizeof(uint32_t) * 8 / bits;
-      static constexpr uint32_t size = pixelSizeX * pixelSizeY / valuesPerWord;
+      constexpr uint32_t bits = 2;
+      constexpr uint32_t mask = (0x01 << bits) - 1;
+      constexpr uint32_t valuesPerWord = sizeof(uint32_t) * 8 / bits;
+      constexpr uint32_t size = pixelSizeX * pixelSizeY / valuesPerWord;
 
       ALPAKA_FN_ACC ALPAKA_FN_INLINE constexpr static uint32_t getIndex(uint16_t x, uint16_t y) {
         return (pixelSizeX * y + x) / valuesPerWord;
@@ -81,7 +81,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         } while (expected != old_word);
       }
 
-    };  // struct PixelStatus
+    }  // struct PixelStatus
 
     template <typename TrackerTraits>
     struct countModules {

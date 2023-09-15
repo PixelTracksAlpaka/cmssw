@@ -113,34 +113,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     descriptions.addWithDefaultLabel(desc);
   }
 
-  // template <typename TrackerTraits>
-  // PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::PixelCPEFastParamsESProducerAlpaka(edm::ParameterSet const& iConfig)
-  //     : ESProducer(iConfig) {
-  //   auto const& myname = iConfig.getParameter<std::string>("ComponentName");
-  // }
-
-  // template <typename TrackerTraits>
-  // std::optional<PixelCPEFastParamsHost<TrackerTraits>>
-  // PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::produce(device::EventSetup& es) {
-  //   auto const& pcpe = es.getData(cpeToken_);
-  //   auto pcpe_buf = cms::alpakatools::make_host_buffer<pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>, Platform>();
-  //   memcpy(pcpe_buf.data(), &pcpe.getCPEFastParams(), sizeof(pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>));
-
-  //   return PixelCPEFastParamsHost<TrackerTraits>(pcpe_buf);
-  // }
-
-  // template <typename TrackerTraits>
-  // void PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::fillDescriptions(
-  //     edm::ConfigurationDescriptions& descriptions) {
-  //   edm::ParameterSetDescription desc;
-
-  //   std::string name = "PixelCPEFastParams";
-  //   name += TrackerTraits::nameModifier;
-  //   desc.add<std::string>("ComponentName", name);
-
-  //   descriptions.addWithDefaultLabel(desc);
-  // }
-
   using PixelCPEFastParamsESProducerAlpakaPhase1 = PixelCPEFastParamsESProducerAlpaka<pixelTopology::Phase1>;
   using PixelCPEFastParamsESProducerAlpakaPhase2 = PixelCPEFastParamsESProducerAlpaka<pixelTopology::Phase2>;
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

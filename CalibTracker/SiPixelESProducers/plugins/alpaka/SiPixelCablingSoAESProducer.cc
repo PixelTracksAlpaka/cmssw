@@ -32,7 +32,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   public:
     SiPixelCablingSoAESProducer(edm::ParameterSet const& iConfig)
         : ESProducer(iConfig), useQuality_(iConfig.getParameter<bool>("UseQualityInfo")) {
-      auto const& component = iConfig.getParameter<std::string>("ComponentName");
+      auto const& component = iConfig.getParameter<std::string>("appendToDataLabel");
       auto cc = setWhatProduced(this, component);
       cablingMapToken_ = cc.consumes(edm::ESInputTag{"", iConfig.getParameter<std::string>("CablingMapLabel")});
       if (useQuality_) {
@@ -43,7 +43,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
       edm::ParameterSetDescription desc;
-      desc.add<std::string>("ComponentName", "");
+      desc.add<std::string>("appendToDataLabel", "");
       desc.add<std::string>("CablingMapLabel", "")->setComment("CablingMap label");
       desc.add<bool>("UseQualityInfo", false);
       descriptions.addWithDefaultLabel(desc);

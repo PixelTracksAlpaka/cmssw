@@ -5,6 +5,6 @@
 #include "DataFormats/Portable/interface/PortableHostCollection.h"
 #include "CondFormats/SiPixelObjects/interface/SiPixelMappingLayout.h"
 
-using SiPixelMappingHost = PortableHostCollection<SiPixelMappingLayout<>>;
+using SiPixelMappingHost = PortableHostCollection<SiPixelMappingSoA>;
 
 #endif  // CondFormats_SiPixelObjects_SiPixelMappingHost_h

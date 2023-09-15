@@ -10,7 +10,7 @@
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
-  using SiPixelMappingDevice = PortableCollection<SiPixelMappingLayout<>>;
+  using SiPixelMappingDevice = PortableCollection<SiPixelMappingSoA>;
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 

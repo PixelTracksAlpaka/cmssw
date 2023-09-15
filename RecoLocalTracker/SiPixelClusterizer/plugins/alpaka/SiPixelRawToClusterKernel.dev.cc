@@ -458,11 +458,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }  // end of Raw to Digi kernel operator()
     };   // end of Raw to Digi struct
 
-  }  // namespace pixelDetails
-}  // namespace ALPAKA_ACCELERATOR_NAMESPACE
-
-namespace pixelDetails {
-
   template <typename TrackerTraits>
   struct fillHitsModuleStart {
     template <typename TAcc>
@@ -545,11 +540,6 @@ namespace pixelDetails {
     }  // end of fillHitsModuleStart kernel operator()
   };   // end of fillHitsModuleStart struct
 
-}  // namespace pixelDetails
-
-namespace ALPAKA_ACCELERATOR_NAMESPACE {
-  namespace pixelDetails {
-
     // Interface to outside
     template <typename TrackerTraits>
     void SiPixelRawToClusterKernel<TrackerTraits>::makePhase1ClustersAsync(const SiPixelClusterThresholds clusterThresholds,
@@ -576,12 +566,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       clusters_d = SiPixelClustersCollection(numberOfModules, queue);
       if (wordCounter)  // protect in case of empty event....
       {
-#ifndef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
-        const int threadsPerBlockOrElementsPerThread = 512;
-#else
-        // NB: MPORTANT: This could be tuned to benefit from innermost loop.
-        const int threadsPerBlockOrElementsPerThread = 32;
-#endif
+        const int threadsPerBlockOrElementsPerThread = []() {
+          if constexpr (std::is_same_v<Device, alpaka_common::DevHost>) {
+            // NB: MPORTANT: This could be tuned to benefit from innermost loop.
+            return 32;
+          } else {
+            return 512;
+          }
+        }();
         // fill it all
         const uint32_t blocks = cms::alpakatools::divide_up_by(wordCounter, threadsPerBlockOrElementsPerThread);
         const auto workDiv = cms::alpakatools::make_workdiv<Acc1D>(blocks, threadsPerBlockOrElementsPerThread);
@@ -622,12 +614,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         using namespace pixelClustering;
         // calibrations
         using namespace calibPixel;
-        #ifndef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
-          const auto threadsPerBlockOrElementsPerThread = 256;
-        #else
+        const int threadsPerBlockOrElementsPerThread = []() {
+          if constexpr (std::is_same_v<Device, alpaka_common::DevHost>) {
             // NB: MPORTANT: This could be tuned to benefit from innermost loop.
-            const auto threadsPerBlockOrElementsPerThread = 32;
-        #endif
+            return 32;
+          } else {
+            return 256;
+          }
+        }();
         const auto blocks = cms::alpakatools::divide_up_by(std::max<int>(wordCounter, numberOfModules),
                                                            threadsPerBlockOrElementsPerThread);
         const auto workDiv = cms::alpakatools::make_workdiv<Acc1D>(blocks, threadsPerBlockOrElementsPerThread);
@@ -684,7 +678,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         // MUST be ONE block
         const auto workDivOneBlock = cms::alpakatools::make_workdiv<Acc1D>(1u, 1024u);
         alpaka::exec<Acc1D>(
-            queue, workDivOneBlock, ::pixelDetails::fillHitsModuleStart<TrackerTraits>(), clusters_d->view());
+            queue, workDivOneBlock, fillHitsModuleStart<TrackerTraits>(), clusters_d->view());
 
         // last element holds the number of all clusters
         const auto clusModuleStartLastElement = cms::alpakatools::make_device_view(
@@ -765,7 +759,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       // MUST be ONE block
       const auto workDivOneBlock = cms::alpakatools::make_workdiv<Acc1D>(1u, 1024u);
       alpaka::exec<Acc1D>(
-          queue, workDivOneBlock, ::pixelDetails::fillHitsModuleStart<pixelTopology::Phase2>(), clusters_d->view());
+          queue, workDivOneBlock, fillHitsModuleStart<pixelTopology::Phase2>(), clusters_d->view());
 
       // last element holds the number of all clusters
       const auto clusModuleStartLastElement = cms::alpakatools::make_device_view(

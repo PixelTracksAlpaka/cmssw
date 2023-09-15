@@ -13,7 +13,6 @@ template <typename TDev>
 class SiPixelClustersDevice : public PortableDeviceCollection<SiPixelClustersSoA, TDev> {
 public:
   SiPixelClustersDevice() = default;
-  ~SiPixelClustersDevice() = default;
 
   template <typename TQueue>
   explicit SiPixelClustersDevice(size_t maxModules, TQueue queue)
@@ -22,9 +21,6 @@ public:
   // Constructor which specifies the SoA size
   explicit SiPixelClustersDevice(size_t maxModules, TDev const &device)
       : PortableDeviceCollection<SiPixelClustersSoA, TDev>(maxModules + 1, device) {}
-
-  SiPixelClustersDevice(SiPixelClustersDevice &&) = default;
-  SiPixelClustersDevice &operator=(SiPixelClustersDevice &&) = default;
 
   void setNClusters(uint32_t nClusters, int32_t offsetBPIX2) {
     nClusters_h = nClusters;

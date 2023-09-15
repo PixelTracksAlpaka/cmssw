@@ -31,7 +31,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 namespace cms::alpakatools {
-  // TODO: Is this the right place for the specialization? Or should it be in PortableDeviceProduct?
   template <typename TrackerTraits>
   struct CopyToHost<ALPAKA_ACCELERATOR_NAMESPACE::TrackSoACollection<TrackerTraits>> {
     template <typename TQueue>
@@ -42,40 +41,6 @@ namespace cms::alpakatools {
       return hostData;
     }
   };
-
-  template <>
-  struct CopyToHost<ALPAKA_ACCELERATOR_NAMESPACE::pixelTrack::TrackSoACollectionPhase1> {
-    template <typename TQueue>
-    static auto copyAsync(TQueue& queue,
-                          ALPAKA_ACCELERATOR_NAMESPACE::pixelTrack::TrackSoACollectionPhase1 const& deviceData) {
-      ::pixelTrack::TrackSoAHostPhase1 hostData(queue);
-      alpaka::memcpy(queue, hostData.buffer(), deviceData.buffer());
-      return hostData;
-    }
-  };
-
-  template <>
-  struct CopyToHost<ALPAKA_ACCELERATOR_NAMESPACE::pixelTrack::TrackSoACollectionPhase2> {
-    template <typename TQueue>
-    static auto copyAsync(TQueue& queue,
-                          ALPAKA_ACCELERATOR_NAMESPACE::pixelTrack::TrackSoACollectionPhase2 const& deviceData) {
-      ::pixelTrack::TrackSoAHostPhase2 hostData(queue);
-      alpaka::memcpy(queue, hostData.buffer(), deviceData.buffer());
-      return hostData;
-    }
-  };
-
-  template <>
-  struct CopyToHost<ALPAKA_ACCELERATOR_NAMESPACE::pixelTrack::TrackSoACollectionHIonPhase1> {
-    template <typename TQueue>
-    static auto copyAsync(TQueue& queue,
-                          ALPAKA_ACCELERATOR_NAMESPACE::pixelTrack::TrackSoACollectionHIonPhase1 const& deviceData) {
-      ::pixelTrack::TrackSoAHostHIonPhase1 hostData(queue);
-      alpaka::memcpy(queue, hostData.buffer(), deviceData.buffer());
-      return hostData;
-    }
-  };
-
 }  // namespace cms::alpakatools
 
 #endif  // DataFormats_Track_interface_alpaka_TrackSoACollection_h

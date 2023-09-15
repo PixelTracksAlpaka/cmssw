@@ -18,14 +18,10 @@ public:
   template <typename TQueue>
   explicit SiPixelDigiErrorsDevice(size_t maxFedWords, TQueue queue)
       : PortableDeviceCollection<SiPixelDigiErrorsSoA, TDev>(maxFedWords, queue), maxFedWords_(maxFedWords) {}
-  ~SiPixelDigiErrorsDevice() = default;
 
   // Constructor which specifies the SoA size
   explicit SiPixelDigiErrorsDevice(size_t maxFedWords, TDev const& device)
       : PortableDeviceCollection<SiPixelDigiErrorsSoA, TDev>(maxFedWords, device) {}
-
-  SiPixelDigiErrorsDevice(SiPixelDigiErrorsDevice&&) = default;
-  SiPixelDigiErrorsDevice& operator=(SiPixelDigiErrorsDevice&&) = default;
 
   auto& error_data() const { return (*this->view().pixelErrors()); }
   auto maxFedWords() const { return maxFedWords_; }
