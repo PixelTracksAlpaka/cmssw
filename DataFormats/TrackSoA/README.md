@@ -9,7 +9,7 @@ The host format is inheriting from `DataFormats/Portable/interface/PortableHostC
 while the device format is inheriting from `DataFormats/Portable/interface/PortableDeviceCollection.h`
 
 Both formats use the same SoA Layout (`TrackSoAHeterogeneousLayout`) which is generated
-via the `GENERATE_SOA_LAYOUT` macro in the `PixelTrackDefinitions.h` file.
+via the `GENERATE_SOA_LAYOUT` macro in the `TrackDefinitions.h` file.
 
 ## Notes
 
@@ -55,7 +55,7 @@ Depending on the Alpaka accelerator back-end enabled, `TrackSoACollection` wraps
 
 ## Utilities
 
-`alpaka/PixelTrackUtilities.h` contains a collection of methods which were originally
+`alpaka/TrackUtilities.h` contains a collection of methods which were originally
 defined as class methods inside either `TrackSoAHeterogeneousT` and `TrajectoryStateSoAT`
 which have been adapted to operate on `View` instances, so that they are callable
 from within `__global__` kernels, on both CPU and CPU. 

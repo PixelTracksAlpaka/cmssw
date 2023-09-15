@@ -6,8 +6,8 @@
 #include <alpaka/alpaka.hpp>
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
-// PixelTrackUtilities only included in order to compile SoALayout with Eigen columns
-#include "DataFormats/TrackSoA/interface/alpaka/PixelTrackUtilities.h"
+// TrackUtilities only included in order to compile SoALayout with Eigen columns
+#include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
 #ifdef USE_DBSCAN
 #include "RecoTracker/PixelVertexFinding/plugins/alpaka/clusterTracksDBSCAN.h"
 #define CLUSTERIZE ALPAKA_ACCELERATOR_NAMESPACE::vertexFinder::clusterTracksDBSCAN

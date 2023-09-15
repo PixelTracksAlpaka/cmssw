@@ -4,11 +4,10 @@
 #include <alpaka/alpaka.hpp>
 
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
-#include "DataFormats/TrackSoA/interface/PixelTrackDefinitions.h"
+#include "DataFormats/TrackSoA/interface/TrackDefinitions.h"
 #include "DataFormats/TrackSoA/interface/TrackSoAHost.h"
 #include "DataFormats/TrackSoA/interface/alpaka/TrackSoACollection.h"
 #include "DataFormats/TrackSoA/interface/TrackSoADevice.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoAHost.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoACollection.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -19,8 +18,6 @@
 #include "HelixFit.h"
 
 namespace edm {
-  class Event;
-  class EventSetup;
   class ParameterSetDescription;
 }  // namespace edm
 
@@ -59,7 +56,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   public:
     CAHitNtupletGenerator(const edm::ParameterSet& cfg); 
 
-    static void fillDescriptions(edm::ParameterSetDescription& desc);
+    static void fillPSetDescription(edm::ParameterSetDescription& desc);
     static void fillDescriptionsCommon(edm::ParameterSetDescription& desc);
 
     // TODO: Check if still needed

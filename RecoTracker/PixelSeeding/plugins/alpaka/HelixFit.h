@@ -2,7 +2,7 @@
 #define RecoPixelVertexing_PixelTriplets_HelixFit_h
 
 #include <alpaka/alpaka.hpp>
-#include "DataFormats/TrackSoA/interface/alpaka/PixelTrackUtilities.h"
+#include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "RecoTracker/PixelTrackFitting/interface/alpaka/FitResult.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"

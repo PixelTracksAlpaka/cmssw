@@ -1,9 +1,9 @@
-#ifndef DataFormats_Track_PixelTrackUtilities_h
-#define DataFormats_Track_PixelTrackUtilities_h
+#ifndef DataFormats_Track_interface_alpaka_TrackUtilities_h
+#define DataFormats_Track_interface_alpaka_TrackUtilities_h
 
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
-#include "DataFormats/TrackSoA/interface/PixelTrackDefinitions.h"
-#include "DataFormats/TrackSoA/interface/PixelTrackLayout.h"
+#include "DataFormats/TrackSoA/interface/TrackDefinitions.h"
+#include "DataFormats/TrackSoA/interface/TrackLayout.h"
 
 // Methods that operate on View and ConstView of the TrackSoA, and cannot be class methods.
 template <typename TrackerTraits>

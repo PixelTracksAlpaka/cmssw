@@ -172,7 +172,7 @@ hChi2VsEta = iBook.bookProfile("nChi2ndofVsEta", fmt::sprintf("%s vs track #eta;
   hquality = iBook.book1D("quality", ";Track Quality;#tracks", 7, -0.5, 6.5);
   uint i = 1;
   for (const auto& q : pixelTrack::qualityName) {
-    hquality->setBinLabel(i, q, 1);
+    hquality->setBinLabel(i, q.data(), 1);
     i++;
   }
 }

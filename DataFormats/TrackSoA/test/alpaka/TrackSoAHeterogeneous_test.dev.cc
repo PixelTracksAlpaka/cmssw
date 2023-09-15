@@ -1,5 +1,5 @@
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
-#include "DataFormats/TrackSoA/interface/PixelTrackDefinitions.h"
+#include "DataFormats/TrackSoA/interface/TrackDefinitions.h"
 #include "DataFormats/TrackSoA/interface/alpaka/TrackSoACollection.h"
 #include "DataFormats/TrackSoA/interface/TrackSoADevice.h"
 #include "DataFormats/TrackSoA/interface/TrackSoAHost.h"

@@ -5,8 +5,8 @@
 #include <alpaka/alpaka.hpp>
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
-#include "DataFormats/TrackSoA/interface/PixelTrackLayout.h"
-#include "DataFormats/TrackSoA/interface/PixelTrackDefinitions.h"
+#include "DataFormats/TrackSoA/interface/TrackLayout.h"
+#include "DataFormats/TrackSoA/interface/TrackDefinitions.h"
 #include "DataFormats/Portable/interface/PortableHostCollection.h"
 
 // TODO: The class is created via inheritance of the PortableHostCollection.

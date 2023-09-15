@@ -29,10 +29,10 @@
   <use name="boost"/>
 </bin>
 
-<!-- <bin file="alpaka/CAsizes_t.cpp">
+<bin file="alpaka/CAsizes_t.cpp">
 <flags ALPAKA_BACKENDS="1"/>  
   <use name="alpaka"/>
   <use name="cuda"/>				
   <use name="eigen"/>
   <use name="boost"/>
-</bin> -->
+</bin>

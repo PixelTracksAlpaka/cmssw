@@ -161,15 +161,15 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   template <typename TrackerTraits>
-  void CAHitNtupletGenerator<TrackerTraits>::fillDescriptions(edm::ParameterSetDescription& desc) {
+  void CAHitNtupletGenerator<TrackerTraits>::fillPSetDescription(edm::ParameterSetDescription& desc) {
     fillDescriptionsCommon(desc);
-    edm::LogWarning("CAHitNtupletGenerator::fillDescriptions")
-        << "Note: this fillDescriptions is a dummy one. Most probably you are missing some parameters. \n"
+    edm::LogWarning("CAHitNtupletGenerator::fillPSetDescription")
+        << "Note: this fillPSetDescription is a dummy one. Most probably you are missing some parameters. \n"
            "please implement your TrackerTraits descriptions in CAHitNtupletGenerator. \n";
   }
 
   template <>
-  void CAHitNtupletGenerator<pixelTopology::Phase1>::fillDescriptions(edm::ParameterSetDescription& desc) {
+  void CAHitNtupletGenerator<pixelTopology::Phase1>::fillPSetDescription(edm::ParameterSetDescription& desc) {
     fillDescriptionsCommon(desc);
 
     desc.add<bool>("idealConditions", true);
@@ -202,7 +202,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   template <>
-  void CAHitNtupletGenerator<pixelTopology::HIonPhase1>::fillDescriptions(edm::ParameterSetDescription& desc) {
+  void CAHitNtupletGenerator<pixelTopology::HIonPhase1>::fillPSetDescription(edm::ParameterSetDescription& desc) {
     fillDescriptionsCommon(desc);
 
     desc.add<bool>("idealConditions", false);
@@ -238,7 +238,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   template <>
-  void CAHitNtupletGenerator<pixelTopology::Phase2>::fillDescriptions(edm::ParameterSetDescription& desc) {
+  void CAHitNtupletGenerator<pixelTopology::Phase2>::fillPSetDescription(edm::ParameterSetDescription& desc) {
     fillDescriptionsCommon(desc);
 
     desc.add<bool>("idealConditions", false);

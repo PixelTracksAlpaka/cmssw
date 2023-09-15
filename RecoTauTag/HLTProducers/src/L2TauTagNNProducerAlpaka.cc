@@ -48,7 +48,7 @@
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 
-#include "DataFormats/TrackSoA/interface/alpaka/PixelTrackUtilities.h"
+#include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
 #include "DataFormats/TrackSoA/interface/TrackSoAHost.h"
 #include "DataFormats/Vertex/interface/ZVertexSoAHost.h"
 

@@ -1,11 +1,11 @@
-#ifndef DataFormats_Track_interface_PixelTrackLayout_h
-#define DataFormats_Track_interface_PixelTrackLayout_h
+#ifndef DataFormats_Track_interface_TrackLayout_h
+#define DataFormats_Track_interface_TrackLayout_h
 
 #include <Eigen/Core>
 #include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
-#include "DataFormats/TrackSoA/interface/PixelTrackDefinitions.h"
+#include "DataFormats/TrackSoA/interface/TrackDefinitions.h"
 
 template <typename TrackerTraits>
 struct TrackSoA {

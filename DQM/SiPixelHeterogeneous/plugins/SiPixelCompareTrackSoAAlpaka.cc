@@ -25,7 +25,7 @@
 #include "DQMServices/Core/interface/DQMStore.h"
 // DataFormats
 #include "DataFormats/TrackSoA/interface/TrackSoAHost.h"
-#include "DataFormats/TrackSoA/interface/alpaka/PixelTrackUtilities.h"
+#include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
 
 namespace {
   // same logic used for the MTV:

@@ -7,7 +7,9 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 #include "CAHitNtupletGeneratorKernels.h"
 #include "CAHitNtupletGeneratorKernelsImpl.h"
+#ifdef DUMP_GPU_TK_TUPLES
 #include <mutex>
+#endif
 
 // #define NTUPLE_DEBUG
 // #define GPU_DEBUG
@@ -22,7 +24,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using namespace caHitNtupletGeneratorKernels;
 
     // zero tuples
-    cms::alpakatools::launchZero<Acc1D>(&(tracks_view.hitIndices()), queue);  //TODO test .data()
+    cms::alpakatools::launchZero<Acc1D>(&(tracks_view.hitIndices()), queue);
 
     int32_t nhits = hh.metadata().size();
 
@@ -116,7 +118,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                         workDiv1D,
                         cms::alpakatools::finalizeBulk{},
                         this->device_hitTuple_apc_,
-                        &tracks_view.hitIndices());  //TODO test .data()
+                        &tracks_view.hitIndices());
 
 #ifdef GPU_DEBUG
     alpaka::wait(queue);

@@ -4,7 +4,7 @@
 
 #include "DataFormats/Common/interface/DeviceProduct.h"
 #include "DataFormats/Common/interface/Wrapper.h"
-#include "DataFormats/TrackSoA/interface/PixelTrackLayout.h"
+#include "DataFormats/TrackSoA/interface/TrackLayout.h"
 #include "DataFormats/TrackSoA/interface/alpaka/TrackSoACollection.h"
 #include "DataFormats/TrackSoA/interface/TrackSoADevice.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"

@@ -8,8 +8,8 @@
 #include "CAPixelDoublets.h"
 #include "CAStructures.h"
 
-#include "DataFormats/TrackSoA/interface/alpaka/PixelTrackUtilities.h"
-#include "DataFormats/TrackSoA/interface/PixelTrackDefinitions.h"
+#include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
+#include "DataFormats/TrackSoA/interface/TrackDefinitions.h"
 #include "DataFormats/TrackSoA/interface/TrackSoAHost.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/AtomicPairCounter.h"
@@ -209,9 +209,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using CAParams = caHitNtupletGenerator::CAParamsT<TrackerTraits>;
     using Counters = caHitNtupletGenerator::Counters;
 
-    template <typename Device, typename T>
-    using unique_ptr = typename cms::alpakatools::device_buffer<Device, T>;
-
     using HitsView = TrackingRecHitAlpakaSoAView<TrackerTraits>;
     using HitsConstView = TrackingRecHitAlpakaSoAConstView<TrackerTraits>;
     using TkSoAView = TrackSoAView<TrackerTraits>;
@@ -236,7 +233,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           // ALLOCATIONS FOR THE INTERMEDIATE RESULTS (STAYS ON WORKER)
           //////////////////////////////////////////////////////////
           counters_{cms::alpakatools::make_device_buffer<Counters>(queue)}, 
-          
 
           // workspace
           device_hitToTuple_{cms::alpakatools::make_device_buffer<HitToTuple>(queue)},

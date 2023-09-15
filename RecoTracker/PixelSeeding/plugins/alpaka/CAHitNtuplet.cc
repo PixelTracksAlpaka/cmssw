@@ -73,7 +73,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     cpe += TrackerTraits::nameModifier;
     desc.add<std::string>("CPE", cpe);
 
-    Algo::fillDescriptions(desc);
+    Algo::fillPSetDescription(desc);
     descriptions.addWithDefaultLabel(desc);
   }
 

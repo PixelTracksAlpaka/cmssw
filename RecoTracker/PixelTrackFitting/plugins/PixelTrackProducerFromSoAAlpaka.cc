@@ -26,7 +26,7 @@
 #include "TrackingTools/TrajectoryParametrization/interface/CurvilinearTrajectoryError.h"
 #include "TrackingTools/TrajectoryParametrization/interface/GlobalTrajectoryParameters.h"
 
-#include "DataFormats/TrackSoA/interface/alpaka/PixelTrackUtilities.h"
+#include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
 #include "RecoTracker/PixelTrackFitting/interface/alpaka/FitUtils.h"
 
 #include "storeTracks.h"

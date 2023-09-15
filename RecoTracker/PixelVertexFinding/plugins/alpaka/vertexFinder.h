@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
-#include "DataFormats/TrackSoA/interface/alpaka/PixelTrackUtilities.h"
+#include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
 #include "DataFormats/Vertex/interface/ZVertexSoAHost.h"
 #include "DataFormats/Vertex/interface/ZVertexLayout.h"
 #include "DataFormats/Vertex/interface/alpaka/ZVertexSoACollection.h"

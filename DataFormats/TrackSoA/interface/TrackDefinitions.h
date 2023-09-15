@@ -1,5 +1,5 @@
-#ifndef DataFormats_Track_PixelTrackDefinitions_h
-#define DataFormats_Track_PixelTrackDefinitions_h
+#ifndef DataFormats_Track_interface_TrackDefinitions_h
+#define DataFormats_Track_interface_TrackDefinitions_h
 #include <string>
 #include <algorithm>
 #include <stdexcept>
@@ -8,7 +8,7 @@ namespace pixelTrack {
 
   enum class Quality : uint8_t { bad = 0, edup, dup, loose, strict, tight, highPurity, notQuality };
   constexpr uint32_t qualitySize{uint8_t(Quality::notQuality)};
-  const std::string qualityName[qualitySize]{"bad", "edup", "dup", "loose", "strict", "tight", "highPurity"};
+  constexpr std::string_view qualityName[qualitySize]{"bad", "edup", "dup", "loose", "strict", "tight", "highPurity"};
   inline Quality qualityByName(std::string const &name) {
     auto qp = std::find(qualityName, qualityName + qualitySize, name) - qualityName;
     auto ret = static_cast<Quality>(qp);
