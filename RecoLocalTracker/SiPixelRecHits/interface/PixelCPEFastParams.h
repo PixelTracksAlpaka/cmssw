@@ -149,6 +149,9 @@ namespace pixelCPEforDevice {
 
 }  // namespace pixelCPEforDevice
 
+// The following are manual implementations of methods for asynchronously creating a copy of the Phase 1&2 CPEFastParams
+// objects created on the the device to the host. The copyAsync() method is automatically called on produce() or consume()
+// calls. Data structures inheriting from portableHostCollection do not need to implement such methods manually. 
 namespace cms::alpakatools {
   template <>
   struct CopyToDevice<pixelCPEforDevice::PixelCPEFastParams<alpaka_common::DevHost, pixelTopology::Phase1>> {
