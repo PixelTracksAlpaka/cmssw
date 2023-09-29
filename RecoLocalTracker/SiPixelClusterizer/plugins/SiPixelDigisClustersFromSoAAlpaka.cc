@@ -19,7 +19,7 @@
 // local include(s)
 #include "PixelClusterizerBase.h"
 #include "SiPixelClusterThresholds.h"
-// #define EDM_ML_DEBUG
+#define EDM_ML_DEBUG
 template <typename TrackerTraits>
 class SiPixelDigisClustersFromSoAAlpaka : public edm::global::EDProducer<> {
 public:
@@ -126,8 +126,7 @@ void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID,
       auto const& acluster = aclusters[ic];
       // in any case we cannot  go out of sync with gpu...
       if (!std::is_base_of<pixelTopology::Phase2, TrackerTraits>::value and acluster.charge < clusterThreshold)
-        // edm::LogWarning("SiPixelDigisClustersFromSoAAlpaka") 
-        std::cout << "cluster below charge Threshold "
+        edm::LogWarning("SiPixelDigisClustersFromSoAAlpaka") << "cluster below charge Threshold "
                                                        << "Layer/DetId/clusId " << layer << '/' << detId << '/' << ic
                                                        << " size/charge " << acluster.isize << '/' << acluster.charge << "\n";
       // sort by row (x)
@@ -202,7 +201,8 @@ void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID,
     fillClusters(detId);
 
 #ifdef EDM_ML_DEBUG
-  LogDebug("SiPixelDigisClustersFromSoAAlpaka") << "filled " << totClustersFilled << " clusters";
+  // LogDebug("SiPixelDigisClustersFromSoAAlpaka") 
+  std::cout << "filled " << totClustersFilled << " clusters";
 #endif
 
   if (produceDigis_)

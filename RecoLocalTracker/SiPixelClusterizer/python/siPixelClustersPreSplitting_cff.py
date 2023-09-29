@@ -80,8 +80,7 @@ siPixelDigisPhase2SoA = _siPixelDigisSoAFromCUDA.clone(
 phase2_tracker.toReplaceWith(siPixelDigisClustersPreSplitting, _siPixelDigisClustersFromSoAPhase2.clone(
                         clusterThreshold_layer1 = 4000,
                         clusterThreshold_otherLayers = 4000,
-                        src = "siPixelDigisPhase2SoA",
-                        #produceDigis = False
+                        src = "siPixelDigisPhase2SoA"
                         ))
 
 (gpu & phase2_tracker).toReplaceWith(siPixelClustersPreSplittingTask, cms.Task(
@@ -111,7 +110,7 @@ modifyConfigurationCalibTrackerAlpakaES_ = alpaka.makeProcessModifier(_addProces
 from RecoLocalTracker.SiPixelClusterizer.siPixelRawToClusterPhase1_cfi import siPixelRawToClusterPhase1 as _siPixelRawToClusterAlpaka
 siPixelClustersPreSplittingAlpaka = _siPixelRawToClusterAlpaka.clone()
 
-run3_common.toModify(siPixelClustersPreSplittingAlpaka,
+(alpaka & run3_common).toModify(siPixelClustersPreSplittingAlpaka,
                      # use the pixel channel calibrations scheme for Run 3
                      clusterThreshold_layer1 = 4000,
                      VCaltoElectronGain      = 1,  # all gains=1, pedestals=0
@@ -121,7 +120,7 @@ run3_common.toModify(siPixelClustersPreSplittingAlpaka,
 
 from RecoLocalTracker.SiPixelClusterizer.siPixelPhase2DigiToCluster_cfi import siPixelPhase2DigiToCluster as _siPixelPhase2DigiToCluster
 
-phase2_tracker.toReplaceWith(siPixelClustersPreSplittingAlpaka,_siPixelPhase2DigiToCluster.clone(
+(alpaka & phase2_tracker).toReplaceWith(siPixelClustersPreSplittingAlpaka,_siPixelPhase2DigiToCluster.clone(
   Phase2ReadoutMode = PixelDigitizerAlgorithmCommon.Phase2ReadoutMode.value(), # Flag to decide Readout Mode : linear TDR (-1), dual slope with slope parameters (+1,+2,+3,+4 ...) with threshold subtraction
   Phase2DigiBaseline = int(PixelDigitizerAlgorithmCommon.ThresholdInElectrons_Barrel.value()), #Same for barrel and endcap
   Phase2KinkADC = 8,
@@ -138,7 +137,8 @@ from RecoLocalTracker.SiPixelClusterizer.siPixelDigisClustersFromSoAAlpakaPhase2
 (alpaka & phase2_tracker).toReplaceWith(siPixelDigisClustersPreSplitting,_siPixelDigisClustersFromSoAAlpakaPhase2.clone(
     clusterThreshold_layer1 = 4000,
     clusterThreshold_otherLayers = 4000,
-    src = "siPixelClustersPreSplittingAlpaka"
+    src = "siPixelClustersPreSplittingAlpaka",
+    produceDigis = False
 ))
 
 from RecoLocalTracker.SiPixelClusterizer.siPixelDigisClustersFromSoAAlpakaPhase1_cfi import siPixelDigisClustersFromSoAAlpakaPhase1 as _siPixelDigisClustersFromSoAAlpakaPhase1

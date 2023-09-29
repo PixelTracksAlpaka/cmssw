@@ -36,6 +36,8 @@
 #include "RecoLocalTracker/SiPixelClusterizer/plugins/SiPixelClusterThresholds.h"
 #include "SiPixelRawToClusterKernel.h"
 
+#define GPU_DEBUG
+
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   class SiPixelPhase2DigiToCluster : public stream::SynchronizingEDProducer<> {
@@ -140,6 +142,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   void SiPixelPhase2DigiToCluster::produce(device::Event& iEvent, device::EventSetup const& iSetup) {
+
+    #ifdef GPU_DEBUG
+    std::cout << "SiPixelPhase2DigiToCluster::produce." << std::endl;
+    #endif
     if (nDigis_ == 0) {
       SiPixelClustersCollection clusters_d{pixelTopology::Phase1::numberOfModules, iEvent.queue()};
       iEvent.emplace(digiPutToken_, std::move(digis_d));
@@ -157,6 +163,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     if (includeErrors_) {
       iEvent.emplace(digiErrorPutToken_, Algo_.getErrors());
     }
+
+    #ifdef GPU_DEBUG
+    std::cout << "SiPixelPhase2DigiToCluster::produce - done." << std::endl;
+    #endif
+
   }
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

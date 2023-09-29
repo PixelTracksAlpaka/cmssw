@@ -50,7 +50,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     const device::EDGetToken<HitsOnDevice> tokenHit_;
     const device::EDPutToken<TkSoADevice> tokenTrack_;
 
-    Algo deviceAlgo_;
+    Algo algo_;
   };
 
   template <typename TrackerTraits>
@@ -59,7 +59,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         cpeToken_(esConsumes(edm::ESInputTag("", iConfig.getParameter<std::string>("CPE")))),
         tokenHit_(consumes(iConfig.getParameter<edm::InputTag>("pixelRecHitSrc"))),
         tokenTrack_(produces()),
-        deviceAlgo_(iConfig) {
+        algo_(iConfig) {
 
   }
 
@@ -85,14 +85,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     auto const& hits = iEvent.get(tokenHit_);
 
-    iEvent.emplace(tokenTrack_, deviceAlgo_.makeTuplesAsync(hits, fcpe.const_buffer().data(), bf, iEvent.queue()));
+    iEvent.emplace(tokenTrack_, algo_.makeTuplesAsync(hits, fcpe.const_buffer().data(), bf, iEvent.queue()));
   }
 
   using CAHitNtupletAlpakaPhase1 = CAHitNtupletAlpaka<pixelTopology::Phase1>;
   using CAHitNtupletAlpakaPhase2 = CAHitNtupletAlpaka<pixelTopology::Phase2>;
+  using CAHitNtupletAlpakaHIonPhase1 = CAHitNtupletAlpaka<pixelTopology::HIonPhase1>;
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/MakerMacros.h"
 
 DEFINE_FWK_ALPAKA_MODULE(CAHitNtupletAlpakaPhase1);
 DEFINE_FWK_ALPAKA_MODULE(CAHitNtupletAlpakaPhase2);
+DEFINE_FWK_ALPAKA_MODULE(CAHitNtupletAlpakaHIonPhase1);

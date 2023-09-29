@@ -13,7 +13,7 @@
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/SimpleVector.h"
 
-// #define GPU_DEBUG
+#define GPU_DEBUG
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
@@ -96,7 +96,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         const uint32_t threadIdxGlobal(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
         // zero for next kernels...
         if (0 == threadIdxGlobal)
-          printf("Starting to count modules to set module starts:")
+          printf("Starting to count modules to set module starts:");
         #endif
         cms::alpakatools::for_each_element_in_grid_strided(acc, numElements, [&](uint32_t i) {
           digi_view[i].clus() = i;

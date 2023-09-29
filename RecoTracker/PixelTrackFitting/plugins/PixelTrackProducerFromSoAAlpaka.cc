@@ -36,6 +36,8 @@
  * objects from the output of SoA CA.
  */
 
+#define GPU_DEBUG
+
 template <typename TrackerTraits>
 class PixelTrackProducerFromSoAAlpaka : public edm::global::EDProducer<> {
   using TkSoAHost = TrackSoAHost<TrackerTraits>;
@@ -245,7 +247,7 @@ void PixelTrackProducerFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID strea
     tracks.emplace_back(track.release(), hits);
   }
   #ifdef GPU_DEBUG
-    std::cout << "processed " << nt << " good tuples " << tracks.size() << "out of " << indToEdm.size() << std::endl;
+    std::cout << "processed " << nt << " good tuples " << tracks.size() << " out of " << indToEdm.size() << std::endl;
   #endif
   // store tracks
   storeTracks(iEvent, tracks, httopo);
@@ -259,3 +261,6 @@ DEFINE_FWK_MODULE(PixelTrackProducerFromSoAAlpakaPhase1);
 
 using PixelTrackProducerFromSoAAlpakaPhase2 = PixelTrackProducerFromSoAAlpaka<pixelTopology::Phase2>;
 DEFINE_FWK_MODULE(PixelTrackProducerFromSoAAlpakaPhase2);
+
+using PixelTrackProducerFromSoAAlpakaHIonPhase1 = PixelTrackProducerFromSoAAlpaka<pixelTopology::HIonPhase1>;
+DEFINE_FWK_MODULE(PixelTrackProducerFromSoAAlpakaHIonPhase1);

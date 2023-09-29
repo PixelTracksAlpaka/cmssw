@@ -95,8 +95,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
   using SiPixelRecHitAlpakaPhase1 = SiPixelRecHitAlpaka<pixelTopology::Phase1>;
   using SiPixelRecHitAlpakaPhase2 = SiPixelRecHitAlpaka<pixelTopology::Phase2>;
+  using SiPixelRecHitAlpakaHIonPhase1 = SiPixelRecHitAlpaka<pixelTopology::HIonPhase1>;
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/MakerMacros.h"
 DEFINE_FWK_ALPAKA_MODULE(SiPixelRecHitAlpakaPhase1);
 DEFINE_FWK_ALPAKA_MODULE(SiPixelRecHitAlpakaPhase2);
+DEFINE_FWK_ALPAKA_MODULE(SiPixelRecHitAlpakaHIonPhase1);

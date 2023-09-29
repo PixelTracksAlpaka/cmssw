@@ -26,7 +26,7 @@
 
 #include "vertexFinder.h"
 
-#undef PIXVERTEX_DEBUG_PRODUCE
+#define PIXVERTEX_DEBUG_PRODUCE
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
@@ -35,7 +35,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   template <typename TrackerTraits>
   class PixelVertexProducerAlpaka : public global::EDProducer<> {
     using TkSoADevice = TrackSoACollection<TrackerTraits>;
-    using GPUAlgo = vertexFinder::Producer<TrackerTraits>;
+    using Algo = vertexFinder::Producer<TrackerTraits>;
 
   public:
     explicit PixelVertexProducerAlpaka(const edm::ParameterSet& iConfig);
@@ -44,7 +44,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
   private:
-    void produceOnGPU(edm::StreamID streamID,  // maybe even remove this and leave only produce?
+    void produceOnDevice(edm::StreamID streamID,  // maybe even remove this and leave only produce?
                       device::Event& iEvent,
                       const device::EventSetup& iSetup) const;
     void produce(edm::StreamID streamID, device::Event& iEvent, const device::EventSetup& iSetup) const override;
@@ -52,7 +52,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     device::EDGetToken<TkSoADevice> tokenDeviceTrack_;
     device::EDPutToken<ZVertexCollection> tokenDeviceVertex_;
 
-    const GPUAlgo gpuAlgo_;
+    const Algo algo_;
 
     // Tracking cuts before sending tracks to vertex algo
     const float ptMin_;
@@ -61,7 +61,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template <typename TrackerTraits>
   PixelVertexProducerAlpaka<TrackerTraits>::PixelVertexProducerAlpaka(const edm::ParameterSet& conf)
-      : gpuAlgo_(conf.getParameter<bool>("oneKernel"),
+      : algo_(conf.getParameter<bool>("oneKernel"),
                  conf.getParameter<bool>("useDensity"),
                  conf.getParameter<bool>("useDBSCAN"),
                  conf.getParameter<bool>("useIterative"),
@@ -102,19 +102,19 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   template <typename TrackerTraits>
-  void PixelVertexProducerAlpaka<TrackerTraits>::produceOnGPU(edm::StreamID streamID,
+  void PixelVertexProducerAlpaka<TrackerTraits>::produceOnDevice(edm::StreamID streamID,
                                                               device::Event& iEvent,
                                                               const device::EventSetup& iSetup) const {
     auto const& hTracks = iEvent.get(tokenDeviceTrack_);
 
-    iEvent.emplace(tokenDeviceVertex_, gpuAlgo_.makeAsync(iEvent.queue(), hTracks.view(), ptMin_, ptMax_));
+    iEvent.emplace(tokenDeviceVertex_, algo_.makeAsync(iEvent.queue(), hTracks.view(), ptMin_, ptMax_));
   }
 
   template <typename TrackerTraits>
   void PixelVertexProducerAlpaka<TrackerTraits>::produce(edm::StreamID streamID,
                                                          device::Event& iEvent,
                                                          const device::EventSetup& iSetup) const {
-    produceOnGPU(streamID, iEvent, iSetup);
+    produceOnDevice(streamID, iEvent, iSetup);
   }
 
   using PixelVertexProducerAlpakaPhase1 = PixelVertexProducerAlpaka<pixelTopology::Phase1>;

@@ -296,11 +296,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       HitsOnDevice const& hits_d, ParamsOnDevice const* cpeParams, float bfield, Queue& queue) const {
     using HelixFit = HelixFit<TrackerTraits>;
     using TrackSoA = TrackSoACollection<TrackerTraits>;
-    using GPUKernels = CAHitNtupletGeneratorKernels<TrackerTraits>;
+    using DeviceKernels = CAHitNtupletGeneratorKernels<TrackerTraits>;
 
     TrackSoA tracks(queue);
 
-    GPUKernels kernels(m_params, hits_d.view().metadata().size(), queue);
+    if (0 == hits_d.nHits())
+      return tracks;
+
+    DeviceKernels kernels(m_params, hits_d.view().metadata().size(), queue);
 
     kernels.buildDoublets(hits_d.view(), queue);
     kernels.launchKernels(hits_d.view(), tracks.view(), queue);
@@ -317,7 +320,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     kernels.classifyTuples(hits_d.view(), tracks.view(), queue);
 #ifdef GPU_DEBUG
     alpaka::wait(queue);
-    std::cout << "finished building pixel tracks on GPU" << std::endl;
+    std::cout << "finished building pixel tracks on device" << std::endl;
 #endif
 
     return tracks;

@@ -29,7 +29,7 @@
 #include "PixelClustering.h"
 #include "SiPixelRawToClusterKernel.h"
 
-// #define GPU_DEBUG
+#define GPU_DEBUG
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace pixelDetails {
@@ -526,7 +526,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         if (0 != i)
           ALPAKA_ASSERT_OFFLOAD(clus_view[i].moduleStart() >= clus_view[i - i].moduleStart());
         // Check BPX2 (1), FP1 (4)
-        if (i == TrackerTraits::layerStart[1] || i == TrackerTraits::layerStart[4])
+        constexpr auto bpix2Start = TrackerTraits::layerStart[1];
+        constexpr auto fpix1Start = TrackerTraits::layerStart[4];
+        if (i ==  bpix2Start || i == fpix1Start)
           printf("moduleStart %d %d\n", i, clus_view[i].moduleStart());
       });
 #endif
@@ -706,9 +708,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                                             Queue &queue) {
       
       using namespace pixelClustering;
-      using pixelTopology::Phase2;
+
       nDigis = numDigis;
-      constexpr int numberOfModules = pixelTopology::Phase2::numberOfModules;
+      constexpr int numberOfModules = TrackerTraits::numberOfModules;
       clusters_d = SiPixelClustersCollection(numberOfModules, queue);
       const auto threadsPerBlockOrElementsPerThread = 512;
       const auto blocks =
@@ -722,7 +724,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       std::cout << "countModules kernel launch with " << blocks << " blocks of "
                 << threadsPerBlockOrElementsPerThread << " threadsPerBlockOrElementsPerThread\n";
 #endif
-      alpaka::exec<Acc1D>(queue, workDiv, countModules<pixelTopology::Phase2>(), digis_view, clusters_d->view(), numDigis);
+      alpaka::exec<Acc1D>(queue, workDiv, countModules<TrackerTraits>(), digis_view, clusters_d->view(), numDigis);
 
       auto moduleStartFirstElement =
           cms::alpakatools::make_device_view(alpaka::getDev(queue), clusters_d->view().moduleStart(), 1u);
@@ -733,11 +735,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
 #ifdef GPU_DEBUG
       alpaka::wait(queue);
-      std::cout << "findClus kernel launch with " << numberOfModules << " blocks of " << threadsPerBlock
+      std::cout << "findClus kernel launch with " << numberOfModules << " blocks of " << threadsPerBlockFindClus
                 << " threadsPerBlockOrElementsPerThread\n";
 #endif
       alpaka::exec<Acc1D>(
-          queue, workDivMaxNumModules, findClus<pixelTopology::Phase2>(), digis_view, clusters_d->view(), numDigis);
+          queue, workDivMaxNumModules, findClus<TrackerTraits>(), digis_view, clusters_d->view(), numDigis);
 #ifdef GPU_DEBUG
       alpaka::wait(queue);
 #endif
@@ -745,7 +747,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       // apply charge cut
       alpaka::exec<Acc1D>(queue,
                           workDivMaxNumModules,
-                          ::pixelClustering::clusterChargeCut<pixelTopology::Phase2>(),
+                          ::pixelClustering::clusterChargeCut<TrackerTraits>(),
                           digis_view,
                           clusters_d->view(),
                           clusterThresholds,
@@ -759,14 +761,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       // MUST be ONE block
       const auto workDivOneBlock = cms::alpakatools::make_workdiv<Acc1D>(1u, 1024u);
       alpaka::exec<Acc1D>(
-          queue, workDivOneBlock, fillHitsModuleStart<pixelTopology::Phase2>(), clusters_d->view());
+          queue, workDivOneBlock, fillHitsModuleStart<TrackerTraits>(), clusters_d->view());
+
+      alpaka::wait(queue);
 
       // last element holds the number of all clusters
       const auto clusModuleStartLastElement = cms::alpakatools::make_device_view(
           alpaka::getDev(queue),
           const_cast<uint32_t const *>(clusters_d->view().clusModuleStart() + numberOfModules),
           1u);
-      constexpr int startBPIX2 = pixelTopology::Phase2::layerStart[1];
+      constexpr int startBPIX2 = TrackerTraits::layerStart[1];
       // element startBPIX2 hold the number of clusters until BPIX2
       const auto bpix2ClusterStart = cms::alpakatools::make_device_view(
           alpaka::getDev(queue), const_cast<uint32_t const *>(clusters_d->view().clusModuleStart() + startBPIX2), 1u);

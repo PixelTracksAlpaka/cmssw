@@ -1,7 +1,7 @@
 #ifndef RecoPixelVertexing_PixelTriplets_CAHitNtupletGeneratorKernels_h
 #define RecoPixelVertexing_PixelTriplets_CAHitNtupletGeneratorKernels_h
 
-// #define GPU_DEBUG
+#define GPU_DEBUG
 #include <alpaka/alpaka.hpp>
 #include <cstdint>
 #include "CACell.h"
