@@ -36,6 +36,7 @@ namespace pixelTrack {
   using TrackSoAHostPhase1 = TrackSoAHost<pixelTopology::Phase1>;
   using TrackSoAHostPhase2 = TrackSoAHost<pixelTopology::Phase2>;
   using TrackSoAHostHIonPhase1 = TrackSoAHost<pixelTopology::HIonPhase1>;
+  using TrackSoAHostPhase1Strip = TrackSoAHost<pixelTopology::Phase1Strip>;
 
 }  // namespace pixelTrack
 

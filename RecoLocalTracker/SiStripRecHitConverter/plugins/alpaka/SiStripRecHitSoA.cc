@@ -122,10 +122,10 @@ void SiStripRecHitSoA<TrackerTraits>::acquire(device::Event const& iEvent, devic
   // Algo_.fillWithPixels(pixelHits.view(), nStripHits);
 
   // Create output collection with the right size
-  StripHitsHost hits_h_(
+  StripHits hits_h_(
     nPixelHits + nStripHits, 
-    // pixelHits.view().offsetBPIX2(),
-    // pixelHits.view().hitsModuleStart().begin(),
+    pixelHits.view().offsetBPIX2(),
+    pixelHits.view().hitsModuleStart().begin(),
     iEvent.queue()
   );
 
@@ -188,7 +188,10 @@ void SiStripRecHitSoA<TrackerTraits>::acquire(device::Event const& iEvent, devic
       hitsModuleStart[TrackerTraits::layerStart[layer]];
   }
 
+  iEvent.emplace(stripSoA_, std::move(hits_h_));
+
 }
+
 template <typename TrackerTraits>
 void SiStripRecHitSoA<TrackerTraits>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
