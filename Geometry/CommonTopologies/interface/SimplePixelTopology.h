@@ -674,12 +674,12 @@ namespace pixelTopology {
     
     static constexpr uint32_t const *layerStart = phase1PixelStripTopology::layerStart;
     
-    static constexpr float const *minz = phase1PixelTopology::minz;
-    static constexpr float const *maxz = phase1PixelTopology::maxz;
-    static constexpr float const *maxr = phase1PixelTopology::maxr;
+    static constexpr float const *minz = phase1PixelStripTopology::minz;
+    static constexpr float const *maxz = phase1PixelStripTopology::maxz;
+    static constexpr float const *maxr = phase1PixelStripTopology::maxr;
 
-    static constexpr uint8_t const *layerPairs = phase1PixelTopology::layerPairs;
-    static constexpr int16_t const *phicuts = phase1PixelTopology::phicuts;
+    static constexpr uint8_t const *layerPairs = phase1PixelStripTopology::layerPairs;
+    static constexpr int16_t const *phicuts = phase1PixelStripTopology::phicuts;
 
     static constexpr uint32_t numberOfStripLayers = 2;
     static constexpr uint32_t numberOfLayers = numberOfStripLayers + numberOfPixelLayers;
@@ -693,7 +693,7 @@ namespace pixelTopology {
     static constexpr int nPairs = nPairsForTriplets;                // include forward "jumping" layer pairs
 
 
-    static constexpr char const *nameModifier = "Phase1Strip";
+    static constexpr char const *nameModifier = "";
     
   };
 
@@ -702,6 +702,15 @@ namespace pixelTopology {
 
   template <typename T>
   using isPhase2Topology = typename std::enable_if<std::is_base_of<Phase2, T>::value>::type;
+
+  template <typename TrackerTraits>
+  struct BaseTraits { using type = TrackerTraits; };
+
+  template <>
+  struct BaseTraits<pixelTopology::Phase1Strip> { using type = pixelTopology::Phase1; };
+
+  template <typename TrackerTraits>
+  using base_traits_t = typename BaseTraits<TrackerTraits>::type;
 
 }  // namespace pixelTopology
 

@@ -1,10 +1,13 @@
 
 #include <cstdint>
 #include <memory>
+#include <vector>
 #include "DataFormats/BeamSpot/interface/BeamSpotPOD.h"
 #include "DataFormats/BeamSpot/interface/alpaka/BeamSpotDeviceProduct.h"
-#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersDevice.h"
-#include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersCollection.h"
+// #include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersDevice.h"
+// #include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersCollection.h"
+#include "DataFormats/Portable/interface/PortableHostProduct.h"
+#include "DataFormats/Portable/interface/alpaka/PortableProduct.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
 #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisCollection.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoADevice.h"
@@ -48,6 +51,7 @@
 #include "Geometry/CommonTopologies/interface/GluedGeomDet.h"
 
 #include "SiStripRecHitSoAKernel.h"
+#include "alpaka/mem/view/Traits.hpp"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
@@ -60,6 +64,7 @@ class SiStripRecHitSoA : public stream::SynchronizingEDProducer<> {
   using PixelHits = TrackingRecHitAlpakaCollection<PixelBase>;
 
   using StripHitsHost = TrackingRecHitAlpakaHost<TrackerTraits>;
+  using PixelHitsHost = TrackingRecHitAlpakaHost<PixelBase>;
 
   using Algo = hitkernels::SiStripRecHitSoAKernel<TrackerTraits>;
 
@@ -70,8 +75,7 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:
-
-  void acquire(device::Event const& iEvent, device::EventSetup const& iSetup) override;
+  void acquire(device::Event const& iEvent, device::EventSetup const& iSetup) override {};
   void produce(device::Event& iEvent, device::EventSetup const& iSetup) override;
 
   const edm::ESGetToken<TrackerGeometry, TrackerDigiGeometryRecord> geomToken_;
@@ -79,10 +83,9 @@ private:
   
   const device::EDGetToken<PixelHits> pixelRecHitSoAToken_;
   const device::EDPutToken<StripHits> stripSoA_;
+  const edm::EDPutTokenT<std::vector<uint32_t>> hmsToken_;
 
   const Algo Algo_;
-
-  StripHitsHost hits_h_;
 };
 
 template <typename TrackerTraits>
@@ -90,19 +93,53 @@ SiStripRecHitSoA<TrackerTraits>::SiStripRecHitSoA(const edm::ParameterSet& iConf
     : geomToken_(esConsumes()),
       recHitToken_{consumes(iConfig.getParameter<edm::InputTag>("stripRecHitSource"))},
       pixelRecHitSoAToken_{consumes(iConfig.getParameter<edm::InputTag>("pixelRecHitSoASource"))},
-      stripSoA_{produces()}
+      stripSoA_{produces()},
+      hmsToken_{produces()}
 {
   
 }
 
 template <typename TrackerTraits>
-void SiStripRecHitSoA<TrackerTraits>::acquire(device::Event const& iEvent, device::EventSetup const& iSetup) 
-{
-  std::cout << "acquire" << std::endl;
-  
+void SiStripRecHitSoA<TrackerTraits>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+  edm::ParameterSetDescription desc;
+
+  desc.add<edm::InputTag>("stripRecHitSource", edm::InputTag("siStripMatchedRecHits", "matchedRecHit"));
+  desc.add<edm::InputTag>("pixelRecHitSoASource", edm::InputTag("siPixelRecHitsPreSplittingAlpaka"));
+  descriptions.addWithDefaultLabel(desc);
+
+  // desc.setUnknown();
+  // descriptions.addDefault(desc);
+}
+
+template <class From, class To>
+struct HostView {
+  template <class Queue>
+  HostView(From& from, Queue& queue) : to(from.view().metadata().size(), queue) {
+    alpaka::memcpy(queue, to.buffer(), from.buffer());
+  }
+  To& get() {
+    return to;
+  }
+private:
+  To to;
+};
+
+template <class T>
+struct HostView<T, T> {
+  template <class Queue>
+  HostView(T& from, Queue& queue) : ref(from) {}
+  T& get() {
+    return ref;
+  }
+private:
+  T& ref;
+};
+
+template <typename TrackerTraits>
+void SiStripRecHitSoA<TrackerTraits>::produce(device::Event& iEvent, device::EventSetup const& iSetup) {
+
   // Get the objects that we need
   const TrackerGeometry* trackerGeometry = &iSetup.getData(geomToken_);
-
   auto const& stripHits = iEvent.get(recHitToken_);
   auto const& pixelHits = iEvent.get(pixelRecHitSoAToken_);
 
@@ -119,23 +156,42 @@ void SiStripRecHitSoA<TrackerTraits>::acquire(device::Event const& iEvent, devic
   std::cout << "nStripHits = " << nStripHits << std::endl;
   std::cout << "nPixelHits = " << nPixelHits << std::endl;
 
-  // Algo_.fillWithPixels(pixelHits.view(), nStripHits);
+  HostView<const PixelHits, PixelHitsHost> pixelHitsHostView(pixelHits, iEvent.queue());
+  PixelHitsHost& pixelHitsHost = pixelHitsHostView.get();
+  // PixelHitsHost pixelHitsHost(nPixelHits, iEvent.queue());
 
-  // Create output collection with the right size
-  StripHits hits_h_(
+  // alpaka::memcpy(iEvent.queue(), pixelHitsHost.buffer(), pixelHits.buffer());
+
+  StripHitsHost allHitsHost(
     nPixelHits + nStripHits, 
-    pixelHits.view().offsetBPIX2(),
-    pixelHits.view().hitsModuleStart().begin(),
-    iEvent.queue()
-  );
+    pixelHitsHost.view().offsetBPIX2(),
+    pixelHitsHost.view().hitsModuleStart().data(),
+    iEvent.queue());
+  
+  // Copy pixel data
+  std::copy(pixelHitsHost.view().xLocal(), pixelHitsHost.view().xLocal() + nPixelHits, allHitsHost.view().xLocal());
+  std::copy(pixelHitsHost.view().yLocal(), pixelHitsHost.view().yLocal() + nPixelHits, allHitsHost.view().yLocal());
+  std::copy(pixelHitsHost.view().xerrLocal(), pixelHitsHost.view().xerrLocal() + nPixelHits, allHitsHost.view().xerrLocal());
+  std::copy(pixelHitsHost.view().yerrLocal(), pixelHitsHost.view().yerrLocal() + nPixelHits, allHitsHost.view().yerrLocal());
+  std::copy(pixelHitsHost.view().xGlobal(), pixelHitsHost.view().xGlobal() + nPixelHits, allHitsHost.view().xGlobal());
+  std::copy(pixelHitsHost.view().yGlobal(), pixelHitsHost.view().yGlobal() + nPixelHits, allHitsHost.view().yGlobal());
+  std::copy(pixelHitsHost.view().zGlobal(), pixelHitsHost.view().zGlobal() + nPixelHits, allHitsHost.view().zGlobal());
+  std::copy(pixelHitsHost.view().rGlobal(), pixelHitsHost.view().rGlobal() + nPixelHits, allHitsHost.view().rGlobal());
+  std::copy(pixelHitsHost.view().iphi(), pixelHitsHost.view().iphi() + nPixelHits, allHitsHost.view().iphi());
+  std::copy(pixelHitsHost.view().chargeAndStatus(), pixelHitsHost.view().chargeAndStatus() + nPixelHits, allHitsHost.view().chargeAndStatus());
+  std::copy(pixelHitsHost.view().clusterSizeX(), pixelHitsHost.view().clusterSizeX() + nPixelHits, allHitsHost.view().clusterSizeX());
+  std::copy(pixelHitsHost.view().clusterSizeY(), pixelHitsHost.view().clusterSizeY() + nPixelHits, allHitsHost.view().clusterSizeY());
+  std::copy(pixelHitsHost.view().detectorIndex(), pixelHitsHost.view().detectorIndex() + nPixelHits, allHitsHost.view().detectorIndex());
 
-  alpaka::memcpy(iEvent.queue(), hits_h_.buffer(), pixelHits.buffer());
+  std::copy(pixelHitsHost.view().phiBinnerStorage(), pixelHitsHost.view().phiBinnerStorage() + nPixelHits, allHitsHost.view().phiBinnerStorage());
 
-  auto& hitsModuleStart = hits_h_.view().hitsModuleStart();
+  allHitsHost.view().offsetBPIX2() = pixelHitsHost.view().offsetBPIX2();
+
+  auto& hitsModuleStart = allHitsHost.view().hitsModuleStart();
 
   std::copy(
-    pixelHits.view().hitsModuleStart().begin(),
-    pixelHits.view().hitsModuleStart().end(),
+    pixelHitsHost.view().hitsModuleStart().begin(),
+    pixelHitsHost.view().hitsModuleStart().end(),
     hitsModuleStart.begin()
   );
 
@@ -159,149 +215,42 @@ void SiStripRecHitSoA<TrackerTraits>::acquire(device::Event const& iEvent, devic
     lastIndex = index + 1;
 
     for (const auto& recHit : detSet) {
-      hits_h_.view()[nPixelHits + i].xLocal() = recHit.localPosition().x();
-      hits_h_.view()[nPixelHits + i].yLocal() = recHit.localPosition().y();
-      hits_h_.view()[nPixelHits + i].xerrLocal() = recHit.localPositionError().xx();
-      hits_h_.view()[nPixelHits + i].yerrLocal() = recHit.localPositionError().yy();
+      allHitsHost.view()[nPixelHits + i].xLocal() = recHit.localPosition().x();
+      allHitsHost.view()[nPixelHits + i].yLocal() = recHit.localPosition().y();
+      allHitsHost.view()[nPixelHits + i].xerrLocal() = recHit.localPositionError().xx();
+      allHitsHost.view()[nPixelHits + i].yerrLocal() = recHit.localPositionError().yy();
       auto globalPosition = det->toGlobal(recHit.localPosition());
-      hits_h_.view()[nPixelHits + i].xGlobal() = globalPosition.x();
-      hits_h_.view()[nPixelHits + i].yGlobal() = globalPosition.y();
-      hits_h_.view()[nPixelHits + i].zGlobal() = globalPosition.z();
-      hits_h_.view()[nPixelHits + i].rGlobal() = globalPosition.transverse();
-      hits_h_.view()[nPixelHits + i].iphi() = unsafe_atan2s<7>(globalPosition.y(), globalPosition.x());
-      // hits_h_.view()[nPixelHits + i].chargeAndStatus().charge = ?
-      // hits_h_.view()[nPixelHits + i].chargeAndStatus().status = ?
-      // hits_h_.view()[nPixelHits + i].clusterSizeX() = ?
-      // hits_h_.view()[nPixelHits + i].clusterSizeY() = ?
-      hits_h_.view()[nPixelHits + i].detectorIndex() = det->stereoDet()->index();
+      allHitsHost.view()[nPixelHits + i].xGlobal() = globalPosition.x();
+      allHitsHost.view()[nPixelHits + i].yGlobal() = globalPosition.y();
+      allHitsHost.view()[nPixelHits + i].zGlobal() = globalPosition.z();
+      allHitsHost.view()[nPixelHits + i].rGlobal() = globalPosition.transverse();
+      allHitsHost.view()[nPixelHits + i].iphi() = unsafe_atan2s<7>(globalPosition.y(), globalPosition.x());
+      // allHitsHost.view()[nPixelHits + i].chargeAndStatus().charge = ?
+      // allHitsHost.view()[nPixelHits + i].chargeAndStatus().status = ?
+      // allHitsHost.view()[nPixelHits + i].clusterSizeX() = ?
+      // allHitsHost.view()[nPixelHits + i].clusterSizeY() = ?
+      allHitsHost.view()[nPixelHits + i].detectorIndex() = det->stereoDet()->index();
       // ???
       ++i;
     }
+    
   }
 
-  for (auto j = lastIndex + 1; j <= TrackerTraits::numberOfModules; ++j)
+  for (auto j = lastIndex + 1; j < TrackerTraits::numberOfModules + 1; ++j)
     hitsModuleStart[j] = hitsModuleStart[lastIndex];
 
 
-  for (auto layer = 0U; layer <= TrackerTraits::numberOfLayers; ++layer) {
-    hits_h_.view().hitsLayerStart()[layer] = 
+  for (auto layer = 0U; layer < TrackerTraits::numberOfLayers + 1; ++layer) {
+    allHitsHost.view().hitsLayerStart()[layer] = 
       hitsModuleStart[TrackerTraits::layerStart[layer]];
   }
 
-  iEvent.emplace(stripSoA_, std::move(hits_h_));
+  iEvent.emplace(hmsToken_, std::vector<uint32_t>(hitsModuleStart.begin(), hitsModuleStart.end()));
 
-}
+  iEvent.emplace(stripSoA_, Algo_.fillHitsAsync(allHitsHost, iEvent.queue()));
 
-template <typename TrackerTraits>
-void SiStripRecHitSoA<TrackerTraits>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
-  edm::ParameterSetDescription desc;
-
-  desc.add<edm::InputTag>("stripRecHitSource", edm::InputTag("siStripMatchedRecHits", "matchedRecHit"));
-  desc.add<edm::InputTag>("pixelRecHitSoASource", edm::InputTag("siPixelRecHitsPreSplitting"));
-  descriptions.addWithDefaultLabel(desc);
-
-  // desc.setUnknown();
-  // descriptions.addDefault(desc);
-}
-
-template <typename TrackerTraits>
-void SiStripRecHitSoA<TrackerTraits>::produce(device::Event& iEvent, device::EventSetup const& iSetup) {
-    
-  iEvent.emplace(stripSoA_,Algo_.fillHitsAsync(hits_h_,iEvent.queue()));
-
-
-  // Copy pixel data
-  // std::copy(pixelHits.view().xLocal(), pixelHits.view().xLocal() + nPixelHits, hits_h__.view().xLocal());
-  // std::copy(pixelHits.view().yLocal(), pixelHits.view().yLocal() + nPixelHits, hits_h_.view().yLocal());
-  // std::copy(pixelHits.view().xerrLocal(), pixelHits.view().xerrLocal() + nPixelHits, hits_h_.view().xerrLocal());
-  // std::copy(pixelHits.view().yerrLocal(), pixelHits.view().yerrLocal() + nPixelHits, hits_h_.view().yerrLocal());
-  // std::copy(pixelHits.view().xGlobal(), pixelHits.view().xGlobal() + nPixelHits, hits_h_.view().xGlobal());
-  // std::copy(pixelHits.view().yGlobal(), pixelHits.view().yGlobal() + nPixelHits, hits_h_.view().yGlobal());
-  // std::copy(pixelHits.view().zGlobal(), pixelHits.view().zGlobal() + nPixelHits, hits_h_.view().zGlobal());
-  // std::copy(pixelHits.view().rGlobal(), pixelHits.view().rGlobal() + nPixelHits, hits_h_.view().rGlobal());
-  // std::copy(pixelHits.view().iphi(), pixelHits.view().iphi() + nPixelHits, hits_h_.view().iphi());
-  // std::copy(pixelHits.view().chargeAndStatus(), pixelHits.view().chargeAndStatus() + nPixelHits, hits_h_.view().chargeAndStatus());
-  // std::copy(pixelHits.view().clusterSizeX(), pixelHits.view().clusterSizeX() + nPixelHits, hits_h_.view().clusterSizeX());
-  // std::copy(pixelHits.view().clusterSizeY(), pixelHits.view().clusterSizeY() + nPixelHits, hits_h_.view().clusterSizeY());
-  // std::copy(pixelHits.view().detectorIndex(), pixelHits.view().detectorIndex() + nPixelHits, hits_h_.view().detectorIndex());
-
-  // std::copy(pixelHits.view().phiBinnerStorage(), pixelHits.view().phiBinnerStorage() + nPixelHits, hits_h_.view().phiBinnerStorage());
-
-  // auto& hitsModuleStart = hits_h_.view().hitsModuleStart();
-
-  // std::copy(
-  //   pixelHits.view().hitsModuleStart().begin(),
-  //   pixelHits.view().hitsModuleStart().end(),
-  //   hitsModuleStart.begin()
-  // );
-
-  // hits_h_.view().cpeParams() = pixelHits.view().cpeParams();
-  // hits_h_.view().averageGeometry() = pixelHits.view().averageGeometry();
-  // hits_h_.view().phiBinner() = pixelHits.view().phiBinner();
-
-  // size_t i = 0;
-  // size_t lastIndex = TrackerTraits::numberOfPixelModules;
+  std::cout << "produce done" << std::endl;
   
-  // // Loop over strip RecHits
-  // for (const auto& detSet : stripHits) {
-
-  //   const GluedGeomDet* det = static_cast<const GluedGeomDet*>(trackerGeometry->idToDet(detSet.detId()));
-  //   size_t index = det->stereoDet()->index();
-    
-  //   if (index >= TrackerTraits::numberOfModules)
-  //     break;
-
-  //   // no hits since lastIndex: hitsModuleStart[lastIndex:index] = hitsModuleStart[lastIndex]
-  //   for (auto j = lastIndex + 1; j < index + 1; ++j)
-  //     hitsModuleStart[j] = hitsModuleStart[lastIndex];
-
-  //   hitsModuleStart[index + 1] = hitsModuleStart[index] + detSet.size();
-  //   lastIndex = index + 1;
-
-  //   for (const auto& recHit : detSet) {
-  //     hits_h_.view()[nPixelHits + i].xLocal() = recHit.localPosition().x();
-  //     hits_h_.view()[nPixelHits + i].yLocal() = recHit.localPosition().y();
-  //     hits_h_.view()[nPixelHits + i].xerrLocal() = recHit.localPositionError().xx();
-  //     hits_h_.view()[nPixelHits + i].yerrLocal() = recHit.localPositionError().yy();
-  //     auto globalPosition = det->toGlobal(recHit.localPosition());
-  //     hits_h_.view()[nPixelHits + i].xGlobal() = globalPosition.x();
-  //     hits_h_.view()[nPixelHits + i].yGlobal() = globalPosition.y();
-  //     hits_h_.view()[nPixelHits + i].zGlobal() = globalPosition.z();
-  //     hits_h_.view()[nPixelHits + i].rGlobal() = globalPosition.transverse();
-  //     hits_h_.view()[nPixelHits + i].iphi() = unsafe_atan2s<7>(globalPosition.y(), globalPosition.x());
-  //     // hits_h_.view()[nPixelHits + i].chargeAndStatus().charge = ?
-  //     // hits_h_.view()[nPixelHits + i].chargeAndStatus().status = ?
-  //     // hits_h_.view()[nPixelHits + i].clusterSizeX() = ?
-  //     // hits_h_.view()[nPixelHits + i].clusterSizeY() = ?
-  //     hits_h_.view()[nPixelHits + i].detectorIndex() = det->stereoDet()->index();
-  //     // ???
-  //     ++i;
-  //   }
-  // }
-
-  // for (auto j = lastIndex + 1; j <= TrackerTraits::numberOfModules; ++j)
-  //   hitsModuleStart[j] = hitsModuleStart[lastIndex];
-
-
-  // for (auto layer = 0U; layer <= TrackerTraits::numberOfLayers; ++layer) {
-  //   hits_h_.view().hitsLayerStart()[layer] = 
-  //     hitsModuleStart[TrackerTraits::layerStart[layer]];
-  // }
-
-  // cms::alpakatools::fillManyFromVector(&(hits_h_.view().phiBinner()),
-  //                               TrackerTraits::numberOfLayers,
-  //                               hits_h_.view().iphi(),
-  //                               hits_h_.view().hitsLayerStart().data(),
-  //                               hits_h_.view().metadata().size(),
-  //                               256,
-  //                               hits_h_.view().phiBinnerStorage());
-
-  
-  // // auto hms = std::make_unique<uint32_t[]>(hitsModuleStart.size());
-  // // std::copy(hitsModuleStart.begin(), hitsModuleStart.end(), hms.get());
-
-  // iEvent.emplace(stripSoA_, std::move(hits_h_));
-  // iEvent.emplace(moduleStartToken_, HMSstorage(std::move(hms)));
 }
   using SiStripRecHitSoAPhase1 = SiStripRecHitSoA<pixelTopology::Phase1Strip>;
 }

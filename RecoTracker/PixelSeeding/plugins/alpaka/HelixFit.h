@@ -58,7 +58,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     using TupleMultiplicity = caStructures::TupleMultiplicityT<TrackerTraits>;
 
-    using ParamsOnDevice = pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>;
+    using ParamsOnDevice = pixelCPEforDevice::ParamsOnDeviceT<pixelTopology::base_traits_t<TrackerTraits>>;
 
     explicit HelixFit(float bf, bool fitNas4) : bField_(bf), fitNas4_(fitNas4) {}
     ~HelixFit() { deallocate(); }

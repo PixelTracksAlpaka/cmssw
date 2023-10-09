@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
-#include "DataFormats/Track/interface/TrackSoADevice.h"
+// #include "DataFormats/Track/interface/TrackSoADevice.h"
 #include "DataFormats/Track/interface/TrackSoAHost.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
@@ -21,6 +21,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "FWCore/Utilities/interface/isFinite.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "TrackingTools/DetLayers/interface/BarrelDetLayer.h"
 
 #include "CAHitNtupletGenerator.h"
@@ -202,6 +203,40 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     
     desc.add<std::vector<int>>(
            "phiCuts", std::vector<int>(std::begin(phase1PixelTopology::phicuts), std::end(phase1PixelTopology::phicuts)))
+       ->setComment("Cuts in phi for cells");
+  }
+
+  
+  template <>
+  void CAHitNtupletGenerator<pixelTopology::Phase1Strip>::fillDescriptions(edm::ParameterSetDescription& desc) {
+    fillDescriptionsCommon(desc);
+
+    desc.add<bool>("idealConditions", true);
+    desc.add<bool>("includeJumpingForwardDoublets", false);
+    desc.add<double>("z0Cut", 12.0);
+    desc.add<double>("ptCut", 0.5);
+
+    edm::ParameterSetDescription trackQualityCuts;
+    trackQualityCuts.add<double>("chi2MaxPt", 10.)->setComment("max pT used to determine the pT-dependent chi2 cut");
+    trackQualityCuts.add<std::vector<double>>("chi2Coeff", {0.9, 1.8})->setComment("chi2 at 1GeV and at ptMax above");
+    trackQualityCuts.add<double>("chi2Scale", 8.)
+        ->setComment(
+            "Factor to multiply the pT-dependent chi2 cut (currently: 8 for the broken line fit, ?? for the Riemann "
+            "fit)");
+    trackQualityCuts.add<double>("tripletMinPt", 0.5)->setComment("Min pT for triplets, in GeV");
+    trackQualityCuts.add<double>("tripletMaxTip", 0.3)->setComment("Max |Tip| for triplets, in cm");
+    trackQualityCuts.add<double>("tripletMaxZip", 12.)->setComment("Max |Zip| for triplets, in cm");
+    trackQualityCuts.add<double>("quadrupletMinPt", 0.3)->setComment("Min pT for quadruplets, in GeV");
+    trackQualityCuts.add<double>("quadrupletMaxTip", 0.5)->setComment("Max |Tip| for quadruplets, in cm");
+    trackQualityCuts.add<double>("quadrupletMaxZip", 12.)->setComment("Max |Zip| for quadruplets, in cm");
+    desc.add<edm::ParameterSetDescription>("trackQualityCuts", trackQualityCuts)
+        ->setComment(
+            "Quality cuts based on the results of the track fit:\n  - apply a pT-dependent chi2 cut;\n  - apply "
+            "\"region "
+            "cuts\" based on the fit results (pT, Tip, Zip).");
+    
+    desc.add<std::vector<int>>(
+           "phiCuts", std::vector<int>(std::begin(phase1PixelStripTopology::phicuts), std::end(phase1PixelStripTopology::phicuts)))
        ->setComment("Cuts in phi for cells");
   }
 

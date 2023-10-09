@@ -19,7 +19,7 @@
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/global/EDProducer.h"
 
 #include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
-#include "DataFormats/Track/interface/TrackSoADevice.h"
+// #include "DataFormats/Track/interface/TrackSoADevice.h"
 #include "DataFormats/Vertex/interface/alpaka/ZVertexSoACollection.h"
 #include "DataFormats/Vertex/interface/ZVertexSoADevice.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/MakerMacros.h"

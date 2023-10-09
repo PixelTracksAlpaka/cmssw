@@ -198,9 +198,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           ;
         --pairLayerId;  // move to lower_bound ??
 
-        ALPAKA_ASSERT_OFFLOAD(pairLayerId < nPairs);
-        ALPAKA_ASSERT_OFFLOAD(j < innerLayerCumulativeSize[pairLayerId]);
-        ALPAKA_ASSERT_OFFLOAD(0 == pairLayerId || j >= innerLayerCumulativeSize[pairLayerId - 1]);
+        ALPAKA_ASSERT(pairLayerId < nPairs);
+        ALPAKA_ASSERT(j < innerLayerCumulativeSize[pairLayerId]);
+        ALPAKA_ASSERT(0 == pairLayerId || j >= innerLayerCumulativeSize[pairLayerId - 1]);
 
         uint8_t inner = TrackerTraits::layerPairs[2 * pairLayerId];
         uint8_t outer = TrackerTraits::layerPairs[2 * pairLayerId + 1];
