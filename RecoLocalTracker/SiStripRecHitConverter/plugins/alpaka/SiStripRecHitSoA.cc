@@ -4,10 +4,6 @@
 #include <vector>
 #include "DataFormats/BeamSpot/interface/BeamSpotPOD.h"
 #include "DataFormats/BeamSpot/interface/alpaka/BeamSpotDeviceProduct.h"
-// #include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersDevice.h"
-// #include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersCollection.h"
-#include "DataFormats/Portable/interface/PortableHostProduct.h"
-#include "DataFormats/Portable/interface/alpaka/PortableProduct.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
 #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisCollection.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoADevice.h"
@@ -81,7 +77,7 @@ private:
   const edm::ESGetToken<TrackerGeometry, TrackerDigiGeometryRecord> geomToken_;
   const edm::EDGetTokenT<SiStripMatchedRecHit2DCollection> recHitToken_;
   
-  const device::EDGetToken<PixelHits> pixelRecHitSoAToken_;
+  const edm::EDGetTokenT<PixelHitsHost> pixelRecHitSoAToken_;
   const device::EDPutToken<StripHits> stripSoA_;
   const edm::EDPutTokenT<std::vector<uint32_t>> hmsToken_;
 
@@ -111,37 +107,13 @@ void SiStripRecHitSoA<TrackerTraits>::fillDescriptions(edm::ConfigurationDescrip
   // descriptions.addDefault(desc);
 }
 
-template <class From, class To>
-struct HostView {
-  template <class Queue>
-  HostView(From& from, Queue& queue) : to(from.view().metadata().size(), queue) {
-    alpaka::memcpy(queue, to.buffer(), from.buffer());
-  }
-  To& get() {
-    return to;
-  }
-private:
-  To to;
-};
-
-template <class T>
-struct HostView<T, T> {
-  template <class Queue>
-  HostView(T& from, Queue& queue) : ref(from) {}
-  T& get() {
-    return ref;
-  }
-private:
-  T& ref;
-};
-
 template <typename TrackerTraits>
 void SiStripRecHitSoA<TrackerTraits>::produce(device::Event& iEvent, device::EventSetup const& iSetup) {
 
   // Get the objects that we need
   const TrackerGeometry* trackerGeometry = &iSetup.getData(geomToken_);
   auto const& stripHits = iEvent.get(recHitToken_);
-  auto const& pixelHits = iEvent.get(pixelRecHitSoAToken_);
+  auto const& pixelHitsHost = iEvent.get(pixelRecHitSoAToken_);
 
   // Count strip hits
   size_t nStripHits = 0;
@@ -151,13 +123,13 @@ void SiStripRecHitSoA<TrackerTraits>::produce(device::Event& iEvent, device::Eve
         nStripHits += detSet.size();
   } 
 
-  size_t nPixelHits = pixelHits.view().metadata().size();
+  size_t nPixelHits = pixelHitsHost.view().metadata().size();
 
   std::cout << "nStripHits = " << nStripHits << std::endl;
   std::cout << "nPixelHits = " << nPixelHits << std::endl;
 
-  HostView<const PixelHits, PixelHitsHost> pixelHitsHostView(pixelHits, iEvent.queue());
-  PixelHitsHost& pixelHitsHost = pixelHitsHostView.get();
+  // HostView<const PixelHits, PixelHitsHost> pixelHitsHostView(pixelHits, iEvent.queue());
+  // PixelHitsHost& pixelHitsHost = pixelHitsHostView.get();
   // PixelHitsHost pixelHitsHost(nPixelHits, iEvent.queue());
 
   // alpaka::memcpy(iEvent.queue(), pixelHitsHost.buffer(), pixelHits.buffer());
