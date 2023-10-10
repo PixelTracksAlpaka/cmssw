@@ -7,7 +7,7 @@
 #include "DataFormats/Track/interface/PixelTrackDefinitions.h"
 #include "DataFormats/Track/interface/TrackSoAHost.h"
 #include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
-#include "DataFormats/Track/interface/TrackSoADevice.h"
+// #include "DataFormats/Track/interface/TrackSoADevice.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoAHost.h"
 #include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
 #include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoACollection.h"
@@ -56,7 +56,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using Params = caHitNtupletGenerator::ParamsT<TrackerTraits>;
     using Counters = caHitNtupletGenerator::Counters;
 
-    using ParamsOnDevice = pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>;
+    using ParamsOnDevice = pixelCPEforDevice::ParamsOnDeviceT<pixelTopology::base_traits_t<TrackerTraits>>;
 
   public:
     CAHitNtupletGenerator(const edm::ParameterSet& cfg, edm::ConsumesCollector&& iC) : CAHitNtupletGenerator(cfg, iC){};

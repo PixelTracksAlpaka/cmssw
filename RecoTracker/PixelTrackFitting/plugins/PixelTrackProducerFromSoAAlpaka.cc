@@ -192,8 +192,6 @@ void PixelTrackProducerFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID strea
     ++counter[idx];
   }
 
-  std::cout << "hitmap nulls:" << std::count(hitmap.begin(), hitmap.end(), nullptr) << std::endl;
-
   if (useStripHits_) {
     for (const auto& moduleHits : *stripRechitsDSV) {
       const GluedGeomDet* theStripDet = dynamic_cast<const GluedGeomDet*>(theTrackerGeometry->idToDet(moduleHits[0].geographicalId()));
@@ -218,6 +216,8 @@ void PixelTrackProducerFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID strea
     }
   }
 
+  std::cout << "hitmap nulls:" << std::count(hitmap.begin(), hitmap.end(), nullptr) << std::endl;
+  
   std::vector<const TrackingRecHit *> hits;
   hits.reserve(5); //TODO: Move to the average depending on tracker traits
 

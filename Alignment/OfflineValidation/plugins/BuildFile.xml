@@ -6,6 +6,7 @@
 <use name="CommonTools/UtilAlgos"/>
 <use name="CommonTools/Utils"/>
 <use name="CondCore/DBOutputService"/>
+<use name="CondCore/SiPixelPlugins"/>
 <use name="CondFormats/Alignment"/>
 <use name="CondFormats/BeamSpotObjects"/>
 <use name="CondFormats/RunInfo"/>

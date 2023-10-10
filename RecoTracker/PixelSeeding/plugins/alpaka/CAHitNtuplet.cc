@@ -3,7 +3,7 @@
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Track/interface/TrackSoAHost.h"
 #include "DataFormats/Track/interface/alpaka/TrackSoACollection.h"
-#include "DataFormats/Track/interface/TrackSoADevice.h"
+// #include "DataFormats/Track/interface/TrackSoADevice.h"
 #include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoACollection.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -15,6 +15,7 @@
 #include "FWCore/Utilities/interface/ESGetToken.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "FWCore/Utilities/interface/RunningAverage.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/EDGetToken.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/EDPutToken.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/ESGetToken.h"
@@ -31,6 +32,9 @@
 #include "CAHitNtupletGenerator.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
+
+
+
   template <typename TrackerTraits>
   class CAHitNtupletAlpaka : public stream::EDProducer<> {
     using HitsConstView = TrackingRecHitAlpakaSoAConstView<TrackerTraits>;
@@ -53,7 +57,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     //void endJob() override;
 
     edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> tokenField_;
-    const device::ESGetToken<PixelCPEFastParams<TrackerTraits>, PixelCPEFastParamsRecord> cpeToken_;
+    const device::ESGetToken<PixelCPEFastParams<pixelTopology::base_traits_t<TrackerTraits>>, PixelCPEFastParamsRecord> cpeToken_;
     device::EDGetToken<HitsOnDevice> tokenHit_;
     device::EDPutToken<TkSoADevice> tokenTrack_;
 
@@ -90,7 +94,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     auto& fcpe = es.getData(cpeToken_);
 
     auto const& hits = iEvent.get(tokenHit_);
-
+    
     iEvent.emplace(tokenTrack_, deviceAlgo_.makeTuplesAsync(hits, fcpe.const_buffer().data(), bf, iEvent.queue()));
   }
 

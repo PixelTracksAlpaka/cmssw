@@ -3,8 +3,40 @@
   <class name="alpaka_cuda_async::pixelTrack::TrackSoACollectionPhase1" persistent="false"/>
   <class name="edm::DeviceProduct<alpaka_cuda_async::pixelTrack::TrackSoACollectionPhase1>" persistent="false"/>
   <class name="edm::Wrapper<edm::DeviceProduct<alpaka_cuda_async::pixelTrack::TrackSoACollectionPhase1>>" persistent="false"/>
+
   <class name="alpaka_cuda_async::PortableCollection<TrackLayout<pixelTopology::Phase2>>" persistent="false"/>
   <class name="alpaka_cuda_async::pixelTrack::TrackSoACollectionPhase2" persistent="false"/>
   <class name="edm::DeviceProduct<alpaka_cuda_async::pixelTrack::TrackSoACollectionPhase2>" persistent="false"/>
   <class name="edm::Wrapper<edm::DeviceProduct<alpaka_cuda_async::pixelTrack::TrackSoACollectionPhase2>>" persistent="false"/>
+  
+
+  <!-- <class name="alpaka_cuda_async::PortableCollection<TrackLayout<pixelTopology::Phase1Strip>>" persistent="false"/>
+  <class name="alpaka_cuda_async::pixelTrack::TrackSoACollectionPhase1Strip" persistent="false"/>
+  <class name="edm::DeviceProduct<alpaka_cuda_async::pixelTrack::TrackSoACollectionPhase1Strip>" persistent="false"/>
+  <class name="edm::Wrapper<edm::DeviceProduct<alpaka_cuda_async::pixelTrack::TrackSoACollectionPhase1Strip>>" persistent="false"/> -->
+
+  <!-- <class name="PortableDeviceCollection<TrackLayout<pixelTopology::Phase1>, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>" persistent="false"/> -->
+  
+  <!-- <class name="PortableDeviceCollection<TrackLayout<pixelTopology::Phase2>, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>" persistent="false"/> -->
+  
+  <!-- <class name="PortableDeviceCollection<TrackLayout<pixelTopology::HIonPhase1>, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>" persistent="false"/> -->
+  
+  <!-- <class name="PortableDeviceCollection<TrackLayout<pixelTopology::Phase1Strip>, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>" persistent="false"/> -->
+  
+  <class name="TrackSoADevice<pixelTopology::Phase1, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>" persistent="false"/>
+  <!-- <class name="edm::DeviceProduct<TrackSoADevice<pixelTopology::Phase1, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt> > >" persistent="false"/> -->
+  <!-- <class name="edm::Wrapper<edm::DeviceProduct<TrackSoADevice<pixelTopology::Phase1, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt> > > >" persistent="false"/> -->
+
+  <class name="TrackSoADevice<pixelTopology::Phase2, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>" persistent="false"/>
+  <!-- <class name="edm::DeviceProduct<TrackSoADevice<pixelTopology::Phase2, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt> > >" persistent="false"/> -->
+  <!-- <class name="edm::Wrapper<edm::DeviceProduct<TrackSoADevice<pixelTopology::Phase2, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt> > > >" persistent="false"/> -->
+
+  <class name="TrackSoADevice<pixelTopology::HIonPhase1, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>" persistent="false"/>
+  <!-- <class name="edm::DeviceProduct<TrackSoADevice<pixelTopology::HIonPhase1, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt> > >" persistent="false"/> -->
+  <!-- <class name="edm::Wrapper<edm::DeviceProduct<TrackSoADevice<pixelTopology::HIonPhase1, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt> > > >" persistent="false"/> -->
+
+  <class name="TrackSoADevice<pixelTopology::Phase1Strip, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt>>" persistent="false"/>
+  <class name="edm::DeviceProduct<TrackSoADevice<pixelTopology::Phase1Strip, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt> > >" persistent="false"/>
+  <class name="edm::Wrapper<edm::DeviceProduct<TrackSoADevice<pixelTopology::Phase1Strip, alpaka::DevUniformCudaHipRt<alpaka::ApiCudaRt> > > >" persistent="false"/>
+  
 </lcgdict>
