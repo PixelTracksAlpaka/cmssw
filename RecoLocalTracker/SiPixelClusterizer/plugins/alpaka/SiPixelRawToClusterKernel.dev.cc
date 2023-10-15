@@ -526,7 +526,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         if (0 != i)
           ALPAKA_ASSERT_OFFLOAD(clus_view[i].moduleStart() >= clus_view[i - i].moduleStart());
         // Check BPX2 (1), FP1 (4)
-        if (i == TrackerTraits::layerStart[1] || i == TrackerTraits::layerStart[4])
+        constexpr auto bpix2 = TrackerTraits::layerStart[1];
+        constexpr auto fpix1 = TrackerTraits::layerStart[4];
+        if (i == bpix2 || i == fpix1)
           printf("moduleStart %d %d\n", i, clus_view[i].moduleStart());
       });
 #endif
@@ -695,7 +697,15 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         auto nModules_Clusters_h_2 = cms::alpakatools::make_host_view(nModules_Clusters_h.data() + 2, 1u);
         alpaka::memcpy(queue, nModules_Clusters_h_2, bpix2ClusterStart);
-
+	
+	alpaka::wait(queue);   
+        std::cout << "SiPixelClusterizerAlpaka results:" << std::endl
+        << " > no. of digis: " << nDigis << std::endl
+        << " > no. of active modules: " << nModules_Clusters_h[0] << std::endl
+        << " > no. of clusters: " << nModules_Clusters_h[1] << std::endl
+        << " > bpix2 offset: " << nModules_Clusters_h[2] << std::endl;
+    
+    
       }  // end clusterizer scope
     }
 
@@ -733,11 +743,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
 #ifdef GPU_DEBUG
       alpaka::wait(queue);
-      std::cout << "findClus kernel launch with " << numberOfModules << " blocks of " << threadsPerBlock
+      std::cout << "findClus kernel launch with " << numberOfModules << " blocks of " << threadsPerBlockFindClus
                 << " threadsPerBlockOrElementsPerThread\n";
 #endif
       alpaka::exec<Acc1D>(
-          queue, workDivMaxNumModules, findClus<pixelTopology::Phase2>(), digis_view, clusters_d->view(), numDigis);
+          queue, workDivMaxNumModules, findClus<TrackerTraits>(), digis_view, clusters_d->view(), numDigis);
 #ifdef GPU_DEBUG
       alpaka::wait(queue);
 #endif
@@ -745,7 +755,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       // apply charge cut
       alpaka::exec<Acc1D>(queue,
                           workDivMaxNumModules,
-                          ::pixelClustering::clusterChargeCut<pixelTopology::Phase2>(),
+                          ::pixelClustering::clusterChargeCut<TrackerTraits>(),
                           digis_view,
                           clusters_d->view(),
                           clusterThresholds,
@@ -759,7 +769,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       // MUST be ONE block
       const auto workDivOneBlock = cms::alpakatools::make_workdiv<Acc1D>(1u, 1024u);
       alpaka::exec<Acc1D>(
-          queue, workDivOneBlock, fillHitsModuleStart<pixelTopology::Phase2>(), clusters_d->view());
+          queue, workDivOneBlock, fillHitsModuleStart<TrackerTraits>(), clusters_d->view());
 
       // last element holds the number of all clusters
       const auto clusModuleStartLastElement = cms::alpakatools::make_device_view(
@@ -777,6 +787,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       alpaka::memcpy(queue, nModules_Clusters_h_2, bpix2ClusterStart);
 
       #ifdef GPU_DEBUG
+      	alpaka::wait(queue);
         std::cout << "SiPixelPhase2DigiToCluster: results \n" 
                 << " > no. of digis: " << numDigis << std::endl
                 << " > no. of active modules: " << nModules_Clusters_h[0] << std::endl

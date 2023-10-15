@@ -140,7 +140,8 @@ from RecoLocalTracker.SiPixelClusterizer.siPixelDigisClustersFromSoAAlpakaPhase2
     clusterThreshold_layer1 = 4000,
     clusterThreshold_otherLayers = 4000,
     src = "siPixelClustersPreSplittingAlpaka",
-    storeDigis = False
+    storeDigis = False,
+    produceDigis = False
 ))
 
 from RecoLocalTracker.SiPixelClusterizer.siPixelDigisClustersFromSoAAlpakaPhase1_cfi import siPixelDigisClustersFromSoAAlpakaPhase1 as _siPixelDigisClustersFromSoAAlpakaPhase1

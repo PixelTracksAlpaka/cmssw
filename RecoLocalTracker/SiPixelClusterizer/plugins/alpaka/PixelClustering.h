@@ -96,7 +96,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         const uint32_t threadIdxGlobal(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
         // zero for next kernels...
         if (0 == threadIdxGlobal)
-          printf("Starting to count modules to set module starts:")
+          printf("Starting to count modules to set module starts:");
         #endif
         cms::alpakatools::for_each_element_in_grid_strided(acc, numElements, [&](uint32_t i) {
           digi_view[i].clus() = i;
@@ -425,7 +425,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           // adjust the cluster id to be a positive value starting from 0
           cms::alpakatools::for_each_element_in_block_strided(acc, msize, firstPixel, [&](uint32_t i) {
             if (digi_view[i].moduleId() == ::pixelClustering::invalidModuleId) {  // skip invalid pixels
-              digi_view[i].clus() = -9999;
+              digi_view[i].clus() = ::pixelClustering::invalidClusterId;
             } else {
               digi_view[i].clus() = -digi_view[i].clus() - 1;
             }
@@ -440,7 +440,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               if (foundClusters > 8)
                 printf("max hit %d in %d\n", foundClusters, thisModuleId);
             }
-            if (thisModuleId % 100 == 1)
+            // if (thisModuleId % 100 == 1)
               printf("%d clusters in module %d\n", foundClusters, thisModuleId);
 #endif
           }

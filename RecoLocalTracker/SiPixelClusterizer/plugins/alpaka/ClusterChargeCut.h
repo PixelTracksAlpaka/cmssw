@@ -11,6 +11,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/prefixScan.h"
 #include "RecoLocalTracker/SiPixelClusterizer/plugins/SiPixelClusterThresholds.h"
 
+// #define GPU_DEBUG
 // namespace ALPAKA_ACCELERATOR_NAMESPACE {
 namespace pixelClustering {
 
@@ -32,7 +33,11 @@ namespace pixelClustering {
       auto endModule = clus_view[0].moduleStart();
       if (blockIdx >= endModule)
         return;
-      
+
+      auto& charge = alpaka::declareSharedVar<int32_t[maxNumClustersPerModules], __COUNTER__>(acc);
+      auto& ok = alpaka::declareSharedVar<uint8_t[maxNumClustersPerModules], __COUNTER__>(acc);
+      auto& newclusId = alpaka::declareSharedVar<uint16_t[maxNumClustersPerModules], __COUNTER__>(acc);
+
       const uint32_t gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
 
       for (auto module = firstModule; module < endModule; module += gridDimension) {
@@ -84,12 +89,8 @@ namespace pixelClustering {
   #ifdef GPU_DEBUG
         if (thisModuleId % 100 == 1)
           if (threadIdxLocal == 0)
-            printf("start clusterizer for module %d in block %d\n", thisModuleId, module);
+            printf("start cluster charge cut for module %d in block %d\n", thisModuleId, module);
   #endif
-
-        auto& charge = alpaka::declareSharedVar<int32_t[maxNumClustersPerModules], __COUNTER__>(acc);
-        auto& ok = alpaka::declareSharedVar<uint8_t[maxNumClustersPerModules], __COUNTER__>(acc);
-        auto& newclusId = alpaka::declareSharedVar<uint16_t[maxNumClustersPerModules], __COUNTER__>(acc);
 
         ALPAKA_ASSERT_OFFLOAD(nclus <= maxNumClustersPerModules);
         cms::alpakatools::for_each_element_in_block_strided(acc, nclus, [&](uint32_t i) { charge[i] = 0; });
@@ -113,10 +114,23 @@ namespace pixelClustering {
         alpaka::syncBlockThreads(acc);
 
         auto chargeCut = clusterThresholds.getThresholdForLayerOnCondition(thisModuleId < startBPIX2);
-        
+        bool allGood = true;
+
         cms::alpakatools::for_each_element_in_block_strided(
-            acc, nclus, [&](uint32_t i) { newclusId[i] = ok[i] = charge[i] > chargeCut ? 1 : 0; });
+            acc, nclus, [&](uint32_t i) { 
+              newclusId[i] = ok[i] = (charge[i] > chargeCut) ? 1 : 0; 
+              if (ok[i]==0)
+                allGood = allGood && false;
+
+              // #ifdef GPU_DEBUG
+              // printf("module %d -> chargeCut = %d; cluster %d; charge = %d; ok = %s\n",thisModuleId, chargeCut,i,charge[i],ok[i] > 0 ? " -> good" : "-> cut");
+              // #endif
+              });
         alpaka::syncBlockThreads(acc);
+
+        // if all clusters above threshold do nothing
+        // if (allGood)
+        //   continue;
 
         // renumber
         auto& ws = alpaka::declareSharedVar<uint16_t[32], __COUNTER__>(acc);
@@ -147,18 +161,19 @@ namespace pixelClustering {
           return;
 
         clus_view[thisModuleId].clusInModule() = newclusId[nclus - 1];
-        alpaka::syncBlockThreads(acc);
+        // alpaka::syncBlockThreads(acc);
 
         #ifdef GPU_DEBUG
         if (thisModuleId % 100 == 1)
           if (threadIdxLocal == 0)
             printf("module %d -> chargeCut = %d; nclus (pre cut) = %d; nclus (after cut) = %d\n",thisModuleId, chargeCut,nclus,clus_view[thisModuleId].clusInModule());
         #endif
-        // mark bad cluster again
-        cms::alpakatools::for_each_element_in_block_strided(acc, nclus, [&](uint32_t i) {
-          if (0 == ok[i])
-            newclusId[i] = invalidModuleId + 1;
-        });
+        // // mark bad cluster again
+        // cms::alpakatools::for_each_element_in_block_strided(acc, nclus, [&](uint32_t i) {
+        //   if (0 == ok[i])
+        //     newclusId[i] = invalidModuleId + 1;
+        // });
+
         alpaka::syncBlockThreads(acc);
 
         // reassign id
@@ -172,10 +187,16 @@ namespace pixelClustering {
             continue;  // not valid
           if (digi_view[i].moduleId() != thisModuleId)
             break;  // end of module
-          digi_view[i].clus() = newclusId[digi_view[i].clus()] - 1;
-          if (digi_view[i].clus() == invalidModuleId)
-            digi_view[i].moduleId() = invalidModuleId;
+          if (0 == ok[digi_view[i].clus()])
+            digi_view[i].moduleId() = digi_view[i].clus() = invalidModuleId;
+          else
+            digi_view[i].clus() = newclusId[digi_view[i].clus()] - 1;
+          // digi_view[i].clus() = newclusId[digi_view[i].clus()] - 1;
+          // if (digi_view[i].clus() == invalidModuleId)
+          //   digi_view[i].moduleId() = invalidModuleId;
         }
+
+        alpaka::syncBlockThreads(acc);
 
         //done
       }

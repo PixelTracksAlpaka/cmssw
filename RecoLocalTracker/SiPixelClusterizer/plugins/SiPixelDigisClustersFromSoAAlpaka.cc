@@ -19,7 +19,8 @@
 // local include(s)
 #include "PixelClusterizerBase.h"
 #include "SiPixelClusterThresholds.h"
-#define EDM_ML_DEBUG
+// #define EDM_ML_DEBUG
+// #define GPU_DEBUG
 template <typename TrackerTraits>
 class SiPixelDigisClustersFromSoAAlpaka : public edm::global::EDProducer<> {
 public:
@@ -125,9 +126,8 @@ void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID,
     for (int32_t ic = 0; ic < nclus + 1; ++ic) {
       auto const& acluster = aclusters[ic];
       // in any case we cannot  go out of sync with gpu...
-      if (!std::is_base_of<pixelTopology::Phase2, TrackerTraits>::value and acluster.charge < clusterThreshold)
-        // edm::LogWarning("SiPixelDigisClustersFromSoAAlpaka") 
-        std::cout << "cluster below charge Threshold "
+      if (acluster.charge < clusterThreshold)
+        edm::LogWarning("SiPixelDigisClustersFromSoAAlpaka") << "cluster below charge Threshold "
                                                        << "Layer/DetId/clusId " << layer << '/' << detId << '/' << ic
                                                        << " size/charge " << acluster.isize << '/' << acluster.charge << "\n";
       // sort by row (x)
@@ -152,6 +152,10 @@ void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID,
       spc.abort();
   };
 
+  
+  #ifdef GPU_DEBUG
+  std::cout << "Dumping all digis. nDigis = "<< nDigis << std::endl;
+  #endif
   for (uint32_t i = 0; i < nDigis; i++) {
     // check for uninitialized digis
     if (digisView[i].rawIdArr() == 0)
@@ -159,12 +163,17 @@ void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID,
     // check for noisy/dead pixels (electrons set to 0)
     if (digisView[i].adc() == 0)
       continue;
-    if (digisView[i].clus() > 9000)
+    if (digisView[i].clus() >= -pixelClustering::invalidClusterId)
       continue;  // not in cluster; TODO add an assert for the size
+    if (digisView[i].clus() == pixelClustering::invalidModuleId)
+      continue;  // from clusters killed by charge cut
 #ifdef EDM_ML_DEBUG
     assert(digisView[i].rawIdArr() > 109999);
 #endif
     if (detId != digisView[i].rawIdArr()) {
+      #ifdef GPU_DEBUG
+      std::cout << ">> Closed module --"<< detId << "; nclus = " << nclus <<std::endl;
+      #endif
       // new module
       fillClusters(detId);
 #ifdef EDM_ML_DEBUG
@@ -182,7 +191,15 @@ void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID,
       }
     }
     PixelDigi dig{digisView[i].pdigi()};
-  
+    #ifdef GPU_DEBUG
+    std::cout << i << ";" 
+              << digisView[i].rawIdArr() << ";"
+              << digisView[i].clus() << ";"
+              << digisView[i].pdigi() << ";"
+              << digisView[i].adc() << ";"
+              << dig.row() << ";"
+              << dig.column() << std::endl;
+    #endif
     if (storeDigis_)
       (*detDigis).data.emplace_back(dig);
       // fill clusters
