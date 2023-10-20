@@ -24,7 +24,6 @@ struct mykernel {
       printf("start kernel for %d data\n", N);
     }
 
-
     using Hist = HistoContainer<T, NBINS, 12000, S, uint16_t>;
 
     auto& hist = alpaka::declareSharedVar<Hist, __COUNTER__>(acc);
