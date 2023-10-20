@@ -107,7 +107,7 @@ namespace cms {
     template <typename Hist, typename V, typename Func>
     ALPAKA_FN_ACC ALPAKA_FN_INLINE void forEachInBins(Hist const &hist, V value, int n, Func func) {
       int bs = Hist::bin(value);
-      int be = std::min(int(Hist::totbins() - 1), bs + n);
+      int be = std::min(int(Hist::nbins() - 1), bs + n);
       bs = std::max(0, bs - n);
       ALPAKA_ASSERT_OFFLOAD(be >= bs);
       for (auto pj = hist.begin(bs); pj < hist.end(be); ++pj) {

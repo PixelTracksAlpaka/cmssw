@@ -32,11 +32,11 @@
   <flags ALPAKA_BACKENDS="1"/> 
 </bin>
 
-<bin name="alpakaTestOneHistoContainer" file="alpaka/testOneHistoContainer.dev.cc">
+<!-- <bin name="alpakaTestOneHistoContainer" file="alpaka/testOneHistoContainer.dev.cc">
   <use name="alpaka"/>
   <use name="HeterogeneousCore/AlpakaInterface"/>
   <flags ALPAKA_BACKENDS="1"/>
-</bin>
+</bin> COMMENTED, SOLVED IN 43064--> 
 
 <bin name="alpakaTestOneToManyAssoc" file="alpaka/testOneToManyAssoc.dev.cc">
   <use name="alpaka"/>
