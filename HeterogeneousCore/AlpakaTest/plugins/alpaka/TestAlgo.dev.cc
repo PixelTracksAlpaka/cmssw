@@ -6,7 +6,7 @@
 #include <alpaka/alpaka.hpp>
 
 #include "DataFormats/PortableTestObjects/interface/alpaka/TestDeviceCollection.h"
-#include "DataFormats/PortableTestObjects/interface/alpaka/TestDeviceProduct.h"
+#include "DataFormats/PortableTestObjects/interface/alpaka/TestDeviceObject.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
@@ -74,7 +74,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     alpaka::exec<Acc1D>(queue, workDiv, TestAlgoKernel{}, collection.view(), collection->metadata().size(), xvalue);
   }
 
-  void TestAlgo::set(Queue& queue, portabletest::TestDeviceProduct& product, double xvalue) const {
+  void TestAlgo::set(Queue& queue, portabletest::TestDeviceObject& product, double xvalue) const {
     // a work division with a single block, thread and element
     auto workDiv = make_workdiv<Acc1D>(1u, 1u);
 

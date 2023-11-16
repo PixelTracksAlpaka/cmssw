@@ -7,7 +7,7 @@
 <use name="DataFormats/Math"/>
 <use name="DataFormats/Portable"/>
 <use name="HeterogeneousCore/AlpakaInterface"/>
-<flags ALPAKA_BACKENDS="cuda rocm"/>
+<flags ALPAKA_BACKENDS="!serial"/>
 <export>
   <lib name="1"/>
 </export>

@@ -5,11 +5,11 @@
   </class>
   <class name="edm::Wrapper<reco::BeamSpot>"/>
 
-  <class name="BeamSpotPOD" ClassVersion="10">
-   <version ClassVersion="10" checksum="280341519"/>
+  <class name="BeamSpotPOD" ClassVersion="3">
+   <version ClassVersion="3" checksum="280341519"/>
   </class>
   <class name="edm::Wrapper<BeamSpotPOD>"/>
 
-  <class name="BeamSpotHostProduct" persistent="false"/>
-  <class name="edm::Wrapper<BeamSpotHostProduct>" persistent="false"/>
+  <class name="BeamSpotHost" persistent="false"/>
+  <class name="edm::Wrapper<BeamSpotHost>" persistent="false"/>
 </lcgdict>

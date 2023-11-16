@@ -1,5 +1,5 @@
 #include "DataFormats/PortableTestObjects/interface/alpaka/TestDeviceCollection.h"
-#include "DataFormats/PortableTestObjects/interface/alpaka/TestDeviceProduct.h"
+#include "DataFormats/PortableTestObjects/interface/alpaka/TestDeviceObject.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -23,7 +23,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     void produce(edm::StreamID sid, device::Event& event, device::EventSetup const&) const override {
       // run the algorithm, potentially asynchronously
-      portabletest::TestDeviceProduct product{event.queue()};
+      portabletest::TestDeviceObject product{event.queue()};
       algo_.set(event.queue(), product);
 
       portabletest::TestDeviceCollection collection{size_, event.queue()};
@@ -41,7 +41,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     }
 
   private:
-    const device::EDPutToken<portabletest::TestDeviceProduct> productToken_;
+    const device::EDPutToken<portabletest::TestDeviceObject> productToken_;
     const device::EDPutToken<portabletest::TestDeviceCollection> collectionToken_;
     const int32_t size_;
 

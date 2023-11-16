@@ -3,4 +3,4 @@
 #include "DataFormats/PortableTestObjects/interface/TestSoA.h"
 #include "DataFormats/PortableTestObjects/interface/TestStruct.h"
 #include "DataFormats/PortableTestObjects/interface/alpaka/TestDeviceCollection.h"
-#include "DataFormats/PortableTestObjects/interface/alpaka/TestDeviceProduct.h"
+#include "DataFormats/PortableTestObjects/interface/alpaka/TestDeviceObject.h"

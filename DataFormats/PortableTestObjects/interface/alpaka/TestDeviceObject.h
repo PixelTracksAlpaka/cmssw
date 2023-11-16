@@ -1,7 +1,7 @@
-#ifndef DataFormats_PortableTestObjects_interface_alpaka_TestDeviceProduct_h
-#define DataFormats_PortableTestObjects_interface_alpaka_TestDeviceProduct_h
+#ifndef DataFormats_PortableTestObjects_interface_alpaka_TestDeviceObject_h
+#define DataFormats_PortableTestObjects_interface_alpaka_TestDeviceObject_h
 
-#include "DataFormats/Portable/interface/alpaka/PortableProduct.h"
+#include "DataFormats/Portable/interface/alpaka/PortableObject.h"
 #include "DataFormats/PortableTestObjects/interface/TestStruct.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
@@ -14,10 +14,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using namespace ::portabletest;
 
     // struct with x, y, z, id fields in device global memory
-    using TestDeviceProduct = PortableProduct<TestStruct>;
+    using TestDeviceObject = PortableObject<TestStruct>;
 
   }  // namespace portabletest
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
-#endif  // DataFormats_PortableTestObjects_interface_alpaka_TestDeviceProduct_h
+#endif  // DataFormats_PortableTestObjects_interface_alpaka_TestDeviceObject_h
