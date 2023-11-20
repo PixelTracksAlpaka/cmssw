@@ -36,6 +36,7 @@ namespace cms::alpakatools {
                           TracksDevice<TrackerTraits, TDevice> const& deviceData) {
       ::TracksHost<TrackerTraits> hostData(queue);
       alpaka::memcpy(queue, hostData.buffer(), deviceData.buffer());
+      printf("Tracks: I'm copying to host. But why?\n");
       return hostData;
     }
   };

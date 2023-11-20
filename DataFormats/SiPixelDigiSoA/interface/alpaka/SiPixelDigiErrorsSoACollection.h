@@ -26,7 +26,7 @@ namespace cms::alpakatools {
     static auto copyAsync(TQueue& queue, SiPixelDigiErrorsDevice<TDevice> const& srcData) {
       SiPixelDigiErrorsHost dstData(srcData.maxFedWords(), queue);
       alpaka::memcpy(queue, dstData.buffer(), srcData.buffer());
-
+      printf("Digis: I'm copying to host. But why?\n");
       return dstData;
     }
   };

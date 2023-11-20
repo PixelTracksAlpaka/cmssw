@@ -61,7 +61,7 @@ public:
   Product const* operator->() const { return buffer_->data(); }
 
   // access the buffer
-  Buffer& buffer() { return *buffer_; }
+  Buffer buffer() { return *buffer_; }
   ConstBuffer buffer() const { return *buffer_; }
   ConstBuffer const_buffer() const { return *buffer_; }
 

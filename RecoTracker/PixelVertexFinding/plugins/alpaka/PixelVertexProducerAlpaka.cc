@@ -35,7 +35,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   template <typename TrackerTraits>
   class PixelVertexProducerAlpaka : public global::EDProducer<> {
     using TkSoADevice = TracksSoACollection<TrackerTraits>;
-    using GPUAlgo = vertexFinder::Producer<TrackerTraits>;
+    using Algo = vertexFinder::Producer<TrackerTraits>;
 
   public:
     explicit PixelVertexProducerAlpaka(const edm::ParameterSet& iConfig);
@@ -52,7 +52,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     device::EDGetToken<TkSoADevice> tokenDeviceTrack_;
     device::EDPutToken<ZVertexCollection> tokenDeviceVertex_;
 
-    const GPUAlgo gpuAlgo_;
+    const Algo Algo_;
 
     // Tracking cuts before sending tracks to vertex algo
     const float ptMin_;
@@ -61,7 +61,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template <typename TrackerTraits>
   PixelVertexProducerAlpaka<TrackerTraits>::PixelVertexProducerAlpaka(const edm::ParameterSet& conf)
-      : gpuAlgo_(conf.getParameter<bool>("oneKernel"),
+      : Algo_(conf.getParameter<bool>("oneKernel"),
                  conf.getParameter<bool>("useDensity"),
                  conf.getParameter<bool>("useDBSCAN"),
                  conf.getParameter<bool>("useIterative"),
@@ -105,9 +105,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   void PixelVertexProducerAlpaka<TrackerTraits>::produceOnGPU(edm::StreamID streamID,
                                                               device::Event& iEvent,
                                                               const device::EventSetup& iSetup) const {
-    auto const& hTracks = iEvent.get(tokenDeviceTrack_);
+    auto const& dTracks = iEvent.get(tokenDeviceTrack_);
 
-    iEvent.emplace(tokenDeviceVertex_, gpuAlgo_.makeAsync(iEvent.queue(), hTracks.view(), ptMin_, ptMax_));
+    iEvent.emplace(tokenDeviceVertex_, Algo_.makeAsync(iEvent.queue(), dTracks.view(), ptMin_, ptMax_));
   }
 
   template <typename TrackerTraits>
