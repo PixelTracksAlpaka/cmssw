@@ -5,6 +5,6 @@
   <class name="edm::Wrapper<portabletest::TestHostCollection>" splitLevel="0"/>
 
   <class name="portabletest::TestStruct"/>
-  <class name="portabletest::TestHostObject" persistent="false"/>
-  <class name="edm::Wrapper<portabletest::TestHostObject>" persistent="false"/>
+  <class name="portabletest::TestHostObject" persistent="true"/>
+  <class name="edm::Wrapper<portabletest::TestHostObject>" persistent="true"/>
 </lcgdict>

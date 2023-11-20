@@ -10,6 +10,6 @@
   </class>
   <class name="edm::Wrapper<BeamSpotPOD>"/>
 
-  <class name="BeamSpotHost" persistent="false"/>
-  <class name="edm::Wrapper<BeamSpotHost>" persistent="false"/>
+  <class name="BeamSpotHost" persistent="true"/>
+  <class name="edm::Wrapper<BeamSpotHost>" persistent="true"/>
 </lcgdict>
