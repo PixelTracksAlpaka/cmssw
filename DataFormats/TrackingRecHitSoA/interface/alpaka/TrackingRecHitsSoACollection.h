@@ -31,7 +31,9 @@ namespace cms::alpakatools {
         TQueue& queue, TrackingRecHitDevice<TrackerTraits, TDevice> const& deviceData) {
       TrackingRecHitHost<TrackerTraits> hostData(deviceData.view().metadata().size(), queue);
       alpaka::memcpy(queue, hostData.buffer(), deviceData.buffer());
-      printf("I'm copying to host. But why?\n");
+      #ifdef GPU_DEBUG
+      printf("TrackingRecHitsSoACollection: I'm copying to host.\n");
+      #endif
       return hostData;
     }
   };

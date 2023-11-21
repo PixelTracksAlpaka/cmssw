@@ -14,6 +14,7 @@
 // TODO: The class is created via inheritance of the PortableCollection.
 // This is generally discouraged, and should be done via composition.
 // See: https://github.com/cms-sw/cmssw/pull/40465#discussion_r1067364306
+
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template <typename TrackerTraits>
@@ -36,7 +37,9 @@ namespace cms::alpakatools {
                           TracksDevice<TrackerTraits, TDevice> const& deviceData) {
       ::TracksHost<TrackerTraits> hostData(queue);
       alpaka::memcpy(queue, hostData.buffer(), deviceData.buffer());
-      printf("Tracks: I'm copying to host. But why?\n");
+      #ifdef GPU_DEBUG
+      printf("TracksSoACollection: I'm copying to host.\n");
+      #endif
       return hostData;
     }
   };
