@@ -1,5 +1,5 @@
-#ifndef DataFormats_SiPixelDigiSoA_interface_SiPixelDigisSoAv2_h
-#define DataFormats_SiPixelDigiSoA_interface_SiPixelDigisSoAv2_h
+#ifndef DataFormats_SiPixelDigiSoA_interface_SiPixelDigisSoA_h
+#define DataFormats_SiPixelDigiSoA_interface_SiPixelDigisSoA_h
 
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 
@@ -12,8 +12,8 @@ GENERATE_SOA_LAYOUT(SiPixelDigisLayout,
                     SOA_COLUMN(uint16_t, yy),
                     SOA_COLUMN(uint16_t, moduleId))
 
-using SiPixelDigisSoAv2 = SiPixelDigisLayout<>;
-using SiPixelDigisSoAv2View = SiPixelDigisSoAv2::View;
-using SiPixelDigisSoAv2ConstView = SiPixelDigisSoAv2::ConstView;
+using SiPixelDigisSoA = SiPixelDigisLayout<>;
+using SiPixelDigisSoAView = SiPixelDigisSoA::View;
+using SiPixelDigisSoAConstView = SiPixelDigisSoA::ConstView;
 
-#endif  // DataFormats_SiPixelDigiSoA_interface_SiPixelDigisSoAv2_h
+#endif  // DataFormats_SiPixelDigiSoA_interface_SiPixelDigisSoA_h

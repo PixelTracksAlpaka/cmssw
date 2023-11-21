@@ -1,29 +1,28 @@
-#ifndef DataFormats_RecHits_TrackingRecHitsLayout_h
-#define DataFormats_RecHits_TrackingRecHitsLayout_h
+#ifndef DataFormats_TrackingRecHitSoA_interface_TrackingRecHitsSoA_h
+#define DataFormats_TrackingRecHitSoA_interface_TrackingRecHitsSoA_h
 
 #include <Eigen/Dense>
 
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 #include "DataFormats/TrackingRecHitSoA/interface/SiPixelHitStatus.h"
-#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
 
 template <typename TrackerTraits>
-struct TrackingRecHitAlpakaSoA {
+struct TrackingRecHitSoA {
   using hindex_type = typename TrackerTraits::hindex_type;
   using PhiBinner = cms::alpakatools::HistoContainer<int16_t,
                                                      256,
-                                                     500000,
+                                                     -1,
                                                      8 * sizeof(int16_t),
                                                      hindex_type,
                                                      TrackerTraits::numberOfLayers>;  //28 for phase2 geometry
+  using PhiBinnerView = typename PhiBinner::View;
   using PhiBinnerStorageType = typename PhiBinner::index_type;
   using AverageGeometry = pixelTopology::AverageGeometryT<TrackerTraits>;
   using HitLayerStartArray = std::array<hindex_type, TrackerTraits::numberOfLayers + 1>;
   using HitModuleStartArray = std::array<hindex_type, TrackerTraits::numberOfModules + 1>;
 
-  //Is it better to have two split?
   GENERATE_SOA_LAYOUT(Layout,
                       SOA_COLUMN(float, xLocal),
                       SOA_COLUMN(float, yLocal),
@@ -39,9 +38,6 @@ struct TrackingRecHitAlpakaSoA {
                       SOA_COLUMN(int16_t, clusterSizeY),
                       SOA_COLUMN(uint16_t, detectorIndex),
                       SOA_SCALAR(int32_t, offsetBPIX2),
-                      //These above could be separated in a specific
-                      //layout since they don't depends on the template
-                      //for the moment I'm keeping them here
                       SOA_COLUMN(PhiBinnerStorageType, phiBinnerStorage),
                       SOA_SCALAR(HitModuleStartArray, hitsModuleStart),
                       SOA_SCALAR(HitLayerStartArray, hitsLayerStart),
@@ -50,10 +46,10 @@ struct TrackingRecHitAlpakaSoA {
 };
 
 template <typename TrackerTraits>
-using TrackingRecHitAlpakaLayout = typename TrackingRecHitAlpakaSoA<TrackerTraits>::template Layout<>;
+using TrackingRecHitLayout = typename TrackingRecHitSoA<TrackerTraits>::template Layout<>;
 template <typename TrackerTraits>
-using TrackingRecHitAlpakaSoAView = typename TrackingRecHitAlpakaSoA<TrackerTraits>::template Layout<>::View;
+using TrackingRecHitSoAView = typename TrackingRecHitSoA<TrackerTraits>::template Layout<>::View;
 template <typename TrackerTraits>
-using TrackingRecHitAlpakaSoAConstView = typename TrackingRecHitAlpakaSoA<TrackerTraits>::template Layout<>::ConstView;
+using TrackingRecHitSoAConstView = typename TrackingRecHitSoA<TrackerTraits>::template Layout<>::ConstView;
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef DataFormats_SiPixelClusterSoA_interface_alpaka_SiPixelClustersCollection_h
-#define DataFormats_SiPixelClusterSoA_interface_alpaka_SiPixelClustersCollection_h
+#ifndef DataFormats_SiPixelClusterSoA_interface_alpaka_SiPixelClustersSoACollection_h
+#define DataFormats_SiPixelClusterSoA_interface_alpaka_SiPixelClustersSoACollection_h
 
 #include <alpaka/alpaka.hpp>
 
@@ -22,10 +22,13 @@ namespace cms::alpakatools {
       SiPixelClustersHost dstData(srcData->metadata().size(), queue);
       alpaka::memcpy(queue, dstData.buffer(), srcData.buffer());
       dstData.setNClusters(srcData.nClusters(), srcData.offsetBPIX2());
+      #ifdef GPU_DEBUG //keeping this untiil copies are in the Tracer
+      printf("SiPixelClustersSoACollection: I'm copying to host.\n");
+      #endif
       return dstData;
     }
   };
 }  // namespace cms::alpakatools
 
-ASSERT_DEVICE_MATCHES_HOST_COLLECTION(SiPixelClustersCollection, SiPixelClustersHost);
-#endif  // DataFormats_SiPixelClusterSoA_interface_alpaka_SiPixelClustersCollection_h
+ASSERT_DEVICE_MATCHES_HOST_COLLECTION(SiPixelClustersSoACollection, SiPixelClustersHost);
+#endif  // DataFormats_SiPixelClusterSoA_interface_alpaka_SiPixelClustersSoACollection_h

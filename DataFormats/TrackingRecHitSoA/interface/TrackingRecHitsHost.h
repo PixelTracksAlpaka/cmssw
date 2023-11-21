@@ -6,28 +6,28 @@
 #include <alpaka/alpaka.hpp>
 
 #include "DataFormats/Portable/interface/PortableHostCollection.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
+#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsSoA.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
 template <typename TrackerTraits>
-class TrackingRecHitHost : public PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>> {
+class TrackingRecHitHost : public PortableHostCollection<TrackingRecHitLayout<TrackerTraits>> {
 public:
-  using hitSoA = TrackingRecHitAlpakaSoA<TrackerTraits>;
+  using hitSoA = TrackingRecHitSoA<TrackerTraits>;
   //Need to decorate the class with the inherited portable accessors being now a template
-  using PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>::view;
-  using PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>::const_view;
-  using PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>::buffer;
+  using PortableHostCollection<TrackingRecHitLayout<TrackerTraits>>::view;
+  using PortableHostCollection<TrackingRecHitLayout<TrackerTraits>>::const_view;
+  using PortableHostCollection<TrackingRecHitLayout<TrackerTraits>>::buffer;
 
   TrackingRecHitHost() = default;
 
   template <typename TQueue>
   explicit TrackingRecHitHost(uint32_t nHits, TQueue queue)
-      : PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>(nHits, queue) {}
+      : PortableHostCollection<TrackingRecHitLayout<TrackerTraits>>(nHits, queue) {}
 
   // Constructor which specifies the SoA size
   template <typename TQueue>
   explicit TrackingRecHitHost(uint32_t nHits, int32_t offsetBPIX2, uint32_t const* hitsModuleStart, TQueue queue)
-      : PortableHostCollection<TrackingRecHitAlpakaLayout<TrackerTraits>>(nHits, queue) {
+      : PortableHostCollection<TrackingRecHitLayout<TrackerTraits>>(nHits, queue) {
     std::copy(hitsModuleStart, hitsModuleStart + TrackerTraits::numberOfModules + 1, view().hitsModuleStart().data());
     view().offsetBPIX2() = offsetBPIX2;
   }
