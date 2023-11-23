@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <optional>
+#include <type_traits>
 
 #include <alpaka/alpaka.hpp>
 
@@ -62,7 +63,6 @@ public:
   ConstBuffer buffer() const { return *buffer_; }
   ConstBuffer const_buffer() const { return *buffer_; }
 
-  //TODO add test here
   // part of the ROOT read streamer
   static void ROOTReadStreamer(PortableHostObject* newObj, Product& product) {
     // destroy the default-constructed object
