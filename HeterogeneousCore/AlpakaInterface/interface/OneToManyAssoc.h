@@ -258,7 +258,7 @@ namespace cms {
           printf("uhm");
           numberOfWarps = alpaka::getWarpSizes(alpaka::getDev(queue))[0];
 #endif
-
+	  printf("numberOfWarps = %d \n",numberOfWarps);
           alpaka::exec<TAcc>(
               queue, workDiv, multiBlockPrefixScan<Counter>(), poff, poff, nOnes, nblocks, ppsws, numberOfWarps);
         } else {

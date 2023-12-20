@@ -13,7 +13,7 @@ struct TrackingRecHitSoA {
   using hindex_type = typename TrackerTraits::hindex_type;
   using PhiBinner = cms::alpakatools::HistoContainer<int16_t,
                                                      256,
-                                                     -1,
+                                                     -1,//TrackerTraits::maxNumberOfHits,
                                                      8 * sizeof(int16_t),
                                                      hindex_type,
                                                      TrackerTraits::numberOfLayers>;  //28 for phase2 geometry
