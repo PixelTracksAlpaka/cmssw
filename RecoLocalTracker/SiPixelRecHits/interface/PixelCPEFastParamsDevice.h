@@ -1,14 +1,11 @@
-#ifndef DataFormats_PixelCPEFastParams_interface_PixelCPEFastParamsDevice_h
-#define DataFormats_PixelCPEFastParams_interface_PixelCPEFastParamsDevice_h
+#ifndef RecoLocalTracker_SiPixelRecHits_PixelCPEFastParamsDevice_h
+#define RecoLocalTracker_SiPixelRecHits_PixelCPEFastParamsDevice_h
 
 #include <alpaka/alpaka.hpp>
-#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEGenericBase.h"
+#include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
 
-#include "pixelCPEforDevice.h"
-
+/*
 template <typename TDev, typename TrackerTraits>
 class PixelCPEFastParamsDevice {
 public:
@@ -28,5 +25,7 @@ public:
 private:
   Buffer buffer_;
 };
-
+*/
+ template <typename TDev, typename TrackerTraits>
+ using PixelCPEFastParamsDevice = PortableDeviceObject<pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>, TDev>;
 #endif
