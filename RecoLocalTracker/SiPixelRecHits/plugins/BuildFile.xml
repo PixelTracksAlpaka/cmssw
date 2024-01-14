@@ -1,10 +1,7 @@
-<use name="fmt"/>
 <use name="CondFormats/SiPixelTransient"/>
 <use name="DataFormats/BeamSpot"/>
 <use name="DataFormats/TrackerCommon"/>
 <use name="DataFormats/TrackingRecHitSoA"/>
-<use name="HeterogeneousCore/AlpakaCore"/>
-<use name="HeterogeneousCore/AlpakaInterface"/>
 <use name="RecoLocalTracker/ClusterParameterEstimator"/>
 <use name="RecoLocalTracker/Records"/>
 <use name="RecoLocalTracker/SiPixelRecHits"/>
@@ -15,6 +12,7 @@
   <set name="cuda_src" value=""/>
 </iftool>
 <library file="*.cc ${cuda_src}" name="RecoLocalTrackerSiPixelRecHitsPlugins">
+  <use name="cuda"/> 
   <use name="CUDADataFormats/BeamSpot"/>
   <use name="CUDADataFormats/TrackingRecHit"/>
   <use name="HeterogeneousCore/CUDACore"/>
@@ -23,6 +21,8 @@
 <library file="alpaka/*.cc" name="RecoLocalTrackerSiPixelRecHitsPluginsPortable">
   <use name="alpaka"/>
   <use name="DataFormats/Portable"/>
+  <use name="HeterogeneousCore/AlpakaCore"/>
+  <use name="HeterogeneousCore/AlpakaInterface"/>
   <flags ALPAKA_BACKENDS="1"/>
   <flags EDM_PLUGIN="1"/>
 </library>

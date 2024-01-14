@@ -68,8 +68,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   std::unique_ptr<PixelCPEFastParamsHost<TrackerTraits>> PixelCPEFastParamsESProducerAlpaka<TrackerTraits>::produce(
       const PixelCPEFastParamsRecord& iRecord) {
     // add the new la width object
-    const SiPixelLorentzAngle* lorentzAngleWidthProduct = nullptr;
-    lorentzAngleWidthProduct = &iRecord.get(lorentzAngleWidthToken_);
+    const SiPixelLorentzAngle* lorentzAngleWidthProduct = &iRecord.get(lorentzAngleWidthToken_); 
 
     const SiPixelGenErrorDBObject* genErrorDBObjectProduct = nullptr;
 

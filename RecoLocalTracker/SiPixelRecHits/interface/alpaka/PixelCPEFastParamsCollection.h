@@ -13,15 +13,9 @@
 // This is generally discouraged, and should be done via composition.
 // See: https://github.com/cms-sw/cmssw/pull/40465#discussion_r1067364306
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
-#ifdef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
+
   template <typename TrackerTraits>
-  using PixelCPEFastParamsCollection = PixelCPEFastParamsHost<TrackerTraits>;
-#else
-  template <typename TrackerTraits>
-  using PixelCPEFastParamsCollection = PixelCPEFastParamsDevice<Device, TrackerTraits>;
-#endif
-  template <typename TrackerTraits>
-  using PixelCPEFastParams = PixelCPEFastParamsCollection<TrackerTraits>;
+  using PixelCPEFastParams = std::conditional_v<std::is_same_v<Device, alpaka::DevCpu>, PixelCPEFastParamsHost<TrackerTraits>, PixelCPEFastParamsDevice<Device, TrackerTraits>>;
 
   using PixelCPEFastParamsPhase1 = PixelCPEFastParams<pixelTopology::Phase1>;
   using PixelCPEFastParamsPhase2 = PixelCPEFastParams<pixelTopology::Phase2>;
@@ -34,7 +28,7 @@ namespace cms::alpakatools {
     template <typename TQueue>
     static auto copyAsync(TQueue& queue, PixelCPEFastParamsHost<TrackerTraits> const& srcData) {
       using TDevice = typename alpaka::trait::DevType<TQueue>::type;
-      PixelCPEFastParamsDevice<TDevice, TrackerTraits> dstData(queue);  //srcData->metadata().size(), queue);
+      PixelCPEFastParamsDevice<TDevice, TrackerTraits> dstData(queue); 
       alpaka::memcpy(queue, dstData.buffer(), srcData.buffer());
       return dstData;
     }
