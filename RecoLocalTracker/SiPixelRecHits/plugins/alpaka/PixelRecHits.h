@@ -24,7 +24,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace pixelRecHits {
 
     template <typename TrackerTraits>
-    class getHits {
+    class GetHits {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
@@ -59,7 +59,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             agc.ladderMaxZ[il] = ag.ladderMaxZ[il] - bs->z;
           });
 
-          if (0 == threadIdxLocal) {
+          if (cms::alpakatools::once_per_block(acc)) {
             agc.endCapZ[0] = ag.endCapZ[0] - bs->z;
             agc.endCapZ[1] = ag.endCapZ[1] - bs->z;
           }
@@ -80,7 +80,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         if (0 == nclus)
           return;
 #ifdef GPU_DEBUG
-        if (threadIdxLocal == 0) {
+        if (cms::alpakatools::once_per_block(acc)) {
           auto k = clusters[1 + blockIdx].moduleStart();
           while (digis[k].moduleId() == invalidModuleId)
             ++k;
@@ -88,7 +88,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         }
 
         if (me % 100 == 1)
-          if (threadIdxLocal == 0)
+          if (cms::alpakatools::once_per_block(acc))
             printf(
                 "hitbuilder: %d clusters in module %d. will write at %d\n", nclus, me, clusters[me].clusModuleStart());
 #endif

@@ -1,8 +1,6 @@
 #include <memory>
 #include <vector>
 
-#include <fmt/printf.h>
-
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
@@ -124,8 +122,9 @@ void SiPixelRecHitFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID streamID,
     LogDebug("SiPixelRecHitFromSoAAlpaka") << "in det " << gind << ": conv " << nhits << " hits from " << dsv.size()
                                            << " legacy clusters" << ' ' << fc << ',' << lc << "\n";
     if (nhits > maxHitsInModule)
-      edm::LogWarning("SiPixelRecHitFromSoAAlpaka") << fmt::sprintf(
-          "Too many clusters %d in module %d. Only the first %d hits will be converted", nhits, gind, maxHitsInModule);
+	edm::LogWarning("SiPixelRecHitFromSoAAlpaka").format(
+           "Too many clusters {} in module {}. Only the first {} hits will be converted", nhits, gind, maxHitsInModule);
+
     nhits = std::min(nhits, maxHitsInModule);
 
     LogDebug("SiPixelRecHitFromSoAAlpaka") << "in det " << gind << "conv " << nhits << " hits from " << dsv.size()
