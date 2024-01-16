@@ -1,5 +1,5 @@
 #include <alpaka/alpaka.hpp>
-#include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
+#include "DataFormats/PixelTrackSoA/interface/alpaka/PixelTrackUtilities.h"
 #include "DataFormats/VertexSoA/interface/alpaka/ZVertexUtilities.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
@@ -31,13 +31,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
-                                    TrackSoAConstView<TrackerTraits> tracks_view,
+                                    PixelTrackSoAConstView<TrackerTraits> tracks_view,
                                     VtxSoAView soa,
                                     WsSoAView pws,
                                     float ptMin,
                                     float ptMax) const {
         auto const* quality = tracks_view.quality();
-        using helper = TracksUtilities<TrackerTraits>;
+        using helper = PixelTrackUtilities<TrackerTraits>;
 
         for (auto idx : cms::alpakatools::elements_with_stride(acc, tracks_view.nTracks())) {
           // TODO: since nHits is not used anywhere else it gives of an unused variable warning. Check!
@@ -49,7 +49,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
           if (helper::isTriplet(tracks_view, idx))
             continue;  // no triplets
-          if (quality[idx] < ::pixelTrack::Quality::highPurity)
+          if (quality[idx] < ::pixelTrackSoA::Quality::highPurity)
             continue;
 
           auto pt = tracks_view[idx].pt();
@@ -126,7 +126,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     template <typename TrackerTraits>
     ZVertexCollection Producer<TrackerTraits>::makeAsync(Queue& queue,
-                                                         const TrackSoAConstView<TrackerTraits>& tracks_view,
+                                                         const PixelTrackSoAConstView<TrackerTraits>& tracks_view,
                                                          float ptMin,
                                                          float ptMax) const {
 #ifdef PIXVERTEX_DEBUG_PRODUCE

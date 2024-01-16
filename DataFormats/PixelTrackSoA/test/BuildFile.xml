@@ -1,0 +1,6 @@
+<use name="eigen"/>
+<bin file="alpaka/PixelTrackSoA_test.cc alpaka/PixelTrackSoA_test.dev.cc" name="PixelTrackSoAAlpaka_test">
+  <use name="alpaka"/>
+  <use name="HeterogeneousCore/AlpakaInterface"/>
+<flags ALPAKA_BACKENDS="1"/>
+</bin>

@@ -1,10 +1,10 @@
-#ifndef DataFormats_Track_interface_TrackDefinitions_h
-#define DataFormats_Track_interface_TrackDefinitions_h
+#ifndef DataFormats_PixelTrackSoA_interface_PixelTrackDefinitions_h
+#define DataFormats_PixelTrackSoA_interface_PixelTrackDefinitions_h
 #include <string>
 #include <algorithm>
 #include <stdexcept>
 
-namespace pixelTrack {
+namespace pixelTrackSoA { // TODO: once the CUDA code is removed, this should be changed back to pixelTrack
 
   enum class Quality : uint8_t { bad = 0, edup, dup, loose, strict, tight, highPurity, notQuality };
   constexpr uint32_t qualitySize{uint8_t(Quality::notQuality)};
@@ -12,8 +12,8 @@ namespace pixelTrack {
   inline Quality qualityByName(std::string const &name) {
     auto qp = std::find(qualityName, qualityName + qualitySize, name) - qualityName;
     auto ret = static_cast<Quality>(qp);
-    if (ret == pixelTrack::Quality::notQuality)
-      throw std::invalid_argument(name + "is not a pixelTrack::Quality!");
+    if (ret == pixelTrackSoA::Quality::notQuality)
+      throw std::invalid_argument(name + "is not a pixelTrackSoA::Quality!");
 
     return ret;
   }
@@ -26,6 +26,6 @@ namespace pixelTrack {
   constexpr uint32_t maxNumber() { return 32 * 1024; }
 #endif
 
-}  // namespace pixelTrack
+}  // namespace pixelTrackSoA
 
-#endif
+#endif  // DataFormats_PixelTrackSoA_interface_PixelTrackDefinitions_h

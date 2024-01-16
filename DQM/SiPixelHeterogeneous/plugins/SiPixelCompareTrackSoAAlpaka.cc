@@ -24,8 +24,8 @@
 #include "DQMServices/Core/interface/DQMEDAnalyzer.h"
 #include "DQMServices/Core/interface/DQMStore.h"
 // DataFormats
-#include "DataFormats/TrackSoA/interface/TracksHost.h"
-#include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackHost.h"
+#include "DataFormats/PixelTrackSoA/interface/alpaka/PixelTrackUtilities.h"
 
 namespace {
   // same logic used for the MTV:
@@ -68,7 +68,7 @@ namespace {
 template <typename T>
 class SiPixelCompareTrackSoAAlpaka : public DQMEDAnalyzer {
 public:
-  using PixelTrackSoA = TracksHost<T>;
+  using PixelTrackSoA = PixelTrackHost<T>;
 
   explicit SiPixelCompareTrackSoAAlpaka(const edm::ParameterSet&);
   ~SiPixelCompareTrackSoAAlpaka() override = default;
@@ -81,7 +81,7 @@ private:
   const edm::EDGetTokenT<PixelTrackSoA> tokenSoATrackGPU_;
   const std::string topFolderName_;
   const bool useQualityCut_;
-  const pixelTrack::Quality minQuality_;
+  const pixelTrackSoA::Quality minQuality_;
   const float dr2cut_;
   MonitorElement* hnTracks_;
   MonitorElement* hnLooseAndAboveTracks_;
@@ -128,7 +128,7 @@ SiPixelCompareTrackSoAAlpaka<T>::SiPixelCompareTrackSoAAlpaka(const edm::Paramet
       tokenSoATrackGPU_(consumes<PixelTrackSoA>(iConfig.getParameter<edm::InputTag>("pixelTrackSrcGPU"))),
       topFolderName_(iConfig.getParameter<std::string>("topFolderName")),
       useQualityCut_(iConfig.getParameter<bool>("useQualityCut")),
-      minQuality_(pixelTrack::qualityByName(iConfig.getParameter<std::string>("minQuality"))),
+      minQuality_(pixelTrackSoA::qualityByName(iConfig.getParameter<std::string>("minQuality"))),
       dr2cut_(iConfig.getParameter<double>("deltaR2cut")) {}
 
 //
@@ -136,7 +136,7 @@ SiPixelCompareTrackSoAAlpaka<T>::SiPixelCompareTrackSoAAlpaka(const edm::Paramet
 //
 template <typename T>
 void SiPixelCompareTrackSoAAlpaka<T>::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  using helper = TracksUtilities<T>;
+  using helper = PixelTrackUtilities<T>;
   const auto& tsoaHandleCPU = iEvent.getHandle(tokenSoATrackCPU_);
   const auto& tsoaHandleGPU = iEvent.getHandle(tokenSoATrackGPU_);
   if (not tsoaHandleCPU or not tsoaHandleGPU) {

@@ -18,8 +18,8 @@
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/EventSetup.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/global/EDProducer.h"
 
-#include "DataFormats/TrackSoA/interface/alpaka/TracksSoACollection.h"
-#include "DataFormats/TrackSoA/interface/TracksDevice.h"
+#include "DataFormats/PixelTrackSoA/interface/alpaka/PixelTrackSoACollection.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackDevice.h"
 #include "DataFormats/VertexSoA/interface/alpaka/ZVertexSoACollection.h"
 #include "DataFormats/VertexSoA/interface/ZVertexDevice.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/MakerMacros.h"
@@ -34,7 +34,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template <typename TrackerTraits>
   class PixelVertexProducerAlpaka : public global::EDProducer<> {
-    using TkSoADevice = TracksSoACollection<TrackerTraits>;
+    using TkSoADevice = PixelTrackSoACollection<TrackerTraits>;
     using Algo = vertexFinder::Producer<TrackerTraits>;
 
   public:

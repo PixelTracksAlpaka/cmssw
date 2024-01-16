@@ -16,9 +16,9 @@
 #include "HelixFit.h"
 
 template <typename TrackerTraits>
-using Tuples = typename TrackSoA<TrackerTraits>::HitContainer;
+using Tuples = typename PixelTrackSoA<TrackerTraits>::HitContainer;
 template <typename TrackerTraits>
-using OutputSoAView = TrackSoAView<TrackerTraits>;
+using OutputSoAView = PixelTrackSoAView<TrackerTraits>;
 template <typename TrackerTraits>
 using TupleMultiplicity = caStructures::TupleMultiplicityT<TrackerTraits>;
 
@@ -212,7 +212,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         brokenline::lineFit(acc, hits_ge, fast_fit, bField, data, line);
         brokenline::circleFit(acc, hits, hits_ge, fast_fit, bField, data, circle);
 
-        TracksUtilities<TrackerTraits>::copyFromCircle(
+        PixelTrackUtilities<TrackerTraits>::copyFromCircle(
             results_view, circle.par, circle.cov, line.par, line.cov, 1.f / float(bField), tkid);
         results_view[tkid].pt() = float(bField) / float(std::abs(circle.par(2)));
         results_view[tkid].eta() = alpaka::math::asinh(acc, line.par(0));

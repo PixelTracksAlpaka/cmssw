@@ -1,14 +1,14 @@
 # TrackSoA Data Formats
 
 `DataFormat`s meant to be used on Host (CPU) or Device ( GPU) for
-storing information about `TrackSoA`s created during the Pixel-local Reconstruction
+storing information about `PixelTrackSoA`s created during the Pixel-local Reconstruction
 chain. It stores data in an SoA manner.  
 
 The host format is inheriting from `DataFormats/Portable/interface/PortableHostCollection.h`,
 while the device format is inheriting from `DataFormats/Portable/interface/PortableDeviceCollection.h`
 
-Both formats use the same SoA Layout (`TrackSoA::Layout`) which is generated
-via the `GENERATE_SOA_LAYOUT` macro in the `TrackDefinitions.h` file.
+Both formats use the same SoA Layout (`PixelTrackSoA::Layout`) which is generated
+via the `GENERATE_SOA_LAYOUT` macro in the `PixelTrackDefinitions.h` file.
 
 ## Notes
 
@@ -19,35 +19,35 @@ is replaced, but there don't seem to be any conflicts in including it in the `La
 - Host and Device classes should **not** be created via inheritance, as they're done here,
 but via composition. See [this discussion](https://github.com/cms-sw/cmssw/pull/40465#discussion_r1066039309).
 
-## TracksHost
+## PixelTrackHost
 
-The version of the data format to be used for storing `TrackSoA` data on the CPU. 
+The version of the data format to be used for storing `PixelTrackSoA` data on the CPU. 
 Instances of this class are to be used for:
 
 - Having a place to copy data to host from device, via `Memcpy`, or
 - Running host-side algorithms using data stored in an SoA manner.
 
-## TracksDevice
+## PixelTrackDevice
 
-The version of the data format to be used for storing `TrackSoA` data on the GPU.
+The version of the data format to be used for storing `PixelTrackSoA` data on the GPU.
 
-Instances of `TracksDevice` are to be created on host and be
+Instances of `PixelTrackDevice` are to be created on host and be
 used on device only. To do so, the instance's `view()` method is to be called
 to pass a `View` to any kernel launched. Accessing data from the `view()` is not
 possible on the host side.
 
-## TracksSoACollection
+## PixelTrackSoACollection
 
-Depending on the Alpaka accelerator back-end enabled, `TracksSoACollection` wraps either the Host or Device SoA:
+Depending on the Alpaka accelerator back-end enabled, `PixelTrackSoACollection` wraps either the Host or Device SoA:
 
 ```cpp
 
 #ifdef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
   template <typename TrackerTraits>
-  using TracksSoACollection = TracksHost<TrackerTraits>;
+  using PixelTrackSoACollection = PixelTrackHost<TrackerTraits>;
 #else
   template <typename TrackerTraits>
-  using TracksSoACollection = TracksDevice<TrackerTraits, Device>;
+  using PixelTrackSoACollection = PixelTrackDevice<TrackerTraits, Device>;
 #endif
 
 ```

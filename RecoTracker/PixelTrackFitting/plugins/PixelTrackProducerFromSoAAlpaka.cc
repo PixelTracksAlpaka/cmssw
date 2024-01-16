@@ -3,7 +3,7 @@
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/GeometrySurface/interface/Plane.h"
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
-#include "DataFormats/TrackSoA/interface/TracksHost.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackHost.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackExtra.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
@@ -26,7 +26,7 @@
 #include "TrackingTools/TrajectoryParametrization/interface/CurvilinearTrajectoryError.h"
 #include "TrackingTools/TrajectoryParametrization/interface/GlobalTrajectoryParameters.h"
 
-#include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
+#include "DataFormats/PixelTrackSoA/interface/alpaka/PixelTrackUtilities.h"
 #include "RecoTracker/PixelTrackFitting/interface/alpaka/FitUtils.h"
 
 #include "storeTracks.h"
@@ -38,8 +38,8 @@
 
 template <typename TrackerTraits>
 class PixelTrackProducerFromSoAAlpaka : public edm::global::EDProducer<> {
-  using TkSoAHost = TracksHost<TrackerTraits>;
-  using tracksHelpers = TracksUtilities<TrackerTraits>;
+  using TkSoAHost = PixelTrackHost<TrackerTraits>;
+  using tracksHelpers = PixelTrackUtilities<TrackerTraits>;
   using HMSstorage = std::vector<uint32_t>;
 
 public:
@@ -63,7 +63,7 @@ private:
   const edm::ESGetToken<TrackerTopology, TrackerTopologyRcd> ttTopoToken_;
 
   int32_t const minNumberOfHits_;
-  pixelTrack::Quality const minQuality_;
+  pixelTrackSoA::Quality const minQuality_;
 };
 
 template <typename TrackerTraits>
@@ -75,12 +75,12 @@ PixelTrackProducerFromSoAAlpaka<TrackerTraits>::PixelTrackProducerFromSoAAlpaka(
       idealMagneticFieldToken_(esConsumes()),
       ttTopoToken_(esConsumes()),
       minNumberOfHits_(iConfig.getParameter<int>("minNumberOfHits")),
-      minQuality_(pixelTrack::qualityByName(iConfig.getParameter<std::string>("minQuality"))) {
-  if (minQuality_ == pixelTrack::Quality::notQuality) {
+      minQuality_(pixelTrackSoA::qualityByName(iConfig.getParameter<std::string>("minQuality"))) {
+  if (minQuality_ == pixelTrackSoA::Quality::notQuality) {
     throw cms::Exception("PixelTrackConfiguration")
-        << iConfig.getParameter<std::string>("minQuality") + " is not a pixelTrack::Quality";
+        << iConfig.getParameter<std::string>("minQuality") + " is not a pixelTrackSoA::Quality";
   }
-  if (minQuality_ < pixelTrack::Quality::dup) {
+  if (minQuality_ < pixelTrackSoA::Quality::dup) {
     throw cms::Exception("PixelTrackConfiguration")
         << iConfig.getParameter<std::string>("minQuality") + " not supported";
   }
@@ -116,7 +116,7 @@ void PixelTrackProducerFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID strea
                                                  reco::TrackBase::tight,
                                                  reco::TrackBase::tight,
                                                  reco::TrackBase::highPurity};
-  assert(reco::TrackBase::highPurity == recoQuality[int(pixelTrack::Quality::highPurity)]);
+  assert(reco::TrackBase::highPurity == recoQuality[int(pixelTrackSoA::Quality::highPurity)]);
 
 #ifdef GPU_DEBUG
   std::cout << "Converting soa helix in reco tracks" << std::endl;

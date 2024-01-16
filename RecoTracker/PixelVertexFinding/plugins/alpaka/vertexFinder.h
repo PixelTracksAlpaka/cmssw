@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
-#include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
+#include "DataFormats/PixelTrackSoA/interface/alpaka/PixelTrackUtilities.h"
 #include "DataFormats/VertexSoA/interface/ZVertexHost.h"
 #include "DataFormats/VertexSoA/interface/ZVertexSoA.h"
 #include "DataFormats/VertexSoA/interface/alpaka/ZVertexSoACollection.h"
@@ -32,7 +32,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     template <typename TrackerTraits>
     class Producer {
-      using TkSoAConstView = TrackSoAConstView<TrackerTraits>;
+      using TkSoAConstView = PixelTrackSoAConstView<TrackerTraits>;
 
     public:
       Producer(bool oneKernel,

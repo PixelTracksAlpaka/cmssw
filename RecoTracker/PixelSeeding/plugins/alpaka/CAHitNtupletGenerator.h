@@ -4,10 +4,10 @@
 #include <alpaka/alpaka.hpp>
 
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
-#include "DataFormats/TrackSoA/interface/TrackDefinitions.h"
-#include "DataFormats/TrackSoA/interface/TracksHost.h"
-#include "DataFormats/TrackSoA/interface/alpaka/TracksSoACollection.h"
-#include "DataFormats/TrackSoA/interface/TracksDevice.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackDefinitions.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackHost.h"
+#include "DataFormats/PixelTrackSoA/interface/alpaka/PixelTrackSoACollection.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackDevice.h"
 #include "DataFormats/TrackerRecHitSoA/interface/TrackerRecHitSoA.h"
 #include "DataFormats/TrackerRecHitSoA/interface/alpaka/TrackerRecHitSoACollection.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -37,17 +37,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using OuterHitOfCell = caStructures::OuterHitOfCellT<TrackerTraits>;
 
     using CACell = CACellT<TrackerTraits>;
-    using TkSoAHost = TracksHost<TrackerTraits>;
-    using TkSoADevice = TracksSoACollection<TrackerTraits>;
-    using HitContainer = typename TrackSoA<TrackerTraits>::HitContainer;
+    using TkSoAHost = PixelTrackHost<TrackerTraits>;
+    using TkSoADevice = PixelTrackSoACollection<TrackerTraits>;
+    using HitContainer = typename PixelTrackSoA<TrackerTraits>::HitContainer;
     using Tuple = HitContainer;
 
     using CellNeighborsVector = caStructures::CellNeighborsVectorT<TrackerTraits>;
     using CellTracksVector = caStructures::CellTracksVectorT<TrackerTraits>;
 
-    using Quality = ::pixelTrack::Quality;
+    using Quality = ::pixelTrackSoA::Quality;
 
-    using QualityCuts = ::pixelTrack::QualityCutsT<TrackerTraits>;
+    using QualityCuts = ::pixelTrackSoA::QualityCutsT<TrackerTraits>;
     using Params = caHitNtupletGenerator::ParamsT<TrackerTraits>;
     using Counters = caHitNtupletGenerator::Counters;
 

@@ -10,9 +10,9 @@
 #include <functional>
 #include <vector>
 
-#include "DataFormats/TrackSoA/interface/alpaka/TracksSoACollection.h"
-#include "DataFormats/TrackSoA/interface/TracksDevice.h"
-#include "DataFormats/TrackSoA/interface/TracksHost.h"
+#include "DataFormats/PixelTrackSoA/interface/alpaka/PixelTrackSoACollection.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackDevice.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackHost.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -30,7 +30,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using namespace caHitNtupletGenerator;
     using namespace caPixelDoublets;
     using namespace pixelTopology;
-    using namespace pixelTrack;
+    using namespace pixelTrackSoA;
 
     template <typename T>
     T sqr(T x) {
@@ -68,12 +68,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                          (float)cfg.getParameter<double>("dcaCutOuterTriplet")}};
       };
 
-      static constexpr ::pixelTrack::QualityCutsT<TrackerTraits> makeQualityCuts(edm::ParameterSet const& pset) {
+      static constexpr ::pixelTrackSoA::QualityCutsT<TrackerTraits> makeQualityCuts(edm::ParameterSet const& pset) {
         auto coeff = pset.getParameter<std::array<double, 2>>("chi2Coeff");
         auto ptMax = pset.getParameter<double>("chi2MaxPt");
 
         coeff[1] = (coeff[1] - coeff[0]) / log2(ptMax);
-        return ::pixelTrack::QualityCutsT<TrackerTraits>{// polynomial coefficients for the pT-dependent chi2 cut
+        return ::pixelTrackSoA::QualityCutsT<TrackerTraits>{// polynomial coefficients for the pT-dependent chi2 cut
                                                          {(float)coeff[0], (float)coeff[1], 0.f, 0.f},
                                                          // max pT used to determine the chi2 cut
                                                          (float)ptMax,
@@ -104,8 +104,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                         {(bool)cfg.getParameter<bool>("includeFarForwards")}};
       }
 
-      static constexpr ::pixelTrack::QualityCutsT<TrackerTraits> makeQualityCuts(edm::ParameterSet const& pset) {
-        return ::pixelTrack::QualityCutsT<TrackerTraits>{
+      static constexpr ::pixelTrackSoA::QualityCutsT<TrackerTraits> makeQualityCuts(edm::ParameterSet const& pset) {
+        return ::pixelTrackSoA::QualityCutsT<TrackerTraits>{
             static_cast<float>(pset.getParameter<double>("maxChi2")),
             static_cast<float>(pset.getParameter<double>("minPt")),
             static_cast<float>(pset.getParameter<double>("maxTip")),
@@ -294,13 +294,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   template <typename TrackerTraits>
-  TracksSoACollection<TrackerTraits> CAHitNtupletGenerator<TrackerTraits>::makeTuplesAsync(
+  PixelTrackSoACollection<TrackerTraits> CAHitNtupletGenerator<TrackerTraits>::makeTuplesAsync(
       HitsOnDevice const& hits_d, ParamsOnDevice const* cpeParams, float bfield, Queue& queue) const {
     using HelixFit = HelixFit<TrackerTraits>;
-    using TrackSoA = TracksSoACollection<TrackerTraits>;
+    using PixelTrackSoA = PixelTrackSoACollection<TrackerTraits>;
     using GPUKernels = CAHitNtupletGeneratorKernels<TrackerTraits>;
 
-    TrackSoA tracks(queue);
+    PixelTrackSoA tracks(queue);
 
     GPUKernels kernels(m_params, hits_d.view().metadata().size(), queue);
 

@@ -14,7 +14,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
-#include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
+#include "DataFormats/PixelTrackSoA/interface/alpaka/PixelTrackUtilities.h"
 #include "DataFormats/TrackerRecHitSoA/interface/TrackerRecHitSoA.h"
 
 #include "CAStructures.h"
@@ -47,19 +47,19 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     template <typename TrackerTraits>
     using OuterHitOfCell = caStructures::OuterHitOfCellT<TrackerTraits>;
 
-    using Quality = ::pixelTrack::Quality;
+    using Quality = ::pixelTrackSoA::Quality;
 
     template <typename TrackerTraits>
-    using TkSoAView = TrackSoAView<TrackerTraits>;
+    using TkSoAView = PixelTrackSoAView<TrackerTraits>;
 
     template <typename TrackerTraits>
-    using HitContainer = typename TrackSoA<TrackerTraits>::HitContainer;
+    using HitContainer = typename PixelTrackSoA<TrackerTraits>::HitContainer;
 
     template <typename TrackerTraits>
     using HitsConstView = typename CACellT<TrackerTraits>::HitsConstView;
 
     template <typename TrackerTraits>
-    using QualityCuts = ::pixelTrack::QualityCutsT<TrackerTraits>;
+    using QualityCuts = ::pixelTrackSoA::QualityCutsT<TrackerTraits>;
 
     template <typename TrackerTraits>
     using CAParams = caHitNtupletGenerator::CAParamsT<TrackerTraits>;
@@ -252,7 +252,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           float mc = maxScore;
           uint16_t im = tkNotFound;
 
-          auto score = [&](auto it) { return std::abs(TracksUtilities<TrackerTraits>::tip(tracks_view, it)); };
+          auto score = [&](auto it) { return std::abs(PixelTrackUtilities<TrackerTraits>::tip(tracks_view, it)); };
 
           // full crazy combinatorics
           int ntr = thisCell.tracks().size();
@@ -647,8 +647,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         if (0 == threadIdx)
           tracks_view.nTracks() = ntracks;
         for (auto idx : cms::alpakatools::elements_with_stride(acc, ntracks)) {
-          ALPAKA_ASSERT_OFFLOAD(TracksUtilities<TrackerTraits>::nHits(tracks_view, idx) >= 3);
-          tracks_view[idx].nLayers() = TracksUtilities<TrackerTraits>::computeNumberOfLayers(tracks_view, idx);
+          ALPAKA_ASSERT_OFFLOAD(PixelTrackUtilities<TrackerTraits>::nHits(tracks_view, idx) >= 3);
+          tracks_view[idx].nLayers() = PixelTrackUtilities<TrackerTraits>::computeNumberOfLayers(tracks_view, idx);
         }
       }
     };
@@ -756,7 +756,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           if (hitToTuple.size(idx) < 2)
             continue;
 
-          auto score = [&](auto it, auto nl) { return std::abs(TracksUtilities<TrackerTraits>::tip(tracks_view, it)); };
+          auto score = [&](auto it, auto nl) { return std::abs(PixelTrackUtilities<TrackerTraits>::tip(tracks_view, it)); };
 
           // full combinatorics
           for (auto ip = hitToTuple.begin(idx); ip < hitToTuple.end(idx) - 1; ++ip) {
@@ -877,7 +877,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           for (auto it = hitToTuple.begin(idx); it != hitToTuple.end(idx); ++it) {
             if (tracks_view[*it].quality() <= good)
               continue;
-            onlyTriplets &= TracksUtilities<TrackerTraits>::isTriplet(tracks_view, *it);
+            onlyTriplets &= PixelTrackUtilities<TrackerTraits>::isTriplet(tracks_view, *it);
             if (!onlyTriplets)
               break;
           }
@@ -890,8 +890,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           for (auto ip = hitToTuple.begin(idx); ip != hitToTuple.end(idx); ++ip) {
             auto const it = *ip;
             if (tracks_view[it].quality() >= good &&
-                std::abs(TracksUtilities<TrackerTraits>::tip(tracks_view, it)) < mc) {
-              mc = std::abs(TracksUtilities<TrackerTraits>::tip(tracks_view, it));
+                std::abs(PixelTrackUtilities<TrackerTraits>::tip(tracks_view, it)) < mc) {
+              mc = std::abs(PixelTrackUtilities<TrackerTraits>::tip(tracks_view, it));
               im = it;
             }
           }
@@ -937,8 +937,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           for (auto ip = hitToTuple.begin(idx); ip != hitToTuple.end(idx); ++ip) {
             auto const it = *ip;
             if (tracks_view[it].quality() >= good &&
-                std::abs(TracksUtilities<TrackerTraits>::tip(tracks_view, it)) < mc) {
-              mc = std::abs(TracksUtilities<TrackerTraits>::tip(tracks_view, it));
+                std::abs(PixelTrackUtilities<TrackerTraits>::tip(tracks_view, it)) < mc) {
+              mc = std::abs(PixelTrackUtilities<TrackerTraits>::tip(tracks_view, it));
               im = it;
             }
           }
@@ -949,7 +949,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           // mark worse ambiguities
           for (auto ip = hitToTuple.begin(idx); ip != hitToTuple.end(idx); ++ip) {
             auto const it = *ip;
-            if (tracks_view[it].quality() > reject && TracksUtilities<TrackerTraits>::isTriplet(tracks_view, it) &&
+            if (tracks_view[it].quality() > reject && PixelTrackUtilities<TrackerTraits>::isTriplet(tracks_view, it) &&
                 it != im)
               tracks_view[it].quality() = reject;  //no race:  simple assignment of the same constant
           }
@@ -982,12 +982,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                  int(tracks_view[i].quality()),
                  nh,
                  tracks_view[i].nLayers(),
-                 TracksUtilities<TrackerTraits>::charge(tracks_view, i),
+                 PixelTrackUtilities<TrackerTraits>::charge(tracks_view, i),
                  tracks_view[i].pt(),
                  tracks_view[i].eta(),
-                 TracksUtilities<TrackerTraits>::phi(tracks_view, i),
-                 TracksUtilities<TrackerTraits>::tip(tracks_view, i),
-                 TracksUtilities<TrackerTraits>::zip(tracks_view, i),
+                 PixelTrackUtilities<TrackerTraits>::phi(tracks_view, i),
+                 PixelTrackUtilities<TrackerTraits>::tip(tracks_view, i),
+                 PixelTrackUtilities<TrackerTraits>::zip(tracks_view, i),
                  tracks_view[i].chi2(),
                  hh[*tracks_view.hitIndices().begin(i)].zGlobal(),
                  hh[*(tracks_view.hitIndices().begin(i) + 1)].zGlobal(),

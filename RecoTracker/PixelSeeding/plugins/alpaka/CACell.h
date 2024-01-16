@@ -13,8 +13,8 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/VecArray.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/SimpleVector.h"
 #include "RecoTracker/PixelSeeding/interface/CircleEq.h"
-#include "DataFormats/TrackSoA/interface/TrackDefinitions.h"
-#include "DataFormats/TrackSoA/interface/TracksSoA.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackDefinitions.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackSoA.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "CAStructures.h"
 
@@ -39,9 +39,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     using TmpTuple = cms::alpakatools::VecArray<uint32_t, TrackerTraits::maxDepth>;
 
-    using HitContainer = typename TrackSoA<TrackerTraits>::HitContainer;
-    using Quality = ::pixelTrack::Quality;
-    static constexpr auto bad = ::pixelTrack::Quality::bad;
+    using HitContainer = typename PixelTrackSoA<TrackerTraits>::HitContainer;
+    using Quality = ::pixelTrackSoA::Quality;
+    static constexpr auto bad = ::pixelTrackSoA::Quality::bad;
 
     enum class StatusBit : uint16_t { kUsed = 1, kInTrack = 2, kKilled = 1 << 15 };
 

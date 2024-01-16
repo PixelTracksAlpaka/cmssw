@@ -1,0 +1,10 @@
+<lcgdict>
+  <class name="alpaka_rocm_async::PortableCollection<PixelTrackLayout<pixelTopology::Phase1>>" persistent="false"/>
+  <class name="alpaka_rocm_async::pixelTrack::PixelTrackSoACollectionPhase1" persistent="false"/>
+  <class name="edm::DeviceProduct<alpaka_rocm_async::pixelTrack::PixelTrackSoACollectionPhase1>" persistent="false"/>
+  <class name="edm::Wrapper<edm::DeviceProduct<alpaka_rocm_async::pixelTrack::PixelTrackSoACollectionPhase1>>" persistent="false"/>
+  <class name="alpaka_rocm_async::PortableCollection<PixelTrackLayout<pixelTopology::Phase2>>" persistent="false"/>
+  <class name="alpaka_rocm_async::pixelTrack::PixelTrackSoACollectionPhase2" persistent="false"/>
+  <class name="edm::DeviceProduct<alpaka_rocm_async::pixelTrack::PixelTrackSoACollectionPhase2>" persistent="false"/>
+  <class name="edm::Wrapper<edm::DeviceProduct<alpaka_rocm_async::pixelTrack::PixelTrackSoACollectionPhase2>>" persistent="false"/>
+</lcgdict>

@@ -48,8 +48,8 @@
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 
-#include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
-#include "DataFormats/TrackSoA/interface/TracksHost.h"
+#include "DataFormats/PixelTrackSoA/interface/alpaka/PixelTrackUtilities.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackHost.h"
 #include "DataFormats/VertexSoA/interface/ZVertexHost.h"
 
 namespace L2TauTagNNv1 {
@@ -146,7 +146,7 @@ struct L2TauNNProducerAlpakaCacheData {
 
 class L2TauNNProducerAlpaka : public edm::stream::EDProducer<edm::GlobalCache<L2TauNNProducerAlpakaCacheData>> {
 public:
-  using TracksHost = pixelTrack::TracksHostPhase1;
+  using PixelTrackHost = pixelTrack::PixelTrackHostPhase1;
 
   struct caloRecHitCollections {
     const HBHERecHitCollection* hbhe;
@@ -181,16 +181,16 @@ private:
                        const caloRecHitCollections& caloRecHits);
   void fillPatatracks(tensorflow::Tensor& cellGridMatrix,
                       const std::vector<l1t::TauRef>& allTaus,
-                      const TracksHost& patatracks_tsoa,
+                      const PixelTrackHost& patatracks_tsoa,
                       const ZVertexHost& patavtx_soa,
                       const reco::BeamSpot& beamspot,
                       const MagneticField* magfi);
   void selectGoodTracksAndVertices(const ZVertexHost& patavtx_soa,
-                                   const TracksHost& patatracks_tsoa,
+                                   const PixelTrackHost& patatracks_tsoa,
                                    std::vector<int>& trkGood,
                                    std::vector<int>& vtxGood);
   std::pair<float, float> impactParameter(int it,
-                                          const TracksHost& patatracks_tsoa,
+                                          const PixelTrackHost& patatracks_tsoa,
                                           float patatrackPhi,
                                           const reco::BeamSpot& beamspot,
                                           const MagneticField* magfi);
@@ -210,7 +210,7 @@ private:
   const edm::ESGetToken<CaloGeometry, CaloGeometryRecord> geometryToken_;
   const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> bFieldToken_;
   const edm::EDGetTokenT<ZVertexHost> pataVerticesToken_;
-  const edm::EDGetTokenT<TracksHost> pataTracksToken_;
+  const edm::EDGetTokenT<PixelTrackHost> pataTracksToken_;
   const edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;
   const unsigned int maxVtx_;
   const float fractionSumPt2_;
@@ -574,10 +574,10 @@ void L2TauNNProducerAlpaka::fillCaloRecHits(tensorflow::Tensor& cellGridMatrix,
 }
 
 void L2TauNNProducerAlpaka::selectGoodTracksAndVertices(const ZVertexHost& patavtx_soa,
-                                                        const TracksHost& patatracks_tsoa,
+                                                        const PixelTrackHost& patatracks_tsoa,
                                                         std::vector<int>& trkGood,
                                                         std::vector<int>& vtxGood) {
-  using patatrackHelpers = TracksUtilities<pixelTopology::Phase1>;
+  using patatrackHelpers = PixelTrackUtilities<pixelTopology::Phase1>;
   const auto maxTracks = patatracks_tsoa.view().metadata().size();
   const int nv = patavtx_soa.view().nvFinal();
   trkGood.clear();
@@ -604,7 +604,7 @@ void L2TauNNProducerAlpaka::selectGoodTracksAndVertices(const ZVertexHost& patav
         pTSquaredSum[vtx_ass_to_track] += patatrackPt * patatrackPt;
       }
     }
-    if (nHits > 0 and quality[trk_idx] >= pixelTrack::Quality::loose) {
+    if (nHits > 0 and quality[trk_idx] >= pixelTrackSoA::Quality::loose) {
       trkGood.push_back(trk_idx);
     }
   }
@@ -622,14 +622,14 @@ void L2TauNNProducerAlpaka::selectGoodTracksAndVertices(const ZVertexHost& patav
 }
 
 std::pair<float, float> L2TauNNProducerAlpaka::impactParameter(int it,
-                                                               const TracksHost& patatracks_tsoa,
+                                                               const PixelTrackHost& patatracks_tsoa,
                                                                float patatrackPhi,
                                                                const reco::BeamSpot& beamspot,
                                                                const MagneticField* magfi) {
   /* dxy and dz */
   riemannFit::Vector5d ipar, opar;
   riemannFit::Matrix5d icov, ocov;
-  TracksUtilities<pixelTopology::Phase1>::copyToDense(patatracks_tsoa.view(), ipar, icov, it);
+  PixelTrackUtilities<pixelTopology::Phase1>::copyToDense(patatracks_tsoa.view(), ipar, icov, it);
   riemannFit::transformToPerigeePlane(ipar, icov, opar, ocov);
   LocalTrajectoryParameters lpar(opar(0), opar(1), opar(2), opar(3), opar(4), 1.);
   float sp = std::sin(patatrackPhi);
@@ -654,12 +654,12 @@ std::pair<float, float> L2TauNNProducerAlpaka::impactParameter(int it,
 
 void L2TauNNProducerAlpaka::fillPatatracks(tensorflow::Tensor& cellGridMatrix,
                                            const std::vector<l1t::TauRef>& allTaus,
-                                           const TracksHost& patatracks_tsoa,
+                                           const PixelTrackHost& patatracks_tsoa,
                                            const ZVertexHost& patavtx_soa,
                                            const reco::BeamSpot& beamspot,
                                            const MagneticField* magfi) {
   using NNInputs = L2TauTagNNv1::NNInputs;
-  using patatrackHelpers = TracksUtilities<pixelTopology::Phase1>;
+  using patatrackHelpers = PixelTrackUtilities<pixelTopology::Phase1>;
   float deta, dphi;
   int eta_idx = 0;
   int phi_idx = 0;

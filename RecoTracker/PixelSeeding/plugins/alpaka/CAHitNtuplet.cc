@@ -1,8 +1,8 @@
 #include <alpaka/alpaka.hpp>
 
-#include "DataFormats/TrackSoA/interface/TracksHost.h"
-#include "DataFormats/TrackSoA/interface/alpaka/TracksSoACollection.h"
-#include "DataFormats/TrackSoA/interface/TracksDevice.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackHost.h"
+#include "DataFormats/PixelTrackSoA/interface/alpaka/PixelTrackSoACollection.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackDevice.h"
 #include "DataFormats/TrackerRecHitSoA/interface/alpaka/TrackerRecHitSoACollection.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -32,8 +32,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using HitsOnDevice = TrackerRecHitSoACollection<TrackerTraits>;
     using HitsOnHost = TrackerRecHitHost<TrackerTraits>;
 
-    using TkSoAHost = TracksHost<TrackerTraits>;
-    using TkSoADevice = TracksSoACollection<TrackerTraits>;
+    using TkSoAHost = PixelTrackHost<TrackerTraits>;
+    using TkSoADevice = PixelTrackSoACollection<TrackerTraits>;
 
     using Algo = CAHitNtupletGenerator<TrackerTraits>;
 

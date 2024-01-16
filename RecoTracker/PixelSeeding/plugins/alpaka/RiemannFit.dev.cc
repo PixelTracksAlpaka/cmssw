@@ -8,16 +8,16 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
 #include "DataFormats/TrackerRecHitSoA/interface/TrackerRecHitSoA.h"
-#include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
+#include "DataFormats/PixelTrackSoA/interface/alpaka/PixelTrackUtilities.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
 #include "RecoTracker/PixelTrackFitting/interface/alpaka/RiemannFit.h"
 #include "HelixFit.h"
 #include "CAStructures.h"
 
 template <typename TrackerTraits>
-using Tuples = typename TrackSoA<TrackerTraits>::HitContainer;
+using Tuples = typename PixelTrackSoA<TrackerTraits>::HitContainer;
 template <typename TrackerTraits>
-using OutputSoAView = TrackSoAView<TrackerTraits>;
+using OutputSoAView = PixelTrackSoAView<TrackerTraits>;
 template <typename TrackerTraits>
 using TupleMultiplicity = caStructures::TupleMultiplicityT<TrackerTraits>;
 
@@ -175,7 +175,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         riemannFit::fromCircleToPerigee(acc, circle_fit[local_idx]);
 
-        TracksUtilities<TrackerTraits>::copyFromCircle(results_view,
+        PixelTrackUtilities<TrackerTraits>::copyFromCircle(results_view,
                                                        circle_fit[local_idx].par,
                                                        circle_fit[local_idx].cov,
                                                        line_fit.par,

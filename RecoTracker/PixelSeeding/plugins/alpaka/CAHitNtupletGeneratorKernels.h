@@ -9,9 +9,9 @@
 #include "CAPixelDoublets.h"
 #include "CAStructures.h"
 
-#include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
-#include "DataFormats/TrackSoA/interface/TrackDefinitions.h"
-#include "DataFormats/TrackSoA/interface/TracksHost.h"
+#include "DataFormats/PixelTrackSoA/interface/alpaka/PixelTrackUtilities.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackDefinitions.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackHost.h"
 #include "DataFormats/TrackerRecHitSoA/interface/TrackerRecHitSoA.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/AtomicPairCounter.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
@@ -96,7 +96,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     template <typename TrackerTraits>
     struct ParamsT<TrackerTraits, pixelTopology::isPhase1Topology<TrackerTraits>> : public AlgoParams {
       using TT = TrackerTraits;
-      using QualityCuts = ::pixelTrack::QualityCutsT<TT>;  //track quality cuts
+      using QualityCuts = ::pixelTrackSoA::QualityCutsT<TT>;  //track quality cuts
       using CellCuts = caPixelDoublets::CellCutsT<TT>;     //cell building cuts
       using CAParams = CAParamsT<TT>;                      //params to be used on device
 
@@ -147,7 +147,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     template <typename TrackerTraits>
     struct ParamsT<TrackerTraits, pixelTopology::isPhase2Topology<TrackerTraits>> : public AlgoParams {
       using TT = TrackerTraits;
-      using QualityCuts = ::pixelTrack::QualityCutsT<TT>;
+      using QualityCuts = ::pixelTrackSoA::QualityCutsT<TT>;
       using CellCuts = caPixelDoublets::CellCutsT<TT>;
       using CAParams = CAParamsT<TT>;
 
@@ -196,7 +196,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       unsigned long long nZeroTrackCells;
     };
 
-    using Quality = ::pixelTrack::Quality;
+    using Quality = ::pixelTrackSoA::Quality;
 
   }  // namespace caHitNtupletGenerator
 
@@ -204,7 +204,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   class CAHitNtupletGeneratorKernels {
   public:
     using TrackerTraits = TTTraits;
-    using QualityCuts = ::pixelTrack::QualityCutsT<TrackerTraits>;
+    using QualityCuts = ::pixelTrackSoA::QualityCutsT<TrackerTraits>;
     using CellCuts = caPixelDoublets::CellCutsT<TrackerTraits>;
     using Params = caHitNtupletGenerator::ParamsT<TrackerTraits>;
     using CAParams = caHitNtupletGenerator::CAParamsT<TrackerTraits>;
@@ -212,7 +212,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     using HitsView = TrackerRecHitSoAView<TrackerTraits>;
     using HitsConstView = TrackerRecHitSoAConstView<TrackerTraits>;
-    using TkSoAView = TrackSoAView<TrackerTraits>;
+    using TkSoAView = PixelTrackSoAView<TrackerTraits>;
 
     using HitToTuple = caStructures::template HitToTupleT<TrackerTraits>;
     using TupleMultiplicity = caStructures::template TupleMultiplicityT<TrackerTraits>;
@@ -228,8 +228,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     using CACell = CACellT<TrackerTraits>;
 
-    using Quality = ::pixelTrack::Quality;
-    using HitContainer = typename TrackSoA<TrackerTraits>::HitContainer;
+    using Quality = ::pixelTrackSoA::Quality;
+    using HitContainer = typename PixelTrackSoA<TrackerTraits>::HitContainer;
 
     CAHitNtupletGeneratorKernels(Params const& params, uint32_t nhits, Queue& queue);
     ~CAHitNtupletGeneratorKernels() = default;

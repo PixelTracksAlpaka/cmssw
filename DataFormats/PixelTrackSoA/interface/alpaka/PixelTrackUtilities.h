@@ -1,16 +1,16 @@
-#ifndef DataFormats_Track_interface_alpaka_TrackUtilities_h
-#define DataFormats_Track_interface_alpaka_TrackUtilities_h
+#ifndef DataFormats_PixelTrackSoA_interface_alpaka_PixelTrackUtilities_h
+#define DataFormats_PixelTrackSoA_interface_alpaka_PixelTrackUtilities_h
 
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
-#include "DataFormats/TrackSoA/interface/TrackDefinitions.h"
-#include "DataFormats/TrackSoA/interface/TracksSoA.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackDefinitions.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackSoA.h"
 
-// Methods that operate on View and ConstView of the TrackSoA, and cannot be class methods.
+// Methods that operate on View and ConstView of the PixelTrackSoA, and cannot be class methods.
 template <typename TrackerTraits>
-struct TracksUtilities {
-  using TrackSoAView = typename TrackSoA<TrackerTraits>::template Layout<>::View;
-  using TrackSoAConstView = typename TrackSoA<TrackerTraits>::template Layout<>::ConstView;
-  using hindex_type = typename TrackSoA<TrackerTraits>::hindex_type;
+struct PixelTrackUtilities { // TODO: once the CUDA code is removed, this should be changed back to TrackUtilities
+  using TrackSoAView = typename PixelTrackSoA<TrackerTraits>::template Layout<>::View;
+  using TrackSoAConstView = typename PixelTrackSoA<TrackerTraits>::template Layout<>::ConstView;
+  using hindex_type = typename PixelTrackSoA<TrackerTraits>::hindex_type;
 
   // State at the Beam spot
   // phi,tip,1/pt,cotan(theta),zip
@@ -100,16 +100,16 @@ struct TracksUtilities {
   }
 };
 
-namespace pixelTrack {
+namespace pixelTrackSoA { // TODO: once the CUDA code is removed, this should be changed back to pixelTrack
 
   template <typename TrackerTraits, typename Enable = void>
   struct QualityCutsT {};
 
   template <typename TrackerTraits>
   struct QualityCutsT<TrackerTraits, pixelTopology::isPhase1Topology<TrackerTraits>> {
-    using TrackSoAView = typename TrackSoA<TrackerTraits>::template Layout<>::View;
-    using TrackSoAConstView = typename TrackSoA<TrackerTraits>::template Layout<>::ConstView;
-    using tracksHelper = TracksUtilities<TrackerTraits>;
+    using TrackSoAView = typename PixelTrackSoA<TrackerTraits>::template Layout<>::View;
+    using TrackSoAConstView = typename PixelTrackSoA<TrackerTraits>::template Layout<>::ConstView;
+    using tracksHelper = PixelTrackUtilities<TrackerTraits>;
     float chi2Coeff[4];
     float chi2MaxPt;  // GeV
     float chi2Scale;
@@ -170,9 +170,9 @@ namespace pixelTrack {
 
   template <typename TrackerTraits>
   struct QualityCutsT<TrackerTraits, pixelTopology::isPhase2Topology<TrackerTraits>> {
-    using TrackSoAView = typename TrackSoA<TrackerTraits>::template Layout<>::View;
-    using TrackSoAConstView = typename TrackSoA<TrackerTraits>::template Layout<>::ConstView;
-    using tracksHelper = TracksUtilities<TrackerTraits>;
+    using TrackSoAView = typename PixelTrackSoA<TrackerTraits>::template Layout<>::View;
+    using TrackSoAConstView = typename PixelTrackSoA<TrackerTraits>::template Layout<>::ConstView;
+    using tracksHelper = PixelTrackUtilities<TrackerTraits>;
 
     float maxChi2;
     float minPt;
@@ -188,10 +188,10 @@ namespace pixelTrack {
     }
   };
 
-}  // namespace pixelTrack
+}  // namespace pixelTrackSoA
 
 // TODO: Should those be placed in the ALPAKA_ACCELERATOR_NAMESPACE
-template struct TracksUtilities<pixelTopology::Phase1>;
-template struct TracksUtilities<pixelTopology::Phase2>;
+template struct PixelTrackUtilities<pixelTopology::Phase1>;
+template struct PixelTrackUtilities<pixelTopology::Phase2>;
 
-#endif
+#endif  // DataFormats_PixelTrackSoA_interface_alpaka_PixelTrackUtilities_h

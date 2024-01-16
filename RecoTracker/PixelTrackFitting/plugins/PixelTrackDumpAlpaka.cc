@@ -16,12 +16,12 @@
 #include "RecoTracker/TkMSParametrization/interface/PixelRecoUtilities.h"
 
 #include "DataFormats/VertexSoA/interface/ZVertexHost.h"
-#include "DataFormats/TrackSoA/interface/TracksHost.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackHost.h"
 
 template <typename TrackerTraits>
 class PixelTrackDumpAlpakaT : public edm::global::EDAnalyzer<> {
 public:
-  using TkSoAHost = TracksHost<TrackerTraits>;
+  using TkSoAHost = PixelTrackHost<TrackerTraits>;
   using VertexSoAHost = ZVertexHost;
 
   explicit PixelTrackDumpAlpakaT(const edm::ParameterSet& iConfig);

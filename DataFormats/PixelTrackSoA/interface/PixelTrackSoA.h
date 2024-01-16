@@ -1,21 +1,21 @@
-#ifndef DataFormats_Track_interface_TrackLayout_h
-#define DataFormats_Track_interface_TrackLayout_h
+#ifndef DataFormats_PixelTrackSoA_interface_PixelTrackSoA_h
+#define DataFormats_PixelTrackSoA_interface_PixelTrackSoA_h
 
 #include <Eigen/Core>
 #include "HeterogeneousCore/AlpakaInterface/interface/OneToManyAssoc.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
-#include "DataFormats/TrackSoA/interface/TrackDefinitions.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackDefinitions.h"
 
 template <typename TrackerTraits>
-struct TrackSoA {
+struct PixelTrackSoA { // TODO: once the CUDA code is removed, this should be changed back to TrackSoA
   static constexpr int32_t S = TrackerTraits::maxNumberOfTuples;
   static constexpr int32_t H = TrackerTraits::avgHitsPerTrack;
   // Aliases in order to not confuse the GENERATE_SOA_LAYOUT
   // macro with weird colons and angled brackets.
   using Vector5f = Eigen::Matrix<float, 5, 1>;
   using Vector15f = Eigen::Matrix<float, 15, 1>;
-  using Quality = pixelTrack::Quality;
+  using Quality = pixelTrackSoA::Quality;
 
   using hindex_type = uint32_t;
 
@@ -35,10 +35,10 @@ struct TrackSoA {
 };
 
 template <typename TrackerTraits>
-using TrackLayout = typename TrackSoA<TrackerTraits>::template Layout<>;
+using PixelTrackLayout = typename PixelTrackSoA<TrackerTraits>::template Layout<>;
 template <typename TrackerTraits>
-using TrackSoAView = typename TrackSoA<TrackerTraits>::template Layout<>::View;
+using PixelTrackSoAView = typename PixelTrackSoA<TrackerTraits>::template Layout<>::View;
 template <typename TrackerTraits>
-using TrackSoAConstView = typename TrackSoA<TrackerTraits>::template Layout<>::ConstView;
+using PixelTrackSoAConstView = typename PixelTrackSoA<TrackerTraits>::template Layout<>::ConstView;
 
-#endif
+#endif  // DataFormats_PixelTrackSoA_interface_PixelTrackSoA_h

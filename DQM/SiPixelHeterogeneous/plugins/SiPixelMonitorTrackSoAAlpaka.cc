@@ -23,12 +23,12 @@
 #include "DQMServices/Core/interface/MonitorElement.h"
 #include "DQMServices/Core/interface/DQMEDAnalyzer.h"
 #include "DQMServices/Core/interface/DQMStore.h"
-#include "DataFormats/TrackSoA/interface/TracksHost.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackHost.h"
 
 template <typename T>
 class SiPixelMonitorTrackSoAAlpaka : public DQMEDAnalyzer {
 public:
-  using PixelTrackHeterogeneous = TracksHost<T>;
+  using PixelTrackHeterogeneous = PixelTrackHost<T>;
   explicit SiPixelMonitorTrackSoAAlpaka(const edm::ParameterSet&);
   ~SiPixelMonitorTrackSoAAlpaka() override = default;
   void bookHistograms(DQMStore::IBooker& ibooker, edm::Run const& iRun, edm::EventSetup const& iSetup) override;
@@ -39,7 +39,7 @@ private:
   edm::EDGetTokenT<PixelTrackHeterogeneous> tokenSoATrack_;
   std::string topFolderName_;
   bool useQualityCut_;
-  pixelTrack::Quality minQuality_;
+  pixelTrackSoA::Quality minQuality_;
   MonitorElement* hnTracks;
   MonitorElement* hnLooseAndAboveTracks;
   MonitorElement* hnHits;
@@ -68,7 +68,7 @@ SiPixelMonitorTrackSoAAlpaka<T>::SiPixelMonitorTrackSoAAlpaka(const edm::Paramet
   tokenSoATrack_ = consumes<PixelTrackHeterogeneous>(iConfig.getParameter<edm::InputTag>("pixelTrackSrc"));
   topFolderName_ = iConfig.getParameter<std::string>("topFolderName");  //"SiPixelHeterogeneous/PixelTrackSoA";
   useQualityCut_ = iConfig.getParameter<bool>("useQualityCut");
-  minQuality_ = pixelTrack::qualityByName(iConfig.getParameter<std::string>("minQuality"));
+  minQuality_ = pixelTrackSoA::qualityByName(iConfig.getParameter<std::string>("minQuality"));
 }
 
 //
@@ -98,7 +98,7 @@ void SiPixelMonitorTrackSoAAlpaka<T>::analyze(const edm::Event& iEvent, const ed
       continue;
 
     // fill the quality for all tracks
-    pixelTrack::Quality qual = quality[it];
+    pixelTrackSoA::Quality qual = quality[it];
     hquality->Fill(int(qual));
     nTracks++;
 
@@ -171,7 +171,7 @@ hChi2VsEta = iBook.bookProfile("nChi2ndofVsEta", fmt::sprintf("%s vs track #eta;
   htip = iBook.book1D("tip", ";Track (quality #geq loose) TIP [cm];#tracks", 100, -0.5, 0.5);
   hquality = iBook.book1D("quality", ";Track Quality;#tracks", 7, -0.5, 6.5);
   uint i = 1;
-  for (const auto& q : pixelTrack::qualityName) {
+  for (const auto& q : pixelTrackSoA::qualityName) {
     hquality->setBinLabel(i, q.data(), 1);
     i++;
   }

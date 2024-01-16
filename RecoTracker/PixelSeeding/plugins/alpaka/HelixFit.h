@@ -2,7 +2,7 @@
 #define RecoPixelVertexing_PixelTriplets_HelixFit_h
 
 #include <alpaka/alpaka.hpp>
-#include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
+#include "DataFormats/PixelTrackSoA/interface/alpaka/PixelTrackUtilities.h"
 #include "DataFormats/TrackerRecHitSoA/interface/TrackerRecHitSoA.h"
 #include "RecoTracker/PixelTrackFitting/interface/alpaka/FitResult.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
@@ -53,8 +53,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using HitView = TrackerRecHitSoAView<TrackerTraits>;
     using HitConstView = TrackerRecHitSoAConstView<TrackerTraits>;
 
-    using Tuples = typename TrackSoA<TrackerTraits>::HitContainer;
-    using OutputSoAView = TrackSoAView<TrackerTraits>;
+    using Tuples = typename PixelTrackSoA<TrackerTraits>::HitContainer;
+    using OutputSoAView = PixelTrackSoAView<TrackerTraits>;
 
     using TupleMultiplicity = caStructures::TupleMultiplicityT<TrackerTraits>;
 

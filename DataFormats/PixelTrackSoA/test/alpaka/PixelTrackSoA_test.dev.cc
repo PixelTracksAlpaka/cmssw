@@ -1,21 +1,21 @@
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
-#include "DataFormats/TrackSoA/interface/TrackDefinitions.h"
-#include "DataFormats/TrackSoA/interface/alpaka/TracksSoACollection.h"
-#include "DataFormats/TrackSoA/interface/TracksDevice.h"
-#include "DataFormats/TrackSoA/interface/TracksHost.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackDefinitions.h"
+#include "DataFormats/PixelTrackSoA/interface/alpaka/PixelTrackSoACollection.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackDevice.h"
+#include "DataFormats/PixelTrackSoA/interface/PixelTrackHost.h"
 
-using Quality = pixelTrack::Quality;
+using Quality = pixelTrackSoA::Quality;
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   using namespace cms::alpakatools;
   namespace testTrackSoA {
 
-    // Kernel which fills the TrackSoAView with data
+    // Kernel which fills the PixelTrackSoAView with data
     // to test writing to it
     template <typename TrackerTraits>
     class TestFillKernel {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
-      ALPAKA_FN_ACC void operator()(TAcc const& acc, TrackSoAView<TrackerTraits> tracks_view) const {
+      ALPAKA_FN_ACC void operator()(TAcc const& acc, PixelTrackSoAView<TrackerTraits> tracks_view) const {
         const int32_t i = alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u];
 
         if (i == 0) {
@@ -33,13 +33,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
     };
 
-    // Kernel which reads from the TrackSoAView to verify
+    // Kernel which reads from the PixelTrackSoAView to verify
     // that it was written correctly from the fill kernel
     template <typename TrackerTraits>
     class TestVerifyKernel {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
-      ALPAKA_FN_ACC void operator()(TAcc const& acc, TrackSoAConstView<TrackerTraits> tracks_view) const {
+      ALPAKA_FN_ACC void operator()(TAcc const& acc, PixelTrackSoAConstView<TrackerTraits> tracks_view) const {
         const int32_t i = alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u];
 
         if (i == 0) {
@@ -58,7 +58,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     // Host function which invokes the two kernels above
     template <typename TrackerTraits>
-    void runKernels(TrackSoAView<TrackerTraits> tracks_view, Queue& queue) {
+    void runKernels(PixelTrackSoAView<TrackerTraits> tracks_view, Queue& queue) {
       uint32_t items = 64;
       uint32_t groups = divide_up_by(tracks_view.metadata().size(), items);
       auto workDiv = make_workdiv<Acc1D>(groups, items);
@@ -66,8 +66,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       //alpaka::exec<Acc1D>(queue, workDiv, TestVerifyKernel<TrackerTraits>{}, tracks_view); //TODO: wait for some PR that solves this and then check it!!!
     }
 
-    template void runKernels<pixelTopology::Phase1>(TrackSoAView<pixelTopology::Phase1> tracks_view, Queue& queue);
-    template void runKernels<pixelTopology::Phase2>(TrackSoAView<pixelTopology::Phase2> tracks_view, Queue& queue);
+    template void runKernels<pixelTopology::Phase1>(PixelTrackSoAView<pixelTopology::Phase1> tracks_view, Queue& queue);
+    template void runKernels<pixelTopology::Phase2>(PixelTrackSoAView<pixelTopology::Phase2> tracks_view, Queue& queue);
 
   }  // namespace testTrackSoA
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

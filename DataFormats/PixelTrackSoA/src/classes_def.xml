@@ -1,0 +1,28 @@
+<lcgdict>
+
+  <class name="PixelTrackSoA<pixelTopology::Phase1>"/>
+  <class name="PixelTrackSoA<pixelTopology::Phase1>::Layout<>"/>
+  <class name="PixelTrackLayout<pixelTopology::Phase1>"/>
+  <class name="PixelTrackSoAView<pixelTopology::Phase1>"/>
+
+  <class name="PixelTrackSoA<pixelTopology::Phase2>"/>
+  <class name="PixelTrackSoA<pixelTopology::Phase2>::Layout<>"/>
+  <class name="PixelTrackLayout<pixelTopology::Phase2>"/>
+  <class name="PixelTrackSoAView<pixelTopology::Phase2>"/>
+
+  <class name="PixelTrackSoA<pixelTopology::HIonPhase1>"/>
+  <class name="PixelTrackSoA<pixelTopology::HIonPhase1>::Layout<>"/>
+  <class name="PixelTrackLayout<pixelTopology::HIonPhase1>"/>
+  <class name="PixelTrackSoAView<pixelTopology::HIonPhase1>"/>
+
+  <class name="PortableHostCollection<PixelTrackLayout<pixelTopology::Phase1>>"/>
+  <class name="PixelTrackHostPhase1"/>
+  <class name="edm::Wrapper<PixelTrackHostPhase1>" splitLevel="0"/>
+
+  <class name="PortableHostCollection<PixelTrackLayout<pixelTopology::Phase2>>"/>
+  <class name="PixelTrackHostPhase2"/>
+  <class name="edm::Wrapper<PixelTrackHostPhase2>" splitLevel="0"/>
+  <class name="PixelTrackHostHIonPhase1"/>
+  <class name="edm::Wrapper<PixelTrackHostHIonPhase1>" splitLevel="0"/>
+
+</lcgdict>
