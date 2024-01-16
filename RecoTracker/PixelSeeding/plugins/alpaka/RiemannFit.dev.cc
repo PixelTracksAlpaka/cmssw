@@ -7,7 +7,7 @@
 
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsSoA.h"
+#include "DataFormats/TrackerRecHitSoA/interface/TrackerRecHitSoA.h"
 #include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
 #include "RecoTracker/PixelTrackFitting/interface/alpaka/RiemannFit.h"
@@ -33,7 +33,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                   Tuples<TrackerTraits> const *__restrict__ foundNtuplets,
                                   TupleMultiplicity<TrackerTraits> const *__restrict__ tupleMultiplicity,
                                   uint32_t nHits,
-                                  TrackingRecHitSoAConstView<TrackerTraits> hh,
+                                  TrackerRecHitSoAConstView<TrackerTraits> hh,
                                   pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const *__restrict__ cpeParams,
                                   double *__restrict__ phits,
                                   float *__restrict__ phits_ge,
@@ -209,7 +209,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   };
 
   template <typename TrackerTraits>
-  void HelixFit<TrackerTraits>::launchRiemannKernels(const TrackingRecHitSoAConstView<TrackerTraits> &hv,
+  void HelixFit<TrackerTraits>::launchRiemannKernels(const TrackerRecHitSoAConstView<TrackerTraits> &hv,
                                                      pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const *cpeParams,
                                                      uint32_t nhits,
                                                      uint32_t maxNumberOfTuples,

@@ -13,7 +13,7 @@
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
 #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisSoACollection.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsSoA.h"
+#include "DataFormats/TrackerRecHitSoA/interface/TrackerRecHitSoA.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
@@ -33,7 +33,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     SiPixelDigisSoAConstView digis,
                                     uint32_t numElements,
                                     SiPixelClustersSoAConstView clusters,
-                                    TrackingRecHitSoAView<TrackerTraits> hits) const {
+                                    TrackerRecHitSoAView<TrackerTraits> hits) const {
         // FIXME
         // the compiler seems NOT to optimize loads from views (even in a simple test case)
         // The whole gimnastic here of copying or not is a pure heuristic exercise that seems to produce the fastest code with the above signature

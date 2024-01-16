@@ -4,7 +4,7 @@
 #include "DataFormats/Math/interface/approx_atan2.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsHost.h"
+#include "DataFormats/TrackerRecHitSoA/interface/TrackerRecHitHost.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -19,7 +19,7 @@
 template <typename T>
 class SiPixelMonitorRecHitsSoAAlpaka : public DQMEDAnalyzer {
 public:
-  using HitsOnHost = TrackingRecHitHost<T>;
+  using HitsOnHost = TrackerRecHitHost<T>;
 
   explicit SiPixelMonitorRecHitsSoAAlpaka(const edm::ParameterSet&);
   ~SiPixelMonitorRecHitsSoAAlpaka() override = default;

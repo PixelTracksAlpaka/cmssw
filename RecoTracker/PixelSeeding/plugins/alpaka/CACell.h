@@ -9,7 +9,7 @@
 
 #include <alpaka/alpaka.hpp>
 
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsSoA.h"
+#include "DataFormats/TrackerRecHitSoA/interface/TrackerRecHitSoA.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/VecArray.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/SimpleVector.h"
 #include "RecoTracker/PixelSeeding/interface/CircleEq.h"
@@ -32,7 +32,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using CellNeighborsVector = caStructures::CellNeighborsVectorT<TrackerTraits>;
     using CellTracksVector = caStructures::CellTracksVectorT<TrackerTraits>;
 
-    using HitsConstView = TrackingRecHitSoAConstView<TrackerTraits>;
+    using HitsConstView = TrackerRecHitSoAConstView<TrackerTraits>;
     using hindex_type = typename TrackerTraits::hindex_type;
     using tindex_type = typename TrackerTraits::tindex_type;
     static constexpr auto invalidHitId = std::numeric_limits<hindex_type>::max();

@@ -8,7 +8,7 @@
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "DataFormats/GeometrySurface/interface/SOARotation.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
-#include "DataFormats/TrackingRecHitSoA/interface/SiPixelHitStatus.h"
+#include "DataFormats/TrackerRecHitSoA/interface/SiPixelRecHitStatus.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEGenericBase.h"
 #include "CondFormats/SiPixelTransient/interface/SiPixelGenError.h"
 

@@ -10,8 +10,8 @@
 #include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersDevice.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
 #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisSoACollection.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsDevice.h"
-#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitsSoACollection.h"
+#include "DataFormats/TrackerRecHitSoA/interface/TrackerRecHitDevice.h"
+#include "DataFormats/TrackerRecHitSoA/interface/alpaka/TrackerRecHitSoACollection.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
@@ -33,7 +33,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       using ParamsOnDevice = pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>;
 
-      TrackingRecHitsSoACollection<TrackerTraits> makeHitsAsync(SiPixelDigisSoACollection const& digis_d,
+      TrackerRecHitSoACollection<TrackerTraits> makeHitsAsync(SiPixelDigisSoACollection const& digis_d,
                                                                 SiPixelClustersSoACollection const& clusters_d,
                                                                 BeamSpotPOD const* bs_d,
                                                                 ParamsOnDevice const* cpeParams,

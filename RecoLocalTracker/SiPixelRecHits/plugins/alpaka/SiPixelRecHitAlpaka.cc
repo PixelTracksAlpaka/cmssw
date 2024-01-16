@@ -4,8 +4,8 @@
 #include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersSoACollection.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
 #include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisSoACollection.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsDevice.h"
-#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitsSoACollection.h"
+#include "DataFormats/TrackerRecHitSoA/interface/TrackerRecHitDevice.h"
+#include "DataFormats/TrackerRecHitSoA/interface/alpaka/TrackerRecHitSoACollection.h"
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
@@ -49,7 +49,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     const device::EDGetToken<BeamSpotDevice> tBeamSpot;
     const device::EDGetToken<SiPixelClustersSoACollection> tokenClusters_;
     const device::EDGetToken<SiPixelDigisSoACollection> tokenDigi_;
-    const device::EDPutToken<TrackingRecHitsSoACollection<TrackerTraits>> tokenHit_;
+    const device::EDPutToken<TrackerRecHitSoACollection<TrackerTraits>> tokenHit_;
 
     const pixelgpudetails::PixelRecHitKernel<TrackerTraits> Algo_;
   };

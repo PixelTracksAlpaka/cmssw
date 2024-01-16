@@ -7,8 +7,8 @@
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsHost.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsSoA.h"
+#include "DataFormats/TrackerRecHitSoA/interface/TrackerRecHitHost.h"
+#include "DataFormats/TrackerRecHitSoA/interface/TrackerRecHitSoA.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -26,7 +26,7 @@
 
 template <typename TrackerTraits>
 class SiPixelRecHitFromSoAAlpaka : public edm::global::EDProducer<> {
-  using HitModuleStartArray = typename TrackingRecHitSoA<TrackerTraits>::HitModuleStartArray;
+  using HitModuleStartArray = typename TrackerRecHitSoA<TrackerTraits>::HitModuleStartArray;
   using hindex_type = typename TrackerTraits::hindex_type;
   using HMSstorage = typename std::vector<hindex_type>;
 
@@ -37,7 +37,7 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
   // Data has been implicitly copied from Device to Host by the framework
-  using HitsOnHost = TrackingRecHitHost<TrackerTraits>;
+  using HitsOnHost = TrackerRecHitHost<TrackerTraits>;
 
 private:
   void produce(edm::StreamID streamID, edm::Event& iEvent, const edm::EventSetup& iSetup) const override;

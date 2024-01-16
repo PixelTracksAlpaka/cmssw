@@ -9,7 +9,7 @@
 <use name="DataFormats/SiPixelDetId"/>
 <use name="DataFormats/TrackerRecHit2D"/>
 <use name="DataFormats/TrackingRecHit"/>
-<use name="DataFormats/TrackingRecHitSoA"/>
+<use name="DataFormats/TrackerRecHitSoA"/>
 <use name="DataFormats/TrackReco"/>
 <use name="DataFormats/TrackSoA"/>
 <use name="FWCore/Framework"/>

@@ -8,8 +8,8 @@
 #include "DataFormats/TrackSoA/interface/TracksHost.h"
 #include "DataFormats/TrackSoA/interface/alpaka/TracksSoACollection.h"
 #include "DataFormats/TrackSoA/interface/TracksDevice.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsSoA.h"
-#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitsSoACollection.h"
+#include "DataFormats/TrackerRecHitSoA/interface/TrackerRecHitSoA.h"
+#include "DataFormats/TrackerRecHitSoA/interface/alpaka/TrackerRecHitSoACollection.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
 
@@ -26,11 +26,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   template <typename TrackerTraits>
   class CAHitNtupletGenerator {
   public:
-    using HitsView = TrackingRecHitSoAView<TrackerTraits>;
-    using HitsConstView = TrackingRecHitSoAConstView<TrackerTraits>;
-    using HitsOnDevice = TrackingRecHitsSoACollection<TrackerTraits>;
-    using HitsOnHost = TrackingRecHitHost<TrackerTraits>;
-    using hindex_type = typename TrackingRecHitSoA<TrackerTraits>::hindex_type;
+    using HitsView = TrackerRecHitSoAView<TrackerTraits>;
+    using HitsConstView = TrackerRecHitSoAConstView<TrackerTraits>;
+    using HitsOnDevice = TrackerRecHitSoACollection<TrackerTraits>;
+    using HitsOnHost = TrackerRecHitHost<TrackerTraits>;
+    using hindex_type = typename TrackerRecHitSoA<TrackerTraits>::hindex_type;
 
     using HitToTuple = caStructures::HitToTupleT<TrackerTraits>;
     using TupleMultiplicity = caStructures::TupleMultiplicityT<TrackerTraits>;

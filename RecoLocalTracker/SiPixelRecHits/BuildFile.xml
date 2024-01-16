@@ -7,7 +7,7 @@
 <use name="CondFormats/SiPixelTransient"/>
 <use name="DataFormats/TrackerCommon"/>
 <use name="DataFormats/TrackerRecHit2D"/>
-<use name="DataFormats/TrackingRecHitSoA"/>
+<use name="DataFormats/TrackerRecHitSoA"/>
 <use name="DataFormats/BeamSpot"/>
 <use name="FWCore/ParameterSet"/>
 <use name="HeterogeneousCore/AlpakaCore"/>

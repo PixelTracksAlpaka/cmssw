@@ -9,7 +9,7 @@
 
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
-#include "DataFormats/TrackingRecHitSoA/interface/SiPixelHitStatus.h"
+#include "DataFormats/TrackerRecHitSoA/interface/SiPixelRecHitStatus.h"
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "DataFormats/GeometrySurface/interface/SOARotation.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
@@ -19,14 +19,14 @@ namespace CPEFastParametrisation {
   // From https://cmssdt.cern.ch/dxr/CMSSW/source/CondFormats/SiPixelTransient/src/SiPixelGenError.cc#485-486
   // qbin: int (0-4) describing the charge of the cluster
   // [0: 1.5<Q/Qavg, 1: 1<Q/Qavg<1.5, 2: 0.85<Q/Qavg<1, 3: 0.95Qmin<Q<0.85Qavg, 4: Q<0.95Qmin]
-  constexpr int kGenErrorQBins = 5;
+  constexpr int kGenErrorQBinsAlpaka = 5;
   // arbitrary number of bins for sampling errors
-  constexpr int kNumErrorBins = 16;
+  constexpr int kNumErrorBinsAlpaka = 16;
 }  // namespace CPEFastParametrisation
 
 namespace pixelCPEforDevice {
 
-  using Status = SiPixelHitStatus;
+  using Status = SiPixelRecHitStatus;
   using Frame = SOAFrame<float>;
   using Rotation = SOARotation<float>;
 
@@ -93,10 +93,10 @@ namespace pixelCPEforDevice {
 
     float apeXX, apeYY;  // ape^2
     uint8_t sx2, sy1, sy2;
-    uint8_t sigmax[CPEFastParametrisation::kNumErrorBins], sigmax1[CPEFastParametrisation::kNumErrorBins],
-        sigmay[CPEFastParametrisation::kNumErrorBins];  // in micron
-    float xfact[CPEFastParametrisation::kGenErrorQBins], yfact[CPEFastParametrisation::kGenErrorQBins];
-    int minCh[CPEFastParametrisation::kGenErrorQBins];
+    uint8_t sigmax[CPEFastParametrisation::kNumErrorBinsAlpaka], sigmax1[CPEFastParametrisation::kNumErrorBinsAlpaka],
+        sigmay[CPEFastParametrisation::kNumErrorBinsAlpaka];  // in micron
+    float xfact[CPEFastParametrisation::kGenErrorQBinsAlpaka], yfact[CPEFastParametrisation::kGenErrorQBinsAlpaka];
+    int minCh[CPEFastParametrisation::kGenErrorQBinsAlpaka];
 
     Frame frame;
   };
@@ -362,15 +362,15 @@ namespace pixelCPEforDevice {
 
     auto ch = cp.charge[ic];
     auto bin = 0;
-    for (; bin < CPEFastParametrisation::kGenErrorQBins - 1; ++bin)
+    for (; bin < CPEFastParametrisation::kGenErrorQBinsAlpaka - 1; ++bin)
       // find first bin which minimum charge exceeds cluster charge
       if (ch < detParams.minCh[bin + 1])
         break;
 
     // in detParams qBins are reversed bin0 -> smallest charge, bin4-> largest charge
     // whereas in CondFormats/SiPixelTransient/src/SiPixelGenError.cc it is the opposite
-    // so we reverse the bin here -> kGenErrorQBins - 1 - bin
-    cp.status[ic].qBin = CPEFastParametrisation::kGenErrorQBins - 1 - bin;
+    // so we reverse the bin here -> kGenErrorQBinsAlpaka - 1 - bin
+    cp.status[ic].qBin = CPEFastParametrisation::kGenErrorQBinsAlpaka - 1 - bin;
     cp.status[ic].isOneX = isOneX;
     cp.status[ic].isBigX = (isOneX & isBigX) | isEdgeX;
     cp.status[ic].isOneY = isOneY;
@@ -378,8 +378,8 @@ namespace pixelCPEforDevice {
 
     auto xoff = -float(TrackerTraits::xOffset) * comParams.thePitchX;
     int low_value = 0;
-    int high_value = CPEFastParametrisation::kNumErrorBins - 1;
-    int bin_value = float(CPEFastParametrisation::kNumErrorBins) * (cp.xpos[ic] + xoff) / (2 * xoff);
+    int high_value = CPEFastParametrisation::kNumErrorBinsAlpaka - 1;
+    int bin_value = float(CPEFastParametrisation::kNumErrorBinsAlpaka) * (cp.xpos[ic] + xoff) / (2 * xoff);
     // return estimated bin value truncated to [0, 15]
     int jx = std::clamp(bin_value, low_value, high_value);
 

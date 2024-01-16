@@ -1,15 +1,15 @@
-#ifndef DataFormats_TrackingRecHitSoA_interface_TrackingRecHitsSoA_h
-#define DataFormats_TrackingRecHitSoA_interface_TrackingRecHitsSoA_h
+#ifndef DataFormats_TrackerRecHitSoA_interface_TrackerRecHitSoA_h
+#define DataFormats_TrackerRecHitSoA_interface_TrackerRecHitSoA_h
 
 #include <Eigen/Dense>
 
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
-#include "DataFormats/TrackingRecHitSoA/interface/SiPixelHitStatus.h"
+#include "DataFormats/TrackerRecHitSoA/interface/SiPixelRecHitStatus.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
 
 template <typename TrackerTraits>
-struct TrackingRecHitSoA {
+struct TrackerRecHitSoA {
   using hindex_type = typename TrackerTraits::hindex_type;
   using PhiBinner = cms::alpakatools::HistoContainer<int16_t,
                                                      256,
@@ -33,7 +33,7 @@ struct TrackingRecHitSoA {
                       SOA_COLUMN(float, zGlobal),
                       SOA_COLUMN(float, rGlobal),
                       SOA_COLUMN(int16_t, iphi),
-                      SOA_COLUMN(SiPixelHitStatusAndCharge, chargeAndStatus),
+                      SOA_COLUMN(SiPixelRecHitStatusAndCharge, chargeAndStatus),
                       SOA_COLUMN(int16_t, clusterSizeX),
                       SOA_COLUMN(int16_t, clusterSizeY),
                       SOA_COLUMN(uint16_t, detectorIndex),
@@ -46,10 +46,10 @@ struct TrackingRecHitSoA {
 };
 
 template <typename TrackerTraits>
-using TrackingRecHitLayout = typename TrackingRecHitSoA<TrackerTraits>::template Layout<>;
+using TrackerRecHitLayout = typename TrackerRecHitSoA<TrackerTraits>::template Layout<>;
 template <typename TrackerTraits>
-using TrackingRecHitSoAView = typename TrackingRecHitSoA<TrackerTraits>::template Layout<>::View;
+using TrackerRecHitSoAView = typename TrackerRecHitSoA<TrackerTraits>::template Layout<>::View;
 template <typename TrackerTraits>
-using TrackingRecHitSoAConstView = typename TrackingRecHitSoA<TrackerTraits>::template Layout<>::ConstView;
+using TrackerRecHitSoAConstView = typename TrackerRecHitSoA<TrackerTraits>::template Layout<>::ConstView;
 
-#endif
+#endif  // DataFormats_TrackerRecHitSoA_interface_TrackerRecHitSoA_h

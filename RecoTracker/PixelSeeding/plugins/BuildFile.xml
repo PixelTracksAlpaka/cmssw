@@ -25,7 +25,7 @@
  <use name="alpaka"/>
   <use name="DataFormats/Portable"/>
   <use name="DataFormats/TrackSoA"/>
-  <use name="DataFormats/TrackingRecHitSoA"/>
+  <use name="DataFormats/TrackerRecHitSoA"/>
   <use name="FWCore/Utilities"/>
   <use name="HeterogeneousCore/AlpakaCore"/>
   <use name="HeterogeneousCore/AlpakaInterface"/>

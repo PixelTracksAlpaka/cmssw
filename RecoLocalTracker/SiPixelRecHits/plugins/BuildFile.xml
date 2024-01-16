@@ -2,7 +2,7 @@
 <use name="CondFormats/SiPixelTransient"/>
 <use name="DataFormats/BeamSpot"/>
 <use name="DataFormats/TrackerCommon"/>
-<use name="DataFormats/TrackingRecHitSoA"/>
+<use name="DataFormats/TrackerRecHitSoA"/>
 <use name="HeterogeneousCore/AlpakaCore"/>
 <use name="HeterogeneousCore/AlpakaInterface"/>
 <use name="RecoLocalTracker/ClusterParameterEstimator"/>

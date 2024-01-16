@@ -46,7 +46,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace pixelgpudetails {
 
     template <typename TrackerTraits>
-    TrackingRecHitsSoACollection<TrackerTraits> PixelRecHitKernel<TrackerTraits>::makeHitsAsync(
+    TrackerRecHitSoACollection<TrackerTraits> PixelRecHitKernel<TrackerTraits>::makeHitsAsync(
         SiPixelDigisSoACollection const& digis_d,
         SiPixelClustersSoACollection const& clusters_d,
         BeamSpotPOD const* bs_d,
@@ -56,7 +56,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       auto nHits = clusters_d.nClusters();
       auto offsetBPIX2 = clusters_d.offsetBPIX2();
 
-      TrackingRecHitsSoACollection<TrackerTraits> hits_d(nHits, offsetBPIX2, clusters_d->clusModuleStart(), queue);
+      TrackerRecHitSoACollection<TrackerTraits> hits_d(nHits, offsetBPIX2, clusters_d->clusModuleStart(), queue);
 
       int activeModulesWithDigis = digis_d.nModules();
 
@@ -96,7 +96,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
           // Use a view since it's runtime sized and can't use the implicit definition
           // see HeterogeneousCore/AlpakaInterface/interface/OneToManyAssoc.h:100
-          typename TrackingRecHitSoA<TrackerTraits>::PhiBinnerView hrv_d;
+          typename TrackerRecHitSoA<TrackerTraits>::PhiBinnerView hrv_d;
           hrv_d.assoc = &(hits_d.view().phiBinner());
           hrv_d.offSize = -1;
           hrv_d.offStorage = nullptr;

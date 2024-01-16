@@ -5,7 +5,7 @@
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "DataFormats/GeometrySurface/interface/SOARotation.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
-#include "DataFormats/TrackingRecHitSoA/interface/SiPixelHitStatus.h"
+#include "DataFormats/TrackerRecHitSoA/interface/SiPixelRecHitStatus.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEFastParamsHost.h"
 #include "CondFormats/SiPixelTransient/interface/SiPixelGenError.h"
 
@@ -180,7 +180,7 @@ void PixelCPEFastParamsHost<TrackerTraits>::fillParamsForDevice() {
     float moduleOffsetX = -(0.5f * float(g.nRows) + TrackerTraits::bigPixXCorrection);
     auto const xoff = moduleOffsetX * buffer_->commonParams().thePitchX;
 
-    for (int ix = 0; ix < CPEFastParametrisation::kNumErrorBins; ++ix) {
+    for (int ix = 0; ix < CPEFastParametrisation::kNumErrorBinsAlpaka; ++ix) {
       auto x = xoff * (1.f - (0.5f + float(ix)) / 8.f);
       auto gvx = p.theOrigin.x() - x;
       auto gvy = p.theOrigin.y();
@@ -200,7 +200,7 @@ void PixelCPEFastParamsHost<TrackerTraits>::fillParamsForDevice() {
     float moduleOffsetY = 0.5f * float(g.nCols) + TrackerTraits::bigPixYCorrection;
     auto const yoff = -moduleOffsetY * buffer_->commonParams().thePitchY;
 
-    for (int ix = 0; ix < CPEFastParametrisation::kNumErrorBins; ++ix) {
+    for (int ix = 0; ix < CPEFastParametrisation::kNumErrorBinsAlpaka; ++ix) {
       auto y = yoff * (1.f - (0.5f + float(ix)) / 8.f);
       auto gvx = p.theOrigin.x() + 40.f * buffer_->commonParams().thePitchY;
       auto gvy = p.theOrigin.y() - y;
@@ -219,7 +219,7 @@ void PixelCPEFastParamsHost<TrackerTraits>::fillParamsForDevice() {
     auto aveCB = cp.cotbeta;
 
     // sample x by charge
-    int qbin = CPEFastParametrisation::kGenErrorQBins;  // low charge
+    int qbin = CPEFastParametrisation::kGenErrorQBinsAlpaka;  // low charge
     int k = 0;
     for (int qclus = 1000; qclus < 200000; qclus += 1000) {
       errorFromTemplates(p, cp, qclus);
@@ -237,17 +237,17 @@ void PixelCPEFastParamsHost<TrackerTraits>::fillParamsForDevice() {
 #endif  // EDM_ML_DEBUG
     }
 
-    assert(k <= CPEFastParametrisation::kGenErrorQBins);
+    assert(k <= CPEFastParametrisation::kGenErrorQBinsAlpaka);
 
     // fill the rest  (sometimes bin 4 is missing)
-    for (int kk = k; kk < CPEFastParametrisation::kGenErrorQBins; ++kk) {
+    for (int kk = k; kk < CPEFastParametrisation::kGenErrorQBinsAlpaka; ++kk) {
       g.xfact[kk] = g.xfact[k - 1];
       g.yfact[kk] = g.yfact[k - 1];
       g.minCh[kk] = g.minCh[k - 1];
     }
     auto detx = 1.f / g.xfact[0];
     auto dety = 1.f / g.yfact[0];
-    for (int kk = 0; kk < CPEFastParametrisation::kGenErrorQBins; ++kk) {
+    for (int kk = 0; kk < CPEFastParametrisation::kGenErrorQBinsAlpaka; ++kk) {
       g.xfact[kk] *= detx;
       g.yfact[kk] *= dety;
     }
@@ -255,9 +255,9 @@ void PixelCPEFastParamsHost<TrackerTraits>::fillParamsForDevice() {
     float ys = 8.f - 4.f;  // apperent bias of half pixel (see plot)
     // plot: https://indico.cern.ch/event/934821/contributions/3974619/attachments/2091853/3515041/DigilessReco.pdf page 25
     // sample yerr as function of "size"
-    for (int iy = 0; iy < CPEFastParametrisation::kNumErrorBins; ++iy) {
+    for (int iy = 0; iy < CPEFastParametrisation::kNumErrorBinsAlpaka; ++iy) {
       ys += 1.f;  // first bin 0 is for size 9  (and size is in fixed point 2^3)
-      if (CPEFastParametrisation::kNumErrorBins - 1 == iy)
+      if (CPEFastParametrisation::kNumErrorBinsAlpaka - 1 == iy)
         ys += 8.f;  // last bin for "overflow"
       // cp.cotalpha = ys*(buffer_->commonParams().thePitchX/(8.f*thickness));  //  use this to print sampling in "x"  (and comment the line below)
       cp.cotbeta = std::copysign(ys * (buffer_->commonParams().thePitchY / (8.f * thickness)), aveCB);

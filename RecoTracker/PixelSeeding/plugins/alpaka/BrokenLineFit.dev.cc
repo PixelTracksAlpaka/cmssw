@@ -7,7 +7,7 @@
 #include <alpaka/alpaka.hpp>
 #include <cstdint>
 
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsSoA.h"
+#include "DataFormats/TrackerRecHitSoA/interface/TrackerRecHitSoA.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
@@ -32,7 +32,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     ALPAKA_FN_ACC void operator()(TAcc const &acc,
                                   Tuples<TrackerTraits> const *__restrict__ foundNtuplets,
                                   TupleMultiplicity<TrackerTraits> const *__restrict__ tupleMultiplicity,
-                                  TrackingRecHitSoAConstView<TrackerTraits> hh,
+                                  TrackerRecHitSoAConstView<TrackerTraits> hh,
                                   pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const *__restrict__ cpeParams,
                                   typename TrackerTraits::tindex_type *__restrict__ ptkids,
                                   double *__restrict__ phits,
@@ -119,7 +119,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #ifdef YERR_FROM_DC
           auto const &dp = cpeParams->detParams(hh.detectorIndex(hit));
           auto status = hh[hit].chargeAndStatus().status;
-          int qbin = CPEFastParametrisation::kGenErrorQBins - 1 - status.qBin;
+          int qbin = CPEFastParametrisation::kGenErrorQBinsAlpaka - 1 - status.qBin;
           ALPAKA_ASSERT_OFFLOAD(qbin >= 0 && qbin < 5);
           bool nok = (status.isBigY | status.isOneY);
           // compute cotanbeta and use it to recompute error
@@ -128,7 +128,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           int bin =
               int(cb * (float(phase1PixelTopology::pixelThickess) / float(phase1PixelTopology::pixelPitchY)) * 8.f) - 4;
           int low_value = 0;
-          int high_value = CPEFastParametrisation::kNumErrorBins - 1;
+          int high_value = CPEFastParametrisation::kNumErrorBinsAlpaka - 1;
           // return estimated bin value truncated to [0, 15]
           bin = std::clamp(bin, low_value, high_value);
           float yerr = dp.sigmay[bin] * 1.e-4f;  // toCM
@@ -244,7 +244,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template <typename TrackerTraits>
   void HelixFit<TrackerTraits>::launchBrokenLineKernels(
-      const TrackingRecHitSoAConstView<TrackerTraits> &hv,
+      const TrackerRecHitSoAConstView<TrackerTraits> &hv,
       pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const *cpeParams,
       uint32_t hitsInFit,
       uint32_t maxNumberOfTuples,
