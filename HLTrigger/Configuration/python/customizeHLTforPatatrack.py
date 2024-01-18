@@ -415,7 +415,7 @@ def customizeHLTforAlpakaPixelRecoVertexing(process):
     # consumes
     #  - TkSoADevice
     # produces
-    #  - ZVertexDevice
+    #  - Vertex1DDevice
     process.hltPixelVertices = cms.EDProducer('PixelVertexProducerAlpakaPhase1@alpaka',
         oneKernel = cms.bool(True),
         useDensity = cms.bool(True),

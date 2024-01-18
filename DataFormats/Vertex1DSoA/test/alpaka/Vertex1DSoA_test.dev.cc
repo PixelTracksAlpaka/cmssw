@@ -1,18 +1,18 @@
-#include "DataFormats/VertexSoA/interface/alpaka/ZVertexSoACollection.h"
-#include "DataFormats/VertexSoA/interface/ZVertexDevice.h"
-#include "DataFormats/VertexSoA/interface/ZVertexHost.h"
+#include "DataFormats/Vertex1DSoA/interface/alpaka/Vertex1DSoACollection.h"
+#include "DataFormats/Vertex1DSoA/interface/Vertex1DDevice.h"
+#include "DataFormats/Vertex1DSoA/interface/Vertex1DHost.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"  // Check if this is really needed; code doesn't compile without it
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   using namespace alpaka;
   using namespace cms::alpakatools;
 
-  namespace testZVertexSoAT {
+  namespace testVertex1DSoAT {
 
     class TestFillKernel {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
-      ALPAKA_FN_ACC void operator()(TAcc const& acc, zVertex::ZVertexSoAView zvertex_view) const {
+      ALPAKA_FN_ACC void operator()(TAcc const& acc, vertex1d::Vertex1DSoAView zvertex_view) const {
         const int32_t i = alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u];
         if (i == 0) {
           zvertex_view.nvFinal() = 420;
@@ -33,7 +33,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     class TestVerifyKernel {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
-      ALPAKA_FN_ACC void operator()(TAcc const& acc, zVertex::ZVertexSoAView zvertex_view) const {
+      ALPAKA_FN_ACC void operator()(TAcc const& acc, vertex1d::Vertex1DSoAView zvertex_view) const {
         const int32_t i = alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u];
         if (i == 0) {
           ALPAKA_ASSERT_OFFLOAD(zvertex_view.nvFinal() == 420);
@@ -51,7 +51,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
     };
 
-    void runKernels(zVertex::ZVertexSoAView zvertex_view, Queue& queue) {
+    void runKernels(vertex1d::Vertex1DSoAView zvertex_view, Queue& queue) {
       uint32_t items = 64;
       uint32_t groups = divide_up_by(zvertex_view.metadata().size(), items);
       auto workDiv = make_workdiv<Acc1D>(groups, items);
@@ -59,6 +59,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       //alpaka::exec<Acc1D>(queue, workDiv, TestVerifyKernel{}, zvertex_view);
     }
 
-  }  // namespace testZVertexSoAT
+  }  // namespace testVertex1DSoAT
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

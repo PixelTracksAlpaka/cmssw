@@ -7,7 +7,7 @@
 <use name="Geometry/TrackerGeometryBuilder"/>
 <use name="DataFormats/TrackerRecHitSoA"/>
 <use name="DataFormats/PixelTrackSoA"/>
-<use name="DataFormats/VertexSoA"/>
+<use name="DataFormats/Vertex1DSoA"/>
 <use name="DataFormats/BeamSpot"/>
 <use name="CUDADataFormats/TrackingRecHit"/>
 <use name="CUDADataFormats/Track"/>

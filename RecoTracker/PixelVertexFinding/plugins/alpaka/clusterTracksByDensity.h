@@ -5,7 +5,7 @@
 #include <cmath>
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
-#include "DataFormats/VertexSoA/interface/ZVertexSoA.h"
+#include "DataFormats/Vertex1DSoA/interface/Vertex1DSoA.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 #include "../PixelVertexWorkSpaceLayout.h"
@@ -13,7 +13,7 @@
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace vertexFinder {
-    using VtxSoAView = ::zVertex::ZVertexSoAView;
+    using VtxSoAView = ::vertex1d::Vertex1DSoAView;
     using WsSoAView = ::vertexFinder::workSpace::PixelVertexWorkSpaceSoAView;
     // this algo does not really scale as it works in a single block...
     // enough for <10K tracks we have
@@ -74,7 +74,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       // fill hist  (bin shall be wider than "eps")
       for (auto i : cms::alpakatools::elements_with_stride(acc, nt)) {
-        ALPAKA_ASSERT_OFFLOAD(i < ::zVertex::MAXTRACKS);
+        ALPAKA_ASSERT_OFFLOAD(i < ::vertex1d::MAXTRACKS);
         int iz = int(zt[i] * 10.);  // valid if eps<=0.1
         // iz = std::clamp(iz, INT8_MIN, INT8_MAX);  // sorry c++17 only
         iz = std::min(std::max(iz, INT8_MIN), INT8_MAX);
@@ -205,7 +205,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
       alpaka::syncBlockThreads(acc);
 
-      ALPAKA_ASSERT_OFFLOAD(foundClusters < ::zVertex::MAXVTX);
+      ALPAKA_ASSERT_OFFLOAD(foundClusters < ::vertex1d::MAXVTX);
 
       // propagate the negative id to all the tracks in the cluster.
       for (auto i : cms::alpakatools::elements_with_stride(acc, nt)) {

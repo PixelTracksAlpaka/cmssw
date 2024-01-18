@@ -1,10 +1,10 @@
-#ifndef DataFormats_Vertex_ZVertexSoA_h
-#define DataFormats_Vertex_ZVertexSoA_h
+#ifndef DataFormats_Vertex1DSoA_interface_Vertex1DSoA_h
+#define DataFormats_Vertex1DSoA_interface_Vertex1DSoA_h
 
 #include <Eigen/Core>
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 
-GENERATE_SOA_LAYOUT(ZVertexLayout,
+GENERATE_SOA_LAYOUT(Vertex1DLayout,
                     SOA_COLUMN(int16_t, idv),
                     SOA_COLUMN(float, zv),
                     SOA_COLUMN(float, wv),
@@ -14,14 +14,14 @@ GENERATE_SOA_LAYOUT(ZVertexLayout,
                     SOA_COLUMN(uint16_t, sortInd),
                     SOA_SCALAR(uint32_t, nvFinal))
 
-// Previous ZVertexSoA class methods.
-// They operate on View and ConstView of the ZVertexSoA.
-namespace zVertex {
+// Previous Vertex1DSoA class methods.
+// They operate on View and ConstView of the Vertex1DSoA.
+namespace vertex1d {
   // Common types for both Host and Device code
-  using ZVertexSoA = ZVertexLayout<>;
-  using ZVertexSoAView = ZVertexLayout<>::View;
-  using ZVertexSoAConstView = ZVertexLayout<>::ConstView;
+  using Vertex1DSoA = Vertex1DLayout<>;
+  using Vertex1DSoAView = Vertex1DLayout<>::View;
+  using Vertex1DSoAConstView = Vertex1DLayout<>::ConstView;
 
-}  // namespace zVertex
+}  // namespace vertex1d
 
-#endif
+#endif  // DataFormats_Vertex1DSoA_interface_Vertex1DSoA_h

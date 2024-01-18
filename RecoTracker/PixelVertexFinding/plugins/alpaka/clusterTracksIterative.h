@@ -5,8 +5,8 @@
 #include <cmath>
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
-#include "DataFormats/VertexSoA/interface/alpaka/ZVertexUtilities.h"
-#include "DataFormats/VertexSoA/interface/ZVertexDefinitions.h"
+#include "DataFormats/Vertex1DSoA/interface/alpaka/Vertex1DUtilities.h"
+#include "DataFormats/Vertex1DSoA/interface/Vertex1DDefinitions.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 #include "RecoTracker/PixelVertexFinding/plugins/PixelVertexWorkSpaceLayout.h"
@@ -69,7 +69,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         // fill hist  (bin shall be wider than "eps")
         for (auto i : cms::alpakatools::elements_with_stride(acc, nt)) {
-          ALPAKA_ASSERT_OFFLOAD(i < ::zVertex::MAXTRACKS);
+          ALPAKA_ASSERT_OFFLOAD(i < ::vertex1d::MAXTRACKS);
           int iz = int(zt[i] * 10.);  // valid if eps<=0.1
           iz = std::clamp(iz, INT8_MIN, INT8_MAX);
           izt[i] = iz - INT8_MIN;
@@ -198,7 +198,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         }
         alpaka::syncBlockThreads(acc);
 
-        ALPAKA_ASSERT_OFFLOAD(foundClusters < ::zVertex::MAXVTX);
+        ALPAKA_ASSERT_OFFLOAD(foundClusters < ::vertex1d::MAXVTX);
 
         // propagate the negative id to all the tracks in the cluster.
         for (auto i : cms::alpakatools::elements_with_stride(acc, nt)) {

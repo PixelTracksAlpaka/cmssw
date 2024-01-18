@@ -1,5 +1,5 @@
 /**
-   Simple test for the zVertex::ZVertexSoA data structure
+   Simple test for the vertex1d::Vertex1DSoA data structure
    which inherits from Portable{Host}Collection.
 
    Creates an instance of the class (automatically allocates
@@ -15,9 +15,9 @@
 
 #include <alpaka/alpaka.hpp>
 #include <unistd.h>
-#include "DataFormats/VertexSoA/interface/alpaka/ZVertexSoACollection.h"
-#include "DataFormats/VertexSoA/interface/ZVertexDevice.h"
-#include "DataFormats/VertexSoA/interface/ZVertexHost.h"
+#include "DataFormats/Vertex1DSoA/interface/alpaka/Vertex1DSoACollection.h"
+#include "DataFormats/Vertex1DSoA/interface/Vertex1DDevice.h"
+#include "DataFormats/Vertex1DSoA/interface/Vertex1DHost.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/devices.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/host.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
@@ -28,8 +28,8 @@ using namespace std;
 using namespace ALPAKA_ACCELERATOR_NAMESPACE;
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
-  namespace testZVertexSoAT {
-    void runKernels(ZVertexSoAView zvertex_view, Queue& queue);
+  namespace testVertex1DSoAT {
+    void runKernels(Vertex1DSoAView zvertex_view, Queue& queue);
   }
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
@@ -42,12 +42,12 @@ int main() {
   {
     // Instantiate vertices on device. PortableCollection allocates
     // SoA on device automatically.
-    ZVertexCollection zvertex_d(queue);
-    testZVertexSoAT::runKernels(zvertex_d.view(), queue);
+    Vertex1DCollection zvertex_d(queue);
+    testVertex1DSoAT::runKernels(zvertex_d.view(), queue);
 
     // Instantate vertices on host. This is where the data will be
     // copied to from device.
-    ZVertexHost zvertex_h(queue);
+    Vertex1DHost zvertex_h(queue);
     std::cout << zvertex_h.view().metadata().size() << std::endl;
     alpaka::memcpy(queue, zvertex_h.buffer(), zvertex_d.const_buffer());
     alpaka::wait(queue);

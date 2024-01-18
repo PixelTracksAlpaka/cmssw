@@ -1,4 +1,4 @@
-<bin file="alpaka/ZVertexSoA_test.cc alpaka/ZVertexSoA_test.dev.cc" name="ZVertexSoA_test">
+<bin file="alpaka/Vertex1DSoA_test.cc alpaka/Vertex1DSoA_test.dev.cc" name="Vertex1DSoA_test">
   <use name="alpaka"/>
   <use name="eigen"/>
   <use name="HeterogeneousCore/AlpakaInterface"/>

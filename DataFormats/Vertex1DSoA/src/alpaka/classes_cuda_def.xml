@@ -1,0 +1,6 @@
+<lcgdict>
+  <class name="alpaka_cuda_async::PortableCollection<vertex1d::Vertex1DSoA>" persistent="false"/>
+  <class name="alpaka_cuda_async::Vertex1DCollection" persistent="false"/>
+  <class name="edm::DeviceProduct<alpaka_cuda_async::Vertex1DCollection>" persistent="false"/>
+  <class name="edm::Wrapper<edm::DeviceProduct<alpaka_cuda_async::Vertex1DCollection>>" persistent="false"/>
+</lcgdict>

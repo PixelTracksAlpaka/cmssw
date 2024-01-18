@@ -20,8 +20,8 @@
 
 #include "DataFormats/PixelTrackSoA/interface/alpaka/PixelTrackSoACollection.h"
 #include "DataFormats/PixelTrackSoA/interface/PixelTrackDevice.h"
-#include "DataFormats/VertexSoA/interface/alpaka/ZVertexSoACollection.h"
-#include "DataFormats/VertexSoA/interface/ZVertexDevice.h"
+#include "DataFormats/Vertex1DSoA/interface/alpaka/Vertex1DSoACollection.h"
+#include "DataFormats/Vertex1DSoA/interface/Vertex1DDevice.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/MakerMacros.h"
 
 #include "vertexFinder.h"
@@ -50,7 +50,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     void produce(edm::StreamID streamID, device::Event& iEvent, const device::EventSetup& iSetup) const override;
 
     device::EDGetToken<TkSoADevice> tokenDeviceTrack_;
-    device::EDPutToken<ZVertexCollection> tokenDeviceVertex_;
+    device::EDPutToken<Vertex1DCollection> tokenDeviceVertex_;
 
     const Algo Algo_;
 

@@ -3,8 +3,8 @@
 #include <alpaka/alpaka.hpp>
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
-#include "DataFormats/VertexSoA/interface/alpaka/ZVertexUtilities.h"
-#include "DataFormats/VertexSoA/interface/ZVertexDefinitions.h"
+#include "DataFormats/Vertex1DSoA/interface/alpaka/Vertex1DUtilities.h"
+#include "DataFormats/Vertex1DSoA/interface/Vertex1DDefinitions.h"
 #include "../PixelVertexWorkSpaceLayout.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
@@ -23,7 +23,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   };
   namespace vertexFinder {
     namespace workSpace {
-      using PixelVertexWorkSpaceSoADevice = PixelVertexWorkSpaceSoADevice<::zVertex::MAXTRACKS>;
+      using PixelVertexWorkSpaceSoADevice = PixelVertexWorkSpaceSoADevice<::vertex1d::MAXTRACKS>;
     }  // namespace workSpace
   }    // namespace vertexFinder
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

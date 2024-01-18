@@ -1,4 +1,4 @@
-#include "DataFormats/VertexSoA/interface/ZVertexHost.h"
+#include "DataFormats/Vertex1DSoA/interface/Vertex1DHost.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/Common/interface/OrphanHandle.h"
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -35,7 +35,7 @@ public:
 private:
   void produce(edm::StreamID streamID, edm::Event &iEvent, const edm::EventSetup &iSetup) const override;
 
-  edm::EDGetTokenT<ZVertexHost> tokenVertex_;
+  edm::EDGetTokenT<Vertex1DHost> tokenVertex_;
   edm::EDGetTokenT<reco::BeamSpot> tokenBeamSpot_;
   edm::EDGetTokenT<reco::TrackCollection> tokenTracks_;
   edm::EDGetTokenT<IndToEdm> tokenIndToEdm_;

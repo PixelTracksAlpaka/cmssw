@@ -5,11 +5,11 @@
 #include <cstdint>
 #include <alpaka/alpaka.hpp>
 #include "DataFormats/PixelTrackSoA/interface/alpaka/PixelTrackUtilities.h"
-#include "DataFormats/VertexSoA/interface/ZVertexHost.h"
-#include "DataFormats/VertexSoA/interface/ZVertexSoA.h"
-#include "DataFormats/VertexSoA/interface/alpaka/ZVertexSoACollection.h"
-#include "DataFormats/VertexSoA/interface/ZVertexDevice.h"
-#include "DataFormats/VertexSoA/interface/alpaka/ZVertexUtilities.h"
+#include "DataFormats/Vertex1DSoA/interface/Vertex1DHost.h"
+#include "DataFormats/Vertex1DSoA/interface/Vertex1DSoA.h"
+#include "DataFormats/Vertex1DSoA/interface/alpaka/Vertex1DSoACollection.h"
+#include "DataFormats/Vertex1DSoA/interface/Vertex1DDevice.h"
+#include "DataFormats/Vertex1DSoA/interface/alpaka/Vertex1DUtilities.h"
 #include "../PixelVertexWorkSpaceLayout.h"
 #include "PixelVertexWorkSpaceUtilitiesAlpaka.h"
 #include "PixelVertexWorkSpaceSoADeviceAlpaka.h"
@@ -18,7 +18,7 @@
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace vertexFinder {
     using namespace cms::alpakatools;
-    using VtxSoAView = ::zVertex::ZVertexSoAView;
+    using VtxSoAView = ::vertex1d::Vertex1DSoAView;
     using WsSoAView = ::vertexFinder::workSpace::PixelVertexWorkSpaceSoAView;
 
     class init {
@@ -57,7 +57,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       ~Producer() = default;
 
-      ZVertexCollection makeAsync(Queue &queue, const TkSoAConstView &tracks_view, float ptMin, float ptMax) const;
+      Vertex1DCollection makeAsync(Queue &queue, const TkSoAConstView &tracks_view, float ptMin, float ptMax) const;
 
     private:
       const bool oneKernel_;     // run everything (cluster,fit,split,sort) in one kernel. Uses only density clusterizer

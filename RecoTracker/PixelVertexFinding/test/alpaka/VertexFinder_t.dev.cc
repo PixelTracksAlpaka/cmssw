@@ -37,7 +37,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     explicit ClusterGenerator(float nvert, float ntrack)
         : rgen(-13., 13), errgen(0.005, 0.025), clusGen(nvert), trackGen(ntrack), gauss(0., 1.), ptGen(1.) {}
 
-    void operator()(WSSoAHost& pwsh, ZVertexHost& vtxh) {
+    void operator()(WSSoAHost& pwsh, Vertex1DHost& vtxh) {
       int nclus = clusGen(reng);
       for (int zint = 0; zint < vtxh.view().metadata().size(); ++zint) {
         vtxh.view().zv()[zint] = 3.5f * gauss(reng);
@@ -119,8 +119,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     void runKernels(Queue& queue) {
       vertexFinder::workSpace::PixelVertexWorkSpaceSoADevice ws_d(queue);
       ::vertexFinder::workSpace::PixelVertexWorkSpaceSoAHost ws_h(queue);
-      ZVertexHost vertices_h(queue);
-      ZVertexCollection vertices_d(queue);
+      Vertex1DHost vertices_h(queue);
+      Vertex1DCollection vertices_d(queue);
 
       float eps = 0.1f;
       std::array<float, 3> par{{eps, 0.01f, 9.0f}};

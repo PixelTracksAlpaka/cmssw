@@ -15,14 +15,14 @@
 #include "FWCore/Utilities/interface/RunningAverage.h"
 #include "RecoTracker/TkMSParametrization/interface/PixelRecoUtilities.h"
 
-#include "DataFormats/VertexSoA/interface/ZVertexHost.h"
+#include "DataFormats/Vertex1DSoA/interface/Vertex1DHost.h"
 #include "DataFormats/PixelTrackSoA/interface/PixelTrackHost.h"
 
 template <typename TrackerTraits>
 class PixelTrackDumpAlpakaT : public edm::global::EDAnalyzer<> {
 public:
   using TkSoAHost = PixelTrackHost<TrackerTraits>;
-  using VertexSoAHost = ZVertexHost;
+  using VertexSoAHost = Vertex1DHost;
 
   explicit PixelTrackDumpAlpakaT(const edm::ParameterSet& iConfig);
   ~PixelTrackDumpAlpakaT() override = default;

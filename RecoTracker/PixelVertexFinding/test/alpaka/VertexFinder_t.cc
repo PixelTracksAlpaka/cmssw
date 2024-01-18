@@ -4,10 +4,10 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
-#include "DataFormats/VertexSoA/interface/alpaka/ZVertexUtilities.h"
-#include "DataFormats/VertexSoA/interface/ZVertexHost.h"
-#include "DataFormats/VertexSoA/interface/alpaka/ZVertexSoACollection.h"
-#include "DataFormats/VertexSoA/interface/ZVertexDevice.h"
+#include "DataFormats/Vertex1DSoA/interface/alpaka/Vertex1DUtilities.h"
+#include "DataFormats/Vertex1DSoA/interface/Vertex1DHost.h"
+#include "DataFormats/Vertex1DSoA/interface/alpaka/Vertex1DSoACollection.h"
+#include "DataFormats/Vertex1DSoA/interface/Vertex1DDevice.h"
 
 #include "RecoTracker/PixelVertexFinding/plugins/PixelVertexWorkSpaceLayout.h"
 #include "RecoTracker/PixelVertexFinding/plugins/PixelVertexWorkSpaceSoAHostAlpaka.h"

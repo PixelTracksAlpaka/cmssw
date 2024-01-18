@@ -50,7 +50,7 @@
 
 #include "DataFormats/PixelTrackSoA/interface/alpaka/PixelTrackUtilities.h"
 #include "DataFormats/PixelTrackSoA/interface/PixelTrackHost.h"
-#include "DataFormats/VertexSoA/interface/ZVertexHost.h"
+#include "DataFormats/Vertex1DSoA/interface/Vertex1DHost.h"
 
 namespace L2TauTagNNv1 {
   constexpr int nCellEta = 5;
@@ -182,10 +182,10 @@ private:
   void fillPatatracks(tensorflow::Tensor& cellGridMatrix,
                       const std::vector<l1t::TauRef>& allTaus,
                       const PixelTrackHost& patatracks_tsoa,
-                      const ZVertexHost& patavtx_soa,
+                      const Vertex1DHost& patavtx_soa,
                       const reco::BeamSpot& beamspot,
                       const MagneticField* magfi);
-  void selectGoodTracksAndVertices(const ZVertexHost& patavtx_soa,
+  void selectGoodTracksAndVertices(const Vertex1DHost& patavtx_soa,
                                    const PixelTrackHost& patatracks_tsoa,
                                    std::vector<int>& trkGood,
                                    std::vector<int>& vtxGood);
@@ -209,7 +209,7 @@ private:
   const edm::EDGetTokenT<EcalRecHitCollection> eeToken_;
   const edm::ESGetToken<CaloGeometry, CaloGeometryRecord> geometryToken_;
   const edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> bFieldToken_;
-  const edm::EDGetTokenT<ZVertexHost> pataVerticesToken_;
+  const edm::EDGetTokenT<Vertex1DHost> pataVerticesToken_;
   const edm::EDGetTokenT<PixelTrackHost> pataTracksToken_;
   const edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;
   const unsigned int maxVtx_;
@@ -573,7 +573,7 @@ void L2TauNNProducerAlpaka::fillCaloRecHits(tensorflow::Tensor& cellGridMatrix,
   }
 }
 
-void L2TauNNProducerAlpaka::selectGoodTracksAndVertices(const ZVertexHost& patavtx_soa,
+void L2TauNNProducerAlpaka::selectGoodTracksAndVertices(const Vertex1DHost& patavtx_soa,
                                                         const PixelTrackHost& patatracks_tsoa,
                                                         std::vector<int>& trkGood,
                                                         std::vector<int>& vtxGood) {
@@ -655,7 +655,7 @@ std::pair<float, float> L2TauNNProducerAlpaka::impactParameter(int it,
 void L2TauNNProducerAlpaka::fillPatatracks(tensorflow::Tensor& cellGridMatrix,
                                            const std::vector<l1t::TauRef>& allTaus,
                                            const PixelTrackHost& patatracks_tsoa,
-                                           const ZVertexHost& patavtx_soa,
+                                           const Vertex1DHost& patavtx_soa,
                                            const reco::BeamSpot& beamspot,
                                            const MagneticField* magfi) {
   using NNInputs = L2TauTagNNv1::NNInputs;

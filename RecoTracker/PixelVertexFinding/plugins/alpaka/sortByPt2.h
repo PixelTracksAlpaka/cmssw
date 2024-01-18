@@ -9,14 +9,14 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/radixSort.h"
-#include "DataFormats/VertexSoA/interface/ZVertexSoA.h"
+#include "DataFormats/Vertex1DSoA/interface/Vertex1DSoA.h"
 #include "RecoTracker/PixelVertexFinding/plugins/PixelVertexWorkSpaceLayout.h"
 
 #include "vertexFinder.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace vertexFinder {
-    using VtxSoAView = ::zVertex::ZVertexSoAView;
+    using VtxSoAView = ::vertex1d::Vertex1DSoAView;
     using WsSoAView = ::vertexFinder::workSpace::PixelVertexWorkSpaceSoAView;
 
     template <typename TAcc>

@@ -1,0 +1,6 @@
+<lcgdict>
+  <class name="vertex1d::Vertex1DSoA"/>
+  <class name="PortableHostCollection<Vertex1DLayout<>>"/>
+  <class name="Vertex1DHost"/>
+  <class name="edm::Wrapper<Vertex1DHost>" splitLevel="0"/>
+</lcgdict>

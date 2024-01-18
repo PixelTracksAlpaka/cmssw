@@ -1,6 +1,6 @@
 #include <alpaka/alpaka.hpp>
 #include "DataFormats/PixelTrackSoA/interface/alpaka/PixelTrackUtilities.h"
-#include "DataFormats/VertexSoA/interface/alpaka/ZVertexUtilities.h"
+#include "DataFormats/Vertex1DSoA/interface/alpaka/Vertex1DUtilities.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
 #include "PixelVertexWorkSpaceUtilitiesAlpaka.h"
@@ -125,14 +125,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #endif
 
     template <typename TrackerTraits>
-    ZVertexCollection Producer<TrackerTraits>::makeAsync(Queue& queue,
+    Vertex1DCollection Producer<TrackerTraits>::makeAsync(Queue& queue,
                                                          const PixelTrackSoAConstView<TrackerTraits>& tracks_view,
                                                          float ptMin,
                                                          float ptMax) const {
 #ifdef PIXVERTEX_DEBUG_PRODUCE
       std::cout << "producing Vertices on GPU" << std::endl;
 #endif  // PIXVERTEX_DEBUG_PRODUCE
-      ZVertexCollection vertices(queue);
+      Vertex1DCollection vertices(queue);
 
       auto soa = vertices.view();
 
