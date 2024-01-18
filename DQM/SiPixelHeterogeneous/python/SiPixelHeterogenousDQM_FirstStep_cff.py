@@ -52,10 +52,13 @@ from DQM.SiPixelPhase1Common.SiPixelPhase1RawData_cfi import *
 from DQM.SiPixelHeterogeneous.siPixelPhase1CompareRecHitsSoAAlpaka_cfi import *
 from DQM.SiPixelHeterogeneous.siPixelPhase2CompareRecHitsSoAAlpaka_cfi import *
 from DQM.SiPixelHeterogeneous.siPixelHIonPhase1CompareRecHitsSoAAlpaka_cfi import *
+from DQM.SiPixelHeterogeneous.siPixelPhase1CompareRecHitsSoAAlpakavsCUDA_cfi import *
 from DQM.SiPixelHeterogeneous.siPixelPhase1CompareTrackSoAAlpaka_cfi import *
 from DQM.SiPixelHeterogeneous.siPixelPhase2CompareTrackSoAAlpaka_cfi import *
 from DQM.SiPixelHeterogeneous.siPixelHIonPhase1CompareTrackSoAAlpaka_cfi import *
+from DQM.SiPixelHeterogeneous.siPixelPhase1CompareTrackSoAAlpakavsCUDA_cfi import *
 from DQM.SiPixelHeterogeneous.siPixelCompareVertexSoAAlpaka_cfi import *
+from DQM.SiPixelHeterogeneous.siPixelCompareVertexSoAAlpakavsCUDA_cfi import *
 
 # digi errors
 SiPixelPhase1RawDataConfForCPU = copy.deepcopy(SiPixelPhase1RawDataConf)
@@ -186,6 +189,42 @@ siPixelVertexSoAMonitorDevice = siPixelMonitorVertexSoAAlpaka.clone(
     topFolderName = cms.string('SiPixelHeterogeneous/PixelVertexDevice')
 )
 
+siPixelPhase1CompareRecHitsSoAAlpakavsCUDACPU = siPixelPhase1CompareRecHitsSoAAlpakavsCUDA.clone(
+    topFolderName = cms.string('SiPixelHeterogeneous/PixelRecHitsAlpakavsCUDACPU'),
+    pixelHitsSrcAlpaka = cms.InputTag("siPixelRecHitsPreSplittingAlpakaSerial"),
+    pixelHitsSrcCUDA = cms.InputTag("siPixelRecHitsPreSplittingSoA@cpu"),
+)
+
+siPixelPhase1CompareRecHitsSoAAlpakavsCUDAGPU = siPixelPhase1CompareRecHitsSoAAlpakavsCUDA.clone(
+    topFolderName = cms.string('SiPixelHeterogeneous/PixelRecHitsAlpakavsCUDAGPU'),
+    pixelHitsSrcAlpaka = cms.InputTag("siPixelRecHitsPreSplittingAlpaka"),
+    pixelHitsSrcCUDA = cms.InputTag("siPixelRecHitsPreSplittingSoA@cuda"),
+)
+
+siPixelPhase1CompareTrackSoAAlpakavsCUDACPU = siPixelPhase1CompareTrackSoAAlpakavsCUDA.clone(
+    pixelTrackSrcAlpaka = cms.InputTag("pixelTracksAlpakaSerial"),
+    pixelTrackSrcCUDA = cms.InputTag("pixelTracksSoA@cpu"),
+    topFolderName = cms.string('SiPixelHeterogeneous/PixelTrackCompareAlpakavsCUDACPU'),
+)
+
+siPixelPhase1CompareTrackSoAAlpakavsCUDAGPU = siPixelPhase1CompareTrackSoAAlpakavsCUDA.clone(
+    pixelTrackSrcAlpaka = cms.InputTag("pixelTracksAlpaka"),
+    pixelTrackSrcCUDA = cms.InputTag("pixelTracksSoA@cuda"),
+    topFolderName = cms.string('SiPixelHeterogeneous/PixelTrackCompareAlpakavsCUDAGPU'),
+)
+
+siPixelCompareVertexSoAAlpakavsCUDACPU = siPixelCompareVertexSoAAlpakavsCUDA.clone(
+    pixelVertexSrcAlpaka = cms.InputTag("pixelVerticesAlpakaSerial"),
+    pixelVertexSrcCUDA = cms.InputTag("pixelVerticesSoA@cpu"),
+    topFolderName = cms.string('SiPixelHeterogeneous/PixelVertexCompareAlpakavsCUDACPU')
+)
+
+siPixelCompareVertexSoAAlpakavsCUDAGPU = siPixelCompareVertexSoAAlpakavsCUDA.clone(
+    pixelVertexSrcAlpaka = cms.InputTag("pixelVerticesAlpaka"),
+    pixelVertexSrcCUDA = cms.InputTag("pixelVerticesSoA@cuda"),
+    topFolderName = cms.string('SiPixelHeterogeneous/PixelVertexCompareAlpakavsCUDAGPU')
+)
+
 # Run-3 sequence
 monitorpixelSoACompareSource = cms.Sequence(siPixelPhase1MonitorRawDataACPU *
                                             siPixelPhase1MonitorRawDataAGPU *
@@ -233,6 +272,24 @@ _monitorpixelSoACompareSourceHIonPhase1 =  cms.Sequence(siPixelHIonPhase1Monitor
                                               siPixelMonitorVertexSoAGPU *
                                               siPixelCompareVertexSoA)
 
+# Alpaka vs CUDA
+monitorpixelSoACompareSourceAlpakaCUDA = cms.Sequence(
+                                            siPixelRecHitsSoAMonitorSerial *
+                                            siPixelRecHitsSoAMonitorDevice *
+                                            siPixelPhase1CompareRecHitsSoAAlpaka *
+                                            siPixelTrackSoAMonitorSerial *
+                                            siPixelTrackSoAMonitorDevice *
+                                            siPixelPhase1CompareTrackSoAAlpaka *
+                                            siPixelVertexSoAMonitorSerial *
+                                            siPixelVertexSoAMonitorDevice *
+                                            siPixelCompareVertexSoAAlpaka *
+                                            siPixelPhase1CompareRecHitsSoAAlpakavsCUDACPU *
+                                            siPixelPhase1CompareRecHitsSoAAlpakavsCUDAGPU *
+                                            siPixelPhase1CompareTrackSoAAlpakavsCUDACPU *
+                                            siPixelPhase1CompareTrackSoAAlpakavsCUDAGPU *
+                                            siPixelCompareVertexSoAAlpakavsCUDACPU *
+                                            siPixelCompareVertexSoAAlpakavsCUDAGPU)
+
 phase2_tracker.toReplaceWith(monitorpixelSoACompareSource,_monitorpixelSoACompareSource)
 
 from Configuration.ProcessModifiers.gpuValidationPixel_cff import gpuValidationPixel
@@ -240,3 +297,6 @@ gpuValidationPixel.toReplaceWith(monitorpixelSoASource, monitorpixelSoACompareSo
 
 from Configuration.ProcessModifiers.alpakaValidationPixel_cff import alpakaValidationPixel
 (alpakaValidationPixel & ~gpuValidationPixel).toReplaceWith(monitorpixelSoASource, monitorpixelSoACompareSourceAlpaka)
+
+from Configuration.ProcessModifiers.alpakaCUDAValidationPixel_cff import alpakaCUDAValidationPixel
+(alpakaCUDAValidationPixel & ~gpuValidationPixel).toReplaceWith(monitorpixelSoASource, monitorpixelSoACompareSourceAlpakaCUDA)

@@ -134,6 +134,26 @@ alpakaValidationPixel.toReplaceWith(pixelVerticesTask, cms.Task(
                         pixelVerticesAlpakaSerial))
 
 
+from Configuration.ProcessModifiers.alpakaCUDAValidationPixel_cff import alpakaCUDAValidationPixel
+
+alpakaCUDAValidationPixel.toModify(pixelVerticesSoA,
+    cuda = _pixelVerticesSoA.clone(
+        src = cms.InputTag("pixelVerticesCUDA")
+    )
+)
+
+alpakaCUDAValidationPixel.toModify(pixelVerticesSoA.cpu,
+    pixelTrackSrc = "pixelTracksSoA@cpu"
+)
+
+alpakaCUDAValidationPixel.toReplaceWith(pixelVerticesTask, cms.Task(
+                        pixelVertices,
+                        pixelVerticesAlpaka,
+                        pixelVerticesAlpakaSerial,
+                        pixelVerticesCUDA,
+                        pixelVerticesSoA))
+
+
 # Tasks and Sequences
 recopixelvertexingTask = cms.Task(
     pixelTracksTask,

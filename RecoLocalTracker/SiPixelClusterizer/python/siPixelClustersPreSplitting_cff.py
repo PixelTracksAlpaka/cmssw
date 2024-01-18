@@ -193,3 +193,44 @@ alpakaValidationPixel.toReplaceWith(siPixelClustersPreSplittingTask, cms.Task(
                         # SoA serial counterpart
                         siPixelClustersPreSplittingAlpakaSerial))
                         
+### Alpaka vs CUDA validation
+
+from Configuration.ProcessModifiers.alpakaCUDAValidationPixel_cff import alpakaCUDAValidationPixel
+from HeterogeneousCore.CUDACore.SwitchProducerCUDA import SwitchProducerCUDA
+
+siPixelClustersPreSplittingCUDAInp = SwitchProducerCUDA(
+    cpu = cms.EDProducer("SiPixelClusterProducer",
+        ChannelThreshold = cms.int32(10),
+        ClusterMode = cms.string('PixelThresholdClusterizer'),
+        ClusterThreshold = cms.int32(4000),
+        ClusterThreshold_L1 = cms.int32(4000),
+        DropDuplicates = cms.bool(True),
+        ElectronPerADCGain = cms.double(135),
+        MissCalibrate = cms.bool(True),
+        Phase2Calibration = cms.bool(False),
+        Phase2DigiBaseline = cms.double(1200),
+        Phase2KinkADC = cms.int32(8),
+        Phase2ReadoutMode = cms.int32(-1),
+        SeedThreshold = cms.int32(1000),
+        SplitClusters = cms.bool(False),
+        VCaltoElectronGain = cms.int32(1),
+        VCaltoElectronGain_L1 = cms.int32(1),
+        VCaltoElectronOffset = cms.int32(0),
+        VCaltoElectronOffset_L1 = cms.int32(0),
+        maxNumberOfClusters = cms.int32(-1),
+        mightGet = cms.optional.untracked.vstring,
+        payloadType = cms.string('HLT'),
+        src = cms.InputTag("siPixelDigis")
+    )
+)
+
+alpakaCUDAValidationPixel.toReplaceWith(siPixelClustersPreSplittingTask, cms.Task(
+                        siPixelClustersPreSplitting,
+                        siPixelClustersPreSplittingCUDAInp,
+                        siPixelClustersPreSplittingCUDA,
+                        siPixelClustersPreSplittingAlpaka,
+                        siPixelClustersPreSplittingAlpakaSerial,
+                        siPixelDigisClustersPreSplitting,
+                        siPixelGainCalibrationForHLTGPU,
+                        siPixelROCsStatusAndMappingWrapperESProducer))
+

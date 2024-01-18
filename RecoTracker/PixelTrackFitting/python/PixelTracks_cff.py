@@ -250,3 +250,18 @@ alpakaValidationPixel.toReplaceWith(pixelTracksTask, cms.Task(
                         pixelTracksAlpakaSerial))
 
 
+from Configuration.ProcessModifiers.alpakaCUDAValidationPixel_cff import alpakaCUDAValidationPixel
+
+alpakaCUDAValidationPixel.toModify(pixelTracksSoA,
+    # transfer the pixel tracks in SoA format to the host
+    cuda = _pixelTracksSoA.clone()
+)
+alpakaCUDAValidationPixel.toModify(pixelTracksSoA.cpu, pixelRecHitSrc = "siPixelRecHitsPreSplittingSoA@cpu")
+
+alpakaCUDAValidationPixel.toReplaceWith(pixelTracksTask, cms.Task(
+                        pixelTracks,
+                        pixelTracksAlpaka,
+                        pixelTracksAlpakaSerial,
+                        pixelTracksCUDA,
+                        pixelTracksSoA))
+

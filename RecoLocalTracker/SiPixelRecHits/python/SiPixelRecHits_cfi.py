@@ -178,3 +178,18 @@ alpakaValidationPixel.toReplaceWith(siPixelRecHitsPreSplittingTask, cms.Task(
                         siPixelRecHitsPreSplittingAlpakaSerial))
 
 
+from Configuration.ProcessModifiers.alpakaCUDAValidationPixel_cff import alpakaCUDAValidationPixel
+
+alpakaCUDAValidationPixel.toModify(siPixelRecHitsPreSplittingSoA, cuda = _siPixelRecHitSoAFromCUDA.clone())
+
+alpakaCUDAValidationPixel.toModify(siPixelRecHitsPreSplittingCPU, src = cms.InputTag("siPixelClustersPreSplittingCUDAInp@cpu"))
+
+alpakaCUDAValidationPixel.toReplaceWith(siPixelRecHitsPreSplittingTask, cms.Task(
+                        siPixelRecHitsPreSplitting,
+                        siPixelRecHitsPreSplittingAlpaka,
+                        siPixelRecHitsPreSplittingAlpakaSerial,
+                        siPixelRecHitsPreSplittingCPU,
+                        siPixelRecHitsPreSplittingCUDA,
+                        siPixelRecHitsPreSplittingSoA))
+
+
