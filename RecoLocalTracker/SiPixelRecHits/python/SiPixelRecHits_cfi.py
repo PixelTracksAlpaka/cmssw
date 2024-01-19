@@ -181,15 +181,16 @@ alpakaValidationPixel.toReplaceWith(siPixelRecHitsPreSplittingTask, cms.Task(
 from Configuration.ProcessModifiers.alpakaCUDAValidationPixel_cff import alpakaCUDAValidationPixel
 
 alpakaCUDAValidationPixel.toModify(siPixelRecHitsPreSplittingSoA, cuda = _siPixelRecHitSoAFromCUDA.clone())
-
-alpakaCUDAValidationPixel.toModify(siPixelRecHitsPreSplittingCPU, src = cms.InputTag("siPixelClustersPreSplittingCUDAInp@cpu"))
+alpakaCUDAValidationPixel.toModify(siPixelRecHitsPreSplittingCPU, src = cms.InputTag("siPixelClustersPreSplittingCPU"))
 
 alpakaCUDAValidationPixel.toReplaceWith(siPixelRecHitsPreSplittingTask, cms.Task(
-                        siPixelRecHitsPreSplitting,
-                        siPixelRecHitsPreSplittingAlpaka,
-                        siPixelRecHitsPreSplittingAlpakaSerial,
+                        # Reconstruct and convert the pixel hit with alpaka on host and device
+                        siPixelRecHitsPreSplittingTask.copy(),
+                        # reconstruct the pixel rechits on the cpu
                         siPixelRecHitsPreSplittingCPU,
+                        # reconstruct the pixel rechits on the gpu
                         siPixelRecHitsPreSplittingCUDA,
+                        # this is an alias for the SoA on GPU or CPU to be used for DQM
                         siPixelRecHitsPreSplittingSoA))
 
 

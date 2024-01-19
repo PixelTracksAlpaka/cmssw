@@ -259,9 +259,10 @@ alpakaCUDAValidationPixel.toModify(pixelTracksSoA,
 alpakaCUDAValidationPixel.toModify(pixelTracksSoA.cpu, pixelRecHitSrc = "siPixelRecHitsPreSplittingSoA@cpu")
 
 alpakaCUDAValidationPixel.toReplaceWith(pixelTracksTask, cms.Task(
-                        pixelTracks,
-                        pixelTracksAlpaka,
-                        pixelTracksAlpakaSerial,
+                        # Reconstruct and convert the pixel tracks with alpaka on host and device
+                        pixelTracksTask.copy(),
+                        # build the pixel ntuplets and pixel tracks in SoA format on the GPU
                         pixelTracksCUDA,
+                        # this is an alias for the SoA on GPU or CPU to be used for DQM
                         pixelTracksSoA))
 

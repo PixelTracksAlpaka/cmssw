@@ -147,10 +147,11 @@ alpakaCUDAValidationPixel.toModify(pixelVerticesSoA.cpu,
 )
 
 alpakaCUDAValidationPixel.toReplaceWith(pixelVerticesTask, cms.Task(
-                        pixelVertices,
-                        pixelVerticesAlpaka,
-                        pixelVerticesAlpakaSerial,
+                        # Reconstruct and convert the pixel tracks with alpaka on host and device
+                        pixelVerticesTask.copy(),
+                        # build pixel vertices in SoA format on the GPU
                         pixelVerticesCUDA,
+                        # this is an alias for the SoA on GPU or CPU to be used for DQM
                         pixelVerticesSoA))
 
 

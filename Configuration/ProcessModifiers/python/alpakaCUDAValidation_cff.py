@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.ProcessModifiers.alpaka_cff import *
+from Configuration.ProcessModifiers.alpakaValidationPixel_cff import *
 from Configuration.ProcessModifiers.alpakaCUDAValidationPixel_cff import *
 from Configuration.ProcessModifiers.gpu_cff import *
 
@@ -8,5 +9,6 @@ from Configuration.ProcessModifiers.gpu_cff import *
 
 alpakaCUDAValidation =  cms.ModifierChain(
     alpaka,
+    alpakaValidationPixel,
     alpakaCUDAValidationPixel
 )
