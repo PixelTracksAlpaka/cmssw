@@ -17,6 +17,7 @@
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
+  // TODO: once the CUDA code is removed, these should be changed back to TrackSoACollection*
   template <typename TrackerTraits>
   using PixelTrackSoACollection = std::conditional_t<std::is_same_v<Device, alpaka::DevCpu>,
                                                  PixelTrackHost<TrackerTraits>,

@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace pixelTrackSoA { // TODO: once the CUDA code is removed, this should be changed back to pixelTrack
+namespace pixelTrackSoA { // TODO: once the CUDA code is removed, this should be changed back to pixelTrack (or trackSoA)
 
   enum class Quality : uint8_t { bad = 0, edup, dup, loose, strict, tight, highPurity, notQuality };
   constexpr uint32_t qualitySize{uint8_t(Quality::notQuality)};

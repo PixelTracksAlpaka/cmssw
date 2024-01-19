@@ -1,4 +1,4 @@
-# TrackSoA Data Formats
+# PixelTrackSoA Data Formats
 
 `DataFormat`s meant to be used on Host (CPU) or Device ( GPU) for
 storing information about `PixelTrackSoA`s created during the Pixel-local Reconstruction
@@ -54,12 +54,12 @@ Depending on the Alpaka accelerator back-end enabled, `PixelTrackSoACollection` 
 
 ## Utilities
 
-`alpaka/TrackUtilities.h` contains a collection of methods which were originally
+`alpaka/PixelTrackUtilities.h` contains a collection of methods which were originally
 defined as class methods inside either `TrackSoAHeterogeneousT` and `TrajectoryStateSoAT`
 which have been adapted to operate on `View` instances, so that they are callable
-from within `__global__` kernels, on both CPU and CPU. 
+from within `__global__` kernels, on both CPU and GPU. 
 
 ## Use case
 
-See `test/TrackSoAHeterogeneous_test.cpp` for a simple example of instantiation,
+See `test/alpaka/PixelTrackSoA_test.cc` for a simple example of instantiation,
 processing and copying from device to host.

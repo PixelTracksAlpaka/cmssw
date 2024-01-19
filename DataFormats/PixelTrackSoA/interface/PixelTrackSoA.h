@@ -34,6 +34,7 @@ struct PixelTrackSoA { // TODO: once the CUDA code is removed, this should be ch
                       SOA_SCALAR(HitContainer, detIndices))
 };
 
+// TODO: once the CUDA code is removed, this should be changed back to Track*
 template <typename TrackerTraits>
 using PixelTrackLayout = typename PixelTrackSoA<TrackerTraits>::template Layout<>;
 template <typename TrackerTraits>

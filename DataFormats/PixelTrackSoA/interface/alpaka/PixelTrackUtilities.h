@@ -100,7 +100,7 @@ struct PixelTrackUtilities { // TODO: once the CUDA code is removed, this should
   }
 };
 
-namespace pixelTrackSoA { // TODO: once the CUDA code is removed, this should be changed back to pixelTrack
+namespace pixelTrackSoA { // TODO: once the CUDA code is removed, this should be changed back to pixelTrack (or trackSoA)
 
   template <typename TrackerTraits, typename Enable = void>
   struct QualityCutsT {};

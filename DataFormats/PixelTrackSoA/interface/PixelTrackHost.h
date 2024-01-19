@@ -12,6 +12,7 @@
 // TODO: The class is created via inheritance of the PortableHostCollection.
 // This is generally discouraged, and should be done via composition.
 // See: https://github.com/cms-sw/cmssw/pull/40465#discussion_r1067364306
+// TODO: once the CUDA code is removed, this should be changed back to TrackHost
 template <typename TrackerTraits>
 class PixelTrackHost : public PortableHostCollection<PixelTrackLayout<TrackerTraits>> {
 public:
@@ -33,6 +34,7 @@ public:
 
 namespace pixelTrack {
 
+  // TODO: once the CUDA code is removed, this should be changed back to TrackHost*
   using PixelTrackHostPhase1 = PixelTrackHost<pixelTopology::Phase1>;
   using PixelTrackHostPhase2 = PixelTrackHost<pixelTopology::Phase2>;
   using PixelTrackHostHIonPhase1 = PixelTrackHost<pixelTopology::HIonPhase1>;
