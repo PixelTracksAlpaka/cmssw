@@ -175,10 +175,10 @@ void SiPixelCompareVertexSoAAlpakavsCUDA::bookHistograms(DQMStore::IBooker& iboo
 void SiPixelCompareVertexSoAAlpakavsCUDA::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   // monitorpixelVertexSoA
   edm::ParameterSetDescription desc;
-  desc.add<edm::InputTag>("pixelVertexSrcAlpaka", edm::InputTag("pixelVerticesAlpakaSerial"));
-  desc.add<edm::InputTag>("pixelVertexSrcCUDA", edm::InputTag("pixelVerticesSoA@cpu"));
+  desc.add<edm::InputTag>("pixelVertexSrcAlpaka", edm::InputTag("pixelVerticesAlpakaSerial")); // This is changed in the cfg instances to also compare AlpakavsCUDA on GPU/Device
+  desc.add<edm::InputTag>("pixelVertexSrcCUDA", edm::InputTag("pixelVerticesSoA@cpu")); // This is changed in the cfg instances to also compare AlpakavsCUDA on GPU/Device
   desc.add<edm::InputTag>("beamSpotSrc", edm::InputTag("offlineBeamSpot"));
-  desc.add<std::string>("topFolderName", "SiPixelHeterogeneous/PixelVertexCompareAlpakavsCUDACPU");
+  desc.add<std::string>("topFolderName", "SiPixelHeterogeneous/PixelVertexCompareAlpakavsCUDACPU"); // This is changed in the cfg instances to also compare AlpakavsCUDA on GPU/Device
   desc.add<double>("dzCut", 1.);
   descriptions.addWithDefaultLabel(desc);
 }
