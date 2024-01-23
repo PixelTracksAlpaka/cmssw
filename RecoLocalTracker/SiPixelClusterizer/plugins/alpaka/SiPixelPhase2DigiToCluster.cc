@@ -104,22 +104,24 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     const TrackerGeometry* geom_ = &iSetup.getData(geomToken_);
 
     uint32_t nDigis = 0;
-    for (auto DSViter = input.begin(); DSViter != input.end(); DSViter++) {
-      nDigis = nDigis + DSViter->size();
-    }
-    SiPixelDigisHost digis_h(nDigis, iEvent.queue());
-    nDigis_ = nDigis;
 
+    for (const auto& det : input) {
+      nDigis += det.size();
+    }
+    
     if (nDigis_ == 0)
       return;
 
+    SiPixelDigisHost digis_h(nDigis, iEvent.queue());
+    nDigis_ = nDigis;
+
     nDigis = 0;
-    for (auto DSViter = input.begin(); DSViter != input.end(); DSViter++) {
-      unsigned int detid = DSViter->detId();
+    for (const auto& det : input) {
+      unsigned int detid = det.detId();
       DetId detIdObject(detid);
       const GeomDetUnit* genericDet = geom_->idToDetUnit(detIdObject);
       auto const gind = genericDet->index();
-      for (auto const& px : *DSViter) {
+      for (auto const& px : det) {
         digis_h.view()[nDigis].moduleId() = uint16_t(gind);
 
         digis_h.view()[nDigis].xx() = uint16_t(px.row());
@@ -137,7 +139,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     digis_d = SiPixelDigisSoACollection(nDigis, iEvent.queue());
     alpaka::memcpy(iEvent.queue(), digis_d.buffer(), digis_h.buffer());
 
-    Algo_.makePhase2ClustersAsync(clusterThresholds_, digis_d.view(), nDigis, iEvent.queue());
+    Algo_.makePhase2ClustersAsync(iEvent.queue(),clusterThresholds_, digis_d.view(), nDigis);
   }
 
   void SiPixelPhase2DigiToCluster::produce(device::Event& iEvent, device::EventSetup const& iSetup) {

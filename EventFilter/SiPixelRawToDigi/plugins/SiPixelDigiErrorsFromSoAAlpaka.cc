@@ -11,7 +11,6 @@
 #include "DataFormats/SiPixelDigi/interface/PixelDigi.h"
 #include "DataFormats/SiPixelRawData/interface/SiPixelFormatterErrors.h"
 #include "EventFilter/SiPixelRawToDigi/interface/PixelDataFormatter.h"
-#include "FWCore/Framework/interface/ESTransientHandle.h"
 #include "FWCore/Framework/interface/ESWatcher.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -94,8 +93,7 @@ void SiPixelDigiErrorsFromSoAAlpaka::produce(edm::Event& iEvent, const edm::Even
   DetIdCollection usererror_detidcollection{};
   edmNew::DetSetVector<PixelFEDChannel> disabled_channelcollection{};
 
-  PixelDataFormatter formatter(cabling_.get(), usePhase1_);  // for phase 1 & 0
-  // assert(formatterErrors != nullptr);                        // TODO: check what is happening here
+  PixelDataFormatter formatter(cabling_.get(), usePhase1_);  // for phase 1 & 0 
   auto errors = formatterErrors;  // make a copy
   PixelDataFormatter::DetErrors nodeterrors;
 

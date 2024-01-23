@@ -16,8 +16,6 @@
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigiErrorsSoA.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisSoA.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
 #include "RecoLocalTracker/SiPixelClusterizer/plugins/SiPixelClusterThresholds.h"
 
 // #define GPU_DEBUG
@@ -26,7 +24,7 @@ namespace calibPixel {
   using namespace cms::alpakatools;
   constexpr uint16_t InvId = std::numeric_limits<uint16_t>::max() - 1;
   // must be > MaxNumModules
-  struct calibDigis {
+  struct CalibDigis {
     template <typename TAcc>
     ALPAKA_FN_ACC void operator()(const TAcc& acc,
                                   SiPixelClusterThresholds clusterThresholds,
@@ -85,7 +83,7 @@ namespace calibPixel {
       });
     }
   };
-  struct calibDigisPhase2 {
+  struct CalibDigisPhase2 {
     template <typename TAcc>
     ALPAKA_FN_ACC void operator()(const TAcc& acc,
                                   SiPixelClusterThresholds clusterThresholds,

@@ -8,4 +8,3 @@
 <use name="boost"/>
 <use name="CondFormats/DataRecord"/>
 <use name="CalibTracker/Records"/>
-<flags ALPAKA_BACKENDS="1"/>

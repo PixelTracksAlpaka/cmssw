@@ -7,16 +7,15 @@
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersSoA.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisSoA.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/prefixScan.h"
 #include "RecoLocalTracker/SiPixelClusterizer/plugins/SiPixelClusterThresholds.h"
 
 // #define GPU_DEBUG
-// namespace ALPAKA_ACCELERATOR_NAMESPACE {
+
 namespace pixelClustering {
 
   template <typename TrackerTraits>
-  struct clusterChargeCut {
+  struct ClusterChargeCut {
     template <typename TAcc>
     ALPAKA_FN_ACC void operator()(
         const TAcc& acc,
@@ -53,7 +52,7 @@ namespace pixelClustering {
           return;
 
         const uint32_t threadIdxLocal(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[0u]);
-        if (threadIdxLocal == 0 && nclus > maxNumClustersPerModules)
+        if (cms::alpakatools::once_per_block(acc) && nclus > maxNumClustersPerModules)
           printf("Warning too many clusters in module %d in block %d: %d > %d\n",
                  thisModuleId,
                  module,
@@ -89,7 +88,7 @@ namespace pixelClustering {
 
 #ifdef GPU_DEBUG
         if (thisModuleId % 100 == 1)
-          if (threadIdxLocal == 0)
+          if (cms::alpakatools::once_per_block(acc))
             printf("start cluster charge cut for module %d in block %d\n", thisModuleId, module);
 #endif
 
@@ -158,22 +157,22 @@ namespace pixelClustering {
           return;
 
         clus_view[thisModuleId].clusInModule() = newclusId[nclus - 1];
-        // alpaka::syncBlockThreads(acc);
+        alpaka::syncBlockThreads(acc);
 
 #ifdef GPU_DEBUG
         if (thisModuleId % 100 == 1)
-          if (threadIdxLocal == 0)
+          if (cms::alpakatools::once_per_block(acc))
             printf("module %d -> chargeCut = %d; nclus (pre cut) = %d; nclus (after cut) = %d\n",
                    thisModuleId,
                    chargeCut,
                    nclus,
                    clus_view[thisModuleId].clusInModule());
 #endif
-        // // mark bad cluster again
-        // cms::alpakatools::for_each_element_in_block_strided(acc, nclus, [&](uint32_t i) {
-        //   if (0 == ok[i])
-        //     newclusId[i] = invalidModuleId + 1;
-        // });
+        // mark bad cluster again
+         cms::alpakatools::for_each_element_in_block_strided(acc, nclus, [&](uint32_t i) {
+           if (0 == ok[i])
+             newclusId[i] = invalidModuleId + 1;
+         });
 
         alpaka::syncBlockThreads(acc);
 
