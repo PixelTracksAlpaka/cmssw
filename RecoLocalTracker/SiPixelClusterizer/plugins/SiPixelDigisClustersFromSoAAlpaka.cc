@@ -1,6 +1,5 @@
 #include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
 #include "DataFormats/Common/interface/DetSetVector.h"
-#include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 #include "DataFormats/SiPixelDigi/interface/PixelDigi.h"
@@ -49,7 +48,7 @@ SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::SiPixelDigisClustersFromSoAAlp
       clusterThresholds_(iConfig.getParameter<int>("clusterThreshold_layer1"),
                          iConfig.getParameter<int>("clusterThreshold_otherLayers")),
       produceDigis_(iConfig.getParameter<bool>("produceDigis")),
-      storeDigis_(iConfig.getParameter<bool>("produceDigis") && iConfig.getParameter<bool>("storeDigis")),
+      storeDigis_(produceDigis_ && iConfig.getParameter<bool>("storeDigis")), 
       clustersPutToken_(produces()) {
   if (produceDigis_)
     digisPutToken_ = produces<edm::DetSetVector<PixelDigi>>();

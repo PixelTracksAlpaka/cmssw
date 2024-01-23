@@ -24,7 +24,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     ALPAKA_STATIC_ACC_MEM_GLOBAL uint32_t gMaxHit = 0;
 #endif
 
-    namespace PixelStatus {
+    namespace pixelStatus {
       // Phase-1 pixel modules
       constexpr uint32_t pixelSizeX = pixelTopology::Phase1::numRowsInModule;
       constexpr uint32_t pixelSizeY = pixelTopology::Phase1::numColsInModule;
@@ -37,15 +37,15 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       constexpr uint32_t valuesPerWord = sizeof(uint32_t) * 8 / bits;
       constexpr uint32_t size = pixelSizeX * pixelSizeY / valuesPerWord;
 
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE constexpr static uint32_t getIndex(uint16_t x, uint16_t y) {
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE constexpr uint32_t getIndex(uint16_t x, uint16_t y) {
         return (pixelSizeX * y + x) / valuesPerWord;
       }
 
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE constexpr static uint32_t getShift(uint16_t x, uint16_t y) {
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE constexpr uint32_t getShift(uint16_t x, uint16_t y) {
         return (x % valuesPerWord) * 2;
       }
 
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE constexpr static Status getStatus(uint32_t const* __restrict__ status,
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE constexpr Status getStatus(uint32_t const* __restrict__ status,
                                                                        uint16_t x,
                                                                        uint16_t y) {
         uint32_t index = getIndex(x, y);
@@ -53,14 +53,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         return Status{(status[index] >> shift) & mask};
       }
 
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE constexpr static bool isDuplicate(uint32_t const* __restrict__ status,
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE constexpr bool isDuplicate(uint32_t const* __restrict__ status,
                                                                        uint16_t x,
                                                                        uint16_t y) {
         return getStatus(status, x, y) == kDuplicate;
       }
 
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE constexpr static void promote(TAcc const& acc,
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE constexpr void promote(TAcc const& acc,
                                                                    uint32_t* __restrict__ status,
                                                                    const uint16_t x,
                                                                    const uint16_t y) {
@@ -81,10 +81,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         } while (expected != old_word);
       }
 
-    }  // namespace PixelStatus
+    }  // namespace pixelStatus
 
     template <typename TrackerTraits>
-    struct countModules {
+    struct CountModules {
       template <typename TAcc>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
                                     SiPixelDigisSoAView digi_view,
@@ -119,16 +119,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    struct findClus {
+    struct FindClus {
       template <typename TAcc>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
                                     SiPixelDigisSoAView digi_view,
                                     SiPixelClustersSoAView clus_view,
                                     const unsigned int numElements) const {
         constexpr bool isPhase2 = std::is_base_of<pixelTopology::Phase2, TrackerTraits>::value;
-        constexpr const uint32_t pixelStatusSize = isPhase2 ? 1 : PixelStatus::size;
+        constexpr const uint32_t pixelStatusSize = isPhase2 ? 1 : pixelStatus::size;
 
-        // packed words array used to store the PixelStatus of each pixel
+        // packed words array used to store the pixelStatus of each pixel
         auto& status = alpaka::declareSharedVar<uint32_t[pixelStatusSize], __COUNTER__>(acc);
 
         // find the index of the first pixel not belonging to this module (or invalid)
@@ -150,7 +150,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           const uint32_t threadIdxLocal(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[0u]);
 #ifdef GPU_DEBUG
           if (thisModuleId % 100 == 1)
-            if (threadIdxLocal == 0)
+            if (cms::alpakatools::once_per_block(acc))
               printf("start clusterizer for module %d in block %d\n", thisModuleId, module);
 #endif
 
@@ -192,7 +192,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           ALPAKA_ASSERT_OFFLOAD((msize == numElements) or
                                 ((msize < numElements) and (digi_view[msize].moduleId() != thisModuleId)));
           // limit to maxPixInModule  (FIXME if recurrent (and not limited to simulation with low threshold) one will need to implement something cleverer)
-          if (0 == threadIdxLocal) {
+          if (cms::alpakatools::once_per_grid(acc)) { 
             if (msize - firstPixel > maxPixInModule) {
               printf("too many pixels in module %d: %d > %d\n", thisModuleId, msize - firstPixel, maxPixInModule);
               msize = maxPixInModule + firstPixel;
@@ -207,24 +207,24 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           alpaka::syncBlockThreads(acc);
 #endif
           // remove duplicate pixels
-          if constexpr (not isPhase2 and false) {  //FIXME remove THIS
+          if constexpr (not isPhase2) {  //FIXME remove THIS
             if (msize > 1) {
               cms::alpakatools::for_each_element_in_block_strided(
-                  acc, PixelStatus::size, [&](uint32_t i) { status[i] = 0; });
+                  acc, pixelStatus::size, [&](uint32_t i) { status[i] = 0; });
               alpaka::syncBlockThreads(acc);
 
               cms::alpakatools::for_each_element_in_block_strided(acc, msize - 1, firstElementIdx, [&](uint32_t i) {
                 // skip invalid pixels
                 if (digi_view[i].moduleId() == ::pixelClustering::invalidModuleId)
                   return;
-                PixelStatus::promote(acc, status, digi_view[i].xx(), digi_view[i].yy());
+                pixelStatus::promote(acc, status, digi_view[i].xx(), digi_view[i].yy());
               });
               alpaka::syncBlockThreads(acc);
               cms::alpakatools::for_each_element_in_block_strided(acc, msize - 1, firstElementIdx, [&](uint32_t i) {
                 // skip invalid pixels
                 if (digi_view[i].moduleId() == ::pixelClustering::invalidModuleId)
                   return;
-                if (PixelStatus::isDuplicate(status, digi_view[i].xx(), digi_view[i].yy())) {
+                if (pixelStatus::isDuplicate(status, digi_view[i].xx(), digi_view[i].yy())) {
                   digi_view[i].moduleId() = ::pixelClustering::invalidModuleId;
                   digi_view[i].rawIdArr() = 0;
                 }
@@ -251,7 +251,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #ifdef GPU_DEBUG
           ALPAKA_ASSERT_OFFLOAD(hist.size() == totGood);
           if (thisModuleId % 100 == 1)
-            if (threadIdxLocal == 0)
+            if (cms::alpakatools::once_per_block(acc))
               printf("histo size %d\n", hist.size());
 #endif
           cms::alpakatools::for_each_element_in_block_strided(acc, msize, firstPixel, [&](uint32_t i) {
@@ -267,12 +267,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           // Hence, maxiter can be tuned accordingly to the workdiv.
           constexpr unsigned int maxiter = 16;
           ALPAKA_ASSERT_OFFLOAD((hist.size() / blockDimension) <= maxiter);
-#ifndef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
-          constexpr uint32_t threadDimension = 1;
-#else
-          // NB: can be tuned.
-          constexpr uint32_t threadDimension = 256;
-#endif
+	   
+	  // NB: can be tuned.
+          constexpr uint32_t threadDimension = cms::alpakatools::requires_single_thread_per_block_v<TAcc> ? 1 : 256;
+
 #ifndef NDEBUG
           [[maybe_unused]] const uint32_t runTimeThreadDimension(
               alpaka::getWorkDiv<alpaka::Thread, alpaka::Elems>(acc)[0u]);
@@ -382,7 +380,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #ifdef GPU_DEBUG
           {
             auto& n0 = alpaka::declareSharedVar<int, __COUNTER__>(acc);
-            if (threadIdxLocal == 0)
+            if (cms::alpakatools::once_per_block(acc))
               n0 = nloops;
             alpaka::syncBlockThreads(acc);
 #ifndef NDEBUG
@@ -390,7 +388,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             ALPAKA_ASSERT_OFFLOAD(alpaka::syncBlockThreadsPredicate<alpaka::BlockAnd>(acc, ok));
 #endif
             if (thisModuleId % 100 == 1)
-              if (threadIdxLocal == 0)
+              if (cms::alpakatools::once_per_block(acc))
                 printf("# loops %d\n", nloops);
           }
 #endif
@@ -430,7 +428,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             }
           });
           alpaka::syncBlockThreads(acc);
-          if (threadIdxLocal == 0) {
+          if (cms::alpakatools::once_per_block(acc)) {
             clus_view[thisModuleId].clusInModule() = foundClusters;
             clus_view[module].moduleId() = thisModuleId;
 #ifdef GPU_DEBUG

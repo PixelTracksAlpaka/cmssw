@@ -149,7 +149,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   void SiPixelRawToCluster<TrackerTraits>::acquire(device::Event const& iEvent, device::EventSetup const& iSetup) {
     [[maybe_unused]] auto const& hMap = iSetup.getData(mapToken_);
     auto const& dGains = iSetup.getData(gainsToken_);
-    auto Gains = SiPixelGainCalibrationForHLTDevice(1, iEvent.queue());
+    auto gains = SiPixelGainCalibrationForHLTDevice(1, iEvent.queue());
     auto modulesToUnpackRegional =
         cms::alpakatools::make_device_buffer<unsigned char[]>(iEvent.queue(), ::pixelgpudetails::MAX_SIZE);
     const unsigned char* modulesToUnpack;
@@ -249,7 +249,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     for (uint32_t i = 0; i < fedIds_.size(); ++i) {
       wordFedAppender.initializeWordFed(fedIds_[i], index[i], start[i], words[i]);
     }
-    Algo_.makePhase1ClustersAsync(clusterThresholds_,
+    Algo_.makePhase1ClustersAsync(iEvent.queue(),
+		    		  clusterThresholds_,
                                   hMap.const_view(),
                                   modulesToUnpack,
                                   dGains.const_view(),
@@ -258,8 +259,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                   fedCounter,
                                   useQuality_,
                                   includeErrors_,
-                                  edm::MessageDrop::instance()->debugEnabled,
-                                  iEvent.queue());
+                                  edm::MessageDrop::instance()->debugEnabled);
+                        
   }
 
   template <typename TrackerTraits>
