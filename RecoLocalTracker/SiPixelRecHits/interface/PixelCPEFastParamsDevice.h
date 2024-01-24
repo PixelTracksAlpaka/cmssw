@@ -4,8 +4,8 @@
 #include <alpaka/alpaka.hpp>
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
+#include "DataFormats/Portable/interface/PortableDeviceObject.h"
 
-/*
 template <typename TDev, typename TrackerTraits>
 class PixelCPEFastParamsDevice {
 public:
@@ -25,7 +25,9 @@ public:
 private:
   Buffer buffer_;
 };
-*/
+
+/*
  template <typename TDev, typename TrackerTraits>
  using PixelCPEFastParamsDevice = PortableDeviceObject<pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>, TDev>;
+*/
 #endif

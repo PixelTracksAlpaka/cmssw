@@ -15,7 +15,7 @@
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   template <typename TrackerTraits>
-  using PixelCPEFastParams = std::conditional_v<std::is_same_v<Device, alpaka::DevCpu>, PixelCPEFastParamsHost<TrackerTraits>, PixelCPEFastParamsDevice<Device, TrackerTraits>>;
+  using PixelCPEFastParams = std::conditional_t<std::is_same_v<Device, alpaka::DevCpu>, PixelCPEFastParamsHost<TrackerTraits>, PixelCPEFastParamsDevice<Device, TrackerTraits>>;
 
   using PixelCPEFastParamsPhase1 = PixelCPEFastParams<pixelTopology::Phase1>;
   using PixelCPEFastParamsPhase2 = PixelCPEFastParams<pixelTopology::Phase2>;
