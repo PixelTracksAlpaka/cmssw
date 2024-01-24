@@ -2,23 +2,18 @@
 #define DataFormats_PixelCPEFastParams_interface_PixelCPEFastParamsHost_h
 
 #include <alpaka/alpaka.hpp>
+
+#include "CondFormats/SiPixelTransient/interface/SiPixelGenError.h"
+#include "DataFormats/GeometrySurface/interface/SOARotation.h"
+#include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
+#include "DataFormats/TrackingRecHitSoA/interface/SiPixelHitStatus.h"
+#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/CopyToDevice.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
-#include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
-#include "DataFormats/GeometrySurface/interface/SOARotation.h"
-#include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
-#include "DataFormats/TrackingRecHitSoA/interface/SiPixelHitStatus.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/PixelCPEGenericBase.h"
-#include "CondFormats/SiPixelTransient/interface/SiPixelGenError.h"
 
 #include "pixelCPEforDevice.h"
-
-namespace pixelCPEforDevice {
-
-  constexpr float micronsToCm = 1.0e-4;
-
-}
 
 template <typename TrackerTraits>
 class PixelCPEFastParamsHost : public PixelCPEGenericBase {
@@ -53,6 +48,5 @@ private:
 
   Buffer buffer_;
 };
-// }  // namespace pixelCPEforDevice
 
-#endif
+#endif  // DataFormats_PixelCPEFastParams_interface_PixelCPEFastParamsHost_h

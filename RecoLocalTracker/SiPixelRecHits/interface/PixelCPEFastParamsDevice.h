@@ -26,8 +26,4 @@ private:
   Buffer buffer_;
 };
 
-/*
- template <typename TDev, typename TrackerTraits>
- using PixelCPEFastParamsDevice = PortableDeviceObject<pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>, TDev>;
-*/
-#endif
+#endif  // RecoLocalTracker_SiPixelRecHits_PixelCPEFastParamsDevice_h

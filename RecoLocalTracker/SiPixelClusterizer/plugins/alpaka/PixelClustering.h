@@ -147,7 +147,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           auto firstPixel = clus_view[1 + module].moduleStart();
           auto thisModuleId = digi_view[firstPixel].moduleId();
           ALPAKA_ASSERT_OFFLOAD(thisModuleId < TrackerTraits::numberOfModules);
-          const uint32_t threadIdxLocal(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[0u]);
 #ifdef GPU_DEBUG
           if (thisModuleId % 100 == 1)
             if (cms::alpakatools::once_per_block(acc))
@@ -303,7 +302,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               alpaka::atomicAdd(acc, &n40, 1u, alpaka::hierarchy::Blocks{});
           });
           alpaka::syncBlockThreads(acc);
-          if (0 == threadIdxLocal) {
+          if (cms::alpakatools::once_per_block(acc)) {
             if (n60 > 0)
               printf("columns with more than 60 px %d in %d\n", n60, thisModuleId);
             else if (n40 > 0)

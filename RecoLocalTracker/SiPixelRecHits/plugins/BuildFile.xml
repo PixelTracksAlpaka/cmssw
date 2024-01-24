@@ -12,7 +12,6 @@
   <set name="cuda_src" value=""/>
 </iftool>
 <library file="*.cc ${cuda_src}" name="RecoLocalTrackerSiPixelRecHitsPlugins">
-  <use name="cuda"/> 
   <use name="CUDADataFormats/BeamSpot"/>
   <use name="CUDADataFormats/TrackingRecHit"/>
   <use name="HeterogeneousCore/CUDACore"/>

@@ -51,7 +51,6 @@ namespace pixelClustering {
         if (nclus == 0)
           return;
 
-        const uint32_t threadIdxLocal(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[0u]);
         if (cms::alpakatools::once_per_block(acc) && nclus > maxNumClustersPerModules)
           printf("Warning too many clusters in module %d in block %d: %d > %d\n",
                  thisModuleId,
