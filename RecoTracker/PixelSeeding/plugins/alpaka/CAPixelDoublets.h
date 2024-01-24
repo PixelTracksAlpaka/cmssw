@@ -7,15 +7,13 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
 #include "CAPixelDoubletsAlgos.h"
 
-#define CONSTANT_VAR __constant__
-
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   using namespace alpaka;
   using namespace cms::alpakatools;
   namespace caPixelDoublets {
 
     template <typename TrackerTraits>
-    class initDoublets {
+    class InitDoublets {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const& acc,
@@ -30,25 +28,25 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         for (auto i : cms::alpakatools::elements_with_stride(acc, nHits))
           (*isOuterHitOfCell).container[i].reset();
 
-        const uint32_t threadIdx(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
-        if (0 == threadIdx) {
+        if (cms::alpakatools::once_per_grid(acc)){ 
           cellNeighbors->construct(TrackerTraits::maxNumOfActiveDoublets, cellNeighborsContainer);
           cellTracks->construct(TrackerTraits::maxNumOfActiveDoublets, cellTracksContainer);
-          auto i = cellNeighbors->extend(acc);
-          assert(0 == i);
+          [[maybe_unused]] auto i = cellNeighbors->extend(acc);
+          ALPAKA_ASSERT_OFFLOAD(0 == i); 
           (*cellNeighbors)[0].reset();
           i = cellTracks->extend(acc);
-          assert(0 == i);
+          ALPAKA_ASSERT_OFFLOAD(0 == i);
           (*cellTracks)[0].reset();
         }
       }
     };
-
-    constexpr auto getDoubletsFromHistoMaxBlockSize = 64;  // for both x and y
-    constexpr auto getDoubletsFromHistoMinBlocksPerMP = 16;
+    
+    // Not used for the moment, see below. 
+    //constexpr auto getDoubletsFromHistoMaxBlockSize = 64;  // for both x and y
+    //constexpr auto getDoubletsFromHistoMinBlocksPerMP = 16;
 
     template <typename TrackerTraits>
-    class getDoubletsFromHisto {
+    class GetDoubletsFromHisto {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       // #ifdef __CUDACC__

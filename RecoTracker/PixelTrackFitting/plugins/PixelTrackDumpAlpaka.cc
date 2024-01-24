@@ -1,7 +1,5 @@
 #include <Eigen/Core>  // needed here by soa layout
 
-#include "DataFormats/Common/interface/Handle.h"
-#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -12,16 +10,14 @@
 #include "FWCore/PluginManager/interface/ModuleDef.h"
 #include "FWCore/Utilities/interface/EDGetToken.h"
 #include "FWCore/Utilities/interface/InputTag.h"
-#include "FWCore/Utilities/interface/RunningAverage.h"
-#include "RecoTracker/TkMSParametrization/interface/PixelRecoUtilities.h"
 
-#include "DataFormats/Vertex/interface/ZVertexSoAHost.h"
-#include "DataFormats/TrackSoA/interface/TrackSoAHost.h"
+#include "DataFormats/VertexSoA/interface/ZVertexHost.h"
+#include "DataFormats/TrackSoA/interface/TracksHost.h"
 
 template <typename TrackerTraits>
 class PixelTrackDumpAlpakaT : public edm::global::EDAnalyzer<> {
 public:
-  using TkSoAHost = TrackSoAHost<TrackerTraits>;
+  using TkSoAHost = TracksHost<TrackerTraits>;
   using VertexSoAHost = ZVertexHost;
 
   explicit PixelTrackDumpAlpakaT(const edm::ParameterSet& iConfig);

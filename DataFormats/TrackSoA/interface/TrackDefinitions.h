@@ -9,11 +9,12 @@ namespace pixelTrack {
   enum class Quality : uint8_t { bad = 0, edup, dup, loose, strict, tight, highPurity, notQuality };
   constexpr uint32_t qualitySize{uint8_t(Quality::notQuality)};
   constexpr std::string_view qualityName[qualitySize]{"bad", "edup", "dup", "loose", "strict", "tight", "highPurity"};
-  inline Quality qualityByName(std::string const &name) {
+  inline Quality qualityByName(std::string_view name) {
     auto qp = std::find(qualityName, qualityName + qualitySize, name) - qualityName;
     auto ret = static_cast<Quality>(qp);
+
     if (ret == pixelTrack::Quality::notQuality)
-      throw std::invalid_argument(name + "is not a pixelTrack::Quality!");
+      throw std::invalid_argument(std::string(name) + " is not a pixelTrack::Quality!");
 
     return ret;
   }
