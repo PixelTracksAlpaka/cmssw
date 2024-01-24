@@ -10,16 +10,16 @@
 #include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
 #ifdef USE_DBSCAN
 #include "RecoTracker/PixelVertexFinding/plugins/alpaka/clusterTracksDBSCAN.h"
-#define CLUSTERIZE ALPAKA_ACCELERATOR_NAMESPACE::vertexFinder::clusterTracksDBSCAN
+#define CLUSTERIZE ALPAKA_ACCELERATOR_NAMESPACE::vertexFinder::ClusterTracksDBSCAN
 #elif USE_ITERATIVE
 #include "RecoTracker/PixelVertexFinding/plugins/alpaka/clusterTracksIterative.h"
-#define CLUSTERIZE ALPAKA_ACCELERATOR_NAMESPACE::vertexFinder::clusterTracksIterative
+#define CLUSTERIZE ALPAKA_ACCELERATOR_NAMESPACE::vertexFinder::ClusterTracksIterative
 #else
 #include "RecoTracker/PixelVertexFinding/plugins/alpaka/clusterTracksByDensity.h"
-#define CLUSTERIZE ALPAKA_ACCELERATOR_NAMESPACE::vertexFinder::clusterTracksByDensityKernel
+#define CLUSTERIZE ALPAKA_ACCELERATOR_NAMESPACE::vertexFinder::ClusterTracksByDensityKernel
 #endif
-#include "RecoTracker/PixelVertexFinding/plugins/alpaka/PixelVertexWorkSpaceUtilitiesAlpaka.h"
-#include "RecoTracker/PixelVertexFinding/plugins/PixelVertexWorkSpaceLayout.h"
+
+#include "RecoTracker/PixelVertexFinding/interface/PixelVertexWorkSpaceLayout.h"
 #include "RecoTracker/PixelVertexFinding/plugins/PixelVertexWorkSpaceSoAHostAlpaka.h"
 #include "RecoTracker/PixelVertexFinding/plugins/alpaka/PixelVertexWorkSpaceSoADeviceAlpaka.h"
 
@@ -31,7 +31,7 @@
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   using namespace cms::alpakatools;
 
-  using WSSoAHost = ::vertexFinder::workSpace::PixelVertexWorkSpaceSoAHost;
+  using WSSoAHost = ::vertexFinder::PixelVertexWorkSpaceSoAHost;
 
   struct ClusterGenerator {
     explicit ClusterGenerator(float nvert, float ntrack)
@@ -81,7 +81,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   namespace vertexfinder_t {
 #ifdef ONE_KERNEL
-    class vertexFinderOneKernel {
+    class VertexFinderOneKernel {
     public:
       template <typename TAcc>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
@@ -106,7 +106,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 #endif
 
-    class kernel_print {
+    class Kernel_print {
     public:
       template <typename TAcc>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
@@ -117,8 +117,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     void runKernels(Queue& queue) {
-      vertexFinder::workSpace::PixelVertexWorkSpaceSoADevice ws_d(queue);
-      ::vertexFinder::workSpace::PixelVertexWorkSpaceSoAHost ws_h(queue);
+      vertexFinder::PixelVertexWorkSpaceSoADevice ws_d(zVertex::MAXTRACKS,queue);
+      ::vertexFinder::PixelVertexWorkSpaceSoAHost ws_h(zVertex::MAXTRACKS,queue);
       ZVertexHost vertices_h(queue);
       ZVertexCollection vertices_d(queue);
 
@@ -132,7 +132,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
           gen(ws_h, vertices_h);
           auto workDiv1D = make_workdiv<Acc1D>(1, 1);
-          alpaka::exec<Acc1D>(queue, workDiv1D, vertexFinder::init{}, vertices_d.view(), ws_d.view());
+          alpaka::exec<Acc1D>(queue, workDiv1D, vertexFinder::Init{}, vertices_d.view(), ws_d.view());
           // std::cout << "v,t size " << ws_h.view().zt()[0] << ' ' << vertices_h.view().zv()[0] << std::endl;
           alpaka::memcpy(queue, ws_d.buffer(), ws_h.buffer());
           alpaka::wait(queue);
@@ -148,13 +148,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           if ((i % 4) == 3)
             par = {{0.7f * eps, 0.01f, 9.0f}};
 
-          alpaka::exec<Acc1D>(queue, workDiv1D, kernel_print{}, vertices_d.view(), ws_d.view());
+          alpaka::exec<Acc1D>(queue, workDiv1D, Kernel_print{}, vertices_d.view(), ws_d.view());
 
           auto workDivClusterizer = make_workdiv<Acc1D>(1, 512 + 256);
 #ifdef ONE_KERNEL
           alpaka::exec<Acc1D>(queue,
                               workDivClusterizer,
-                              vertexFinderOneKernel{},
+                              VertexFinderOneKernel{},
                               vertices_d.view(),
                               ws_d.view(),
                               kk,
@@ -166,13 +166,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               queue, workDivClusterizer, CLUSTERIZE{}, vertices_d.view(), ws_d.view(), kk, par[0], par[1], par[2]);
 #endif
           alpaka::wait(queue);
-          alpaka::exec<Acc1D>(queue, workDiv1D, kernel_print{}, vertices_d.view(), ws_d.view());
+          alpaka::exec<Acc1D>(queue, workDiv1D, Kernel_print{}, vertices_d.view(), ws_d.view());
           alpaka::wait(queue);
 
           auto workDivFitter = make_workdiv<Acc1D>(1, 1024 - 256);
 
           alpaka::exec<Acc1D>(
-              queue, workDivFitter, vertexFinder::fitVerticesKernel{}, vertices_d.view(), ws_d.view(), 50.f);
+              queue, workDivFitter, vertexFinder::FitVerticesKernel{}, vertices_d.view(), ws_d.view(), 50.f);
 
           alpaka::memcpy(queue, vertices_h.buffer(), vertices_d.buffer());
           alpaka::wait(queue);
@@ -193,7 +193,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           }
 
           alpaka::exec<Acc1D>(
-              queue, workDivFitter, vertexFinder::fitVerticesKernel{}, vertices_d.view(), ws_d.view(), 50.f);
+              queue, workDivFitter, vertexFinder::FitVerticesKernel{}, vertices_d.view(), ws_d.view(), 50.f);
           alpaka::memcpy(queue, vertices_h.buffer(), vertices_d.buffer());
           alpaka::wait(queue);
 
@@ -211,16 +211,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
           // one vertex per block!!!
           alpaka::exec<Acc1D>(
-              queue, workDivSplitter, vertexFinder::splitVerticesKernel{}, vertices_d.view(), ws_d.view(), 9.f);
+              queue, workDivSplitter, vertexFinder::SplitVerticesKernel{}, vertices_d.view(), ws_d.view(), 9.f);
           alpaka::memcpy(queue, ws_h.buffer(), ws_d.buffer());
           alpaka::wait(queue);
           std::cout << "after split " << ws_h.view().nvIntermediate() << std::endl;
 
           alpaka::exec<Acc1D>(
-              queue, workDivFitter, vertexFinder::fitVerticesKernel{}, vertices_d.view(), ws_d.view(), 5000.f);
+              queue, workDivFitter, vertexFinder::FitVerticesKernel{}, vertices_d.view(), ws_d.view(), 5000.f);
 
           auto workDivSorter = make_workdiv<Acc1D>(1, 256);
-          alpaka::exec<Acc1D>(queue, workDivSorter, vertexFinder::sortByPt2Kernel{}, vertices_d.view(), ws_d.view());
+          alpaka::exec<Acc1D>(queue, workDivSorter, vertexFinder::SortByPt2Kernel{}, vertices_d.view(), ws_d.view());
           alpaka::memcpy(queue, vertices_h.buffer(), vertices_d.buffer());
           alpaka::wait(queue);
 

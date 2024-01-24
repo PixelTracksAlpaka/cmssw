@@ -5,26 +5,13 @@
 #include "DataFormats/Portable/interface/alpaka/PortableCollection.h"
 #include "DataFormats/Vertex/interface/alpaka/ZVertexUtilities.h"
 #include "DataFormats/Vertex/interface/ZVertexDefinitions.h"
-#include "../PixelVertexWorkSpaceLayout.h"
+#include "RecoTracker/PixelVertexFinding/interface/PixelVertexWorkSpaceLayout.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
-  template <int32_t S>
-  class PixelVertexWorkSpaceSoADevice : public PortableCollection<PixelVertexWSSoALayout<>> {
-  public:
-    PixelVertexWorkSpaceSoADevice() = default;
-
-    // Constructor which specifies the SoA size and Alpaka Queue
-    explicit PixelVertexWorkSpaceSoADevice(Queue queue) : PortableCollection<PixelVertexWSSoALayout<>>(S, queue) {}
-
-    // Constructor which specifies the SoA size and alpaka device
-    // TODO: Needed?
-    explicit PixelVertexWorkSpaceSoADevice(Device const& device)
-        : PortableCollection<PixelVertexWSSoALayout<>>(S, device) {}
-  };
+  
   namespace vertexFinder {
-    namespace workSpace {
-      using PixelVertexWorkSpaceSoADevice = PixelVertexWorkSpaceSoADevice<::zVertex::MAXTRACKS>;
-    }  // namespace workSpace
+      
+      using PixelVertexWorkSpaceSoADevice = PortableCollection<::vertexFinder::PixelVertexWSSoALayout<>>;
   }    // namespace vertexFinder
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 

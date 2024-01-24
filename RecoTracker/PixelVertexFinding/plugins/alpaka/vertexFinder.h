@@ -10,29 +10,28 @@
 #include "DataFormats/Vertex/interface/alpaka/ZVertexSoACollection.h"
 #include "DataFormats/Vertex/interface/ZVertexSoADevice.h"
 #include "DataFormats/Vertex/interface/alpaka/ZVertexUtilities.h"
-#include "../PixelVertexWorkSpaceLayout.h"
-#include "PixelVertexWorkSpaceUtilitiesAlpaka.h"
-#include "PixelVertexWorkSpaceSoADeviceAlpaka.h"
+#include "RecoTracker/PixelVertexFinding/interface/PixelVertexWorkSpaceLayout.h"
+#include "RecoTracker/PixelVertexFinding/plugins/alpaka/PixelVertexWorkSpaceSoADeviceAlpaka.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace vertexFinder {
     using namespace cms::alpakatools;
     using VtxSoAView = ::zVertex::ZVertexSoAView;
-    using WsSoAView = ::vertexFinder::workSpace::PixelVertexWorkSpaceSoAView;
+    using WsSoAView = ::vertexFinder::PixelVertexWorkSpaceSoAView;
 
-    class init {
+    class Init {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(const TAcc &acc, VtxSoAView pdata, WsSoAView pws) const {
         pdata.nvFinal() = 0;  // initialization
-        vertexFinder::workSpace::utilities::init(pws);
+        ::vertexFinder::init(pws);
       }
     };
 
     template <typename TrackerTraits>
     class Producer {
-      using TkSoAConstView = TrackSoAConstView<TrackerTraits>;
+      using TkSoAConstView = reco::TrackSoAConstView<TrackerTraits>;
 
     public:
       Producer(bool oneKernel,

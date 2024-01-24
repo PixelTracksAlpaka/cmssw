@@ -9,7 +9,7 @@
 #include "DataFormats/Vertex/interface/alpaka/ZVertexSoACollection.h"
 #include "DataFormats/Vertex/interface/ZVertexSoADevice.h"
 
-#include "RecoTracker/PixelVertexFinding/plugins/PixelVertexWorkSpaceLayout.h"
+#include "RecoTracker/PixelVertexFinding/interface/PixelVertexWorkSpaceLayout.h"
 #include "RecoTracker/PixelVertexFinding/plugins/PixelVertexWorkSpaceSoAHostAlpaka.h"
 #include "RecoTracker/PixelVertexFinding/plugins/alpaka/PixelVertexWorkSpaceSoADeviceAlpaka.h"
 

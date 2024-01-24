@@ -48,16 +48,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       // only for test
       auto& noise = alpaka::declareSharedVar<int, __COUNTER__>(acc);
-      const uint32_t threadIdxLocal(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[0u]);
-      if (verbose && 0 == threadIdxLocal)
+     
+       if constexpr (verbose) {
+         if (cms::alpakatools::once_per_block(acc)) 
         noise = 0;
-
+       }
       alpaka::syncBlockThreads(acc);
 
       // compute cluster location
       for (auto i : cms::alpakatools::elements_with_stride(acc, nt)) {
         if (iv[i] > 9990) {
-          if (verbose)
+          if constexpr (verbose)
             alpaka::atomicAdd(acc, &noise, 1, alpaka::hierarchy::Threads{});
           continue;
         }
@@ -98,14 +99,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           wv[i] *= float(nn[i]) / chi2[i];
         }
       }
-
-      if (verbose && 0 == threadIdxLocal)
-        printf("found %d proto clusters ", foundClusters);
-      if (verbose && 0 == threadIdxLocal)
-        printf("and %d noise\n", noise);
+       if constexpr (verbose) {
+         if (cms::alpakatools::once_per_block(acc))
+	 {
+		 printf("found %d proto clusters ", foundClusters);
+		 printf("and %d noise\n", noise);
+	 } 
+       }
     }
 
-    class fitVerticesKernel {
+    class FitVerticesKernel {
     public:
       template <typename TAcc>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
