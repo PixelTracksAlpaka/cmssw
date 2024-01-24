@@ -3,8 +3,8 @@
 #include "DataFormats/Vertex/interface/alpaka/ZVertexUtilities.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
-#include "PixelVertexWorkSpaceUtilitiesAlpaka.h"
-#include "PixelVertexWorkSpaceSoADeviceAlpaka.h"
+#include "RecoTracker/PixelVertexFinding/interface/PixelVertexWorkSpaceLayout.h"
+#include "RecoTracker/PixelVertexFinding/plugins/alpaka/PixelVertexWorkSpaceSoADeviceAlpaka.h"
 
 #include "vertexFinder.h"
 #include "vertexFinder.h"
@@ -27,11 +27,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     constexpr float maxChi2ForSplit = 9.f;
 
     template <typename TrackerTraits>
-    class loadTracks {
+    class LoadTracks {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
-                                    TrackSoAConstView<TrackerTraits> tracks_view,
+                                    reco::TrackSoAConstView<TrackerTraits> tracks_view,
                                     VtxSoAView soa,
                                     WsSoAView pws,
                                     float ptMin,
@@ -40,9 +40,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         using helper = TracksUtilities<TrackerTraits>;
 
         for (auto idx : cms::alpakatools::elements_with_stride(acc, tracks_view.nTracks())) {
-          // TODO: since nHits is not used anywhere else it gives of an unused variable warning. Check!
-          // auto nHits = helper::nHits(tracks_view, idx);
-          // ALPAKA_ASSERT_OFFLOAD(nHits >= 3);
+
+           [[maybe_unused]] auto nHits = helper::nHits(tracks_view, idx);
+           ALPAKA_ASSERT_OFFLOAD(nHits >= 3);
 
           // initialize soa...
           soa[idx].idv() = -1;
@@ -71,7 +71,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 // #define THREE_KERNELS
 #ifndef THREE_KERNELS
-    class vertexFinderOneKernel {  //FIXME: CUDA do not have the split here
+    class VertexFinderOneKernel {  
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
@@ -97,7 +97,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
     };
 #else
-    class vertexFinderOneKernel1 {
+    class VertexFinderKernel1 {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
@@ -113,7 +113,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         fitVertices(pdata, pws, maxChi2ForFirstFit);
       }
     };
-    class vertexFinderKernel2 {
+    class VertexFinderKernel2 {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(const TAcc& acc, VtxSoAView pdata, WsSoAView pws) const {
@@ -126,7 +126,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     template <typename TrackerTraits>
     ZVertexCollection Producer<TrackerTraits>::makeAsync(Queue& queue,
-                                                         const TrackSoAConstView<TrackerTraits>& tracks_view,
+                                                         const reco::TrackSoAConstView<TrackerTraits>& tracks_view,
                                                          float ptMin,
                                                          float ptMax) const {
 #ifdef PIXVERTEX_DEBUG_PRODUCE
@@ -136,13 +136,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       auto soa = vertices.view();
 
-      // ALPAKA_ASSERT_OFFLOAD(vertices.buffer());
-
-      auto ws_d = workSpace::PixelVertexWorkSpaceSoADevice(queue);
+      auto ws_d = PixelVertexWorkSpaceSoADevice(::zVertex::MAXTRACKS,queue);
 
       // Initialize
       const auto initWorkDiv = cms::alpakatools::make_workdiv<Acc1D>(1, 1);
-      alpaka::exec<Acc1D>(queue, initWorkDiv, init{}, soa, ws_d.view());
+      alpaka::exec<Acc1D>(queue, initWorkDiv, Init{}, soa, ws_d.view());
 
       // Load Tracks
       const uint32_t blockSize = 128;
@@ -150,7 +148,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           cms::alpakatools::divide_up_by(tracks_view.metadata().size() + blockSize - 1, blockSize);
       const auto loadTracksWorkDiv = cms::alpakatools::make_workdiv<Acc1D>(numberOfBlocks, blockSize);
       alpaka::exec<Acc1D>(
-          queue, loadTracksWorkDiv, loadTracks<TrackerTraits>{}, tracks_view, soa, ws_d.view(), ptMin, ptMax);
+          queue, loadTracksWorkDiv, LoadTracks<TrackerTraits>{}, tracks_view, soa, ws_d.view(), ptMin, ptMax);
 
       // Running too many thread lead to problems when printf is enabled.
       const auto finderSorterWorkDiv = cms::alpakatools::make_workdiv<Acc1D>(1, 1024 - 128);
@@ -161,7 +159,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #ifndef THREE_KERNELS
         alpaka::exec<Acc1D>(queue,
                             finderSorterWorkDiv,
-                            vertexFinderOneKernel{},
+                            VertexFinderOneKernel{},
                             soa,
                             ws_d.view(),
                             doSplitting_,
@@ -171,34 +169,34 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                             chi2max);
 #else
         alpaka::exec<Acc1D>(
-            queue, finderSorterWorkDiv, vertexFinderOneKernel{}, soa, ws_d.view(), minT, eps, errmax, chi2max);
+            queue, finderSorterWorkDiv, VertexFinderOneKernel{}, soa, ws_d.view(), minT, eps, errmax, chi2max);
 
         // one block per vertex...
-        if (doSplitting_)  //FIXME: CUDA doesn't have this
-          alpaka::exec<Acc1D>(queue, splitterFitterWorkDiv, splitVerticesKernel{}, soa, ws_d.view(), maxChi2ForSplit);
+        if (doSplitting_)  
+          alpaka::exec<Acc1D>(queue, splitterFitterWorkDiv, SplitVerticesKernel{}, soa, ws_d.view(), maxChi2ForSplit);
         alpaka::exec<Acc1D>(queue, finderSorterWorkDiv{}, soa, ws_d.view());
 #endif
       } else {  // five kernels
         if (useDensity_) {
           alpaka::exec<Acc1D>(
-              queue, finderSorterWorkDiv, clusterTracksByDensityKernel{}, soa, ws_d.view(), minT, eps, errmax, chi2max);
+              queue, finderSorterWorkDiv, ClusterTracksByDensityKernel{}, soa, ws_d.view(), minT, eps, errmax, chi2max);
 
         } else if (useDBSCAN_) {
           alpaka::exec<Acc1D>(
-              queue, finderSorterWorkDiv, clusterTracksDBSCAN{}, soa, ws_d.view(), minT, eps, errmax, chi2max);
+              queue, finderSorterWorkDiv, ClusterTracksDBSCAN{}, soa, ws_d.view(), minT, eps, errmax, chi2max);
         } else if (useIterative_) {
           alpaka::exec<Acc1D>(
-              queue, finderSorterWorkDiv, clusterTracksIterative{}, soa, ws_d.view(), minT, eps, errmax, chi2max);
+              queue, finderSorterWorkDiv, ClusterTracksIterative{}, soa, ws_d.view(), minT, eps, errmax, chi2max);
         }
-        alpaka::exec<Acc1D>(queue, finderSorterWorkDiv, fitVerticesKernel{}, soa, ws_d.view(), maxChi2ForFirstFit);
+        alpaka::exec<Acc1D>(queue, finderSorterWorkDiv, FitVerticesKernel{}, soa, ws_d.view(), maxChi2ForFirstFit);
 
         // one block per vertex...
         if (doSplitting_) {
-          alpaka::exec<Acc1D>(queue, splitterFitterWorkDiv, splitVerticesKernel{}, soa, ws_d.view(), maxChi2ForSplit);
+          alpaka::exec<Acc1D>(queue, splitterFitterWorkDiv, SplitVerticesKernel{}, soa, ws_d.view(), maxChi2ForSplit);
 
-          alpaka::exec<Acc1D>(queue, finderSorterWorkDiv, fitVerticesKernel{}, soa, ws_d.view(), maxChi2ForFinalFit);
+          alpaka::exec<Acc1D>(queue, finderSorterWorkDiv, FitVerticesKernel{}, soa, ws_d.view(), maxChi2ForFinalFit);
         }
-        alpaka::exec<Acc1D>(queue, finderSorterWorkDiv, sortByPt2Kernel{}, soa, ws_d.view());
+        alpaka::exec<Acc1D>(queue, finderSorterWorkDiv, SortByPt2Kernel{}, soa, ws_d.view());
       }
 
       return vertices;

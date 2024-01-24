@@ -9,7 +9,7 @@
 #include "DataFormats/Vertex/interface/ZVertexDefinitions.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
-#include "RecoTracker/PixelVertexFinding/plugins/PixelVertexWorkSpaceLayout.h"
+#include "RecoTracker/PixelVertexFinding/interface/PixelVertexWorkSpaceLayout.h"
 #include "vertexFinder.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
@@ -17,7 +17,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     // this algo does not really scale as it works in a single block...
     // enough for <10K tracks we have
-    class clusterTracksIterative {
+    class ClusterTracksIterative {
     public:
       template <typename TAcc>
       ALPAKA_FN_ACC void operator()(const TAcc& acc,
@@ -30,9 +30,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       ) const {
         constexpr bool verbose = false;  // in principle the compiler should optmize out if false
         const uint32_t threadIdxLocal(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[0u]);
-        if (verbose && 0 == threadIdxLocal)
+  	if constexpr (verbose) {
+         if (cms::alpakatools::once_per_block(acc))
           printf("params %d %f %f %f\n", minT, eps, errmax, chi2max);
-
+	}
         auto er2mx = errmax * errmax;
 
         auto& __restrict__ data = pdata;
@@ -62,8 +63,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         }
         alpaka::syncBlockThreads(acc);
 
-        if (verbose && 0 == threadIdxLocal)
+        if constexpr (verbose) {
+         if (cms::alpakatools::once_per_block(acc)) 
           printf("booked hist with %d bins, size %d for %d tracks\n", hist.nbins(), hist.capacity(), nt);
+	}
 
         ALPAKA_ASSERT_OFFLOAD(static_cast<int>(nt) <= hist.capacity());
 
@@ -216,8 +219,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         nvIntermediate = nvFinal = foundClusters;
 
-        if (verbose && 0 == threadIdxLocal)
+        if constexpr (verbose) {
+         if (cms::alpakatools::once_per_block(acc)) 
           printf("found %d proto vertices\n", foundClusters);
+	}
       }
     };
   }  // namespace vertexFinder

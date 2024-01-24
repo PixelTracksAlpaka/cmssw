@@ -5,6 +5,8 @@
 
 // Intermediate data used in the vertex reco algos
 // For internal use only
+namespace vertexFinder {
+
 GENERATE_SOA_LAYOUT(PixelVertexWSSoALayout,
                     SOA_COLUMN(uint16_t, itrk),            // index of original track
                     SOA_COLUMN(float, zt),                 // input track z at bs
@@ -15,12 +17,15 @@ GENERATE_SOA_LAYOUT(PixelVertexWSSoALayout,
                     SOA_SCALAR(uint32_t, ntrks),           // number of "selected tracks"
                     SOA_SCALAR(uint32_t, nvIntermediate))  // the number of vertices after splitting pruning etc.
 
-namespace vertexFinder {
-  namespace workSpace {
     using PixelVertexWorkSpaceSoALayout = PixelVertexWSSoALayout<>;
     using PixelVertexWorkSpaceSoAView = PixelVertexWSSoALayout<>::View;
     using PixelVertexWorkSpaceSoAConstView = PixelVertexWSSoALayout<>::ConstView;
-  }  // namespace workSpace
+
+   ALPAKA_FN_ACC ALPAKA_FN_INLINE void init(PixelVertexWorkSpaceSoAView &workspace_view) {
+          workspace_view.ntrks() = 0;
+          workspace_view.nvIntermediate() = 0;
+    }
+
 }  // namespace vertexFinder
 
 #endif

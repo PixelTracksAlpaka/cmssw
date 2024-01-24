@@ -10,14 +10,14 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/radixSort.h"
 #include "DataFormats/Vertex/interface/ZVertexLayout.h"
-#include "RecoTracker/PixelVertexFinding/plugins/PixelVertexWorkSpaceLayout.h"
+#include "RecoTracker/PixelVertexFinding/interface/PixelVertexWorkSpaceLayout.h"
 
 #include "vertexFinder.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace vertexFinder {
     using VtxSoAView = ::zVertex::ZVertexSoAView;
-    using WsSoAView = ::vertexFinder::workSpace::PixelVertexWorkSpaceSoAView;
+    using WsSoAView = ::vertexFinder::PixelVertexWorkSpaceSoAView;
 
     template <typename TAcc>
     ALPAKA_FN_ACC ALPAKA_FN_INLINE void sortByPt2(const TAcc& acc, VtxSoAView& data, WsSoAView& ws) {
@@ -56,18 +56,20 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           sortInd[0] = 0;
         return;
       }
-#ifndef ALPAKA_ACC_CPU_B_SEQ_T_SEQ_ENABLED
-      auto& sws = alpaka::declareSharedVar<uint16_t[1024], __COUNTER__>(acc);
-      // sort using only 16 bits
-      cms::alpakatools::radixSort<Acc1D, float, 2>(acc, ptv2, sortInd, sws, nvFinal);
-#else
-      for (uint16_t i = 0; i < nvFinal; ++i)
-        sortInd[i] = i;
-      std::sort(sortInd, sortInd + nvFinal, [&](auto i, auto j) { return ptv2[i] < ptv2[j]; });
-#endif
+      
+       if constexpr (not cms::alpakatools::requires_single_thread_per_block_v<TAcc>) {
+         auto& sws = alpaka::declareSharedVar<uint16_t[1024], __COUNTER__>(acc);
+         // sort using only 16 bits
+         cms::alpakatools::radixSort<Acc1D, float, 2>(acc, ptv2, sortInd, sws, nvFinal);
+       } else {
+         for (uint16_t i = 0; i < nvFinal; ++i)
+           sortInd[i] = i;
+         std::sort(sortInd, sortInd + nvFinal, [&](auto i, auto j) { return ptv2[i] < ptv2[j]; });
+       }
+
     }
 
-    class sortByPt2Kernel {
+    class SortByPt2Kernel {
     public:
       template <typename TAcc>
       ALPAKA_FN_ACC void operator()(const TAcc& acc, VtxSoAView pdata, WsSoAView pws) const {
