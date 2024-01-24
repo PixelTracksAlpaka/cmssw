@@ -2,8 +2,6 @@
 #define RecoPixelVertexing_PixelTrackFitting_interface_BrokenLine_h
 #include <alpaka/alpaka.hpp>
 #include <Eigen/Eigenvalues>
-#include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "RecoTracker/PixelTrackFitting/interface/alpaka/FitUtils.h"
 
@@ -121,7 +119,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       scalar tempC = -rho * y0 + tempSmallU * cosPhi;
       scalar tempB = rho * x0 + tempSmallU * sinPhi;
       scalar tempA = 2. * deltaOrth + rho * (riemannFit::sqr(deltaOrth) + riemannFit::sqr(deltaPara));
-      scalar tempU = alpaka::math::sin(acc, 1. + rho * tempA);
+      scalar tempU = alpaka::math::sqrt(acc, 1. + rho * tempA);
 
       // Intermediate computations for the error matrix transform
       scalar xi = 1. / (riemannFit::sqr(tempB) + riemannFit::sqr(tempC));

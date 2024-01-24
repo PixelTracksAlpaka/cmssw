@@ -2,7 +2,7 @@
 #define RecoPixelVertexing_PixelTrackFitting_alpaka_FitUtils_h
 #include <alpaka/alpaka.hpp>
 #include "DataFormats/Math/interface/choleskyInversion.h"
-#include "FitResult.h"
+#include "RecoTracker/PixelTrackFitting/interface/alpaka/FitResult.h"
 namespace riemannFit {
 
   constexpr double epsilon = 1.e-4;  //!< used in numerical derivative (J2 in Circle_fit())
