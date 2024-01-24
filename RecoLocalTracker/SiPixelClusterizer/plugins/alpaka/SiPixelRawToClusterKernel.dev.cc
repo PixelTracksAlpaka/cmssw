@@ -663,7 +663,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         // apply charge cut
         alpaka::exec<Acc1D>(queue,
                             workDivMaxNumModules,
-                            ::pixelClustering::clusterChargeCut<TrackerTraits>{},
+                            ::pixelClustering::ClusterChargeCut<TrackerTraits>{},
                             digis_d->view(),
                             clusters_d->view(),
                             clusterThresholds,
@@ -756,7 +756,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       // apply charge cut
       alpaka::exec<Acc1D>(queue,
                           workDivMaxNumModules,
-                          ::pixelClustering::clusterChargeCut<TrackerTraits>{},
+                          ::pixelClustering::ClusterChargeCut<TrackerTraits>{},
                           digis_view,
                           clusters_d->view(),
                           clusterThresholds,

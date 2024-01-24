@@ -245,7 +245,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       return;
 
     // copy the FED data to a single cpu buffer
-    typename Algo::WordFedAppender wordFedAppender(nDigis_);
+    pixelDetails::WordFedAppender wordFedAppender(nDigis_);
     for (uint32_t i = 0; i < fedIds_.size(); ++i) {
       wordFedAppender.initializeWordFed(fedIds_[i], index[i], start[i], words[i]);
     }

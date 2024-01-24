@@ -1,11 +1,11 @@
 #include "DataFormats/BeamSpot/interface/BeamSpotPOD.h"
-#include "DataFormats/BeamSpot/interface/alpaka/BeamSpotDeviceProduct.h"
+#include "DataFormats/BeamSpot/interface/alpaka/BeamSpotDevice.h"
 #include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersDevice.h"
-#include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersCollection.h"
+#include "DataFormats/SiPixelClusterSoA/interface/alpaka/SiPixelClustersSoACollection.h"
 #include "DataFormats/SiPixelDigiSoA/interface/SiPixelDigisDevice.h"
-#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisCollection.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitSoADevice.h"
-#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitSoACollection.h"
+#include "DataFormats/SiPixelDigiSoA/interface/alpaka/SiPixelDigisSoACollection.h"
+#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsDevice.h"
+#include "DataFormats/TrackingRecHitSoA/interface/alpaka/TrackingRecHitsSoACollection.h"
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
@@ -42,18 +42,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
-    using ParamsOnGPU = pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits>;
-
   private:
     void produce(edm::StreamID streamID, device::Event& iEvent, const device::EventSetup& iSetup) const override;
 
     const device::ESGetToken<PixelCPEFastParams<TrackerTraits>, PixelCPEFastParamsRecord> cpeToken_;
-    const device::EDGetToken<BeamSpotDeviceProduct> tBeamSpot;
-    const device::EDGetToken<SiPixelClustersCollection> tokenClusters_;
-    const device::EDGetToken<SiPixelDigisCollection> tokenDigi_;
-    const device::EDPutToken<TrackingRecHitAlpakaCollection<TrackerTraits>> tokenHit_;
+    const device::EDGetToken<BeamSpotDevice> tBeamSpot;
+    const device::EDGetToken<SiPixelClustersSoACollection> tokenClusters_;
+    const device::EDGetToken<SiPixelDigisSoACollection> tokenDigi_;
+    const device::EDPutToken<TrackingRecHitsSoACollection<TrackerTraits>> tokenHit_;
 
-    const pixelgpudetails::PixelRecHitGPUKernel<TrackerTraits> gpuAlgo_;
+    const pixelgpudetails::PixelRecHitKernel<TrackerTraits> Algo_;
   };
 
   template <typename TrackerTraits>
