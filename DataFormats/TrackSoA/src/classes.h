@@ -1,11 +1,12 @@
-#ifndef DataFormats_Track_src_classes_h
-#define DataFormats_Track_src_classes_h
+#ifndef DataFormats_TrackSoA_src_classes_h
+#define DataFormats_TrackSoA_src_classes_h
 
 #include "DataFormats/Common/interface/Wrapper.h"
-#include "DataFormats/TrackSoA/interface/TrackLayout.h"
-#include "DataFormats/TrackSoA/interface/TrackSoAHost.h"
+#include "DataFormats/TrackSoA/interface/TracksSoA.h"
+#include "DataFormats/TrackSoA/interface/TracksHost.h"
 
 using namespace pixelTopology;
 using namespace pixelTrack;
+using namespace reco;
 
-#endif  // DataFormats_Track_src_classes_h
+#endif  // DataFormats_TrackSoA_src_classes_h

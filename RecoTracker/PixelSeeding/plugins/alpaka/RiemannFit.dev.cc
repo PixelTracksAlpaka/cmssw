@@ -7,7 +7,7 @@
 
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
+#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsSoA.h"
 #include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
 #include "RecoTracker/PixelTrackFitting/interface/alpaka/RiemannFit.h"
@@ -15,9 +15,9 @@
 #include "CAStructures.h"
 
 template <typename TrackerTraits>
-using Tuples = typename TrackSoA<TrackerTraits>::HitContainer;
+using Tuples = typename reco::TrackSoA<TrackerTraits>::HitContainer;
 template <typename TrackerTraits>
-using OutputSoAView = TrackSoAView<TrackerTraits>;
+using OutputSoAView = reco::TrackSoAView<TrackerTraits>;
 template <typename TrackerTraits>
 using TupleMultiplicity = caStructures::TupleMultiplicityT<TrackerTraits>;
 
@@ -26,14 +26,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   using namespace cms::alpakatools;
 
   template <int N, typename TrackerTraits>
-  class kernel_FastFit {  // TODO
+  class Kernel_FastFit { 
   public:
     template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
     ALPAKA_FN_ACC void operator()(TAcc const &acc,
                                   Tuples<TrackerTraits> const *__restrict__ foundNtuplets,
                                   TupleMultiplicity<TrackerTraits> const *__restrict__ tupleMultiplicity,
                                   uint32_t nHits,
-                                  TrackingRecHitAlpakaSoAConstView<TrackerTraits> hh,
+                                  TrackingRecHitSoAConstView<TrackerTraits> hh,
                                   pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const *__restrict__ cpeParams,
                                   double *__restrict__ phits,
                                   float *__restrict__ phits_ge,
@@ -51,7 +51,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
 #ifdef RIEMANN_DEBUG
       const uint32_t threadIdx(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
-      if (0 == threadIdx)
+      if (cms::alpakatools::once_per_grid(acc)) 
         printf("%d Ntuple of size %d for %d hits to fit\n", tupleMultiplicity->size(nHits), nHits, hitsInFit);
 #endif
 
@@ -93,7 +93,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   };
 
   template <int N, typename TrackerTraits>
-  class kernel_CircleFit {  // TODO
+  class Kernel_CircleFit {  
   public:
     template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
     ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -139,7 +139,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   };
 
   template <int N, typename TrackerTraits>
-  class kernel_LineFit {  // TODO
+  class Kernel_LineFit {  
   public:
     template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
     ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -209,7 +209,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   };
 
   template <typename TrackerTraits>
-  void HelixFit<TrackerTraits>::launchRiemannKernels(const TrackingRecHitAlpakaSoAConstView<TrackerTraits> &hv,
+  void HelixFit<TrackerTraits>::launchRiemannKernels(const TrackingRecHitSoAConstView<TrackerTraits> &hv,
                                                      pixelCPEforDevice::ParamsOnDeviceT<TrackerTraits> const *cpeParams,
                                                      uint32_t nhits,
                                                      uint32_t maxNumberOfTuples,
@@ -237,7 +237,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       // triplets
       alpaka::exec<Acc1D>(queue,
                           workDivTriplets,
-                          kernel_FastFit<3, TrackerTraits>{},
+                          Kernel_FastFit<3, TrackerTraits>{},
                           tuples_,
                           tupleMultiplicity_,
                           3,
@@ -250,7 +250,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       alpaka::exec<Acc1D>(queue,
                           workDivTriplets,
-                          kernel_CircleFit<3, TrackerTraits>{},
+                          Kernel_CircleFit<3, TrackerTraits>{},
                           tupleMultiplicity_,
                           3,
                           bField_,
@@ -262,7 +262,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       alpaka::exec<Acc1D>(queue,
                           workDivTriplets,
-                          kernel_LineFit<3, TrackerTraits>{},
+                          Kernel_LineFit<3, TrackerTraits>{},
                           tupleMultiplicity_,
                           3,
                           bField_,
@@ -276,7 +276,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       // quads
       alpaka::exec<Acc1D>(queue,
                           workDivQuadsPenta,
-                          kernel_FastFit<4, TrackerTraits>{},
+                          Kernel_FastFit<4, TrackerTraits>{},
                           tuples_,
                           tupleMultiplicity_,
                           4,
@@ -289,7 +289,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       alpaka::exec<Acc1D>(queue,
                           workDivQuadsPenta,
-                          kernel_CircleFit<4, TrackerTraits>{},
+                          Kernel_CircleFit<4, TrackerTraits>{},
                           tupleMultiplicity_,
                           4,
                           bField_,
@@ -301,7 +301,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       alpaka::exec<Acc1D>(queue,
                           workDivQuadsPenta,
-                          kernel_LineFit<4, TrackerTraits>{},
+                          Kernel_LineFit<4, TrackerTraits>{},
                           tupleMultiplicity_,
                           4,
                           bField_,
@@ -316,7 +316,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         // penta
         alpaka::exec<Acc1D>(queue,
                             workDivQuadsPenta,
-                            kernel_FastFit<4, TrackerTraits>{},
+                            Kernel_FastFit<4, TrackerTraits>{},
                             tuples_,
                             tupleMultiplicity_,
                             5,
@@ -329,7 +329,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         alpaka::exec<Acc1D>(queue,
                             workDivQuadsPenta,
-                            kernel_CircleFit<4, TrackerTraits>{},
+                            Kernel_CircleFit<4, TrackerTraits>{},
                             tupleMultiplicity_,
                             5,
                             bField_,
@@ -341,7 +341,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         alpaka::exec<Acc1D>(queue,
                             workDivQuadsPenta,
-                            kernel_LineFit<4, TrackerTraits>{},
+                            Kernel_LineFit<4, TrackerTraits>{},
                             tupleMultiplicity_,
                             5,
                             bField_,
@@ -355,7 +355,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         // penta all 5
         alpaka::exec<Acc1D>(queue,
                             workDivQuadsPenta,
-                            kernel_FastFit<5, TrackerTraits>{},
+                            Kernel_FastFit<5, TrackerTraits>{},
                             tuples_,
                             tupleMultiplicity_,
                             5,
@@ -368,7 +368,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         alpaka::exec<Acc1D>(queue,
                             workDivQuadsPenta,
-                            kernel_CircleFit<5, TrackerTraits>{},
+                            Kernel_CircleFit<5, TrackerTraits>{},
                             tupleMultiplicity_,
                             5,
                             bField_,
@@ -380,7 +380,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         alpaka::exec<Acc1D>(queue,
                             workDivQuadsPenta,
-                            kernel_LineFit<5, TrackerTraits>{},
+                            Kernel_LineFit<5, TrackerTraits>{},
                             tupleMultiplicity_,
                             5,
                             bField_,

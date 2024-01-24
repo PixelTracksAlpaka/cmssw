@@ -15,7 +15,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/workdivision.h"
 #include "RecoLocalTracker/SiPixelRecHits/interface/pixelCPEforDevice.h"
 #include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
+#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsSoA.h"
 
 #include "CAStructures.h"
 #include "CAHitNtupletGeneratorKernels.h"
@@ -50,10 +50,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using Quality = ::pixelTrack::Quality;
 
     template <typename TrackerTraits>
-    using TkSoAView = TrackSoAView<TrackerTraits>;
+    using TkSoAView = reco::TrackSoAView<TrackerTraits>;
 
     template <typename TrackerTraits>
-    using HitContainer = typename TrackSoA<TrackerTraits>::HitContainer;
+    using HitContainer = typename reco::TrackSoA<TrackerTraits>::HitContainer;
 
     template <typename TrackerTraits>
     using HitsConstView = typename CACellT<TrackerTraits>::HitsConstView;
@@ -67,7 +67,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using Counters = caHitNtupletGenerator::Counters;
 
     template <typename TrackerTraits>
-    class kernel_checkOverflows {
+    class Kernel_checkOverflows {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -82,12 +82,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     OuterHitOfCell<TrackerTraits> const *isOuterHitOfCell,
                                     int32_t nHits,
                                     uint32_t maxNumberOfDoublets,
-                                    Counters *counters) const {
-        const uint32_t threadIdx(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
+                                    Counters *counters) const { 
 
         auto &c = *counters;
         // counters once per event
-        if (0 == threadIdx) {
+         if (cms::alpakatools::once_per_grid(acc)){ 
           alpaka::atomicAdd(acc, &c.nEvents, 1ull, alpaka::hierarchy::Blocks{});
           alpaka::atomicAdd(acc, &c.nHits, static_cast<unsigned long long>(nHits), alpaka::hierarchy::Blocks{});
           alpaka::atomicAdd(acc, &c.nCells, static_cast<unsigned long long>(*nCells), alpaka::hierarchy::Blocks{});
@@ -100,7 +99,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         }
 
 #ifdef NTUPLE_DEBUGS
-        if (0 == threadIdx) {
+         if (cms::alpakatools::once_per_grid(acc)){
           printf("number of found cells %d \n found tuples %d with total hits %d out of %d\n",
                  *nCells,
                  apc->get().first,
@@ -122,7 +121,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         }
 #endif
 
-        if (0 == threadIdx) {
+        if (cms::alpakatools::once_per_grid(acc)){
           if (apc->get().first >= TrackerTraits::maxNumberOfQuadruplets)
             printf("Tuples overflow\n");
           if (*nCells >= maxNumberOfDoublets)
@@ -165,7 +164,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    class kernel_fishboneCleaner {
+    class Kernel_fishboneCleaner {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -188,7 +187,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     // remove shorter tracks if sharing a cell
     // It does not seem to affect efficiency in any way!
     template <typename TrackerTraits>
-    class kernel_earlyDuplicateRemover {
+    class Kernel_earlyDuplicateRemover {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -229,7 +228,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     // assume the above (so, short tracks already removed)
     template <typename TrackerTraits>
-    class kernel_fastDuplicateRemover {
+    class Kernel_fastDuplicateRemover {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -318,7 +317,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    class kernel_connect {
+    class Kernel_connect {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -401,7 +400,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
     };
     template <typename TrackerTraits>
-    class kernel_find_ntuplets {
+    class Kernel_find_ntuplets {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -417,8 +416,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         using Cell = CACellT<TrackerTraits>;
 
 #ifdef GPU_DEBUG
-        const uint32_t threadIdx(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
-        if (threadIdx == 0)
+        if (cms::alpakatools::once_per_grid(acc)) 
           printf("starting producing ntuplets from %d cells \n", *nCells);
 #endif
 
@@ -459,7 +457,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    class kernel_mark_used {
+    class Kernel_mark_used {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -475,7 +473,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    class kernel_countMultiplicity {
+    class Kernel_countMultiplicity {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -497,7 +495,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    class kernel_fillMultiplicity {
+    class Kernel_fillMultiplicity {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -519,7 +517,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    class kernel_classifyTracks {
+    class Kernel_classifyTracks {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -566,7 +564,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    class kernel_doStatsForTracks {
+    class Kernel_doStatsForTracks {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc, TkSoAView<TrackerTraits> tracks_view, Counters *counters) const {
@@ -584,7 +582,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    class kernel_countHitInTracks {
+    class Kernel_countHitInTracks {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -600,7 +598,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    class kernel_fillHitInTracks {
+    class Kernel_fillHitInTracks {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -616,7 +614,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    class kernel_fillHitDetIndices {
+    class Kernel_fillHitDetIndices {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -635,7 +633,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    class kernel_fillNLayers {
+    class Kernel_fillNLayers {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -643,8 +641,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     cms::alpakatools::AtomicPairCounter *apc) const {
         // clamp the number of tracks to the capacity of the SoA
         auto ntracks = std::min<int>(apc->get().first, tracks_view.metadata().size() - 1);
-        const uint32_t threadIdx(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);
-        if (0 == threadIdx)
+       
+        if (cms::alpakatools::once_per_grid(acc)) 
           tracks_view.nTracks() = ntracks;
         for (auto idx : cms::alpakatools::elements_with_stride(acc, ntracks)) {
           ALPAKA_ASSERT_OFFLOAD(TracksUtilities<TrackerTraits>::nHits(tracks_view, idx) >= 3);
@@ -654,7 +652,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    class kernel_doStatsForHitInTracks {
+    class Kernel_doStatsForHitInTracks {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -672,7 +670,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    class kernel_countSharedHit {
+    class Kernel_countSharedHit {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -712,7 +710,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    class kernel_markSharedHit {
+    class Kernel_markSharedHit {
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
                                     int const *__restrict__ nshared,
@@ -739,7 +737,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     // mostly for very forward triplets.....
     template <typename TrackerTraits>
-    class kernel_rejectDuplicate {
+    class Kernel_rejectDuplicate {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -796,7 +794,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    class kernel_sharedHitCleaner {
+    class Kernel_sharedHitCleaner {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -850,7 +848,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
     };
     template <typename TrackerTraits>
-    class kernel_tripletCleaner {
+    class Kernel_tripletCleaner {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -911,7 +909,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    class kernel_simpleTripletCleaner {
+    class Kernel_simpleTripletCleaner {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -959,7 +957,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    class kernel_print_found_ntuplets {
+    class Kernel_print_found_ntuplets {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc,
@@ -982,7 +980,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                  int(tracks_view[i].quality()),
                  nh,
                  tracks_view[i].nLayers(),
-                 TracksUtilities<TrackerTraits>::charge(tracks_view, i),
+		 TracksUtilities<TrackerTraits>::charge(tracks_view, i),
+                 //TracksUtilities<TrackerTraits>::charge(tracks_view, i),
                  tracks_view[i].pt(),
                  tracks_view[i].eta(),
                  TracksUtilities<TrackerTraits>::phi(tracks_view, i),
@@ -1000,7 +999,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       }
     };
 
-    class kernel_printCounters {
+    class Kernel_printCounters {
     public:
       template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
       ALPAKA_FN_ACC void operator()(TAcc const &acc, Counters const *counters) const {

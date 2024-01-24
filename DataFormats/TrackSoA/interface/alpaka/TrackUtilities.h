@@ -3,23 +3,23 @@
 
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
 #include "DataFormats/TrackSoA/interface/TrackDefinitions.h"
-#include "DataFormats/TrackSoA/interface/TrackLayout.h"
+#include "DataFormats/TrackSoA/interface/TracksSoA.h"
 
 // Methods that operate on View and ConstView of the TrackSoA, and cannot be class methods.
 template <typename TrackerTraits>
 struct TracksUtilities {
-  using TrackSoAView = typename TrackSoA<TrackerTraits>::template TrackSoAHeterogeneousLayout<>::View;
-  using TrackSoAConstView = typename TrackSoA<TrackerTraits>::template TrackSoAHeterogeneousLayout<>::ConstView;
-  using hindex_type = typename TrackSoA<TrackerTraits>::hindex_type;
+  using TrackSoAView = typename reco::TrackSoA<TrackerTraits>::template Layout<>::View;
+  using TrackSoAConstView = typename reco::TrackSoA<TrackerTraits>::template Layout<>::ConstView;
+  using hindex_type = typename reco::TrackSoA<TrackerTraits>::hindex_type;
 
   // State at the Beam spot
   // phi,tip,1/pt,cotan(theta),zip
-  ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE static constexpr float charge(const TrackSoAConstView &tracks, int32_t i) {
+/*  ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE static constexpr float charge(const TrackSoAConstView &tracks, int32_t i) {
     //was: std::copysign(1.f, tracks[i].state()(2)). Will be constexpr with C++23
     float v = tracks[i].state()(2);
     return float((0.0f < v) - (v < 0.0f));
   }
-
+*/
   ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE static constexpr float phi(const TrackSoAConstView &tracks, int32_t i) {
     return tracks[i].state()(0);
   }
@@ -107,8 +107,8 @@ namespace pixelTrack {
 
   template <typename TrackerTraits>
   struct QualityCutsT<TrackerTraits, pixelTopology::isPhase1Topology<TrackerTraits>> {
-    using TrackSoAView = typename TrackSoA<TrackerTraits>::template TrackSoAHeterogeneousLayout<>::View;
-    using TrackSoAConstView = typename TrackSoA<TrackerTraits>::template TrackSoAHeterogeneousLayout<>::ConstView;
+    using TrackSoAView = typename reco::TrackSoA<TrackerTraits>::template Layout<>::View;
+    using TrackSoAConstView = typename reco::TrackSoA<TrackerTraits>::template Layout<>::ConstView;
     using tracksHelper = TracksUtilities<TrackerTraits>;
     float chi2Coeff[4];
     float chi2MaxPt;  // GeV
@@ -170,8 +170,8 @@ namespace pixelTrack {
 
   template <typename TrackerTraits>
   struct QualityCutsT<TrackerTraits, pixelTopology::isPhase2Topology<TrackerTraits>> {
-    using TrackSoAView = typename TrackSoA<TrackerTraits>::template TrackSoAHeterogeneousLayout<>::View;
-    using TrackSoAConstView = typename TrackSoA<TrackerTraits>::template TrackSoAHeterogeneousLayout<>::ConstView;
+    using TrackSoAView = typename reco::TrackSoA<TrackerTraits>::template Layout<>::View;
+    using TrackSoAConstView = typename reco::TrackSoA<TrackerTraits>::template Layout<>::ConstView;
     using tracksHelper = TracksUtilities<TrackerTraits>;
 
     float maxChi2;

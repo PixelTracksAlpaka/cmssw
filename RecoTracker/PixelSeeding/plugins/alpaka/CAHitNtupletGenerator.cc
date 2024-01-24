@@ -2,7 +2,7 @@
 // Original Author: Felice Pantaleo, CERN
 //
 
-// #define GPU_DEBUG
+#define GPU_DEBUG
 // #define DUMP_GPU_TK_TUPLES
 
 #include <array>
@@ -10,10 +10,9 @@
 #include <functional>
 #include <vector>
 
-#include "DataFormats/TrackSoA/interface/alpaka/TrackSoACollection.h"
-#include "DataFormats/TrackSoA/interface/TrackSoADevice.h"
-#include "DataFormats/TrackSoA/interface/TrackSoAHost.h"
-#include "FWCore/Framework/interface/ConsumesCollector.h"
+#include "DataFormats/TrackSoA/interface/alpaka/TracksSoACollection.h"
+#include "DataFormats/TrackSoA/interface/TracksDevice.h"
+#include "DataFormats/TrackSoA/interface/TracksHost.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
@@ -53,10 +52,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     //This is needed to have the partial specialization for  isPhase1Topology/isPhase2Topology
     template <typename TrackerTraits, typename Enable = void>
-    struct topologyCuts {};
+    struct TopologyCuts {};
 
     template <typename TrackerTraits>
-    struct topologyCuts<TrackerTraits, isPhase1Topology<TrackerTraits>> {
+    struct TopologyCuts<TrackerTraits, isPhase1Topology<TrackerTraits>> {
       static constexpr CAParamsT<TrackerTraits> makeCACuts(edm::ParameterSet const& cfg) {
         return CAParamsT<TrackerTraits>{{cfg.getParameter<unsigned int>("maxNumberOfDoublets"),
                                          cfg.getParameter<unsigned int>("minHitsPerNtuplet"),
@@ -91,7 +90,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 
     template <typename TrackerTraits>
-    struct topologyCuts<TrackerTraits, isPhase2Topology<TrackerTraits>> {
+    struct TopologyCuts<TrackerTraits, isPhase2Topology<TrackerTraits>> {
       static constexpr CAParamsT<TrackerTraits> makeCACuts(edm::ParameterSet const& cfg) {
         return CAParamsT<TrackerTraits>{{cfg.getParameter<unsigned int>("maxNumberOfDoublets"),
                                          cfg.getParameter<unsigned int>("minHitsPerNtuplet"),
@@ -116,7 +115,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     //Cell Cuts, as they are the cuts have the same logic for Phase2 and Phase1
     //keeping them separate would allow further differentiation in the future
-    //moving them to topologyCuts and using the same syntax
+    //moving them to TopologyCuts and using the same syntax
     template <typename TrakterTraits>
     CellCutsT<TrakterTraits> makeCellCuts(edm::ParameterSet const& cfg) {
       return CellCutsT<TrakterTraits>{cfg.getParameter<bool>("doClusterCut"),
@@ -136,8 +135,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   CAHitNtupletGenerator<TrackerTraits>::CAHitNtupletGenerator(const edm::ParameterSet& cfg)
       : m_params(makeCommonParams(cfg),
                  makeCellCuts<TrackerTraits>(cfg),
-                 topologyCuts<TrackerTraits>::makeQualityCuts(cfg.getParameterSet("trackQualityCuts")),
-                 topologyCuts<TrackerTraits>::makeCACuts(cfg)) {
+                 TopologyCuts<TrackerTraits>::makeQualityCuts(cfg.getParameterSet("trackQualityCuts")),
+                 TopologyCuts<TrackerTraits>::makeCACuts(cfg)) {
 #ifdef DUMP_GPU_TK_TUPLES
     printf("TK: %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s\n",
            "tid",
@@ -163,7 +162,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   template <typename TrackerTraits>
   void CAHitNtupletGenerator<TrackerTraits>::fillPSetDescription(edm::ParameterSetDescription& desc) {
     fillDescriptionsCommon(desc);
-    edm::LogWarning("CAHitNtupletGenerator::fillPSetDescription")
+    throw cms::Exception("CAHitNtupletGenerator::fillPSetDescription") 
         << "Note: this fillPSetDescription is a dummy one. Most probably you are missing some parameters. \n"
            "please implement your TrackerTraits descriptions in CAHitNtupletGenerator. \n";
   }
@@ -294,10 +293,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   }
 
   template <typename TrackerTraits>
-  TrackSoACollection<TrackerTraits> CAHitNtupletGenerator<TrackerTraits>::makeTuplesAsync(
+  TracksSoACollection<TrackerTraits> CAHitNtupletGenerator<TrackerTraits>::makeTuplesAsync(
       HitsOnDevice const& hits_d, ParamsOnDevice const* cpeParams, float bfield, Queue& queue) const {
     using HelixFit = HelixFit<TrackerTraits>;
-    using TrackSoA = TrackSoACollection<TrackerTraits>;
+    using TrackSoA = TracksSoACollection<TrackerTraits>;
     using GPUKernels = CAHitNtupletGeneratorKernels<TrackerTraits>;
 
     TrackSoA tracks(queue);

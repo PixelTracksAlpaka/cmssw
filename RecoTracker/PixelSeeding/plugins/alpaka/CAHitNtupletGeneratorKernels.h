@@ -11,8 +11,8 @@
 
 #include "DataFormats/TrackSoA/interface/alpaka/TrackUtilities.h"
 #include "DataFormats/TrackSoA/interface/TrackDefinitions.h"
-#include "DataFormats/TrackSoA/interface/TrackSoAHost.h"
-#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsLayout.h"
+#include "DataFormats/TrackSoA/interface/TracksHost.h"
+#include "DataFormats/TrackingRecHitSoA/interface/TrackingRecHitsSoA.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/AtomicPairCounter.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/HistoContainer.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/memory.h"
@@ -210,9 +210,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using CAParams = caHitNtupletGenerator::CAParamsT<TrackerTraits>;
     using Counters = caHitNtupletGenerator::Counters;
 
-    using HitsView = TrackingRecHitAlpakaSoAView<TrackerTraits>;
-    using HitsConstView = TrackingRecHitAlpakaSoAConstView<TrackerTraits>;
-    using TkSoAView = TrackSoAView<TrackerTraits>;
+    using HitsView = TrackingRecHitSoAView<TrackerTraits>;
+    using HitsConstView = TrackingRecHitSoAConstView<TrackerTraits>;
+    using TkSoAView = reco::TrackSoAView<TrackerTraits>;
 
     using HitToTuple = caStructures::template HitToTupleT<TrackerTraits>;
     using TupleMultiplicity = caStructures::template TupleMultiplicityT<TrackerTraits>;
@@ -229,7 +229,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using CACell = CACellT<TrackerTraits>;
 
     using Quality = ::pixelTrack::Quality;
-    using HitContainer = typename TrackSoA<TrackerTraits>::HitContainer;
+    using HitContainer = typename reco::TrackSoA<TrackerTraits>::HitContainer;
 
     CAHitNtupletGeneratorKernels(Params const& params, uint32_t nhits, Queue& queue);
     ~CAHitNtupletGeneratorKernels() = default;

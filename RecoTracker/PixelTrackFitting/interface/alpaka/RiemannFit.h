@@ -2,7 +2,6 @@
 #define RecoPixelVertexing_PixelTrackFitting_interface_RiemannFit_h
 #include <alpaka/alpaka.hpp>
 #include "RecoTracker/PixelTrackFitting/interface/alpaka/FitUtils.h"
-#include "HeterogeneousCore/AlpakaInterface/interface/traits.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
