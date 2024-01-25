@@ -16,8 +16,8 @@
 
 #include "DataFormats/TrackSoA/interface/alpaka/TracksSoACollection.h"
 #include "DataFormats/TrackSoA/interface/TracksDevice.h"
-#include "DataFormats/Vertex/interface/alpaka/ZVertexSoACollection.h"
-#include "DataFormats/Vertex/interface/ZVertexSoADevice.h"
+#include "DataFormats/VertexSoA/interface/alpaka/ZVertexSoACollection.h"
+#include "DataFormats/VertexSoA/interface/ZVertexDevice.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/MakerMacros.h"
 
 #include "vertexFinder.h"
