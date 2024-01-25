@@ -15,13 +15,13 @@
 #include "DataFormats/TrackSoA/interface/TracksHost.h"
 
 template <typename TrackerTraits>
-class PixelTrackDumpAlpakaT : public edm::global::EDAnalyzer<> {
+class PixelTrackCheckSoAT : public edm::global::EDAnalyzer<> {
 public:
   using TkSoAHost = TracksHost<TrackerTraits>;
   using VertexSoAHost = ZVertexHost;
 
-  explicit PixelTrackDumpAlpakaT(const edm::ParameterSet& iConfig);
-  ~PixelTrackDumpAlpakaT() override = default;
+  explicit PixelTrackCheckSoAT(const edm::ParameterSet& iConfig);
+  ~PixelTrackCheckSoAT() override = default;
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
@@ -32,13 +32,13 @@ private:
 };
 
 template <typename TrackerTraits>
-PixelTrackDumpAlpakaT<TrackerTraits>::PixelTrackDumpAlpakaT(const edm::ParameterSet& iConfig) {
+PixelTrackCheckSoAT<TrackerTraits>::PixelTrackCheckSoAT(const edm::ParameterSet& iConfig) {
   tokenSoATrack_ = consumes(iConfig.getParameter<edm::InputTag>("pixelTrackSrc"));
   tokenSoAVertex_ = consumes(iConfig.getParameter<edm::InputTag>("pixelVertexSrc"));
 }
 
 template <typename TrackerTraits>
-void PixelTrackDumpAlpakaT<TrackerTraits>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void PixelTrackCheckSoAT<TrackerTraits>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
   desc.add<edm::InputTag>("pixelTrackSrc", edm::InputTag("pixelTracksAlpaka"));
   desc.add<edm::InputTag>("pixelVertexSrc", edm::InputTag("pixelVerticesAlpaka"));
@@ -46,7 +46,7 @@ void PixelTrackDumpAlpakaT<TrackerTraits>::fillDescriptions(edm::ConfigurationDe
 }
 
 template <typename TrackerTraits>
-void PixelTrackDumpAlpakaT<TrackerTraits>::analyze(edm::StreamID streamID,
+void PixelTrackCheckSoAT<TrackerTraits>::analyze(edm::StreamID streamID,
                                                    edm::Event const& iEvent,
                                                    const edm::EventSetup& iSetup) const {
   auto const& tracks = iEvent.get(tokenSoATrack_);
@@ -69,8 +69,8 @@ void PixelTrackDumpAlpakaT<TrackerTraits>::analyze(edm::StreamID streamID,
   assert(vertices.view().sortInd());
   assert(vertices.view().nvFinal());
 }
-using PixelTrackDumpAlpakaPhase1 = PixelTrackDumpAlpakaT<pixelTopology::Phase1>;
-using PixelTrackDumpAlpakaPhase2 = PixelTrackDumpAlpakaT<pixelTopology::Phase2>;
+using PixelTrackCheckSoAPhase1 = PixelTrackCheckSoAT<pixelTopology::Phase1>;
+using PixelTrackCheckSoAPhase2 = PixelTrackCheckSoAT<pixelTopology::Phase2>;
 
-DEFINE_FWK_MODULE(PixelTrackDumpAlpakaPhase1);
-DEFINE_FWK_MODULE(PixelTrackDumpAlpakaPhase2);
+DEFINE_FWK_MODULE(PixelTrackCheckSoAPhase1);
+DEFINE_FWK_MODULE(PixelTrackCheckSoAPhase2);
