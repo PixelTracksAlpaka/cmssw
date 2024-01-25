@@ -1,13 +1,3 @@
-// -*- C++ -*-
-// Package:    SiPixelCompareTrackSoAAlpaka
-// Class:      SiPixelCompareTrackSoAAlpaka
-//
-/**\class SiPixelCompareTrackSoAAlpaka SiPixelCompareTrackSoAAlpaka.cc
-*/
-//
-// Author: Suvankar Roy Chowdhury
-//
-
 // for string manipulations
 #include <fmt/printf.h>
 #include "DataFormats/Common/interface/Handle.h"
@@ -77,8 +67,8 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:
-  const edm::EDGetTokenT<PixelTrackSoA> tokenSoATrackCPU_;
-  const edm::EDGetTokenT<PixelTrackSoA> tokenSoATrackGPU_;
+  const edm::EDGetTokenT<PixelTrackSoA> tokenSoATrackHost_;
+  const edm::EDGetTokenT<PixelTrackSoA> tokenSoATrackDevice_;
   const std::string topFolderName_;
   const bool useQualityCut_;
   const pixelTrack::Quality minQuality_;
@@ -112,10 +102,10 @@ private:
   MonitorElement* htipdiffMatched_;
 
   //for matching eff vs region: derive the ratio at harvesting
-  MonitorElement* hpt_eta_tkAllCPU_;
-  MonitorElement* hpt_eta_tkAllCPUMatched_;
-  MonitorElement* hphi_z_tkAllCPU_;
-  MonitorElement* hphi_z_tkAllCPUMatched_;
+  MonitorElement* hpt_eta_tkAllHost_;
+  MonitorElement* hpt_eta_tkAllHostMatched_;
+  MonitorElement* hphi_z_tkAllHost_;
+  MonitorElement* hphi_z_tkAllHostMatched_;
 };
 
 //
@@ -124,8 +114,8 @@ private:
 
 template <typename T>
 SiPixelCompareTrackSoAAlpaka<T>::SiPixelCompareTrackSoAAlpaka(const edm::ParameterSet& iConfig)
-    : tokenSoATrackCPU_(consumes<PixelTrackSoA>(iConfig.getParameter<edm::InputTag>("pixelTrackSrcCPU"))),
-      tokenSoATrackGPU_(consumes<PixelTrackSoA>(iConfig.getParameter<edm::InputTag>("pixelTrackSrcGPU"))),
+    : tokenSoATrackHost_(consumes<PixelTrackSoA>(iConfig.getParameter<edm::InputTag>("pixelTrackSrcHost"))),
+      tokenSoATrackDevice_(consumes<PixelTrackSoA>(iConfig.getParameter<edm::InputTag>("pixelTrackSrcDevice"))),
       topFolderName_(iConfig.getParameter<std::string>("topFolderName")),
       useQualityCut_(iConfig.getParameter<bool>("useQualityCut")),
       minQuality_(pixelTrack::qualityByName(iConfig.getParameter<std::string>("minQuality"))),
@@ -137,74 +127,74 @@ SiPixelCompareTrackSoAAlpaka<T>::SiPixelCompareTrackSoAAlpaka(const edm::Paramet
 template <typename T>
 void SiPixelCompareTrackSoAAlpaka<T>::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   using helper = TracksUtilities<T>;
-  const auto& tsoaHandleCPU = iEvent.getHandle(tokenSoATrackCPU_);
-  const auto& tsoaHandleGPU = iEvent.getHandle(tokenSoATrackGPU_);
-  if (not tsoaHandleCPU or not tsoaHandleGPU) {
+  const auto& tsoaHandleHost = iEvent.getHandle(tokenSoATrackHost_);
+  const auto& tsoaHandleDevice = iEvent.getHandle(tokenSoATrackDevice_);
+  if (not tsoaHandleHost or not tsoaHandleDevice) {
     edm::LogWarning out("SiPixelCompareTrackSoAAlpaka");
-    if (not tsoaHandleCPU) {
+    if (not tsoaHandleHost) {
       out << "reference (cpu) tracks not found; ";
     }
-    if (not tsoaHandleGPU) {
+    if (not tsoaHandleDevice) {
       out << "target (gpu) tracks not found; ";
     }
     out << "the comparison will not run.";
     return;
   }
 
-  auto const& tsoaCPU = *tsoaHandleCPU;
-  auto const& tsoaGPU = *tsoaHandleGPU;
-  auto maxTracksCPU = tsoaCPU.view().metadata().size();  //this should be same for both?
-  auto maxTracksGPU = tsoaGPU.view().metadata().size();  //this should be same for both?
-  auto const* qualityCPU = tsoaCPU.view().quality();
-  auto const* qualityGPU = tsoaGPU.view().quality();
-  int32_t nTracksCPU = 0;
-  int32_t nTracksGPU = 0;
-  int32_t nLooseAndAboveTracksCPU = 0;
-  int32_t nLooseAndAboveTracksCPU_matchedGPU = 0;
-  int32_t nLooseAndAboveTracksGPU = 0;
+  auto const& tsoaHost = *tsoaHandleHost;
+  auto const& tsoaDevice = *tsoaHandleDevice;
+  auto maxTracksHost = tsoaHost.view().metadata().size();  //this should be same for both?
+  auto maxTracksDevice = tsoaDevice.view().metadata().size();  //this should be same for both?
+  auto const* qualityHost = tsoaHost.view().quality();
+  auto const* qualityDevice = tsoaDevice.view().quality();
+  int32_t nTracksHost = 0;
+  int32_t nTracksDevice = 0;
+  int32_t nLooseAndAboveTracksHost = 0;
+  int32_t nLooseAndAboveTracksHost_matchedDevice = 0;
+  int32_t nLooseAndAboveTracksDevice = 0;
 
-  //Loop over GPU tracks and store the indices of the loose tracks. Whats happens if useQualityCut_ is false?
-  std::vector<int32_t> looseTrkidxGPU;
-  for (int32_t jt = 0; jt < maxTracksGPU; ++jt) {
-    if (helper::nHits(tsoaGPU.view(), jt) == 0)
+  //Loop over Device tracks and store the indices of the loose tracks. Whats happens if useQualityCut_ is false?
+  std::vector<int32_t> looseTrkidxDevice;
+  for (int32_t jt = 0; jt < maxTracksDevice; ++jt) {
+    if (helper::nHits(tsoaDevice.view(), jt) == 0)
       break;  // this is a guard
-    if (!(tsoaGPU.view()[jt].pt() > 0.))
+    if (!(tsoaDevice.view()[jt].pt() > 0.))
       continue;
-    nTracksGPU++;
-    if (useQualityCut_ && qualityGPU[jt] < minQuality_)
+    nTracksDevice++;
+    if (useQualityCut_ && qualityDevice[jt] < minQuality_)
       continue;
-    nLooseAndAboveTracksGPU++;
-    looseTrkidxGPU.emplace_back(jt);
+    nLooseAndAboveTracksDevice++;
+    looseTrkidxDevice.emplace_back(jt);
   }
 
-  //Now loop over CPU tracks//nested loop for loose gPU tracks
-  for (int32_t it = 0; it < maxTracksCPU; ++it) {
-    int nHitsCPU = helper::nHits(tsoaCPU.view(), it);
+  //Now loop over Host tracks//nested loop for loose gPU tracks
+  for (int32_t it = 0; it < maxTracksHost; ++it) {
+    int nHitsHost = helper::nHits(tsoaHost.view(), it);
 
-    if (nHitsCPU == 0)
+    if (nHitsHost == 0)
       break;  // this is a guard
 
-    float ptCPU = tsoaCPU.view()[it].pt();
-    float etaCPU = tsoaCPU.view()[it].eta();
-    float phiCPU = helper::phi(tsoaCPU.view(), it);
-    float zipCPU = helper::zip(tsoaCPU.view(), it);
-    float tipCPU = helper::tip(tsoaCPU.view(), it);
+    float ptHost = tsoaHost.view()[it].pt();
+    float etaHost = tsoaHost.view()[it].eta();
+    float phiHost = helper::phi(tsoaHost.view(), it);
+    float zipHost = helper::zip(tsoaHost.view(), it);
+    float tipHost = helper::tip(tsoaHost.view(), it);
 
-    if (!(ptCPU > 0.))
+    if (!(ptHost > 0.))
       continue;
-    nTracksCPU++;
-    if (useQualityCut_ && qualityCPU[it] < minQuality_)
+    nTracksHost++;
+    if (useQualityCut_ && qualityHost[it] < minQuality_)
       continue;
-    nLooseAndAboveTracksCPU++;
-    //Now loop over loose GPU trk and find the closest in DeltaR//do we need pt cut?
+    nLooseAndAboveTracksHost++;
+    //Now loop over loose Device trk and find the closest in DeltaR//do we need pt cut?
     const int32_t notFound = -1;
     int32_t closestTkidx = notFound;
     float mindr2 = dr2cut_;
 
-    for (auto gid : looseTrkidxGPU) {
-      float etaGPU = tsoaGPU.view()[gid].eta();
-      float phiGPU = helper::phi(tsoaGPU.view(), gid);
-      float dr2 = reco::deltaR2(etaCPU, phiCPU, etaGPU, phiGPU);
+    for (auto gid : looseTrkidxDevice) {
+      float etaDevice = tsoaDevice.view()[gid].eta();
+      float phiDevice = helper::phi(tsoaDevice.view(), gid);
+      float dr2 = reco::deltaR2(etaHost, phiHost, etaDevice, phiDevice);
       if (dr2 > dr2cut_)
         continue;  // this is arbitrary
       if (mindr2 > dr2) {
@@ -213,35 +203,35 @@ void SiPixelCompareTrackSoAAlpaka<T>::analyze(const edm::Event& iEvent, const ed
       }
     }
 
-    hpt_eta_tkAllCPU_->Fill(etaCPU, ptCPU);  //all CPU tk
-    hphi_z_tkAllCPU_->Fill(phiCPU, zipCPU);
+    hpt_eta_tkAllHost_->Fill(etaHost, ptHost);  //all Host tk
+    hphi_z_tkAllHost_->Fill(phiHost, zipHost);
     if (closestTkidx == notFound)
       continue;
-    nLooseAndAboveTracksCPU_matchedGPU++;
+    nLooseAndAboveTracksHost_matchedDevice++;
 
-    hchi2_->Fill(tsoaCPU.view()[it].chi2(), tsoaGPU.view()[closestTkidx].chi2());
-    hCharge_->Fill(helper::charge(tsoaCPU.view(), it), helper::charge(tsoaGPU.view(), closestTkidx));
-    hnHits_->Fill(helper::nHits(tsoaCPU.view(), it), helper::nHits(tsoaGPU.view(), closestTkidx));
-    hnLayers_->Fill(tsoaCPU.view()[it].nLayers(), tsoaGPU.view()[closestTkidx].nLayers());
-    hpt_->Fill(tsoaCPU.view()[it].pt(), tsoaGPU.view()[closestTkidx].pt());
-    hptLogLog_->Fill(tsoaCPU.view()[it].pt(), tsoaGPU.view()[closestTkidx].pt());
-    heta_->Fill(etaCPU, tsoaGPU.view()[closestTkidx].eta());
-    hphi_->Fill(phiCPU, helper::phi(tsoaGPU.view(), closestTkidx));
-    hz_->Fill(zipCPU, helper::zip(tsoaGPU.view(), closestTkidx));
-    htip_->Fill(tipCPU, helper::tip(tsoaGPU.view(), closestTkidx));
-    hptdiffMatched_->Fill(ptCPU - tsoaGPU.view()[closestTkidx].pt());
-    hCurvdiffMatched_->Fill((helper::charge(tsoaCPU.view(), it) / tsoaCPU.view()[it].pt()) -
-                            (helper::charge(tsoaGPU.view(), closestTkidx) / tsoaGPU.view()[closestTkidx].pt()));
-    hetadiffMatched_->Fill(etaCPU - tsoaGPU.view()[closestTkidx].eta());
-    hphidiffMatched_->Fill(reco::deltaPhi(phiCPU, helper::phi(tsoaGPU.view(), closestTkidx)));
-    hzdiffMatched_->Fill(zipCPU - helper::zip(tsoaGPU.view(), closestTkidx));
-    htipdiffMatched_->Fill(tipCPU - helper::tip(tsoaGPU.view(), closestTkidx));
-    hpt_eta_tkAllCPUMatched_->Fill(etaCPU, tsoaCPU.view()[it].pt());  //matched to gpu
-    hphi_z_tkAllCPUMatched_->Fill(etaCPU, zipCPU);
+    hchi2_->Fill(tsoaHost.view()[it].chi2(), tsoaDevice.view()[closestTkidx].chi2());
+    hCharge_->Fill(helper::charge(tsoaHost.view(), it), helper::charge(tsoaDevice.view(), closestTkidx));
+    hnHits_->Fill(helper::nHits(tsoaHost.view(), it), helper::nHits(tsoaDevice.view(), closestTkidx));
+    hnLayers_->Fill(tsoaHost.view()[it].nLayers(), tsoaDevice.view()[closestTkidx].nLayers());
+    hpt_->Fill(tsoaHost.view()[it].pt(), tsoaDevice.view()[closestTkidx].pt());
+    hptLogLog_->Fill(tsoaHost.view()[it].pt(), tsoaDevice.view()[closestTkidx].pt());
+    heta_->Fill(etaHost, tsoaDevice.view()[closestTkidx].eta());
+    hphi_->Fill(phiHost, helper::phi(tsoaDevice.view(), closestTkidx));
+    hz_->Fill(zipHost, helper::zip(tsoaDevice.view(), closestTkidx));
+    htip_->Fill(tipHost, helper::tip(tsoaDevice.view(), closestTkidx));
+    hptdiffMatched_->Fill(ptHost - tsoaDevice.view()[closestTkidx].pt());
+    hCurvdiffMatched_->Fill((helper::charge(tsoaHost.view(), it) / tsoaHost.view()[it].pt()) -
+                            (helper::charge(tsoaDevice.view(), closestTkidx) / tsoaDevice.view()[closestTkidx].pt()));
+    hetadiffMatched_->Fill(etaHost - tsoaDevice.view()[closestTkidx].eta());
+    hphidiffMatched_->Fill(reco::deltaPhi(phiHost, helper::phi(tsoaDevice.view(), closestTkidx)));
+    hzdiffMatched_->Fill(zipHost - helper::zip(tsoaDevice.view(), closestTkidx));
+    htipdiffMatched_->Fill(tipHost - helper::tip(tsoaDevice.view(), closestTkidx));
+    hpt_eta_tkAllHostMatched_->Fill(etaHost, tsoaHost.view()[it].pt());  //matched to gpu
+    hphi_z_tkAllHostMatched_->Fill(etaHost, zipHost);
   }
-  hnTracks_->Fill(nTracksCPU, nTracksGPU);
-  hnLooseAndAboveTracks_->Fill(nLooseAndAboveTracksCPU, nLooseAndAboveTracksGPU);
-  hnLooseAndAboveTracks_matched_->Fill(nLooseAndAboveTracksCPU, nLooseAndAboveTracksCPU_matchedGPU);
+  hnTracks_->Fill(nTracksHost, nTracksDevice);
+  hnLooseAndAboveTracks_->Fill(nLooseAndAboveTracksHost, nLooseAndAboveTracksDevice);
+  hnLooseAndAboveTracks_matched_->Fill(nLooseAndAboveTracksHost, nLooseAndAboveTracksHost_matchedDevice);
 }
 
 //
@@ -258,28 +248,28 @@ void SiPixelCompareTrackSoAAlpaka<T>::bookHistograms(DQMStore::IBooker& iBook,
   std::string toRep = "Number of tracks";
   // FIXME: all the 2D correlation plots are quite heavy in terms of memory consumption, so a as soon as DQM supports THnSparse
   // these should be moved to a less resource consuming format
-  hnTracks_ = iBook.book2I("nTracks", fmt::sprintf("%s per event; CPU; GPU",toRep), 501, -0.5, 500.5, 501, -0.5, 500.5);
-  hnLooseAndAboveTracks_ = iBook.book2I("nLooseAndAboveTracks", fmt::sprintf("%s (quality #geq loose) per event; CPU; GPU",toRep), 501, -0.5, 500.5, 501, -0.5, 500.5);
-  hnLooseAndAboveTracks_matched_ = iBook.book2I("nLooseAndAboveTracks_matched", fmt::sprintf("%s (quality #geq loose) per event; CPU; GPU",toRep), 501, -0.5, 500.5, 501, -0.5, 500.5);
+  hnTracks_ = iBook.book2I("nTracks", fmt::format("{} per event; Host; Device",toRep), 501, -0.5, 500.5, 501, -0.5, 500.5);
+  hnLooseAndAboveTracks_ = iBook.book2I("nLooseAndAboveTracks", fmt::format("{} (quality #geq loose) per event; Host; Device",toRep), 501, -0.5, 500.5, 501, -0.5, 500.5);
+  hnLooseAndAboveTracks_matched_ = iBook.book2I("nLooseAndAboveTracks_matched", fmt::format("{} (quality #geq loose) per event; Host; Device",toRep), 501, -0.5, 500.5, 501, -0.5, 500.5);
 
   toRep = "Number of all RecHits per track (quality #geq loose)";
-  hnHits_ = iBook.book2I("nRecHits", fmt::sprintf("%s;CPU;GPU",toRep), 15, -0.5, 14.5, 15, -0.5, 14.5);
+  hnHits_ = iBook.book2I("nRecHits", fmt::format("{};Host;Device",toRep), 15, -0.5, 14.5, 15, -0.5, 14.5);
 
   toRep = "Number of all layers per track (quality #geq loose)";
-  hnLayers_ = iBook.book2I("nLayers", fmt::sprintf("%s;CPU;GPU",toRep), 15, -0.5, 14.5, 15, -0.5, 14.5);
+  hnLayers_ = iBook.book2I("nLayers", fmt::format("{};Host;Device",toRep), 15, -0.5, 14.5, 15, -0.5, 14.5);
 
   toRep = "Track (quality #geq loose) #chi^{2}/ndof";
-  hchi2_ = iBook.book2I("nChi2ndof", fmt::sprintf("%s;CPU;GPU",toRep), 40, 0., 20., 40, 0., 20.);
+  hchi2_ = iBook.book2I("nChi2ndof", fmt::format("{};Host;Device",toRep), 40, 0., 20., 40, 0., 20.);
 
   toRep = "Track (quality #geq loose) charge";
-  hCharge_ = iBook.book2I("charge",fmt::sprintf("%s;CPU;GPU",toRep),3, -1.5, 1.5, 3, -1.5, 1.5);
+  hCharge_ = iBook.book2I("charge",fmt::format("{};Host;Device",toRep),3, -1.5, 1.5, 3, -1.5, 1.5);
 
-  hpt_ = iBook.book2I("pt", "Track (quality #geq loose) p_{T} [GeV];CPU;GPU", 200, 0., 200., 200, 0., 200.);
-  hptLogLog_ = make2DIfLog(iBook, true, true, "ptLogLog", "Track (quality #geq loose) p_{T} [GeV];CPU;GPU", 200, log10(0.5), log10(200.), 200, log10(0.5), log10(200.));
-  heta_ = iBook.book2I("eta", "Track (quality #geq loose) #eta;CPU;GPU", 30, -3., 3., 30, -3., 3.);
-  hphi_ = iBook.book2I("phi", "Track (quality #geq loose) #phi;CPU;GPU", 30, -M_PI, M_PI, 30, -M_PI, M_PI);
-  hz_ = iBook.book2I("z", "Track (quality #geq loose) z [cm];CPU;GPU", 30, -30., 30., 30, -30., 30.);
-  htip_ = iBook.book2I("tip", "Track (quality #geq loose) TIP [cm];CPU;GPU", 100, -0.5, 0.5, 100, -0.5, 0.5);
+  hpt_ = iBook.book2I("pt", "Track (quality #geq loose) p_{T} [GeV];Host;Device", 200, 0., 200., 200, 0., 200.);
+  hptLogLog_ = make2DIfLog(iBook, true, true, "ptLogLog", "Track (quality #geq loose) p_{T} [GeV];Host;Device", 200, log10(0.5), log10(200.), 200, log10(0.5), log10(200.));
+  heta_ = iBook.book2I("eta", "Track (quality #geq loose) #eta;Host;Device", 30, -3., 3., 30, -3., 3.);
+  hphi_ = iBook.book2I("phi", "Track (quality #geq loose) #phi;Host;Device", 30, -M_PI, M_PI, 30, -M_PI, M_PI);
+  hz_ = iBook.book2I("z", "Track (quality #geq loose) z [cm];Host;Device", 30, -30., 30., 30, -30., 30.);
+  htip_ = iBook.book2I("tip", "Track (quality #geq loose) TIP [cm];Host;Device", 100, -0.5, 0.5, 100, -0.5, 0.5);
   //1D difference plots
   hptdiffMatched_ = iBook.book1D("ptdiffmatched", " p_{T} diff [GeV] between matched tracks; #Delta p_{T} [GeV]", 60, -30., 30.);
   hCurvdiffMatched_ = iBook.book1D("curvdiffmatched", "q/p_{T} diff [GeV] between matched tracks; #Delta q/p_{T} [GeV]", 60, -30., 30.);
@@ -288,11 +278,11 @@ void SiPixelCompareTrackSoAAlpaka<T>::bookHistograms(DQMStore::IBooker& iBook,
   hzdiffMatched_ = iBook.book1D("zdiffmatched", " z diff between matched tracks; #Delta z [cm]", 300, -1.5, 1.5);
   htipdiffMatched_ = iBook.book1D("tipdiffmatched", " TIP diff between matched tracks; #Delta TIP [cm]", 300, -1.5, 1.5);
   //2D plots for eff
-  hpt_eta_tkAllCPU_ = iBook.book2I("ptetatrkAllCPU", "Track (quality #geq loose) on CPU; #eta; p_{T} [GeV];", 30, -M_PI, M_PI, 200, 0., 200.);
-  hpt_eta_tkAllCPUMatched_ = iBook.book2I("ptetatrkAllCPUmatched", "Track (quality #geq loose) on CPU matched to GPU track; #eta; p_{T} [GeV];", 30, -M_PI, M_PI, 200, 0., 200.);
+  hpt_eta_tkAllHost_ = iBook.book2I("ptetatrkAllHost", "Track (quality #geq loose) on Host; #eta; p_{T} [GeV];", 30, -M_PI, M_PI, 200, 0., 200.);
+  hpt_eta_tkAllHostMatched_ = iBook.book2I("ptetatrkAllHostmatched", "Track (quality #geq loose) on Host matched to Device track; #eta; p_{T} [GeV];", 30, -M_PI, M_PI, 200, 0., 200.);
 
-  hphi_z_tkAllCPU_ = iBook.book2I("phiztrkAllCPU", "Track (quality #geq loose) on CPU; #phi; z [cm];",  30, -M_PI, M_PI, 30, -30., 30.);
-  hphi_z_tkAllCPUMatched_ = iBook.book2I("phiztrkAllCPUmatched", "Track (quality #geq loose) on CPU; #phi; z [cm];", 30, -M_PI, M_PI, 30, -30., 30.);
+  hphi_z_tkAllHost_ = iBook.book2I("phiztrkAllHost", "Track (quality #geq loose) on Host; #phi; z [cm];",  30, -M_PI, M_PI, 30, -30., 30.);
+  hphi_z_tkAllHostMatched_ = iBook.book2I("phiztrkAllHostmatched", "Track (quality #geq loose) on Host; #phi; z [cm];", 30, -M_PI, M_PI, 30, -30., 30.);
 
 }
 
@@ -300,8 +290,8 @@ template<typename T>
 void SiPixelCompareTrackSoAAlpaka<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   // monitorpixelTrackSoA
   edm::ParameterSetDescription desc;
-  desc.add<edm::InputTag>("pixelTrackSrcCPU", edm::InputTag("pixelTracksAlpakaSerial"));
-  desc.add<edm::InputTag>("pixelTrackSrcGPU", edm::InputTag("pixelTracksAlpaka"));
+  desc.add<edm::InputTag>("pixelTrackSrcHost", edm::InputTag("pixelTracksAlpakaSerial"));
+  desc.add<edm::InputTag>("pixelTrackSrcDevice", edm::InputTag("pixelTracksAlpaka"));
   desc.add<std::string>("topFolderName", "SiPixelHeterogeneous/PixelTrackCompareDeviceVSHost");
   desc.add<bool>("useQualityCut", true);
   desc.add<std::string>("minQuality", "loose");

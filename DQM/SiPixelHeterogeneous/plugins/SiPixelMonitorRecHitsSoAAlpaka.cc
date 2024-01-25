@@ -31,7 +31,7 @@ public:
 private:
   const edm::ESGetToken<TrackerGeometry, TrackerDigiGeometryRecord> geomToken_;
   const edm::ESGetToken<TrackerTopology, TrackerTopologyRcd> topoToken_;
-  const edm::EDGetTokenT<HitsOnHost> tokenSoAHitsCPU_;
+  const edm::EDGetTokenT<HitsOnHost> tokenSoAHits_;
   const std::string topFolderName_;
   const TrackerGeometry* tkGeom_ = nullptr;
   const TrackerTopology* tTopo_ = nullptr;
@@ -65,7 +65,7 @@ template <typename T>
 SiPixelMonitorRecHitsSoAAlpaka<T>::SiPixelMonitorRecHitsSoAAlpaka(const edm::ParameterSet& iConfig)
     : geomToken_(esConsumes<TrackerGeometry, TrackerDigiGeometryRecord, edm::Transition::BeginRun>()),
       topoToken_(esConsumes<TrackerTopology, TrackerTopologyRcd, edm::Transition::BeginRun>()),
-      tokenSoAHitsCPU_(consumes(iConfig.getParameter<edm::InputTag>("pixelHitsSrc"))),
+      tokenSoAHits_(consumes(iConfig.getParameter<edm::InputTag>("pixelHitsSrc"))),
       topFolderName_(iConfig.getParameter<std::string>("TopFolderName")) {}
 
 //
@@ -82,7 +82,7 @@ void SiPixelMonitorRecHitsSoAAlpaka<T>::dqmBeginRun(const edm::Run& iRun, const 
 //
 template <typename T>
 void SiPixelMonitorRecHitsSoAAlpaka<T>::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  const auto& rhsoaHandle = iEvent.getHandle(tokenSoAHitsCPU_);
+  const auto& rhsoaHandle = iEvent.getHandle(tokenSoAHits_);
   if (!rhsoaHandle.isValid()) {
     edm::LogWarning("SiPixelMonitorRecHitsSoAAlpaka") << "No RecHits SoA found \n returning!";
     return;

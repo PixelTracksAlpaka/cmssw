@@ -71,8 +71,8 @@ template <typename T>
 SiPixelCompareRecHitsSoAAlpaka<T>::SiPixelCompareRecHitsSoAAlpaka(const edm::ParameterSet& iConfig)
     : geomToken_(esConsumes<TrackerGeometry, TrackerDigiGeometryRecord, edm::Transition::BeginRun>()),
       topoToken_(esConsumes<TrackerTopology, TrackerTopologyRcd, edm::Transition::BeginRun>()),
-      tokenSoAHitsHost_(consumes(iConfig.getParameter<edm::InputTag>("pixelHitsSrcCPU"))),
-      tokenSoAHitsDevice_(consumes(iConfig.getParameter<edm::InputTag>("pixelHitsSrcGPU"))),
+      tokenSoAHitsHost_(consumes(iConfig.getParameter<edm::InputTag>("pixelHitsSrcHost"))),
+      tokenSoAHitsDevice_(consumes(iConfig.getParameter<edm::InputTag>("pixelHitsSrcDevice"))),
       topFolderName_(iConfig.getParameter<std::string>("topFolderName")),
       mind2cut_(iConfig.getParameter<double>("minD2cut")) {}
 
@@ -227,8 +227,8 @@ template<typename T>
 void SiPixelCompareRecHitsSoAAlpaka<T>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   // monitorpixelRecHitsSoAAlpaka
   edm::ParameterSetDescription desc;
-  desc.add<edm::InputTag>("pixelHitsSrcCPU", edm::InputTag("siPixelRecHitsPreSplittingAlpakaSerial"));
-  desc.add<edm::InputTag>("pixelHitsSrcGPU", edm::InputTag("siPixelRecHitsPreSplittingAlpaka"));
+  desc.add<edm::InputTag>("pixelHitsSrcHost", edm::InputTag("siPixelRecHitsPreSplittingAlpakaSerial"));
+  desc.add<edm::InputTag>("pixelHitsSrcDevice", edm::InputTag("siPixelRecHitsPreSplittingAlpaka"));
   desc.add<std::string>("topFolderName", "SiPixelHeterogeneous/PixelRecHitsCompareDeviceVSHost");
   desc.add<double>("minD2cut", 0.0001);
   descriptions.addWithDefaultLabel(desc);
