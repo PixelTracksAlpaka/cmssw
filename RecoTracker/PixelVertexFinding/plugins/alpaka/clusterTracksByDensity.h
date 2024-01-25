@@ -13,7 +13,7 @@
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace vertexFinder {
-    using VtxSoAView = ::zVertex::ZVertexSoAView;
+    using VtxSoAView = ::reco::ZVertexSoAView;
     using WsSoAView = ::vertexFinder::PixelVertexWorkSpaceSoAView;
     // this algo does not really scale as it works in a single block...
     // enough for <10K tracks we have

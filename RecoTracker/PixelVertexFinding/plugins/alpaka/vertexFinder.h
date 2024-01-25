@@ -17,7 +17,7 @@
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace vertexFinder {
     using namespace cms::alpakatools;
-    using VtxSoAView = ::zVertex::ZVertexSoAView;
+    using VtxSoAView = ::reco::ZVertexSoAView;
     using WsSoAView = ::vertexFinder::PixelVertexWorkSpaceSoAView;
 
     class Init {
@@ -56,7 +56,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       ~Producer() = default;
 
-      ZVertexCollection makeAsync(Queue &queue, const TkSoAConstView &tracks_view, float ptMin, float ptMax) const;
+      ZVertexSoACollection makeAsync(Queue &queue, const TkSoAConstView &tracks_view, float ptMin, float ptMax) const;
 
     private:
       const bool oneKernel_;     // run everything (cluster,fit,split,sort) in one kernel. Uses only density clusterizer

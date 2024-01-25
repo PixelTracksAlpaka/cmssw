@@ -12,7 +12,7 @@
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace vertexFinder {
-    using VtxSoAView = ::zVertex::ZVertexSoAView;
+    using VtxSoAView = ::reco::ZVertexSoAView;
     using WsSoAView = ::vertexFinder::PixelVertexWorkSpaceSoAView;
     template <typename TAcc>
     ALPAKA_FN_ACC ALPAKA_FN_INLINE __attribute__((always_inline)) void splitVertices(const TAcc& acc,

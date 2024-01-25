@@ -48,7 +48,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     const float ptMax_;
 
     device::EDGetToken<TkSoADevice> tokenDeviceTrack_;
-    device::EDPutToken<ZVertexCollection> tokenDeviceVertex_;
+    device::EDPutToken<ZVertexSoACollection> tokenDeviceVertex_;
   };
 
   template <typename TrackerTraits>

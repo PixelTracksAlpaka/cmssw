@@ -16,7 +16,7 @@
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace vertexFinder {
-    using VtxSoAView = ::zVertex::ZVertexSoAView;
+    using VtxSoAView = ::reco::ZVertexSoAView;
     using WsSoAView = ::vertexFinder::PixelVertexWorkSpaceSoAView;
 
     template <typename TAcc>
