@@ -244,7 +244,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     static void printCounters();
 
-  protected:
+  private:
     // params
     Params const& m_params;
     cms::alpakatools::device_buffer<Device, Counters> counters_;

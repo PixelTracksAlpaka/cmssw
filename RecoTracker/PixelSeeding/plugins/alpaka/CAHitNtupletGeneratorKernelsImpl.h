@@ -980,7 +980,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                  int(tracks_view[i].quality()),
                  nh,
                  tracks_view[i].nLayers(),
-		 TracksUtilities<TrackerTraits>::charge(tracks_view, i),
+		 reco::charge(tracks_view, i),
                  //TracksUtilities<TrackerTraits>::charge(tracks_view, i),
                  tracks_view[i].pt(),
                  tracks_view[i].eta(),
