@@ -43,14 +43,6 @@ namespace reco {
   template <typename TrackerTraits>
   using TrackSoAConstView = typename reco::TrackSoA<TrackerTraits>::template Layout<>::ConstView;
 
-  template <typename TrackerTraits>
-  ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE static constexpr float charge(const TrackSoAConstView<TrackerTraits> &tracks,
-                                                                    int32_t i) {
-    //was: std::copysign(1.f, tracks[i].state()(2)). Will be constexpr with C++23
-    float v = tracks[i].state()(2);
-    return float((0.0f < v) - (v < 0.0f));
-  }
-
 }  // namespace reco
 
 #endif

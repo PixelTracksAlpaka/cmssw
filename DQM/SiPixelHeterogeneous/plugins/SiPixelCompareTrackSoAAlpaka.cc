@@ -210,7 +210,7 @@ void SiPixelCompareTrackSoAAlpaka<T>::analyze(const edm::Event& iEvent, const ed
     nLooseAndAboveTracksHost_matchedDevice++;
 
     hchi2_->Fill(tsoaHost.view()[it].chi2(), tsoaDevice.view()[closestTkidx].chi2());
-    hCharge_->Fill(reco::charge<T>(tsoaHost.view(), it), reco::charge<T>(tsoaDevice.view(), closestTkidx));
+    hCharge_->Fill(helper::charge(tsoaHost.view(), it), helper::charge(tsoaDevice.view(), closestTkidx));
     hnHits_->Fill(helper::nHits(tsoaHost.view(), it), helper::nHits(tsoaDevice.view(), closestTkidx));
     hnLayers_->Fill(tsoaHost.view()[it].nLayers(), tsoaDevice.view()[closestTkidx].nLayers());
     hpt_->Fill(tsoaHost.view()[it].pt(), tsoaDevice.view()[closestTkidx].pt());
@@ -220,8 +220,8 @@ void SiPixelCompareTrackSoAAlpaka<T>::analyze(const edm::Event& iEvent, const ed
     hz_->Fill(zipHost, helper::zip(tsoaDevice.view(), closestTkidx));
     htip_->Fill(tipHost, helper::tip(tsoaDevice.view(), closestTkidx));
     hptdiffMatched_->Fill(ptHost - tsoaDevice.view()[closestTkidx].pt());
-    hCurvdiffMatched_->Fill((reco::charge<T>(tsoaHost.view(), it) / tsoaHost.view()[it].pt()) -
-                            (reco::charge<T>(tsoaDevice.view(), closestTkidx) / tsoaDevice.view()[closestTkidx].pt()));
+    hCurvdiffMatched_->Fill((helper::charge(tsoaHost.view(), it) / tsoaHost.view()[it].pt()) -
+                            (helper::charge(tsoaDevice.view(), closestTkidx) / tsoaDevice.view()[closestTkidx].pt()));
     hetadiffMatched_->Fill(etaHost - tsoaDevice.view()[closestTkidx].eta());
     hphidiffMatched_->Fill(reco::deltaPhi(phiHost, helper::phi(tsoaDevice.view(), closestTkidx)));
     hzdiffMatched_->Fill(zipHost - helper::zip(tsoaDevice.view(), closestTkidx));

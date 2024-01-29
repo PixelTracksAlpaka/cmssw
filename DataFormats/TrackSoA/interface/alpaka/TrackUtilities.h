@@ -14,12 +14,12 @@ struct TracksUtilities {
 
   // State at the Beam spot
   // phi,tip,1/pt,cotan(theta),zip
-  /*  ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE static constexpr float charge(const TrackSoAConstView &tracks, int32_t i) {
+  ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE static constexpr float charge(const TrackSoAConstView &tracks, int32_t i) {
     //was: std::copysign(1.f, tracks[i].state()(2)). Will be constexpr with C++23
     float v = tracks[i].state()(2);
     return float((0.0f < v) - (v < 0.0f));
   }
-*/
+
   ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE static constexpr float phi(const TrackSoAConstView &tracks, int32_t i) {
     return tracks[i].state()(0);
   }
