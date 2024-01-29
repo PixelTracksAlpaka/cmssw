@@ -640,7 +640,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         auto moduleStartFirstElement =
             cms::alpakatools::make_device_view(alpaka::getDev(queue), clusters_d->view().moduleStart(), 1u);
         alpaka::memcpy(queue, nModules_Clusters_h, moduleStartFirstElement);
-        constexpr auto threadsPerBlockFindClus = 512;
+        constexpr auto threadsPerBlockFindClus = 256;
         const auto workDivMaxNumModules =
             cms::alpakatools::make_workdiv<Acc1D>(numberOfModules, threadsPerBlockFindClus);
         // NB: With present FindClus() / chargeCut() algorithm,
@@ -658,10 +658,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #ifdef GPU_DEBUG
         alpaka::wait(queue);
 #endif
-
+	
+	constexpr auto threadsPerBlockChargeCut = 256;
+	const auto workDivChargeCut =
+		             cms::alpakatools::make_workdiv<Acc1D>(1000, threadsPerBlockChargeCut);
         // apply charge cut
         alpaka::exec<Acc1D>(queue,
-                            workDivMaxNumModules,
+                            workDivChargeCut,
                             ::pixelClustering::ClusterChargeCut<TrackerTraits>{},
                             digis_d->view(),
                             clusters_d->view(),
@@ -735,7 +738,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       /// should be larger than maxPixInModule/16 aka (maxPixInModule/maxiter in the kernel)
 
-      const auto threadsPerBlockFindClus = ((TrackerTraits::maxPixInModule / 16 + 128 - 1) / 128) * 128;
+      const auto threadsPerBlockFindClus = 256;//((TrackerTraits::maxPixInModule / 16 + 128 - 1) / 128) * 128;
       const auto workDivMaxNumModules = cms::alpakatools::make_workdiv<Acc1D>(numberOfModules, threadsPerBlockFindClus);
 
 #ifdef GPU_DEBUG
