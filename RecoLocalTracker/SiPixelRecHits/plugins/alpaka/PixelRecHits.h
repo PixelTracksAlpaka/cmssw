@@ -34,7 +34,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     SiPixelDigisSoAConstView digis,
                                     uint32_t numElements,
                                     SiPixelClustersSoAConstView clusters,
-                                    TrackingRecHitSoAView<TrackerTraits> hits) const {
+                                    reco::TrackingRecHitSoAView<TrackerTraits> hits) const {
         // FIXME
         // the compiler seems NOT to optimize loads from views (even in a simple test case)
         // The whole gimnastic here of copying or not is a pure heuristic exercise that seems to produce the fastest code with the above signature
