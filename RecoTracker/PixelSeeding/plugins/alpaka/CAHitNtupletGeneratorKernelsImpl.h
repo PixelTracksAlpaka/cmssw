@@ -47,7 +47,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     template <typename TrackerTraits>
     using OuterHitOfCell = caStructures::OuterHitOfCellT<TrackerTraits>;
 
-    using Quality = ::pixelTrack::Quality;
+    using Quality = ::reco::pixelTrack::Quality;
 
     template <typename TrackerTraits>
     using TkSoAView = reco::TrackSoAView<TrackerTraits>;
@@ -59,7 +59,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using HitsConstView = typename CACellT<TrackerTraits>::HitsConstView;
 
     template <typename TrackerTraits>
-    using QualityCuts = ::pixelTrack::QualityCutsT<TrackerTraits>;
+    using QualityCuts = ::reco::pixelTrack::QualityCutsT<TrackerTraits>;
 
     template <typename TrackerTraits>
     using CAParams = caHitNtupletGenerator::CAParamsT<TrackerTraits>;
@@ -644,8 +644,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         if (cms::alpakatools::once_per_grid(acc))
           tracks_view.nTracks() = ntracks;
         for (auto idx : cms::alpakatools::elements_with_stride(acc, ntracks)) {
-          ALPAKA_ASSERT_OFFLOAD(TracksUtilities<TrackerTraits>::nHits(tracks_view, idx) >= 3);
-          tracks_view[idx].nLayers() = TracksUtilities<TrackerTraits>::computeNumberOfLayers(tracks_view, idx);
+          ALPAKA_ASSERT_OFFLOAD(reco::TracksUtilities<TrackerTraits>::nHits(tracks_view, idx) >= 3);
+          tracks_view[idx].nLayers() = reco::TracksUtilities<TrackerTraits>::computeNumberOfLayers(tracks_view, idx);
         }
       }
     };

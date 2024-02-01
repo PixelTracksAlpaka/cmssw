@@ -10,24 +10,24 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
 template <typename TrackerTraits>
-class TrackingRecHitHost : public PortableHostCollection<TrackingRecHitLayout<TrackerTraits>> {
+class TrackingRecHitHost : public PortableHostCollection<reco::TrackingRecHitLayout<TrackerTraits>> {
 public:
-  using hitSoA = TrackingRecHitSoA<TrackerTraits>;
+  using hitSoA = reco::TrackingRecHitSoA<TrackerTraits>;
   //Need to decorate the class with the inherited portable accessors being now a template
-  using PortableHostCollection<TrackingRecHitLayout<TrackerTraits>>::view;
-  using PortableHostCollection<TrackingRecHitLayout<TrackerTraits>>::const_view;
-  using PortableHostCollection<TrackingRecHitLayout<TrackerTraits>>::buffer;
+  using PortableHostCollection<reco::TrackingRecHitLayout<TrackerTraits>>::view;
+  using PortableHostCollection<reco::TrackingRecHitLayout<TrackerTraits>>::const_view;
+  using PortableHostCollection<reco::TrackingRecHitLayout<TrackerTraits>>::buffer;
 
   TrackingRecHitHost() = default;
 
   template <typename TQueue>
   explicit TrackingRecHitHost(uint32_t nHits, TQueue queue)
-      : PortableHostCollection<TrackingRecHitLayout<TrackerTraits>>(nHits, queue) {}
+      : PortableHostCollection<reco::TrackingRecHitLayout<TrackerTraits>>(nHits, queue) {}
 
   // Constructor which specifies the SoA size
   template <typename TQueue>
   explicit TrackingRecHitHost(uint32_t nHits, int32_t offsetBPIX2, uint32_t const* hitsModuleStart, TQueue queue)
-      : PortableHostCollection<TrackingRecHitLayout<TrackerTraits>>(nHits, queue) {
+      : PortableHostCollection<reco::TrackingRecHitLayout<TrackerTraits>>(nHits, queue) {
     std::copy(hitsModuleStart, hitsModuleStart + TrackerTraits::numberOfModules + 1, view().hitsModuleStart().data());
     view().offsetBPIX2() = offsetBPIX2;
   }
