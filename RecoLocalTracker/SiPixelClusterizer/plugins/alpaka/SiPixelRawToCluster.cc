@@ -270,10 +270,68 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       return;
     }
 
-    iEvent.emplace(digiPutToken_, Algo_.getDigis());
-    iEvent.emplace(clusterPutToken_, Algo_.getClusters());
+    auto digis = Algo_.getDigis();
+    SiPixelDigisHost hostDigis(digis.view().metadata().size(), iEvent.queue());
+    alpaka::memcpy(iEvent.queue(), hostDigis.buffer(), digis.buffer());
+    alpaka::wait(iEvent.queue());
+    {
+      std::ostringstream out;
+      unsigned int invalid = 0;
+      for (int digi = 0; digi < hostDigis.view().metadata().size(); ++digi) {
+        if (hostDigis.view()[digi].moduleId() == pixelClustering::invalidModuleId) {
+          ++invalid;
+        }
+      }
+      out << "Found " << invalid << " digis with an invalid module id\n";
+      std::cerr << out.str() << std::flush;
+    }
+
+    auto clusters = Algo_.getClusters();
+    SiPixelClustersHost hostClusters(clusters.view().metadata().size(), iEvent.queue());
+    alpaka::memcpy(iEvent.queue(), hostClusters.buffer(), clusters.buffer());
+    alpaka::wait(iEvent.queue());
+    {
+      std::ostringstream out;
+      out << "Found " << hostClusters.view().metadata().size() << " clusters\n";
+      if (hostClusters.view().metadata().size() > pixelClustering::invalidModuleId)
+        out << "Found " << hostClusters.view()[pixelClustering::invalidModuleId].clusInModule() << " clusters with an invalid module id\n";
+      else
+        out << "Found no clusters with an invalid module id\n";
+      std::cerr << out.str() << std::flush;
+    }
+
+    auto digiErrors = Algo_.getErrors();
+    SiPixelDigiErrorsHost hostErrors(digiErrors.view().metadata().size(), iEvent.queue());
+    alpaka::memcpy(iEvent.queue(), hostErrors.buffer(), digiErrors.buffer());
+    alpaka::wait(iEvent.queue());
+    {
+      std::ostringstream out;
+      //out << "SiPixelRawToCluster<TrackerTraits>::produce(...)\n";
+      uint32_t found_errors = 0;
+      uint32_t valid_errors = 0;
+      for (int32_t i = 0; i < hostErrors.view().metadata().size(); ++i) {
+        SiPixelErrorCompact err = hostErrors.view()[i].pixelErrors();
+        if (err.errorType != 0) {
+          ++found_errors;
+          //out << "\trawId: " << err.rawId << "\tword: " << err.word << "\terrorType: " << (uint32_t) err.errorType << "\tfedId: " << (uint32_t) err.fedId << '\n';
+          //assert(err.rawId != pixelClustering::invalidModuleId);
+          if (err.rawId != pixelClustering::invalidModuleId) {
+            ++valid_errors;
+          }
+        }
+      }
+      out << "SiPixelRawToCluster<TrackerTraits>::produce(...)\n";
+      out << "hostErrors.view().size(): " << hostErrors.view().size() << '\n';
+      out << "found_errors:             " << found_errors << '\n';
+      out << "valid_errors:             " << valid_errors << '\n';
+      std::cerr << out.str() << std::flush;
+      assert(found_errors == hostErrors.view().size());
+    }
+
+    iEvent.emplace(digiPutToken_, std::move(digis));
+    iEvent.emplace(clusterPutToken_, std::move(clusters));
     if (includeErrors_) {
-      iEvent.emplace(digiErrorPutToken_, Algo_.getErrors());
+      iEvent.emplace(digiErrorPutToken_, std::move(digiErrors));
       iEvent.emplace(fmtErrorToken_, std::move(errors_));
     }
   }

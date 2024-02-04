@@ -33,7 +33,7 @@
 #include "gpuClusterChargeCut.h"
 #include "gpuClustering.h"
 
-//#define GPU_DEBUG
+#define GPU_DEBUG
 
 namespace pixelgpudetails {
 
@@ -325,7 +325,11 @@ namespace pixelgpudetails {
       if (includeErrors and skipROC) {
         uint32_t rID = getErrRawID<debug>(fedId, ww, errorType, cablingMap);
         if (rID != 0xffffffff)  // store errors only for valid DetIds
+        {
           err->push_back(SiPixelErrorCompact{rID, ww, errorType, fedId});
+          if constexpr (debug)
+            printf(" err no. %d;%d;%d;%d;%d\n",err->size(),rID,ww,errorType,fedId);
+        }
         continue;
       }
 
@@ -338,6 +342,8 @@ namespace pixelgpudetails {
         if (roc > MAX_ROC and roc < 25) {
           uint8_t error = conversionError<debug>(fedId, 2);
           err->push_back(SiPixelErrorCompact{rawId, ww, error, fedId});
+          if constexpr (debug)
+            printf(" err no. %d;%d;%d;%d;%d\n",err->size(),rawId,ww,errorType,fedId);
         }
         continue;
       }
@@ -379,8 +385,13 @@ namespace pixelgpudetails {
           if (not rocRowColIsValid(row, col)) {
             uint8_t error = conversionError<debug>(fedId, 3);  //use the device function and fill the arrays
             err->push_back(SiPixelErrorCompact{rawId, ww, error, fedId});
+            
             if constexpr (debug)
+            { 
+              printf(" err no. %d;%d;%d;%d;%d\n",err->size(),rawId,ww,errorType,fedId);
               printf("BPIX1  Error status: %i\n", error);
+            }
+              
             continue;
           }
         }
@@ -395,8 +406,13 @@ namespace pixelgpudetails {
         if (includeErrors and not dcolIsValid(dcol, pxid)) {
           uint8_t error = conversionError<debug>(fedId, 3);
           err->push_back(SiPixelErrorCompact{rawId, ww, error, fedId});
+          
           if constexpr (debug)
+          {
+            printf(" err no. %d;%d;%d;%d;%d\n",err->size(),rawId,ww,errorType,fedId);
             printf("Error status: %i %d %d %d %d\n", error, dcol, pxid, fedId, roc);
+          }
+            
           continue;
         }
       }
@@ -554,7 +570,7 @@ namespace pixelgpudetails {
             useQualityInfo,
             includeErrors);
       else
-        RawToDigi_kernel<false><<<blocks, threadsPerBlock, 0, stream>>>(  //
+        RawToDigi_kernel<true><<<blocks, threadsPerBlock, 0, stream>>>(  //
             cablingMap,
             modToUnp,
             wordCounter,

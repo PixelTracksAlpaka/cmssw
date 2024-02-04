@@ -21,7 +21,7 @@
 // local include(s)
 #include "PixelClusterizerBase.h"
 
-//#define GPU_DEBUG
+#define GPU_DEBUG
 
 template <typename TrackerTraits>
 class SiPixelDigisClustersFromSoAT : public edm::global::EDProducer<> {

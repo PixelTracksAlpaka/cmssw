@@ -22,7 +22,7 @@
 #include "PixelClusterizerBase.h"
 
 //#define EDM_ML_DEBUG
-//#define GPU_DEBUG
+#define GPU_DEBUG
 
 template <typename TrackerTraits>
 class SiPixelDigisClustersFromSoAAlpaka : public edm::global::EDProducer<> {
@@ -160,11 +160,6 @@ void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID,
   std::cout << "Dumping all digis. nDigis = " << nDigis << std::endl;
 #endif
   for (uint32_t i = 0; i < nDigis; i++) {
-#ifdef GPU_DEBUG
-    PixelDigi dig2{digisView[i].pdigi()};
-    std::cout << i << ";" << digisView[i].rawIdArr() << ";" << digisView[i].clus() << ";" << digisView[i].pdigi() << ";"
-              << digisView[i].adc() << ";" << dig2.row() << ";" << dig2.column() << std::endl;
-#endif
 
     // check for uninitialized digis
     if (digisView[i].rawIdArr() == 0)
@@ -172,10 +167,13 @@ void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID,
     // check for noisy/dead pixels (electrons set to 0)
     if (digisView[i].adc() == 0)
       continue;
-    if (digisView[i].clus() >= -pixelClustering::invalidClusterId)
+    if (digisView[i].clus() <= pixelClustering::invalidClusterId)
       continue;  // not in cluster; TODO add an assert for the size
     if (digisView[i].clus() == pixelClustering::invalidModuleId)
       continue;  // from clusters killed by charge cut
+    
+    
+
 #ifdef EDM_ML_DEBUG
     assert(digisView[i].rawIdArr() > 109999);
 #endif
@@ -200,6 +198,13 @@ void SiPixelDigisClustersFromSoAAlpaka<TrackerTraits>::produce(edm::StreamID,
       }
     }
     PixelDigi dig{digisView[i].pdigi()};
+
+    #ifdef GPU_DEBUG
+    std::cout << i << ";" << digisView[i].rawIdArr() << ";" << digisView[i].clus() << ";" << digisView[i].pdigi() << ";"
+              << digisView[i].adc() << ";" << dig.row() << ";" << dig.column() << std::endl;
+    #endif
+
+    
 
     if (storeDigis_)
       (*detDigis).data.emplace_back(dig);

@@ -4,6 +4,7 @@
 #include <vector>
 
 // CMSSW includes
+#include "CUDADataFormats/Common/interface/PortableHostCollection.h"
 #include "CUDADataFormats/Common/interface/Product.h"
 #include "CUDADataFormats/SiPixelCluster/interface/SiPixelClustersCUDA.h"
 #include "CUDADataFormats/SiPixelCluster/interface/gpuClusteringConstants.h"
@@ -18,6 +19,8 @@
 #include "DataFormats/FEDRawData/interface/FEDNumbering.h"
 #include "DataFormats/FEDRawData/interface/FEDRawData.h"
 #include "DataFormats/FEDRawData/interface/FEDRawDataCollection.h"
+#include "DataFormats/SiPixelClusterSoA/interface/ClusteringConstants.h"
+#include "DataFormats/SiPixelClusterSoA/interface/SiPixelClustersSoA.h"
 #include "EventFilter/SiPixelRawToDigi/interface/PixelDataFormatter.h"
 #include "EventFilter/SiPixelRawToDigi/interface/PixelUnpackingRegions.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
@@ -301,6 +304,45 @@ void SiPixelRawToClusterCUDAT<TrackerTraits>::produce(edm::Event& iEvent, const 
   }
 
   auto tmp = gpuAlgo_.getResults();
+
+  auto const& digis = tmp.first;
+  cms::cuda::PortableHostCollection<SiPixelDigisSoA> hostDigis(digis.view().metadata().size(), ctx.stream());
+  cudaCheck(cudaMemcpyAsync(hostDigis.buffer().get(),
+                            digis.const_buffer().get(),
+                            digis.bufferSize(),
+                            cudaMemcpyDeviceToHost,
+                            ctx.stream()));
+  cudaCheck(cudaStreamSynchronize(ctx.stream()));
+  {
+    std::ostringstream out;
+    unsigned int invalid = 0;
+    for (int digi = 0; digi < hostDigis.view().metadata().size(); ++digi) {
+      if (hostDigis.view()[digi].moduleId() == pixelClustering::invalidModuleId) {
+        ++invalid;
+      }
+    }
+    out << "Found " << invalid << " digis with an invalid module id\n";
+    std::cerr << out.str() << std::flush;
+  }
+
+  auto const& clusters = tmp.second;
+  cms::cuda::PortableHostCollection<SiPixelClustersSoA> hostClusters(clusters.view().metadata().size(), ctx.stream());
+  cudaCheck(cudaMemcpyAsync(hostClusters.buffer().get(),
+                            clusters.const_buffer().get(),
+                            clusters.bufferSize(),
+                            cudaMemcpyDeviceToHost,
+                            ctx.stream()));
+  cudaCheck(cudaStreamSynchronize(ctx.stream()));
+  { 
+    std::ostringstream out;
+    out << "Found " << hostClusters.view().metadata().size() << " clusters\n";
+    if (hostClusters.view().metadata().size() > pixelClustering::invalidModuleId)
+      out << "Found " << hostClusters.view()[pixelClustering::invalidModuleId].clusInModule() << " clusters with an invalid module id\n";
+    else
+      out << "Found no clusters with an invalid module id\n";
+    std::cerr << out.str() << std::flush;
+  }
+
   ctx.emplace(iEvent, digiPutToken_, std::move(tmp.first));
   ctx.emplace(iEvent, clusterPutToken_, std::move(tmp.second));
   if (includeErrors_) {

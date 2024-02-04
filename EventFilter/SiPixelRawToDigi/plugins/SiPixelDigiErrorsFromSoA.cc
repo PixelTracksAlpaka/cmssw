@@ -21,6 +21,8 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 
+//#define GPU_DEBUG
+
 class SiPixelDigiErrorsFromSoA : public edm::stream::EDProducer<> {
 public:
   explicit SiPixelDigiErrorsFromSoA(const edm::ParameterSet& iConfig);
@@ -96,13 +98,29 @@ void SiPixelDigiErrorsFromSoA::produce(edm::Event& iEvent, const edm::EventSetup
   PixelDataFormatter::DetErrors nodeterrors;
 
   auto size = digiErrors.size();
+
+  #ifdef GPU_DEBUG
+  std::cout << "Dumping all digi errors: " << size << std::endl;
+  int nerrs = 0;
+  #endif
+
   for (auto i = 0U; i < size; i++) {
     SiPixelErrorCompact err = digiErrors.error(i);
     if (err.errorType != 0) {
       SiPixelRawDataError error(err.word, err.errorType, err.fedId + FEDNumbering::MINSiPixeluTCAFEDID);
+      
       errors[err.rawId].push_back(error);
+      
+      #ifdef GPU_DEBUG
+      std::cout << "pushing error no. " << i <<";"<<err.word<<std::endl;
+      nerrs++;
+      #endif
     }
   }
+
+  #ifdef GPU_DEBUG
+  std::cout <<"> Tot no. of errors pushed (errorType!=0): " << nerrs << std::endl;
+  #endif
 
   formatter.unpackFEDErrors(errors,
                             tkerrorlist_,

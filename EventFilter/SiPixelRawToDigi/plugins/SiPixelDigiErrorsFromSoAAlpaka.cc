@@ -97,16 +97,33 @@ void SiPixelDigiErrorsFromSoAAlpaka::produce(edm::Event& iEvent, const edm::Even
   auto errors = formatterErrors;                             // make a copy
   PixelDataFormatter::DetErrors nodeterrors;
 
-  // if (digiErrors.view().size() > 0) { // TODO: need to know if this size will be useful or not and how to use it
-  uint32_t size = digiErrors.view().metadata().size();
+  // if we dind't actually wrote any digi error the loop is useless
+  uint32_t size = digiErrors.view().size() > 0 ? digiErrors.view().metadata().size() : 0;
+  
+  #ifdef GPU_DEBUG
+  std::cout << "Dumping all digi errors: " << size << std::endl;
+  int nerrs = 0;
+  #endif
+
   for (auto i = 0U; i < size; i++) {
     SiPixelErrorCompact err = digiErrors.view()[i].pixelErrors();
     if (err.errorType != 0) {
       SiPixelRawDataError error(err.word, err.errorType, err.fedId + FEDNumbering::MINSiPixeluTCAFEDID);
+      
       errors[err.rawId].push_back(error);
+
+      #ifdef GPU_DEBUG
+      std::cout << "pushing error no. " << i <<";"<<err.word<<std::endl;
+      nerrs++;
+      #endif
     }
   }
-  // }
+
+  #ifdef GPU_DEBUG
+  std::cout <<"> Tot no. of errors pushed (errorType!=0): " << nerrs << std::endl;
+  if (nerrs > digiErrors.view().size())
+    std::cout << "WARNING: digiErrors.view().size() == " << digiErrors.view().size() << " < " << nerrs << ".\nThis is odd!" <<std::enl;
+  #endif
 
   formatter.unpackFEDErrors(errors,
                             tkerrorlist_,

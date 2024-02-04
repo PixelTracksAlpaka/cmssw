@@ -52,7 +52,7 @@ namespace pixelClustering {
           return;
 
         if (cms::alpakatools::once_per_block(acc) && nclus > maxNumClustersPerModules)
-          printf("Warning too many clusters in module %d in block %d: %d > %d\n",
+          printf("Warning: too many clusters in module %d in block %d: %u > %d\n",
                  thisModuleId,
                  module,
                  nclus,

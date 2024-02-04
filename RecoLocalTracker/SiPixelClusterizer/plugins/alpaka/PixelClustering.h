@@ -14,7 +14,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/SimpleVector.h"
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 
-//#define GPU_DEBUG
+#define GPU_DEBUG
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
@@ -213,7 +213,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           alpaka::syncBlockThreads(acc);
 #endif
           // remove duplicate pixels
-          if constexpr (not isPhase2) {  //FIXME remove THIS
+          if constexpr (not isPhase2) {
             if (msize > 1) {
               cms::alpakatools::for_each_element_in_block_strided(
                   acc, pixelStatus::size, [&](uint32_t i) { status[i] = 0; });
