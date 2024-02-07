@@ -300,7 +300,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     TrackSoA tracks(queue);
 
-    GPUKernels kernels(m_params, hits_d.view().metadata().size(), queue);
+    GPUKernels kernels(m_params, hits_d.view().metadata().size(), hits_d.offsetBPIX2(),queue);
 
     kernels.buildDoublets(hits_d.view(), queue);
     kernels.launchKernels(hits_d.view(), tracks.view(), queue);

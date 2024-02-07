@@ -48,7 +48,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         constexpr auto maxCellsPerHit = CACellT<TrackerTraits>::maxCellsPerHit;
 
         auto const isOuterHitOfCell = isOuterHitOfCellWrap->container;
-
+        int32_t offset = isOuterHitOfCellWrap->offset;
         // x runs faster...
 
         float x[maxCellsPerHit], y[maxCellsPerHit], z[maxCellsPerHit], n[maxCellsPerHit];
@@ -68,7 +68,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         uint32_t firstElementIdxY = firstElementIdxNoStrideY;
         uint32_t endElementIdxY = endElementIdxNoStrideY;
 
-        for (uint32_t idy = firstElementIdxY, nt = nHits; idy < nt; ++idy) {
+        for (uint32_t idy = firstElementIdxY, nt = nHits - offset; idy < nt; ++idy) {
           if (not cms::alpakatools::next_valid_element_index_strided(
                   idy, firstElementIdxY, endElementIdxY, gridDimensionY, nt))
             break;

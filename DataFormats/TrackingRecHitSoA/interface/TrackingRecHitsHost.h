@@ -34,6 +34,9 @@ public:
 
   uint32_t nHits() const { return view().metadata().size(); }
   uint32_t const* hitsModuleStart() const { return view().hitsModuleStart().data(); }
+  uint32_t offsetBPIX2() const {
+    return view().offsetBPIX2();
+  }  
 };
 
 using TrackingRecHitHostPhase1 = TrackingRecHitHost<pixelTopology::Phase1>;

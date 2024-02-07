@@ -233,7 +233,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     using Quality = ::pixelTrack::Quality;
     using HitContainer = typename reco::TrackSoA<TrackerTraits>::HitContainer;
 
-    CAHitNtupletGeneratorKernels(Params const& params, uint32_t nhits, Queue& queue);
+    CAHitNtupletGeneratorKernels(Params const& params, uint32_t nhits, uint32_t offsetBPIX, Queue& queue);
     ~CAHitNtupletGeneratorKernels() = default;
 
     TupleMultiplicity const* tupleMultiplicity() const { return device_tupleMultiplicity_.data(); }

@@ -19,6 +19,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   template <typename TrackerTraits>
   CAHitNtupletGeneratorKernels<TrackerTraits>::CAHitNtupletGeneratorKernels(Params const &params,
                                                                             uint32_t nhits,
+                                                                            uint32_t offsetBPIX,
                                                                             Queue &queue)
       : m_params(params),
         //////////////////////////////////////////////////////////
@@ -35,7 +36,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
             cms::alpakatools::make_device_buffer<CACell[]>(queue, m_params.caParams_.maxNumberOfDoublets_)},
         // in principle we can use "nhits" to heuristically dimension the workspace...
         device_isOuterHitOfCell_{
-            cms::alpakatools::make_device_buffer<OuterHitOfCellContainer[]>(queue, std::max(1u, nhits))},
+            cms::alpakatools::make_device_buffer<OuterHitOfCellContainer[]>(queue, std::max(1u, nhits - offsetBPIX))},
         isOuterHitOfCell_{cms::alpakatools::make_device_buffer<OuterHitOfCell>(queue)},
 
         device_theCellNeighbors_{cms::alpakatools::make_device_buffer<CellNeighborsVector>(queue)},
@@ -86,7 +87,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     HitContainer::template launchZero<Acc1D>(&(tracks_view.hitIndices()), queue);
 
     int32_t nhits = hh.metadata().size();
-
+    int32_t offset = this->isOuterHitOfCell_.data()->offset;
 #ifdef NTUPLE_DEBUG
     std::cout << "start tuple building. N hits " << nhits << std::endl;
     if (nhits < 2)
@@ -121,13 +122,13 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                         this->device_theCellNeighbors_.data(),
                         this->isOuterHitOfCell_.data(),
                         this->m_params.caParams_);
-
+     
     // do not run the fishbone if there are hits only in BPIX1
-    if (this->m_params.earlyFishbone_) {
+    if (nhits > offset && this->m_params.earlyFishbone_) {
       const auto nthTot = 128;
       const auto stride = 16;
       const auto blockSize = nthTot / stride;
-      const auto numberOfBlocks = cms::alpakatools::divide_up_by(nhits, blockSize);
+      const auto numberOfBlocks = cms::alpakatools::divide_up_by(nhits-offset, blockSize);
       const Vec2D blks{numberOfBlocks, 1u};
       const Vec2D thrs{blockSize, stride};
       const auto fishboneWorkDiv = cms::alpakatools::make_workdiv<Acc2D>(blks, thrs);
@@ -224,11 +225,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     alpaka::wait(queue);
 #endif
     // do not run the fishbone if there are hits only in BPIX1
-    if (this->m_params.lateFishbone_) {
+    if (nhits > offset && this->m_params.lateFishbone_) {
       const auto nthTot = 128;
       const auto stride = 16;
       const auto blockSize = nthTot / stride;
-      const auto numberOfBlocks = cms::alpakatools::divide_up_by(nhits, blockSize);
+      const auto numberOfBlocks = cms::alpakatools::divide_up_by(nhits - offset, blockSize);
       const Vec2D blks{numberOfBlocks, 1u};
       const Vec2D thrs{blockSize, stride};
       const auto workDiv2D = cms::alpakatools::make_workdiv<Acc2D>(blks, thrs);
@@ -290,7 +291,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     {
       int threadsPerBlock = 128;
       // at least one block!
-      int blocks = std::max(1u, cms::alpakatools::divide_up_by(nhits, threadsPerBlock));
+      int blocks = std::max(1u, cms::alpakatools::divide_up_by(nhits - hh.offsetBPIX2(), threadsPerBlock));
       const auto workDiv1D = cms::alpakatools::make_workdiv<Acc1D>(blocks, threadsPerBlock);
 
       alpaka::exec<Acc1D>(queue,
